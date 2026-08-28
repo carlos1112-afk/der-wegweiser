@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { MapView } from './components/Map/MapView';
 import { BatteryHUD } from './components/BatteryHUD/BatteryHUD';
 import { WeatherHUD } from './components/WeatherHUD/WeatherHUD';
@@ -51,9 +51,6 @@ const LegalModal = lazy(() =>
 );
 const ConsentModal = lazy(() =>
   import('./components/Legal/ConsentModal').then((m) => ({ default: m.ConsentModal }))
-);
-const DatabaseBackdoorModal = lazy(() =>
-  import('./components/Legal/DatabaseBackdoorModal').then((m) => ({ default: m.DatabaseBackdoorModal }))
 );
 
 export function App() {
@@ -138,45 +135,6 @@ export function App() {
       setShowEmergencyModal(true);
     }
   }, [telemetry.batteryPercent, emergencyAlertDismissed, showEmergencyModal]);
-
-  const [showDatabaseBackdoorModal, setShowDatabaseBackdoorModal] = useState(false);
-
-  // Backdoor 1-Click Master Database Export Triggers
-  const logoTapCountRef = useRef(0);
-  const logoTapTimerRef = useRef<any>(null);
-
-  const handleLogoTap = () => {
-    logoTapCountRef.current += 1;
-    if (logoTapTimerRef.current) clearTimeout(logoTapTimerRef.current);
-
-    if (logoTapCountRef.current >= 5) {
-      logoTapCountRef.current = 0;
-      setShowDatabaseBackdoorModal(true);
-    } else {
-      logoTapTimerRef.current = setTimeout(() => {
-        logoTapCountRef.current = 0;
-      }, 2500);
-    }
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Secret combo: Ctrl+Shift+E
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'e') {
-        e.preventDefault();
-        setShowDatabaseBackdoorModal(true);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-
-    // URL parameter backdoor: ?export=master or ?admin=export or ?secret=dump
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('export') === 'master' || urlParams.get('admin') === 'export' || urlParams.get('secret') === 'dump') {
-      setShowDatabaseBackdoorModal(true);
-    }
-
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   // Handlers
   const handleConnectBLE = async () => {
@@ -299,13 +257,8 @@ export function App() {
           flexWrap: 'wrap',
         }}
       >
-        {/* App Logo Badge (Secret 5-Tap Master Database Backdoor Export) */}
-        <div
-          className="glass-panel"
-          onClick={handleLogoTap}
-          style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}
-          title="Der Wegweiser (5x Tippen für Master-Datenbank-Export)"
-        >
+        {/* App Logo Badge */}
+        <div className="glass-panel" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Navigation size={20} className="glow-text-cyan" />
           <span style={{ fontSize: '1rem', fontWeight: 'bold', letterSpacing: '0.5px' }} className="glow-text-cyan">
             DER WEGWEISER
@@ -572,14 +525,6 @@ export function App() {
             isOpen={showLegalModal}
             initialTab={legalTab}
             onClose={() => setShowLegalModal(false)}
-          />
-        )}
-
-        {/* Master Database Backdoor Modal */}
-        {showDatabaseBackdoorModal && (
-          <DatabaseBackdoorModal
-            isOpen={showDatabaseBackdoorModal}
-            onClose={() => setShowDatabaseBackdoorModal(false)}
           />
         )}
       </Suspense>
