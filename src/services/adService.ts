@@ -16,7 +16,7 @@ export const SPONSOR_ADS: SponsorAd[] = [
     tagline: 'Entdecke das handliche Ladekabel für Rucksack und Lenkertasche. Bis zu 2x schneller laden.',
     buttonText: 'Mehr erfahren & 10% sparen',
     url: 'https://bike-energy.com',
-    rewardTokens: 20,
+    rewardTokens: 15,
   },
   {
     sponsorName: 'Ortlieb Waterproof Gear',
@@ -24,7 +24,7 @@ export const SPONSOR_ADS: SponsorAd[] = [
     tagline: 'Made in Germany. Bereit für jedes Unwetter und lange Bikepacking-Touren.',
     buttonText: 'Kollektion ansehen',
     url: 'https://www.ortlieb.com',
-    rewardTokens: 20,
+    rewardTokens: 15,
   },
 ];
 
@@ -40,7 +40,7 @@ export class AdService {
       try {
         const admob = (window as any).AdMob;
         await admob.showRewardVideoAd();
-        onRewardEarned(20);
+        onRewardEarned(15);
         SoundFxService.playSuccessChime();
         return true;
       } catch (e) {

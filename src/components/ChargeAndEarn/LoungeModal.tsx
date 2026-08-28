@@ -63,49 +63,68 @@ export interface MapQuest {
 
 const MAP_QUESTS: MapQuest[] = [
   {
-    id: 'quest-surface-1',
-    title: 'Waldradweg-Sanierung & Belags-Check',
-    category: 'surface',
-    locationName: 'Kiefernforst Radweg KM 4.2',
-    lat: 52.48,
-    lng: 13.38,
-    bountyTokens: 25,
-    lastUpdatedDate: '2024-06-12',
-    verificationType: 'ride_history',
-    verificationBadgeText: '📍 GPS-Fahrtenhistorie bestätigt: Du bist auf deiner letzten Tour vor 2 Tagen hier vorbeigefahren (Treffer in Tour-Track #12)',
-    description: 'Letzte offizielle Messung vor über 240 Tagen. Wurde der Schotterweg neu asphaltiert?',
+    id: 'quest-scout-corridor',
+    title: '🗺️ Scout-Korridor: Steigung & Watt-Kalibrierung',
+    category: 'slope',
+    locationName: 'Panorama-Höhenkamm Sektor Nord',
+    lat: 52.44,
+    lng: 13.46,
+    bountyTokens: 30,
+    lastUpdatedDate: '2024-08-01',
+    verificationType: 'live_gps',
+    verificationBadgeText: '⭐ Höchste Belohnung: Live-Standort auf aktiver Fahrt im Scout-Modus (< 150m)',
+    description: 'Du befindest dich live im Ziel-Sektor. Deine Echtzeit-Daten aktualisieren Steigung & Wattstunden-Bedarf für alle E-Biker.',
     questions: [
       {
-        question: 'Wie ist der aktuelle Straßenbelag?',
-        options: ['Frisch & glatt asphaltiert', 'Fester Feinschotter (gut fahrbar)', 'Grober Schotter & Schlaglöcher', '🤷 Weiß nicht / Nicht darauf geachtet'],
+        question: 'Wie steil ist die stärkste Rampe auf diesem Abschnitt?',
+        options: ['Moderat (4-7 %)', 'Anspruchsvoll (8-12 %)', 'Extrem steil (>14 % Turbo nötig)', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
       {
-        question: 'Gibt es Höhenunterschiede / Drängelgitter?',
-        options: ['Ebener Verlauf ohne Barrieren', 'Sanfter Anstieg (~4%)', 'Steiler Anstieg / Umlaufsperre', '🤷 Weiß nicht / Nicht darauf geachtet'],
+        question: 'Gibt es eine Fahrrad-Reparatursäule oder Pumpe vor Ort?',
+        options: ['Ja, voll funktionsfähig', 'Ja, aber defekt / Werkzeug fehlt', 'Nein, keine Werkzeuge', '🤷 Weiß nicht / Nicht darauf geachtet'],
+      },
+    ],
+  },
+  {
+    id: 'quest-slope-live',
+    title: '📍 Vor-Ort Check: Marktplatz Lade-Infrastruktur',
+    category: 'charging',
+    locationName: 'Rathauspassage E-Bike Ladesäule',
+    lat: 52.51,
+    lng: 13.40,
+    bountyTokens: 18,
+    lastUpdatedDate: '2024-05-20',
+    verificationType: 'live_gps',
+    verificationBadgeText: '📍 Live-Standort vor Ort verifiziert (< 200m Distanz)',
+    description: 'Prüfe vor Ort, ob die Schuko-Steckdosen noch aktiv, stromführend und frei zugänglich sind.',
+    questions: [
+      {
+        question: 'Funktionieren die Steckdosen aktuell?',
+        options: ['Ja, Strom fließt (erfolgreich getestet / LED leuchtet)', 'Steckdose defekt / kein Strom', 'Abgesperrt oder zugeparkt', '🤷 Weiß nicht / Nicht getestet'],
       },
       {
-        question: 'Eignung für normale E-Bikes & Lastenräder?',
-        options: ['Perfekt für alle E-Bikes', 'Nur für Mountainbikes & Gravel', 'Nicht empfehlenswert', '🤷 Weiß nicht / Nicht darauf geachtet'],
+        question: 'Wie ist der Wetterschutz vor Ort?',
+        options: ['Vollständig überdacht & regensicher', 'Teilweise überdacht', 'Komplett ungeschützt im Freien', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
     ],
   },
   {
     id: 'quest-charge-community',
-    title: '👥 Bestätigung: Neuer Ladepunkt von Radler_Klaus',
+    title: '👥 Community-Gegenprüfung: Neuer Ladepunkt',
     category: 'community_verify',
     locationName: 'Schutzhütte Birkenhain (KM 18.5)',
     lat: 52.52,
     lng: 13.42,
-    bountyTokens: 35,
+    bountyTokens: 12,
     lastUpdatedDate: 'Vor 2 Tagen gemeldet',
     verificationType: 'community_report',
-    verificationBadgeText: '👥 Community-Verifikation: Radler_Klaus hat vor 2 Tagen einen neuen Ladepunkt gemeldet. Du warst gestern in der Nähe!',
+    verificationBadgeText: '👥 Community-Meldung von Radler_Klaus (Vor 2 Tagen). Du bist kürzlich vorbeigefahren.',
     communityReportInfo: {
       reportedBy: 'Radler_Klaus',
       reportedDate: 'Vor 2 Tagen',
       details: 'Neue wetterfeste 230V Schuko-Steckdose an der hölzernen Schutzhütte montiert.',
     },
-    description: 'Bestätige oder korrigiere die Community-Meldung, damit andere E-Biker sich auf die Lademöglichkeit verlassen können.',
+    description: 'Bestätige oder korrigiere die Community-Meldung aus deiner Erinnerung.',
     questions: [
       {
         question: 'Ist die gemeldete Steckdose an der Schutzhütte vorhanden?',
@@ -115,60 +134,28 @@ const MAP_QUESTS: MapQuest[] = [
         question: 'Fließt Strom / Funktioniert die Dose?',
         options: ['Ja, Strom fließt (getestet / LED leuchtet)', 'Nein, stromlos oder defekt', '🤷 Weiß nicht / Nicht getestet'],
       },
-      {
-        question: 'Wie ist der Regenschutz vor Ort?',
-        options: ['Vollständig überdacht unter der Hütte', 'Teilweise ungeschützt', '🤷 Weiß nicht / Nicht darauf geachtet'],
-      },
     ],
   },
   {
-    id: 'quest-obstacle-community',
-    title: '⚠️ Gefahren-Check: Baustellen-Sperrung Kanalbrücke',
-    category: 'obstacle',
-    locationName: 'Alte Kanalbrücke Ostufer',
-    lat: 52.46,
-    lng: 13.35,
-    bountyTokens: 20,
-    lastUpdatedDate: 'Gestern gemeldet',
-    verificationType: 'community_report',
-    verificationBadgeText: '⚠️ Aktuelle Sperrungsmeldung von E-Trail_Marc (Gestern). Du bist auf deiner Tour dort entlanggefahren.',
-    communityReportInfo: {
-      reportedBy: 'E-Trail_Marc',
-      reportedDate: 'Gestern',
-      details: 'Brücke wegen Bohrarbeiten voll gesperrt. Bauzaun aufgestellt.',
-    },
-    description: 'Prüfe, ob die Sperrung noch aktiv ist oder ob Radfahrer wieder passieren können.',
+    id: 'quest-surface-1',
+    title: '🕒 Rückwirkende Verifikation: Waldradweg Belag',
+    category: 'surface',
+    locationName: 'Kiefernforst Radweg KM 4.2',
+    lat: 52.48,
+    lng: 13.38,
+    bountyTokens: 10,
+    lastUpdatedDate: '2024-06-12',
+    verificationType: 'ride_history',
+    verificationBadgeText: '🕒 Aus vergangener Tour: Treffer in deiner GPX-Fahrtenhistorie vor 2 Tagen',
+    description: 'Du bist hier vor kurzem vorbeigefahren. Hilf mit, den Wegezustand rückwirkend einzustufen.',
     questions: [
       {
-        question: 'Ist die Brücke aktuell für Radfahrer gesperrt?',
-        options: ['Ja, voll gesperrt / Bauzaun steht', 'Nein, wieder frei befahrbar (Baustelle beendet)', '🤷 Weiß nicht / Nicht darauf geachtet'],
+        question: 'Wie war der Straßenbelag auf diesem Teilstück?',
+        options: ['Frisch & glatt asphaltiert', 'Fester Feinschotter (gut fahrbar)', 'Grober Schotter & Schlaglöcher', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
       {
-        question: 'Gibt es eine ausgeschilderte Rad-Umleitung?',
-        options: ['Ja, gut ausgeschilderte Umfahrung über Südsteg', 'Nein, keine Umleitung ausgeschildert', '🤷 Weiß nicht / Nicht darauf geachtet'],
-      },
-    ],
-  },
-  {
-    id: 'quest-slope-live',
-    title: 'Steigungs- & Serpentinen-Messung Panorama-Kamm',
-    category: 'slope',
-    locationName: 'Aussichtsturm Serpentinenweg',
-    lat: 52.44,
-    lng: 13.46,
-    bountyTokens: 25,
-    lastUpdatedDate: '2024-08-01',
-    verificationType: 'live_gps',
-    verificationBadgeText: '📍 Live-GPS-Verifikation: Du befindest dich aktuell im Nahbereich (< 200m)',
-    description: 'Prüfe den Steigungswinkel und die Kurvenradien für unsere automatische Motor-Leistungs-Antizipation.',
-    questions: [
-      {
-        question: 'Wie steil ist die stärkste Rampe?',
-        options: ['Moderat (4-7 %)', 'Anspruchsvoll (8-12 %)', 'Extrem steil (>14 % Turbo nötig)', '🤷 Weiß nicht / Nicht darauf geachtet'],
-      },
-      {
-        question: 'Gibt es eine Fahrrad-Reparatursäule oder Pumpe vor Ort?',
-        options: ['Ja, voll funktionsfähig', 'Ja, aber defekt / Werkzeug fehlt', 'Nein, keine Werkzeuge', '🤷 Weiß nicht / Nicht darauf geachtet'],
+        question: 'Gab es Hindernisse oder Sperrungen?',
+        options: ['Freie Fahrt ohne Barrieren', 'Drängelgitter / Engstelle vorhanden', 'Weg blockiert', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
     ],
   },
@@ -393,15 +380,15 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
 
   const tickTimeoutRef = useRef<ReturnType<typeof setTimeout> | number | null>(null);
 
-  // Wheel Sectors
+  // Wheel Sectors (Fair balance: max 10 tokens, lower than active live scouting)
   const sectors = [
-    { label: '+20 Tok.', amount: 20, color: '#111c30', strokeColor: '#ffb700', textColor: '#ffb700', fullLabel: '🪙 +20 Tokens gewonnen! Super Leistung! 🎉' },
+    { label: '+8 Tok.', amount: 8, color: '#111c30', strokeColor: '#ffb700', textColor: '#ffb700', fullLabel: '🪙 +8 Tokens gewonnen! Toller Pausengewinn! 🎉' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
-    { label: '+10 Tok.', amount: 10, color: '#0c2533', strokeColor: '#00f0ff', textColor: '#00f0ff', fullLabel: '🪙 +10 Tokens gewonnen! Dranbleiben! 🚀' },
+    { label: '+5 Tok.', amount: 5, color: '#0c2533', strokeColor: '#00f0ff', textColor: '#00f0ff', fullLabel: '🪙 +5 Tokens gewonnen! Dranbleiben! 🚀' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
-    { label: '+5 Tok.', amount: 5, color: '#1a102f', strokeColor: '#b026ff', textColor: '#b026ff', fullLabel: '🪙 +5 Tokens gewonnen! Kleinvieh macht auch Mist! 🔋' },
+    { label: '+2 Tok.', amount: 2, color: '#1a102f', strokeColor: '#b026ff', textColor: '#b026ff', fullLabel: '🪙 +2 Tokens gewonnen! Kleinvieh macht auch Mist! 🔋' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
-    { label: '+15 Tok.', amount: 15, color: '#0c2533', strokeColor: '#00f0ff', textColor: '#00f0ff', fullLabel: '🪙 +15 Tokens gewonnen! Großartig! 🌟' },
+    { label: '+10 Tok.', amount: 10, color: '#0c2533', strokeColor: '#00f0ff', textColor: '#00f0ff', fullLabel: '🪙 +10 Tokens gewonnen! Großartig! 🌟' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
   ];
 
@@ -523,7 +510,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   const endCatcherGame = () => {
     setCatcherActive(false);
     setCatcherOrbs([]);
-    const earned = Math.min(30, Math.floor(catcherScore / 2));
+    const earned = Math.min(10, Math.floor(catcherScore / 3));
     if (earned > 0) {
       onAddTokens(earned);
       SoundFxService.playSuccessChime();
@@ -588,7 +575,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     sessionStorage.setItem(QUIZ_ATTEMPT_KEY, 'true');
 
     if (isCorrect) {
-      onAddTokens(15);
+      onAddTokens(6);
       SoundFxService.playSuccessChime();
       confetti({ particleCount: 50, spread: 50 });
     } else {

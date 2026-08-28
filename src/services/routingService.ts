@@ -98,17 +98,17 @@ export class RoutingService {
     const isBatterySafe = availableWh >= totalWhNeeded * 1.15;
 
     const title = isScout
-      ? `🗺️ Karten-Scout: ${params.themes?.[0] || 'Topographie'} Aktualisierung (+15 Tokens)`
+      ? `🗺️ Karten-Scout: ${params.themes?.[0] || 'Topographie'} Aktualisierung (+35 Tokens)`
       : `KI-Runde: ${params.themes?.[0] || 'Badesee'} & Panoramatour`;
 
     const aiStory = isScout
-      ? `Karten-Scout Mission: Diese Route führt dich über einen Sektor mit veralteten Topographie-Daten (> 180 Tage). Deine anonymen Sensordaten aktualisieren Steigung & Belag für alle E-Biker. Bonus bei Tour-Abschluss: +15 Tokens!`
+      ? `Karten-Scout Mission: Diese Route führt dich über einen Sektor mit veralteten Topographie-Daten (> 180 Tage). Deine anonymen Sensordaten aktualisieren Steigung & Belag für alle E-Biker. Bonus bei Tour-Abschluss: +35 Tokens!`
       : `Diese Route wurde speziell für dich zusammengestellt: Sie führt über sanfte, asphaltierte Radwege am Badesee entlang, vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}% und beinhaltet eine perfekte Lademöglichkeit beim Café Waldidyll bei KM 18.`;
 
     return {
       id: `route-${Date.now()}`,
       title,
-      summary: `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie aktiv' : 'Asphalt & Uferwege'}`,
+      summary: `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie (+35 Tok.)' : 'Asphalt & Uferwege'}`,
       aiStory,
       distanceKm: realDistanceKm,
       elevationGainM,
@@ -123,7 +123,7 @@ export class RoutingService {
       waypoints,
       pathCoordinates,
       isScoutMission: isScout,
-      scoutBountyTokens: isScout ? 15 : 0,
+      scoutBountyTokens: isScout ? 35 : 0,
       chargingStopsOnRoute: [
         {
           id: 'cs-route-1',

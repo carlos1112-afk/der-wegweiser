@@ -8,42 +8,51 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Charging Stations (Community-shared bike infrastructure)
+    // 1. Charging Stations (Community-shared bike infrastructure)
+    // Read: public; Create: public; Update: auth users; Delete: strictly forbidden for clients!
     match /charging_stations/{stationId} {
       allow read: if true;
       allow create: if true;
-      allow update, delete: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if false;
     }
 
-    // User Preferences
+    // 2. Spatial Road Intelligence (Anonymous topography & slope segments)
+    // Read & Create: public; Delete: strictly forbidden for clients!
+    match /spatial_road_intelligence/{segmentId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
+    }
+
+    // 3. User Preferences & Local Token States
     match /user_preferences/{userId} {
-      allow read, write: if true; // Fallback for demo & registered users
+      allow read, write: if true;
     }
-
-    // User Memory Patterns
     match /user_memory_patterns/{userId} {
       allow read, write: if true;
     }
-
-    // User Token Accounts & Gamification
     match /user_tokens/{userId} {
       allow read, write: if true;
     }
 
-    // Saved Routes & GPX Tracks
+    // 4. Saved Routes & GPX Tracks
     match /routes/{routeId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if false;
     }
 
-    // B2B Partner Leads & Charging Station Sponsors
+    // 5. B2B Partner Leads (Inbound only, read/delete strictly forbidden for public clients)
     match /partner_leads/{leadId} {
       allow create: if true;
-      allow read, write: if isAuthenticated();
+      allow read, update, delete: if false;
     }
 
-    // Default match-all for development & prototyping
+    // 6. Default Fallback: Read-only, no unauthorized writes or deletions
     match /{document=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

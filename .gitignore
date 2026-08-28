@@ -19,7 +19,14 @@ dist-ssr
 *.local
 *adminsdk*.json
 *serviceaccount*.json
+*.service-account.json
 telegram_bot_token.txt
+
+# Private Admin Scripts & Database Backups (Strictly Local for Carlos)
+scripts/admin_*
+backups/
+backups/*
+*.dump.json
 
 # Editor directories and files
 .vscode/*
