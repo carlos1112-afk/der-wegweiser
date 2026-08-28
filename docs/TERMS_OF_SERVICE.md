@@ -39,19 +39,38 @@ Bitte lesen Sie die folgenden Nutzungsbedingungen und Sicherheitshinweise sorgf�
 
 ---
 
-## § 5 Token-System, Belohnungen & Gamification
+## § 5 Kein Notrufsystem / eCall-Ersatz
+"Der Wegweiser" ist **kein Notfall-Meldesystem** und ersetzt im Falle eines Sturzes oder Unfalls nicht den Notruf über die europaweite Notrufnummer 112.
+
+---
+
+## § 6 Token-System, Belohnungen & Gamification
 1. **Kein gesetzliches Zahlungsmittel**: Die in der App gesammelten oder erworbenen "Tokens" stellen reine In-App-Punkte zur Freischaltung von Komfort-Funktionen und Gamification-Elementen dar.
 2. **Kein Bargeldanspruch**: Tokens begründen keinen Anspruch auf Barauszahlung, Zinsen oder Rückvergütung.
 
 ---
 
-## § 6 Urheberrecht & Open Source Lizenzen
-1. Kartenmaterial: © OpenStreetMap contributors (ODbL), © CARTO, © CyclOSM.
-2. Höhendaten: Open-Meteo SRTM Elevation Data.
-3. Alle Markennamen (Bosch®, Shimano®, Specialized®, Mahle®, Bafang®) sind eingetragene Warenzeichen ihrer jeweiligen Inhaber und werden ausschließlich zur Beschreibung der technischen Kompatibilität verwendet.
+## § 7 Widerrufsbelehrung für Verbraucher (EU-Widerrufsrecht)
+
+### Widerrufsrecht
+Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag über den Erwerb digitaler Inhalte (z. B. In-App Token-Pässe oder B2B-Partner-Abonnements) zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsabschlusses.
+
+Um Ihr Widerrufsrecht auszuüben, müssen Sie uns:
+**Carlos & Team "Der Wegweiser"**, E-Mail: **carlos.condios96@gmail.com**  
+mittels einer eindeutigen Erklärung (z. B. einer per E-Mail versandten Nachricht) über Ihren Entschluss informieren.
+
+### Erlöschen des Widerrufsrechts bei digitalen Inhalten
+Das Widerrufsrecht erlischt bei einem Vertrag über die Lieferung von nicht auf einem körperlichen Datenträger befindlichen digitalen Inhalten, wenn der Unternehmer mit der Ausführung des Vertrags begonnen hat, nachdem der Verbraucher ausdrücklich zugestimmt hat, dass der Unternehmer mit der Ausführung des Vertrags vor Ablauf der Widerrufsfrist beginnt, und seine Kenntnis davon bestätigt hat, dass er durch seine Zustimmung mit Beginn der Ausführung des Vertrags sein Widerrufsrecht verliert.
 
 ---
 
-## § 7 Schlussbestimmungen
-1. Es gilt das Recht der Bundesrepublik Deutschland.
+## § 8 Urheberrecht & Open Source Lizenzen
+1. Kartenmaterial: © OpenStreetMap contributors (ODbL), © CARTO, © CyclOSM.
+2. Höhendaten: Open-Meteo SRTM Elevation Data.
+3. Alle Markennamen (Bosch®, Shimano®, Specialized®, Mahle®, Fazua®, Bafang®) sind eingetragene Warenzeichen ihrer jeweiligen Inhaber und werden ausschließlich zur Beschreibung der technischen Kompatibilität verwendet.
+
+---
+
+## § 9 Schlussbestimmungen & Gerichtsstand
+1. Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.
 2. Sollte eine Bestimmung dieser Nutzungsbedingungen unwirksam sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen hiervon unberührt.

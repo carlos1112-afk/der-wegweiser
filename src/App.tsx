@@ -80,7 +80,7 @@ export function App() {
     return !localStorage.getItem('der_wegweiser_legal_consent');
   });
   const [showLegalModal, setShowLegalModal] = useState(false);
-  const [legalTab, setLegalTab] = useState<'privacy' | 'terms' | 'imprint'>('terms');
+  const [legalTab, setLegalTab] = useState<'privacy' | 'terms' | 'imprint' | 'cockpit'>('terms');
 
   // Modal States
   const [showAnticipationModal, setShowAnticipationModal] = useState(true);
