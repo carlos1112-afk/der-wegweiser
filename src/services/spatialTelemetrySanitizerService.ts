@@ -11,7 +11,7 @@ export interface SanitizedSpatialSegment {
   energyBenchmarkWhPerKm: number;
   surfaceEstimated: string;
   totalDistanceKm: number;
-  ingestedAt: string;
+  recordDate: string; // YYYY-MM-DD (Datum ohne Uhrzeit für Aktualitätsprüfung)
 }
 
 export class SpatialTelemetrySanitizerService {
@@ -26,8 +26,8 @@ export class SpatialTelemetrySanitizerService {
 
   /**
    * Sanitizes recorded ride track data:
-   * 1. Strips all user identifiers, device IDs, calendar timestamps, and account keys.
-   * 2. Preserves GPS coordinates, altitude, slope gradients, and power/efficiency metrics.
+   * 1. Strips all user identifiers, device IDs, exact clock times, and account keys.
+   * 2. Preserves GPS coordinates, altitude, slope gradients, power/efficiency metrics, and YYYY-MM-DD record date.
    * 3. Merges the pure navigational intelligence into the collective map graph.
    */
   public static async sanitizeAndMergeTrack(
@@ -49,6 +49,7 @@ export class SpatialTelemetrySanitizerService {
     const startCoord = trackCoordinates[0];
     const gridKey = this.getSpatialGridKey(startCoord[0], startCoord[1]);
     const segmentId = `seg_${gridKey}_${Date.now().toString(36)}`;
+    const recordDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
     // 2. Build pure anonymous spatial intelligence payload
     const sanitizedSegment: SanitizedSpatialSegment = {
@@ -61,7 +62,7 @@ export class SpatialTelemetrySanitizerService {
       energyBenchmarkWhPerKm: whPerKm,
       surfaceEstimated: avgSlope > 10 ? 'gravel/trail' : 'asphalt/paved',
       totalDistanceKm: Number(distanceKm.toFixed(2)),
-      ingestedAt: new Date().toISOString(),
+      recordDate,
     };
 
     // 3. Merge anonymously into Firestore Collective Spatial Intelligence
