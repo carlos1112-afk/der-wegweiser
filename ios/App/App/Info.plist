@@ -31,9 +31,9 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Der Wegweiser erfasst deinen Standort im Hintergrund (auch bei gesperrtem Bildschirm), um Turn-by-Turn Sprachführung, Notfall-Akkuwarnungen und GPX-Tourenaufzeichnung zu ermöglichen.</string>
 
-	<!-- Bluetooth Permissions (Bosch / Shimano E-Bikes) -->
+	<!-- Bluetooth Permissions (Universal E-Bike & BLE Sensors) -->
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Der Wegweiser verbindet sich über Bluetooth Low Energy mit deinem E-Bike (Bosch Smart System, Shimano STEPS), um Live-Akkustand, Trittfrequenz und Motorleistung abzurufen.</string>
+	<string>Der Wegweiser verbindet sich über Bluetooth Low Energy herstellerunabhängig mit deinem E-Bike oder Sensor, um Live-Akkustand, Trittfrequenz und Motorleistung abzurufen.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Für die Echtzeit-Übertragung von E-Bike Telemetriedaten.</string>
 
