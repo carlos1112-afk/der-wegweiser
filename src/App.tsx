@@ -11,7 +11,6 @@ import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
-import { DatabaseBackdoorExportService } from './services/databaseBackdoorExportService';
 import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
@@ -52,6 +51,9 @@ const LegalModal = lazy(() =>
 );
 const ConsentModal = lazy(() =>
   import('./components/Legal/ConsentModal').then((m) => ({ default: m.ConsentModal }))
+);
+const DatabaseBackdoorModal = lazy(() =>
+  import('./components/Legal/DatabaseBackdoorModal').then((m) => ({ default: m.DatabaseBackdoorModal }))
 );
 
 export function App() {
@@ -137,6 +139,8 @@ export function App() {
     }
   }, [telemetry.batteryPercent, emergencyAlertDismissed, showEmergencyModal]);
 
+  const [showDatabaseBackdoorModal, setShowDatabaseBackdoorModal] = useState(false);
+
   // Backdoor 1-Click Master Database Export Triggers
   const logoTapCountRef = useRef(0);
   const logoTapTimerRef = useRef<any>(null);
@@ -147,7 +151,7 @@ export function App() {
 
     if (logoTapCountRef.current >= 5) {
       logoTapCountRef.current = 0;
-      DatabaseBackdoorExportService.executeMasterExport();
+      setShowDatabaseBackdoorModal(true);
     } else {
       logoTapTimerRef.current = setTimeout(() => {
         logoTapCountRef.current = 0;
@@ -160,7 +164,7 @@ export function App() {
       // Secret combo: Ctrl+Shift+E
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'e') {
         e.preventDefault();
-        DatabaseBackdoorExportService.executeMasterExport();
+        setShowDatabaseBackdoorModal(true);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -168,7 +172,7 @@ export function App() {
     // URL parameter backdoor: ?export=master or ?admin=export or ?secret=dump
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('export') === 'master' || urlParams.get('admin') === 'export' || urlParams.get('secret') === 'dump') {
-      DatabaseBackdoorExportService.executeMasterExport();
+      setShowDatabaseBackdoorModal(true);
     }
 
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -568,6 +572,14 @@ export function App() {
             isOpen={showLegalModal}
             initialTab={legalTab}
             onClose={() => setShowLegalModal(false)}
+          />
+        )}
+
+        {/* Master Database Backdoor Modal */}
+        {showDatabaseBackdoorModal && (
+          <DatabaseBackdoorModal
+            isOpen={showDatabaseBackdoorModal}
+            onClose={() => setShowDatabaseBackdoorModal(false)}
           />
         )}
       </Suspense>

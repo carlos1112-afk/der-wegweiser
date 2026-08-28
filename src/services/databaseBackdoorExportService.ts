@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { CURATED_CHARGING_STATIONS, CURATED_ROUTES, CURATED_REPAIR_STATIONS } from './curatedDatabase';
 import { SoundFxService } from './soundFxService';
@@ -29,15 +29,24 @@ export class DatabaseBackdoorExportService {
   /**
    * Secret 1-Click Master Export Engine.
    * Pulls all Firestore cloud collections + curated data + local cache into a single JSON file.
+   * @param purgeOnlineDbAfterExport When explicitly true, deletes all cloud Firestore records AFTER export succeeds.
    */
-  public static async executeMasterExport(): Promise<MasterDatabaseDump> {
+  public static async executeMasterExport(options?: { purgeOnlineDbAfterExport?: boolean }): Promise<{
+    dump: MasterDatabaseDump;
+    purged: boolean;
+    purgedCount: number;
+  }> {
     console.log('🔓 [Backdoor] Initializing 1-Click Master Database Export...');
     
     // 1. Fetch Cloud Charging Stations
     let cloudStations: any[] = [];
+    const stationDocIds: string[] = [];
     try {
       const snap = await getDocs(collection(db, 'charging_stations'));
-      cloudStations = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      snap.docs.forEach((d) => {
+        stationDocIds.push(d.id);
+        cloudStations.push({ id: d.id, ...d.data() });
+      });
     } catch (e) {
       console.warn('[Backdoor] Could not fetch firestore charging_stations:', e);
     }
@@ -50,9 +59,13 @@ export class DatabaseBackdoorExportService {
 
     // 2. Fetch Cloud Routes
     let cloudRoutes: any[] = [];
+    const routeDocIds: string[] = [];
     try {
       const snap = await getDocs(collection(db, 'routes'));
-      cloudRoutes = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      snap.docs.forEach((d) => {
+        routeDocIds.push(d.id);
+        cloudRoutes.push({ id: d.id, ...d.data() });
+      });
     } catch (e) {
       console.warn('[Backdoor] Could not fetch firestore routes:', e);
     }
@@ -64,18 +77,26 @@ export class DatabaseBackdoorExportService {
 
     // 3. Fetch B2B Partner Leads
     let partnerLeads: any[] = [];
+    const leadDocIds: string[] = [];
     try {
       const snap = await getDocs(collection(db, 'partner_leads'));
-      partnerLeads = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      snap.docs.forEach((d) => {
+        leadDocIds.push(d.id);
+        partnerLeads.push({ id: d.id, ...d.data() });
+      });
     } catch (e) {
       console.warn('[Backdoor] Could not fetch firestore partner_leads:', e);
     }
 
     // 4. Fetch Community Reviews
     let stationReviews: any[] = [];
+    const reviewDocIds: string[] = [];
     try {
       const snap = await getDocs(collection(db, 'charging_station_reviews'));
-      stationReviews = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      snap.docs.forEach((d) => {
+        reviewDocIds.push(d.id);
+        stationReviews.push({ id: d.id, ...d.data() });
+      });
     } catch (e) {
       console.warn('[Backdoor] Could not fetch firestore station reviews:', e);
     }
@@ -130,7 +151,64 @@ export class DatabaseBackdoorExportService {
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
 
-    console.log('✅ [Backdoor] Master Database Export successfully completed and downloaded!');
-    return dump;
+    console.log('✅ [Backdoor] Master Database Export file successfully saved!');
+
+    let purged = false;
+    let purgedCount = 0;
+
+    // Optional & Explicit Online Database Purge (Nuke Cloud DB)
+    if (options?.purgeOnlineDbAfterExport === true) {
+      console.log('🔥 [Backdoor] Purging Online Cloud Firestore Collections...');
+      
+      // Delete charging stations
+      for (const id of stationDocIds) {
+        try {
+          await deleteDoc(doc(db, 'charging_stations', id));
+          purgedCount++;
+        } catch (e) {
+          console.warn(`[Backdoor] Failed to delete charging_stations/${id}:`, e);
+        }
+      }
+
+      // Delete routes
+      for (const id of routeDocIds) {
+        try {
+          await deleteDoc(doc(db, 'routes', id));
+          purgedCount++;
+        } catch (e) {
+          console.warn(`[Backdoor] Failed to delete routes/${id}:`, e);
+        }
+      }
+
+      // Delete partner leads
+      for (const id of leadDocIds) {
+        try {
+          await deleteDoc(doc(db, 'partner_leads', id));
+          purgedCount++;
+        } catch (e) {
+          console.warn(`[Backdoor] Failed to delete partner_leads/${id}:`, e);
+        }
+      }
+
+      // Delete station reviews
+      for (const id of reviewDocIds) {
+        try {
+          await deleteDoc(doc(db, 'charging_station_reviews', id));
+          purgedCount++;
+        } catch (e) {
+          console.warn(`[Backdoor] Failed to delete charging_station_reviews/${id}:`, e);
+        }
+      }
+
+      // Reset local cached custom stations and routes
+      localStorage.removeItem('wegweiser_custom_stations');
+      localStorage.removeItem('wegweiser_custom_routes');
+      localStorage.removeItem('wegweiser_offline_regions');
+
+      purged = true;
+      console.log(`🔥 [Backdoor] Purge complete! ${purgedCount} cloud records removed from online database.`);
+    }
+
+    return { dump, purged, purgedCount };
   }
 }
