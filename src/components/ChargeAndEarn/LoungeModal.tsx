@@ -41,13 +41,20 @@ interface LoungeModalProps {
 export interface MapQuest {
   id: string;
   title: string;
-  category: 'surface' | 'charging' | 'slope' | 'obstacle';
+  category: 'surface' | 'charging' | 'slope' | 'obstacle' | 'community_verify';
   locationName: string;
   lat: number;
   lng: number;
   bountyTokens: number;
   description: string;
   lastUpdatedDate: string;
+  verificationType: 'live_gps' | 'ride_history' | 'community_report';
+  verificationBadgeText: string;
+  communityReportInfo?: {
+    reportedBy: string;
+    reportedDate: string;
+    details: string;
+  };
   questions: {
     question: string;
     options: string[];
@@ -64,49 +71,86 @@ const MAP_QUESTS: MapQuest[] = [
     lng: 13.38,
     bountyTokens: 25,
     lastUpdatedDate: '2024-06-12',
-    description: 'Letzte Befahrung vor über 240 Tagen. Wurde der Schotterweg neu asphaltiert?',
+    verificationType: 'ride_history',
+    verificationBadgeText: '📍 GPS-Fahrtenhistorie bestätigt: Du bist auf deiner letzten Tour vor 2 Tagen hier vorbeigefahren (Treffer in Tour-Track #12)',
+    description: 'Letzte offizielle Messung vor über 240 Tagen. Wurde der Schotterweg neu asphaltiert?',
     questions: [
       {
         question: 'Wie ist der aktuelle Straßenbelag?',
-        options: ['Frisch & glatt asphaltiert', 'Fester Feinschotter (gut fahrbar)', 'Grober Schotter & Schlaglöcher', 'Weg blockiert / unpassierbar'],
+        options: ['Frisch & glatt asphaltiert', 'Fester Feinschotter (gut fahrbar)', 'Grober Schotter & Schlaglöcher', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
       {
-        question: 'Gibt es Höhenunterschiede / Hindernisse?',
-        options: ['Ebener Verlauf', 'Sanfter Anstieg (~4%)', 'Steiler Anstieg (>10%)', 'Umlaufsperre / Drängelgitter'],
+        question: 'Gibt es Höhenunterschiede / Drängelgitter?',
+        options: ['Ebener Verlauf ohne Barrieren', 'Sanfter Anstieg (~4%)', 'Steiler Anstieg / Umlaufsperre', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
       {
         question: 'Eignung für normale E-Bikes & Lastenräder?',
-        options: ['Perfekt für alle Räder', 'Nur für Mountainbikes & Gravel', 'Nicht empfehlenswert'],
+        options: ['Perfekt für alle E-Bikes', 'Nur für Mountainbikes & Gravel', 'Nicht empfehlenswert', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
     ],
   },
   {
-    id: 'quest-charge-2',
-    title: 'Öffentlicher Lade-Hub Marktplatz Funktionstest',
-    category: 'charging',
-    locationName: 'Rathauspassage E-Bike Station',
-    lat: 52.51,
-    lng: 13.40,
-    bountyTokens: 30,
-    lastUpdatedDate: '2024-04-18',
-    description: 'Verifiziere, ob die 230V Schuko-Steckdosen noch aktiv, stromführend und frei zugänglich sind.',
+    id: 'quest-charge-community',
+    title: '👥 Bestätigung: Neuer Ladepunkt von Radler_Klaus',
+    category: 'community_verify',
+    locationName: 'Schutzhütte Birkenhain (KM 18.5)',
+    lat: 52.52,
+    lng: 13.42,
+    bountyTokens: 35,
+    lastUpdatedDate: 'Vor 2 Tagen gemeldet',
+    verificationType: 'community_report',
+    verificationBadgeText: '👥 Community-Verifikation: Radler_Klaus hat vor 2 Tagen einen neuen Ladepunkt gemeldet. Du warst gestern in der Nähe!',
+    communityReportInfo: {
+      reportedBy: 'Radler_Klaus',
+      reportedDate: 'Vor 2 Tagen',
+      details: 'Neue wetterfeste 230V Schuko-Steckdose an der hölzernen Schutzhütte montiert.',
+    },
+    description: 'Bestätige oder korrigiere die Community-Meldung, damit andere E-Biker sich auf die Lademöglichkeit verlassen können.',
     questions: [
       {
-        question: 'Funktionieren die Steckdosen aktuell?',
-        options: ['Ja, Strom fließt (erfolgreich getestet / LED leuchtet)', 'Steckdose defekt / kein Strom', 'Abgesperrt oder zugeparkt', 'Ladesäule wurde abgebaut'],
+        question: 'Ist die gemeldete Steckdose an der Schutzhütte vorhanden?',
+        options: ['Ja, Steckdose ist vorhanden & frei zugänglich', 'Nein, keine Steckdose an der Hütte gefunden', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
       {
-        question: 'Wie ist der Wetterschutz vor Ort?',
-        options: ['Vollständig überdacht & regensicher', 'Teilweise überdacht', 'Komplett ungeschützt im Freien'],
+        question: 'Fließt Strom / Funktioniert die Dose?',
+        options: ['Ja, Strom fließt (getestet / LED leuchtet)', 'Nein, stromlos oder defekt', '🤷 Weiß nicht / Nicht getestet'],
       },
       {
-        question: 'Welche Annehmlichkeiten gibt es in der Nähe?',
-        options: ['Café / Bäckerei & Sitzbänke', 'Nur Fahrradständer', 'Keine weiteren Angebote'],
+        question: 'Wie ist der Regenschutz vor Ort?',
+        options: ['Vollständig überdacht unter der Hütte', 'Teilweise ungeschützt', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
     ],
   },
   {
-    id: 'quest-slope-3',
+    id: 'quest-obstacle-community',
+    title: '⚠️ Gefahren-Check: Baustellen-Sperrung Kanalbrücke',
+    category: 'obstacle',
+    locationName: 'Alte Kanalbrücke Ostufer',
+    lat: 52.46,
+    lng: 13.35,
+    bountyTokens: 20,
+    lastUpdatedDate: 'Gestern gemeldet',
+    verificationType: 'community_report',
+    verificationBadgeText: '⚠️ Aktuelle Sperrungsmeldung von E-Trail_Marc (Gestern). Du bist auf deiner Tour dort entlanggefahren.',
+    communityReportInfo: {
+      reportedBy: 'E-Trail_Marc',
+      reportedDate: 'Gestern',
+      details: 'Brücke wegen Bohrarbeiten voll gesperrt. Bauzaun aufgestellt.',
+    },
+    description: 'Prüfe, ob die Sperrung noch aktiv ist oder ob Radfahrer wieder passieren können.',
+    questions: [
+      {
+        question: 'Ist die Brücke aktuell für Radfahrer gesperrt?',
+        options: ['Ja, voll gesperrt / Bauzaun steht', 'Nein, wieder frei befahrbar (Baustelle beendet)', '🤷 Weiß nicht / Nicht darauf geachtet'],
+      },
+      {
+        question: 'Gibt es eine ausgeschilderte Rad-Umleitung?',
+        options: ['Ja, gut ausgeschilderte Umfahrung über Südsteg', 'Nein, keine Umleitung ausgeschildert', '🤷 Weiß nicht / Nicht darauf geachtet'],
+      },
+    ],
+  },
+  {
+    id: 'quest-slope-live',
     title: 'Steigungs- & Serpentinen-Messung Panorama-Kamm',
     category: 'slope',
     locationName: 'Aussichtsturm Serpentinenweg',
@@ -114,19 +158,17 @@ const MAP_QUESTS: MapQuest[] = [
     lng: 13.46,
     bountyTokens: 25,
     lastUpdatedDate: '2024-08-01',
+    verificationType: 'live_gps',
+    verificationBadgeText: '📍 Live-GPS-Verifikation: Du befindest dich aktuell im Nahbereich (< 200m)',
     description: 'Prüfe den Steigungswinkel und die Kurvenradien für unsere automatische Motor-Leistungs-Antizipation.',
     questions: [
       {
         question: 'Wie steil ist die stärkste Rampe?',
-        options: ['Moderat (4-7 %)', 'Anspruchsvoll (8-12 %)', 'Extrem steil (>14 % Turbo erforderlich)'],
-      },
-      {
-        question: 'Wie ist die Sicht & Kurvenführung?',
-        options: ['Weite, gut einsehbare Kurven', 'Enger Serpentinen-Trail mit Gegenverkehr', 'Gefährliche unübersichtliche Engstelle'],
+        options: ['Moderat (4-7 %)', 'Anspruchsvoll (8-12 %)', 'Extrem steil (>14 % Turbo nötig)', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
       {
         question: 'Gibt es eine Fahrrad-Reparatursäule oder Pumpe vor Ort?',
-        options: ['Ja, voll funktionsfähig', 'Ja, aber defekt / Luftpumpe fehlt', 'Nein, keine Werkzeuge'],
+        options: ['Ja, voll funktionsfähig', 'Ja, aber defekt / Werkzeug fehlt', 'Nein, keine Werkzeuge', '🤷 Weiß nicht / Nicht darauf geachtet'],
       },
     ],
   },
@@ -875,27 +917,49 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                   </span>
                 </div>
 
-                {/* GPS Location Plausibility Badge */}
+                {/* Verification Source Badge */}
                 <div
                   style={{
                     padding: '10px 14px',
-                    backgroundColor: 'rgba(0, 255, 102, 0.1)',
+                    backgroundColor: selectedQuest.verificationType === 'community_report' ? 'rgba(255, 183, 0, 0.1)' : 'rgba(0, 255, 102, 0.1)',
                     borderRadius: '10px',
-                    border: '1px solid #00ff66',
+                    border: selectedQuest.verificationType === 'community_report' ? '1px solid var(--accent-gold)' : '1px solid #00ff66',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    marginBottom: '16px',
+                    marginBottom: '14px',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#00ff66' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: selectedQuest.verificationType === 'community_report' ? 'var(--accent-gold)' : '#00ff66' }}>
                     <CheckCircle2 size={16} />
-                    <span><strong>Standort-Test bestanden:</strong> GPS-Verifizierung vor Ort aktiv (&lt; 250m Distanz)</span>
+                    <span>{selectedQuest.verificationBadgeText}</span>
                   </div>
                   <span style={{ fontSize: '0.7rem', color: '#fff', backgroundColor: 'rgba(0,0,0,0.4)', padding: '2px 6px', borderRadius: '6px' }}>
-                    GPS ±4m
+                    {selectedQuest.verificationType === 'ride_history' ? 'GPX-Match' : selectedQuest.verificationType === 'community_report' ? 'Community' : 'Live-GPS'}
                   </span>
                 </div>
+
+                {/* Community Report Detail Card (if applicable) */}
+                {selectedQuest.communityReportInfo && (
+                  <div
+                    style={{
+                      padding: '12px 14px',
+                      backgroundColor: 'rgba(0, 240, 255, 0.06)',
+                      borderRadius: '12px',
+                      border: '1px dashed var(--accent-cyan)',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--accent-cyan)' }}>
+                        Meldung von: {selectedQuest.communityReportInfo.reportedBy} ({selectedQuest.communityReportInfo.reportedDate})
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: '#fff', fontStyle: 'italic' }}>
+                      "{selectedQuest.communityReportInfo.details}"
+                    </p>
+                  </div>
+                )}
 
                 {/* Questions */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '18px' }}>
