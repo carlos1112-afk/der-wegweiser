@@ -6,17 +6,17 @@ import { AnticipationModal } from './components/AiAssistant/AnticipationModal';
 import { ScannerModal } from './components/ChargingScanner/ScannerModal';
 import { LoungeModal } from './components/ChargeAndEarn/LoungeModal';
 import { AnalyticsModal } from './components/Analytics/AnalyticsModal';
+import { VoiceSettingsModal } from './components/AiAssistant/VoiceSettingsModal';
 import { OledBlackMode } from './components/DisplayModes/OledBlackMode';
+import { FloatingMicButton } from './components/AiAssistant/FloatingMicButton';
 import type { Route, ChargingStation, LiveBikeTelemetry, UserPreferences, UserMemoryPattern } from './types/navigation';
 import { dataRepository } from './services/dataRepository';
 import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService';
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
-import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff } from 'lucide-react';
+import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2 } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
-
-import { FloatingMicButton } from './components/AiAssistant/FloatingMicButton';
 
 export function App() {
   const geo = useGeolocation();
@@ -42,6 +42,7 @@ export function App() {
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [showLoungeModal, setShowLoungeModal] = useState(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false);
 
   // Initialize Data & Pre-generate "Heute-Tour"
   useEffect(() => {
@@ -178,6 +179,15 @@ export function App() {
             🪙 {tokenBalance} Tokens
           </div>
 
+          {/* Voice Personas & Audio Settings Button */}
+          <button
+            className="btn-cyberpunk"
+            onClick={() => setShowVoiceSettingsModal(true)}
+            title="KI-Stimmen & Audio-Einstellungen"
+          >
+            <Volume2 size={16} /> Stimme
+          </button>
+
           {/* OLED Battery Saver Button */}
           <button className="btn-cyberpunk" onClick={handleToggleOledMode} title="OLED Beeline Spar-Modus">
             <EyeOff size={16} /> OLED Saver
@@ -260,6 +270,14 @@ export function App() {
           isOpen={showAnalyticsModal}
           currentRoute={currentRoute}
           onClose={() => setShowAnalyticsModal(false)}
+        />
+      )}
+
+      {/* Voice Personas & Audio Settings Modal */}
+      {showVoiceSettingsModal && (
+        <VoiceSettingsModal
+          isOpen={showVoiceSettingsModal}
+          onClose={() => setShowVoiceSettingsModal(false)}
         />
       )}
     </div>
