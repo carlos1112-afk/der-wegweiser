@@ -79,3 +79,11 @@ Die Nutzung der App ist für Personen ab 16 Jahren bestimmt. Personen unter 16 J
 2. **Ausschließliches Eigentum des Betreibers**: Diese aggregierten Daten und mathematischen Routing-Modelle sind gemäß §§ 87a ff. UrhG und dem Geschäftsgeheimnisgesetz (GeschGehG) das alleinige geistige Eigentum des Betreibers (Carlos). Sie unterliegen der Geheimhaltung und sind vor unberechtigtem Scraping, Vervielfältigung oder Drittverwertung gesetzlich geschützt.
 3. **Datenbank-Administration & Wiederherstellung**: Das Recht des Nutzers auf Löschung seiner personenbezogenen Daten (Art. 17 DSGVO) berührt nicht das Recht des Betreibers, die anonymisierte Gesamt-Navigationsdatenbank zu pflegen, zu sichern, ganz oder teilweise neu aufzubauen oder über autorisierte Backups wiederherzustellen.
 
+---
+
+## 8. Garantierter Ausschluss des Datenverkaufs (No-Data-Brokerage / No-Sale Policy)
+1. **Exklusive Datenabgabe an den Betreiber**: Der Nutzer übermittelt Daten ausschließlich an den Betreiber (Carlos). Eine Weitergabe an nicht für den Kernbetrieb erforderliche Dritte findet nicht statt.
+2. **Strikte Zweckbindung**: Die Verarbeitung aller Daten ist strengstens auf die Kernfunktionen der App "Der Wegweiser" (Turn-by-Turn Navigation, Akku-Telemetrie, Reichweiten-Kalkulation, Offline-Routing) limitiert.
+3. **Absolutes Verkaufsverbot**: Ein Weiterverkauf, Handel, Vermieten oder eine Veräußerung von Nutzer-, Fahr- oder Telemetriedaten an Datenhändler (Data Brokers), fremde Werbekonzerne oder sonstige Dritte ist von vornherein und für alle Zeiten vertraglich und datenschutzrechtlich ausgeschlossen. Kommerzielle Kaufangebote bezüglich unserer Nutzerdatenbanken werden kategorisch abgelehnt.
+
+

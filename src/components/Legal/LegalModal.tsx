@@ -199,6 +199,11 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             <p>
               Sämtliche navigations- und telemetrieabhängigen Daten (aggregierte Streckengraphen, Steigungsprofile, E-Bike Verbrauchskurven, Ladeinfrastrukturdaten und KI-Modelle) sind und verbleiben zu jedem Zeitpunkt das <strong>alleinige und ausschließliche geistige Eigentum des Betreibers (Carlos)</strong>. Die Datenbank ist nach §§ 87a ff. UrhG und dem Geschäftsgeheimnisgesetz (GeschGehG) geschützt. Jegliches Scraping, unbefugte Entnahme oder Drittverwertung ist untersagt. Der Betreiber ist jederzeit berechtigt, die Datenbankstruktur zu sichern, zu bereinigen, neu aufzubauen oder über autorisierte Backups wiederherzustellen.
             </p>
+
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 6 Exklusive Datenabgabe & Garantierter Ausschluss des Datenverkaufs</h4>
+            <p>
+              Der Nutzer übermittelt Daten <strong>ausschließlich an den Betreiber persönlich (Carlos)</strong>. Die Verarbeitung ist strikt auf die Kernfunktionen der App beschränkt. Ein Verkauf, eine Veräußerung oder Weitergabe von Nutzerdaten an Datenbroker oder fremde Dritte ist <strong>dauerhaft und ausnahmslos ausgeschlossen</strong>.
+            </p>
           </div>
         )}
 
@@ -218,13 +223,18 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               * <strong>Bluetooth BLE Telemetrie</strong>: Akku- und Motordaten (Bosch, Shimano, Mahle, etc.) werden zur Reichweitenanalyse verarbeitet und verbleiben lokal auf dem Gerät.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>3. Drittanbieter & Monetarisierung</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>3. Garantierter Ausschluss des Datenverkaufs (No-Sale Policy)</h4>
+            <p>
+              Deine Daten werden <strong>ausschließlich an den Betreiber (Carlos)</strong> übermittelt. Wir verkaufen niemals Nutzerdaten, Bewegungsprofile oder Telemetriewerte an Dritte oder Datenhändler. Angebote zum Kauf unserer Nutzerdaten werden kategorisch abgelehnt.
+            </p>
+
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>4. Drittanbieter & Monetarisierung</h4>
             <p>
               * <strong>BitLabs / CPX Research</strong>: Bei freiwilliger Teilnahme an bezahlten Marktforschungsumfragen werden pseudonyme Nutzer-IDs übermittelt.<br />
               * <strong>Google AdMob</strong>: Verarbeitung standardisierter Werbe-IDs gemäß Google Play Store Richtlinien.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>4. Deine Rechte (Art. 15–21 DSGVO)</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>5. Deine Rechte (Art. 15–21 DSGVO)</h4>
             <p>
               Du hast jederzeit das Recht auf Auskunft, Berichtigung, Löschung und Datenübertragbarkeit deiner gespeicherten Daten. Nutze dafür gerne auch unser integriertes Daten-Cockpit im nächsten Tab.
             </p>

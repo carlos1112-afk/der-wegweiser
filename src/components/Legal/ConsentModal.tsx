@@ -171,6 +171,25 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
                   Reichweiten- und Wattstundenangaben sind physikalische Näherungswerte. Bitte plane stets eine Sicherheitsreserve ein.
                 </div>
               </div>
+
+              {/* 4. No-Sale & Exclusive Operator Transfer Guarantee */}
+              <div
+                style={{
+                  padding: '12px 14px',
+                  backgroundColor: 'rgba(255, 183, 0, 0.08)',
+                  borderRadius: '14px',
+                  border: '1px solid rgba(255, 183, 0, 0.3)',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px',
+                }}
+              >
+                <ShieldCheck size={20} color="var(--accent-gold)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div style={{ fontSize: '0.8rem', color: '#fff', lineHeight: '1.4' }}>
+                  <strong style={{ color: 'var(--accent-gold)' }}>🛡️ Garantierter Ausschluss des Datenverkaufs:</strong><br />
+                  Deine Daten werden <strong>ausschließlich an den Betreiber persönlich (Carlos)</strong> übermittelt und strikt nur für die Funktionen der App verarbeitet. Ein Weiterverkauf oder Handel an Datenbroker/Dritte ist <strong>dauerhaft und ausnahmslos ausgeschlossen</strong>.
+                </div>
+              </div>
             </div>
 
             {/* Links to Full Documents */}

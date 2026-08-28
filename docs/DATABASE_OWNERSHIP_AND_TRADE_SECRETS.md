@@ -3,7 +3,7 @@
 **Projekt:** Der Wegweiser (Autonomous E-Bike Navigation & Co-Pilot)  
 **Rechtsinhaber & Betreiber:** Carlos (nachfolgend: *"Rechtsinhaber"* / *"Betreiber"*)  
 **Stand:** 28. August 2026  
-**Rechtsgrundlagen:** §§ 87a ff. Urheberrechtsgesetz (UrhG), Geschäftsgeheimnisgesetz (GeschGehG), EU-Richtlinie 2016/943, Datenschutz-Grundverordnung (DSGVO Art. 6 Abs. 1 lit. f).
+**Rechtsgrundlagen:** §§ 87a ff. Urheberrechtsgesetz (UrhG), Geschäftsgeheimnisgesetz (GeschGehG), EU-Richtlinie 2016/943, Datenschutz-Grundverordnung (DSGVO Art. 5 Abs. 1 lit. b, Art. 6 Abs. 1 lit. f).
 
 ---
 
@@ -43,6 +43,13 @@
    * Gesicherte Master-Dumps über autorisierte Backdoors oder Speicherarchive wieder einzuspielen,
    * Datenbankschemata und Speicherarchitekturen nach eigenem Ermessen zu migrieren oder neu aufzubauen.
 2. **Rechtssicherheit bei Re-Builds**: Ein Neuaufbau oder eine Re-Initialisierung der Datenbank berührt weder die bestehenden Schutzrechte noch die Eigentumsverhältnisse an den zugrundeliegenden Daten.
+
+---
+
+## 6. Strikte Zweckbindung & Garantierter Ausschluss des Verkaufs von Nutzerdaten (No-Sale Policy)
+1. **Exklusive Datenübermittlung**: Der Nutzer übermittelt anfallende Navigations- und Telemetriedaten ausschließlich und direkt an den Betreiber persönlich (Carlos).
+2. **Strikte Zweckbindung (Art. 5 Abs. 1 lit. b DSGVO)**: Die Verarbeitung aller übermittelten Daten ist strengstens und ausnahmslos auf den Betrieb, die Qualitätssicherung, die Reichweitenberechnung und die Kernfunktionen der App "Der Wegweiser" beschränkt.
+3. **Kategorischer Ausschluss des Datenverkaufs**: Ein Verkauf, eine Veräußerung, Lizenzierung an Datenhändler (Data Brokers), die Vermarktung von Bewegungsprofilen an Dritte oder die kommerzielle Weitergabe von Nutzerdaten an Werbenetzwerke oder externe Datenaufkäufer ist von vornherein und für alle Zeiten vertraglich und datenschutzrechtlich ausgeschlossen. Kommerzielle Kaufangebote Dritter bezüglich Nutzer- oder Telemetriedaten werden kategorisch abgewiesen.
 
 ---
 
