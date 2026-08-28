@@ -95,9 +95,38 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
         <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '8px' }} className="glow-text-cyan">
           {route.title}
         </h2>
-        <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: '1.5', marginBottom: '20px' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: '1.5', marginBottom: '16px' }}>
           {route.aiStory}
         </p>
+
+        {/* Scout Mission Banner */}
+        {route.isScoutMission && (
+          <div
+            style={{
+              padding: '10px 14px',
+              backgroundColor: 'rgba(255, 183, 0, 0.12)',
+              borderRadius: '12px',
+              border: '1px solid var(--accent-gold)',
+              marginBottom: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#fff' }}>
+              <span style={{ fontSize: '1.2rem' }}>🗺️</span>
+              <div>
+                <strong style={{ color: 'var(--accent-gold)' }}>Karten-Scout Modus Aktiv:</strong>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                  Aktualisiert veraltete Sektoren &amp; Topographie-Güten
+                </div>
+              </div>
+            </div>
+            <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+              🪙 +{route.scoutBountyTokens || 15} Bonus
+            </span>
+          </div>
+        )}
 
         {/* Route Stats Grid */}
         <div

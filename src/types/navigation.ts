@@ -89,6 +89,8 @@ export interface Route {
   waypoints: Waypoint[];
   pathCoordinates: [number, number][]; // [lat, lng] array
   chargingStopsOnRoute: ChargingStation[];
+  isScoutMission?: boolean;
+  scoutBountyTokens?: number;
 }
 
 export type BikeManufacturer = 'bosch' | 'shimano' | 'specialized' | 'mahle' | 'fazua' | 'bafang' | 'generic';

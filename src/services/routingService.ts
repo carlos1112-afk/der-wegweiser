@@ -10,6 +10,7 @@ export interface RouteGenerationParams {
   themes?: string[];
   batteryPercent: number;
   bikeType: string;
+  isMapScoutMode?: boolean; // Karten-Scout Modus: Bevorzugt veraltete Sektoren für Bonus-Tokens
 }
 
 export class RoutingService {
@@ -22,11 +23,12 @@ export class RoutingService {
     userPrefs: UserPreferences
   ): Promise<Route> {
     const distance = params.targetDistanceKm || 28;
+    const isScout = !!params.isMapScoutMode;
     const radius = (distance / (2 * Math.PI)) * 0.009; // approx degree delta
 
-    // Generate circular via points (North, East, South)
-    const viaLat = params.startLat + radius * 0.8;
-    const viaLng = params.startLng + radius * 0.6;
+    // Generate circular via points (If Scout Mode: slightly detour via refreshable ridge / sector)
+    const viaLat = params.startLat + radius * (isScout ? 0.95 : 0.8);
+    const viaLng = params.startLng + radius * (isScout ? 0.75 : 0.6);
 
     let pathCoordinates: [number, number][] = [];
     let realDistanceKm = distance;
@@ -82,7 +84,7 @@ export class RoutingService {
     // 5 waypoints along the route
     const waypoints: Waypoint[] = [
       { id: 'wp-1', lat: params.startLat, lng: params.startLng, name: 'Startpunkt', category: 'start' },
-      { id: 'wp-2', lat: viaLat, lng: viaLng, name: 'Badesee Promenade', category: 'scenic' },
+      { id: 'wp-2', lat: viaLat, lng: viaLng, name: isScout ? '🔍 Scout-Sektor: Kiefernkamm' : 'Badesee Promenade', category: 'scenic' },
       { id: 'wp-3', lat: params.startLat + radius * 1.2, lng: params.startLng - radius * 0.4, name: 'E-Bike Lade-Café Waldidyll', category: 'charging' },
       { id: 'wp-4', lat: params.startLat + radius * 0.3, lng: params.startLng - radius * 1.1, name: 'Panorama Aussichtspunkt', category: 'scenic' },
       { id: 'wp-5', lat: params.startLat, lng: params.startLng, name: 'Ziel & Rückkehr', category: 'end' },
@@ -95,11 +97,19 @@ export class RoutingService {
     const availableWh = (userPrefs.batteryCapacityWh * params.batteryPercent) / 100;
     const isBatterySafe = availableWh >= totalWhNeeded * 1.15;
 
+    const title = isScout
+      ? `🗺️ Karten-Scout: ${params.themes?.[0] || 'Topographie'} Aktualisierung (+15 Tokens)`
+      : `KI-Runde: ${params.themes?.[0] || 'Badesee'} & Panoramatour`;
+
+    const aiStory = isScout
+      ? `Karten-Scout Mission: Diese Route führt dich über einen Sektor mit veralteten Topographie-Daten (> 180 Tage). Deine anonymen Sensordaten aktualisieren Steigung & Belag für alle E-Biker. Bonus bei Tour-Abschluss: +15 Tokens!`
+      : `Diese Route wurde speziell für dich zusammengestellt: Sie führt über sanfte, asphaltierte Radwege am Badesee entlang, vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}% und beinhaltet eine perfekte Lademöglichkeit beim Café Waldidyll bei KM 18.`;
+
     return {
       id: `route-${Date.now()}`,
-      title: `KI-Runde: ${params.themes?.[0] || 'Badesee'} & Panoramatour`,
-      summary: `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • Asphalt & Uferwege`,
-      aiStory: `Diese Route wurde speziell für dich zusammengestellt: Sie führt über sanfte, asphaltierte Radwege am Badesee entlang, vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}% und beinhaltet eine perfekte Lademöglichkeit beim Café Waldidyll bei KM 18.`,
+      title,
+      summary: `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie aktiv' : 'Asphalt & Uferwege'}`,
+      aiStory,
       distanceKm: realDistanceKm,
       elevationGainM,
       estimatedTimeMin: Math.round((realDistanceKm / 19) * 60),
@@ -112,6 +122,8 @@ export class RoutingService {
       },
       waypoints,
       pathCoordinates,
+      isScoutMission: isScout,
+      scoutBountyTokens: isScout ? 15 : 0,
       chargingStopsOnRoute: [
         {
           id: 'cs-route-1',
