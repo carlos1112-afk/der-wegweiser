@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Store, Coffee, Wrench, Sparkles, CheckCircle2, X } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
+import { dataRepository } from '../../services/dataRepository';
 import confetti from 'canvas-confetti';
 
 interface PartnerModalProps {
@@ -21,6 +22,14 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
     e.preventDefault();
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 70, spread: 70 });
+    if (dataRepository.addPartnerLead) {
+      dataRepository.addPartnerLead({
+        businessName,
+        email: contactEmail,
+        plan: selectedPlan,
+        type: businessType,
+      });
+    }
     setSubmitted(true);
   };
 

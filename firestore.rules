@@ -17,22 +17,28 @@ service cloud.firestore {
 
     // User Preferences
     match /user_preferences/{userId} {
-      allow read, write: if true; // Fallback for demo users
+      allow read, write: if true; // Fallback for demo & registered users
     }
 
     // User Memory Patterns
     match /user_memory_patterns/{userId} {
-      allow read, write: if true; // Fallback for demo users
+      allow read, write: if true;
     }
 
     // User Token Accounts & Gamification
     match /user_tokens/{userId} {
-      allow read, write: if true; // Fallback for demo users
+      allow read, write: if true;
     }
 
-    // Saved Routes
+    // Saved Routes & GPX Tracks
     match /routes/{routeId} {
       allow read, write: if true;
+    }
+
+    // B2B Partner Leads & Charging Station Sponsors
+    match /partner_leads/{leadId} {
+      allow create: if true;
+      allow read, write: if isAuthenticated();
     }
 
     // Default match-all for development & prototyping

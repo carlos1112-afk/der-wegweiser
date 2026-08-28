@@ -48,7 +48,7 @@ class TopographyRouteResponse(BaseModel):
     totalElevationGainM: float
     estimatedWhConsumption: float
     remainingBatteryPercent: float
-    isBatterySafe: boolean = True
+    isBatterySafe: bool = True
     criticalSegments: List[Dict[str, Any]]
     recommendations: List[str]
 

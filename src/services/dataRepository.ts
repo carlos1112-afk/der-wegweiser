@@ -364,15 +364,58 @@ class LocalAndFirestoreRepository implements IDataRepository {
   }
 
   async saveRoute(userId: string, route: Route): Promise<string> {
-    const saved = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
-    saved.push(route);
-    localStorage.setItem(`routes_${userId}`, JSON.stringify(saved));
+    // 1. Save locally for instant offline retrieval
+    try {
+      const saved = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      if (!saved.some((r: Route) => r.id === route.id)) {
+        saved.push(route);
+      }
+      localStorage.setItem(`routes_${userId}`, JSON.stringify(saved));
+    } catch (e) {
+      console.warn('Could not save route to localStorage:', e);
+    }
+
+    // 2. Persist in Firestore
+    try {
+      const docRef = doc(db, 'routes', route.id);
+      await setDoc(docRef, { ...route, userId, savedAt: new Date().toISOString() });
+    } catch (error) {
+      console.warn('Firestore saveRoute failed, persisted locally:', error);
+    }
+
     return route.id;
   }
 
   async getSavedRoutes(userId: string): Promise<Route[]> {
-    return JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+    let firestoreRoutes: Route[] = [];
+
+    try {
+      const querySnapshot = await getDocs(collection(db, 'routes'));
+      firestoreRoutes = querySnapshot.docs.map((d) => d.data() as Route);
+      if (firestoreRoutes.length > 0) {
+        localStorage.setItem(`routes_${userId}`, JSON.stringify(firestoreRoutes));
+        return firestoreRoutes;
+      }
+    } catch (error) {
+      console.warn('Firestore getSavedRoutes failed, using local cache:', error);
+    }
+
+    try {
+      return JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  async addPartnerLead(lead: { businessName: string; email: string; plan: string; type: string }): Promise<void> {
+    const id = `lead-${Date.now()}`;
+    try {
+      const docRef = doc(db, 'partner_leads', id);
+      await setDoc(docRef, { ...lead, createdAt: new Date().toISOString() });
+    } catch (e) {
+      console.warn('Could not save partner lead to Firestore:', e);
+    }
   }
 }
 
-export const dataRepository: IDataRepository = new LocalAndFirestoreRepository();
+export const dataRepository: IDataRepository & { addPartnerLead?: (lead: any) => Promise<void> } = new LocalAndFirestoreRepository();
