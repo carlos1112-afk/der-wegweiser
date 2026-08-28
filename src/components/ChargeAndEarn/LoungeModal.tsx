@@ -15,8 +15,17 @@ import {
   Flame,
   Sparkles,
   QrCode,
+  FileText,
+  Play,
+  Video,
+  CreditCard,
+  Building2,
+  ExternalLink,
 } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
+import { SurveyWallService, type AvailableSurvey } from '../../services/surveyWallService';
+import { SPONSOR_ADS, type SponsorAd } from '../../services/adService';
+import { PartnerModal } from './PartnerModal';
 
 interface LoungeModalProps {
   tokenBalance: number;
@@ -155,18 +164,31 @@ const COOLDOWN_KEY = 'lounge_wheel_cooldown';
 const QUIZ_ATTEMPT_KEY = 'lounge_quiz_attempted';
 
 export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTokens, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'wheel' | 'quiz' | 'catcher' | 'shop' | 'leaderboard'>('wheel');
+  const [activeTab, setActiveTab] = useState<'wheel' | 'quiz' | 'catcher' | 'surveys' | 'shop' | 'leaderboard'>('wheel');
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotationDegree, setRotationDegree] = useState(0);
   const [lastWin, setLastWin] = useState<string | null>(null);
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+
+  // Rewarded Video Ad Modal State
+  const [showVideoAd, setShowVideoAd] = useState(false);
+  const [adTimeLeft, setAdTimeLeft] = useState(15);
+  const [currentAd, setCurrentAd] = useState<SponsorAd>(SPONSOR_ADS[0]);
+
+  // Survey State
+  const [surveys] = useState<AvailableSurvey[]>(SurveyWallService.getAvailableSurveys());
+  const [activeSurvey, setActiveSurvey] = useState<AvailableSurvey | null>(null);
+  const [surveyStep, setSurveyStep] = useState(1);
+  const [completedSurveys, setCompletedSurveys] = useState<string[]>([]);
+
+  // B2B Partner Modal State
+  const [showPartnerModal, setShowPartnerModal] = useState(false);
 
   // Watt-Catcher Game State
   const [catcherActive, setCatcherActive] = useState(false);
   const [catcherScore, setCatcherScore] = useState(0);
   const [catcherTimeLeft, setCatcherTimeLeft] = useState(20);
   const [catcherOrbs, setCatcherOrbs] = useState<{ id: number; x: number; y: number; type: 'energy' | 'super' | 'glitch' }[]>([]);
-  const catcherIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Shop state
   const [redeemedCodes, setRedeemedCodes] = useState<Record<string, string>>({});
@@ -239,6 +261,42 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     };
   }, [isSpinning]);
 
+  // Video Ad Countdown Timer
+  useEffect(() => {
+    if (!showVideoAd) return;
+    setAdTimeLeft(15);
+
+    const timer = setInterval(() => {
+      setAdTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [showVideoAd]);
+
+  const handleStartVideoAd = () => {
+    SoundFxService.playClick();
+    const randomAd = SPONSOR_ADS[Math.floor(Math.random() * SPONSOR_ADS.length)];
+    setCurrentAd(randomAd);
+    setShowVideoAd(true);
+  };
+
+  const handleCompleteVideoAd = () => {
+    setShowVideoAd(false);
+    onAddTokens(currentAd.rewardTokens);
+    SoundFxService.playSuccessChime();
+    confetti({ particleCount: 70, spread: 70 });
+
+    // Reset wheel cooldown
+    localStorage.removeItem(COOLDOWN_KEY);
+    setCooldownRemaining(0);
+  };
+
   // Watt-Catcher Game Loop
   useEffect(() => {
     if (!catcherActive) return;
@@ -263,8 +321,6 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
 
       setCatcherOrbs((prev) => [...prev.slice(-6), { id, x, y, type }]);
     }, 800);
-
-    catcherIntervalRef.current = timer;
 
     return () => {
       clearInterval(timer);
@@ -368,6 +424,33 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     setRedeemedCodes((prev) => ({ ...prev, [item.id]: item.code || 'REDEEMED-2026' }));
   };
 
+  const handleBuyTokenPack = (amount: number, priceEur: string) => {
+    SoundFxService.playSuccessChime();
+    confetti({ particleCount: 80, spread: 80 });
+    onAddTokens(amount);
+    alert(`🎉 Erfolgreich gekauft: +${amount} Tokens für ${priceEur}! Vielen Dank für deinen Support!`);
+  };
+
+  const handleStartSurvey = (survey: AvailableSurvey) => {
+    SoundFxService.playClick();
+    setActiveSurvey(survey);
+    setSurveyStep(1);
+  };
+
+  const handleCompleteSurveyStep = () => {
+    if (!activeSurvey) return;
+    if (surveyStep < 3) {
+      SoundFxService.playClick();
+      setSurveyStep((s) => s + 1);
+    } else {
+      onAddTokens(activeSurvey.tokenReward);
+      SoundFxService.playSuccessChime();
+      confetti({ particleCount: 80, spread: 80 });
+      setCompletedSurveys((prev) => [...prev, activeSurvey.id]);
+      setActiveSurvey(null);
+    }
+  };
+
   return (
     <div
       style={{
@@ -385,7 +468,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
       <div
         className="glass-panel"
         style={{
-          maxWidth: '680px',
+          maxWidth: '720px',
           width: '100%',
           maxHeight: '92vh',
           overflowY: 'auto',
@@ -407,7 +490,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                 CHARGE 'N' EARN LADE-LOUNGE
               </h3>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Verdiene & löse Tokens ein, während dein E-Bike auflädt
+                Verdiene Tokens durch Spiele & Umfragen oder löse sie für Prämien ein
               </p>
             </div>
           </div>
@@ -448,11 +531,11 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
         </div>
 
         {/* Navigation Tabs */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '6px' }}>
           <button
             onClick={() => setActiveTab('wheel')}
             className={`btn-cyberpunk ${activeTab === 'wheel' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center', display: 'flex' }}
+            style={{ padding: '8px 2px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
             <Dices size={14} /> Glücksrad
           </button>
@@ -460,15 +543,23 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           <button
             onClick={() => setActiveTab('catcher')}
             className={`btn-cyberpunk ${activeTab === 'catcher' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center', display: 'flex' }}
+            style={{ padding: '8px 2px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
-            <Zap size={14} /> Watt-Catcher
+            <Zap size={14} /> Catcher
+          </button>
+
+          <button
+            onClick={() => setActiveTab('surveys')}
+            className={`btn-cyberpunk ${activeTab === 'surveys' ? 'btn-gold' : ''}`}
+            style={{ padding: '8px 2px', fontSize: '0.75rem', justifyContent: 'center' }}
+          >
+            <FileText size={14} /> Umfragen
           </button>
 
           <button
             onClick={() => setActiveTab('quiz')}
             className={`btn-cyberpunk ${activeTab === 'quiz' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center', display: 'flex' }}
+            style={{ padding: '8px 2px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
             <HelpCircle size={14} /> Quiz
           </button>
@@ -476,7 +567,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           <button
             onClick={() => setActiveTab('shop')}
             className={`btn-cyberpunk ${activeTab === 'shop' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center', display: 'flex' }}
+            style={{ padding: '8px 2px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
             <ShoppingBag size={14} /> Shop
           </button>
@@ -484,7 +575,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           <button
             onClick={() => setActiveTab('leaderboard')}
             className={`btn-cyberpunk ${activeTab === 'leaderboard' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center', display: 'flex' }}
+            style={{ padding: '8px 2px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
             <Trophy size={14} /> Rangliste
           </button>
@@ -565,27 +656,33 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
               Drehe am Glücksrad und gewinne kostenlose Tokens für KI-Routen!
             </p>
 
-            {cooldownRemaining > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: 'var(--accent-gold)', fontSize: '0.85rem', marginBottom: '12px', fontWeight: 'bold' }}>
-                <Timer size={16} /> Sperre aktiv: Noch {cooldownRemaining}s abkühlen...
-              </div>
-            )}
+            <div style={{ display: 'flex', gap: '10px', maxWidth: '400px', margin: '0 auto' }}>
+              <button
+                onClick={handleSpinWheel}
+                disabled={isSpinning || cooldownRemaining > 0}
+                className="btn-gold"
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  cursor: isSpinning || cooldownRemaining > 0 ? 'not-allowed' : 'pointer',
+                  opacity: isSpinning || cooldownRemaining > 0 ? 0.6 : 1,
+                }}
+              >
+                {isSpinning ? 'Dreht sich...' : cooldownRemaining > 0 ? `Abkühlen (${cooldownRemaining}s)` : '🎡 Jetzt Drehen'}
+              </button>
 
-            <button
-              onClick={handleSpinWheel}
-              disabled={isSpinning || cooldownRemaining > 0}
-              className="btn-gold"
-              style={{
-                width: '100%',
-                padding: '12px',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                cursor: isSpinning || cooldownRemaining > 0 ? 'not-allowed' : 'pointer',
-                opacity: isSpinning || cooldownRemaining > 0 ? 0.6 : 1,
-              }}
-            >
-              {isSpinning ? 'Glücksrad dreht sich...' : cooldownRemaining > 0 ? `Abkühlen (${cooldownRemaining}s)` : '🎡 Jetzt Drehen (Bis zu +20 Tokens)'}
-            </button>
+              {/* Rewarded Video Ad Booster Button */}
+              <button
+                onClick={handleStartVideoAd}
+                className="btn-cyberpunk"
+                style={{ padding: '12px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                title="15s Sponsor-Video ansehen für +20 Tokens & Cooldown Reset"
+              >
+                <Video size={16} /> +20 Tok. Clip
+              </button>
+            </div>
 
             {lastWin && (
               <div
@@ -606,7 +703,141 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           </div>
         )}
 
-        {/* 2. Watt-Catcher Minigame Tab */}
+        {/* 2. Paid Surveys Offerwall Tab */}
+        {activeTab === 'surveys' && (
+          <div style={{ padding: '8px 0' }}>
+            {activeSurvey ? (
+              <div className="glass-panel" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-gold)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
+                    {activeSurvey.title} (Frage {surveyStep}/3)
+                  </h4>
+                  <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
+                    🪙 +{activeSurvey.tokenReward} Tokens
+                  </span>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  {surveyStep === 1 && (
+                    <div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                        Wie häufig fährst du durchschnittlich mit dem E-Bike oder Fahrrad?
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {['Täglich zum Pendeln', '2-3 Mal pro Woche', 'Nur am Wochenende für Touren', 'Gelegentlich im Urlaub'].map((ans) => (
+                          <button key={ans} onClick={handleCompleteSurveyStep} className="btn-cyberpunk" style={{ textAlign: 'left', padding: '10px 14px' }}>
+                            {ans}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {surveyStep === 2 && (
+                    <div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                        Wie wichtig ist dir eine verlässliche Anzeige von öffentlichen E-Bike Ladepunkten?
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {['Extrem wichtig für längere Tagestouren', 'Wichtig als Sicherheitsreserve', 'Eher zweitrangig'].map((ans) => (
+                          <button key={ans} onClick={handleCompleteSurveyStep} className="btn-cyberpunk" style={{ textAlign: 'left', padding: '10px 14px' }}>
+                            {ans}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {surveyStep === 3 && (
+                    <div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px' }}>
+                        Welche Akkukapazität hat dein Haupt-E-Bike?
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {['Unter 500 Wh', '500 Wh bis 625 Wh', '750 Wh oder mehr (Dual-Battery)', 'Weiß ich nicht genau'].map((ans) => (
+                          <button key={ans} onClick={handleCompleteSurveyStep} className="btn-cyberpunk btn-gold" style={{ textAlign: 'left', padding: '10px 14px' }}>
+                            {ans} (Umfrage abschließen)
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Verdiene echte Tokens während der Ladepause durch kurze Marktforschungs-Umfragen:
+                  </p>
+                  <a
+                    href={SurveyWallService.getOfferwallUrl('user-1')}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    BitLabs Wall <ExternalLink size={12} />
+                  </a>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px' }}>
+                  {surveys.map((sv) => {
+                    const isDone = completedSurveys.includes(sv.id);
+                    return (
+                      <div
+                        key={sv.id}
+                        className="glass-panel"
+                        style={{
+                          padding: '14px',
+                          borderRadius: '14px',
+                          border: isDone ? '1px solid rgba(0, 255, 102, 0.3)' : '1px solid var(--border-glass)',
+                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(15, 22, 36, 0.6)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                        }}
+                      >
+                        <div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>
+                              ⏱️ {sv.durationMinutes} Min • ⭐ {sv.rating}
+                            </span>
+                            <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+                              🪙 +{sv.tokenReward} Tokens
+                            </span>
+                          </div>
+                          <h5 style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff', marginBottom: '2px' }}>
+                            {sv.title}
+                          </h5>
+                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            Thema: {sv.topic}
+                          </p>
+                        </div>
+
+                        {isDone ? (
+                          <div style={{ fontSize: '0.75rem', color: '#00ff66', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
+                            <CheckCircle2 size={14} /> Abgeschlossen & gutgeschrieben
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleStartSurvey(sv)}
+                            className="btn-cyberpunk btn-gold"
+                            style={{ padding: '8px', fontSize: '0.75rem', justifyContent: 'center' }}
+                          >
+                            <Play size={12} fill="currentColor" /> Umfrage Starten (+{sv.tokenReward} Tok.)
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 3. Watt-Catcher Minigame Tab */}
         {activeTab === 'catcher' && (
           <div style={{ padding: '8px 0', textAlign: 'center' }}>
             {!catcherActive ? (
@@ -675,7 +906,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           </div>
         )}
 
-        {/* 3. Quiz Tab */}
+        {/* 4. Quiz Tab */}
         {activeTab === 'quiz' && (
           <div style={{ padding: '8px 0' }}>
             {quizAlreadyCompletedOnLoad ? (
@@ -780,83 +1011,151 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           </div>
         )}
 
-        {/* 4. Token Rewards Shop Tab */}
+        {/* 5. Token Rewards & Purchase Shop Tab */}
         {activeTab === 'shop' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', padding: '8px 0' }}>
-            {SHOP_ITEMS.map((item) => {
-              const isRedeemed = !!redeemedCodes[item.id];
-              const canAfford = tokenBalance >= item.cost;
-
-              return (
-                <div
-                  key={item.id}
-                  className="glass-panel"
-                  style={{
-                    padding: '14px',
-                    borderRadius: '16px',
-                    border: '1px solid var(--border-glass)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    gap: '10px',
-                    backgroundColor: 'rgba(15, 22, 36, 0.6)',
-                  }}
-                >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '1.6rem' }}>{item.icon}</span>
-                      <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
-                        🪙 {item.cost} Tokens
-                      </span>
-                    </div>
-                    <h5 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', marginBottom: '4px' }}>
-                      {item.title}
-                    </h5>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.3' }}>
-                      {item.description}
-                    </p>
-                  </div>
-
-                  {isRedeemed ? (
-                    <div
-                      style={{
-                        padding: '8px',
-                        backgroundColor: 'rgba(0, 255, 102, 0.1)',
-                        border: '1px solid #00ff66',
-                        borderRadius: '8px',
-                        fontSize: '0.75rem',
-                        color: '#00ff66',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <span>Code: <strong>{redeemedCodes[item.id]}</strong></span>
-                      <QrCode size={16} />
-                    </div>
-                  ) : (
-                    <button
-                      disabled={!canAfford}
-                      onClick={() => handleRedeemItem(item)}
-                      className={`btn-cyberpunk ${canAfford ? 'btn-gold' : ''}`}
-                      style={{
-                        padding: '8px',
-                        fontSize: '0.75rem',
-                        justifyContent: 'center',
-                        opacity: canAfford ? 1 : 0.5,
-                        cursor: canAfford ? 'pointer' : 'not-allowed',
-                      }}
-                    >
-                      <Sparkles size={14} /> Jetzt Einlösen
-                    </button>
-                  )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '8px 0' }}>
+            {/* Direct Token In-App Purchase Section */}
+            <div className="glass-panel" style={{ padding: '14px', borderRadius: '16px', border: '1px solid var(--accent-gold)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                <CreditCard size={18} className="glow-text-gold" />
+                <h5 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff' }}>
+                  Token-Packs Sofort Kaufen (Direkt-Gutschrift)
+                </h5>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
+                <div style={{ padding: '10px', backgroundColor: 'rgba(255, 183, 0, 0.08)', borderRadius: '10px', border: '1px solid rgba(255, 183, 0, 0.2)' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>☕ Mini-Pack (100 Tok.)</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', marginBottom: '8px' }}>1,99 € einmalig</div>
+                  <button onClick={() => handleBuyTokenPack(100, '1,99 €')} className="btn-cyberpunk btn-gold" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
+                    Kaufen (1,99 €)
+                  </button>
                 </div>
-              );
-            })}
+
+                <div style={{ padding: '10px', backgroundColor: 'rgba(0, 240, 255, 0.08)', borderRadius: '10px', border: '1px solid rgba(0, 240, 255, 0.2)' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>🚀 Power-Pack (500 Tok.)</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', marginBottom: '8px' }}>4,99 € (Beliebt)</div>
+                  <button onClick={() => handleBuyTokenPack(500, '4,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
+                    Kaufen (4,99 €)
+                  </button>
+                </div>
+
+                <div style={{ padding: '10px', backgroundColor: 'rgba(255, 0, 127, 0.08)', borderRadius: '10px', border: '1px solid rgba(255, 0, 127, 0.2)' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>👑 Supporter Pro</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--accent-pink)', marginBottom: '8px' }}>9,99 € Lifetime</div>
+                  <button onClick={() => handleBuyTokenPack(2000, '9,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center', borderColor: 'var(--accent-pink)', color: 'var(--accent-pink)' }}>
+                    Freischalten (9,99 €)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Redeemable Rewards Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+              {SHOP_ITEMS.map((item) => {
+                const isRedeemed = !!redeemedCodes[item.id];
+                const canAfford = tokenBalance >= item.cost;
+
+                return (
+                  <div
+                    key={item.id}
+                    className="glass-panel"
+                    style={{
+                      padding: '14px',
+                      borderRadius: '16px',
+                      border: '1px solid var(--border-glass)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      gap: '10px',
+                      backgroundColor: 'rgba(15, 22, 36, 0.6)',
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '1.6rem' }}>{item.icon}</span>
+                        <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
+                          🪙 {item.cost} Tokens
+                        </span>
+                      </div>
+                      <h5 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', marginBottom: '4px' }}>
+                        {item.title}
+                      </h5>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                        {item.description}
+                      </p>
+                    </div>
+
+                    {isRedeemed ? (
+                      <div
+                        style={{
+                          padding: '8px',
+                          backgroundColor: 'rgba(0, 255, 102, 0.1)',
+                          border: '1px solid #00ff66',
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          color: '#00ff66',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <span>Code: <strong>{redeemedCodes[item.id]}</strong></span>
+                        <QrCode size={16} />
+                      </div>
+                    ) : (
+                      <button
+                        disabled={!canAfford}
+                        onClick={() => handleRedeemItem(item)}
+                        className={`btn-cyberpunk ${canAfford ? 'btn-gold' : ''}`}
+                        style={{
+                          padding: '8px',
+                          fontSize: '0.75rem',
+                          justifyContent: 'center',
+                          opacity: canAfford ? 1 : 0.5,
+                          cursor: canAfford ? 'pointer' : 'not-allowed',
+                        }}
+                      >
+                        <Sparkles size={14} /> Jetzt Einlösen
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* B2B Partner Pitch Button */}
+            <div
+              className="glass-panel"
+              style={{
+                padding: '12px 16px',
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 183, 0, 0.08)',
+                border: '1px solid rgba(255, 183, 0, 0.25)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '10px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Building2 size={20} className="glow-text-gold" />
+                <span style={{ fontSize: '0.8rem', color: '#fff' }}>
+                  Besitzt du ein Café oder eine Werkstatt? <strong>Werde offizieller Partner-Lade-Stopp!</strong>
+                </span>
+              </div>
+              <button
+                onClick={() => setShowPartnerModal(true)}
+                className="btn-cyberpunk btn-gold"
+                style={{ padding: '6px 14px', fontSize: '0.75rem' }}
+              >
+                Als Partner registrieren
+              </button>
+            </div>
           </div>
         )}
 
-        {/* 5. Leaderboard Tab */}
+        {/* 6. Leaderboard Tab */}
         {activeTab === 'leaderboard' && (
           <div style={{ padding: '8px 0' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -901,6 +1200,103 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           </div>
         )}
       </div>
+
+      {/* Rewarded Sponsor Video Ad Modal */}
+      {showVideoAd && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            zIndex: 3000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+        >
+          <div
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '480px',
+              padding: '24px',
+              borderRadius: '20px',
+              border: '2px solid var(--accent-gold)',
+              boxShadow: '0 0 40px rgba(255, 183, 0, 0.4)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                Sponsor Video Clip • {currentAd.sponsorName}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent-gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                <Timer size={16} /> {adTimeLeft > 0 ? `${adTimeLeft}s` : 'Belohnung bereit!'}
+              </div>
+            </div>
+
+            <div
+              style={{
+                height: '180px',
+                borderRadius: '14px',
+                backgroundColor: 'rgba(255, 183, 0, 0.1)',
+                border: '1px dashed var(--accent-gold)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '16px',
+                gap: '8px',
+              }}
+            >
+              <Video size={48} className="glow-text-gold" />
+              <h4 style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
+                {currentAd.headline}
+              </h4>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.3' }}>
+                {currentAd.tagline}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <a
+                href={currentAd.url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-cyberpunk"
+                style={{ flex: 1, padding: '10px', fontSize: '0.8rem', justifyContent: 'center', textDecoration: 'none' }}
+              >
+                {currentAd.buttonText}
+              </a>
+
+              <button
+                disabled={adTimeLeft > 0}
+                onClick={handleCompleteVideoAd}
+                className="btn-cyberpunk btn-gold"
+                style={{
+                  flex: 1,
+                  padding: '10px',
+                  fontSize: '0.8rem',
+                  justifyContent: 'center',
+                  opacity: adTimeLeft > 0 ? 0.4 : 1,
+                  cursor: adTimeLeft > 0 ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {adTimeLeft > 0 ? `Warte ${adTimeLeft}s` : '🪙 +20 Tokens Einlösen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* B2B Partner Lead Modal */}
+      {showPartnerModal && (
+        <PartnerModal isOpen={showPartnerModal} onClose={() => setShowPartnerModal(false)} />
+      )}
     </div>
   );
 };
