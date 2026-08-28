@@ -11,7 +11,7 @@ import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
-import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon } from 'lucide-react';
+import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 
@@ -37,6 +37,15 @@ const BoschConnectModal = lazy(() =>
 const RideSummaryModal = lazy(() =>
   import('./components/Recording/RideSummaryModal').then((m) => ({ default: m.RideSummaryModal }))
 );
+const GpxImportModal = lazy(() =>
+  import('./components/Navigation/GpxImportModal').then((m) => ({ default: m.GpxImportModal }))
+);
+const EmergencyRangeModal = lazy(() =>
+  import('./components/AiAssistant/EmergencyRangeModal').then((m) => ({ default: m.EmergencyRangeModal }))
+);
+const StationReviewModal = lazy(() =>
+  import('./components/ChargingScanner/StationReviewModal').then((m) => ({ default: m.StationReviewModal }))
+);
 
 export function App() {
   const geo = useGeolocation();
@@ -49,9 +58,11 @@ export function App() {
   const [tokenBalance, setTokenBalance] = useState(60);
   const [isOledModeActive, setIsOledModeActive] = useState(false);
   const [isSunlightMode, setIsSunlightMode] = useState(false);
+  const [selectedStationForReview, setSelectedStationForReview] = useState<ChargingStation | null>(null);
   const [telemetry, setTelemetry] = useState<LiveBikeTelemetry>({
     isConnected: false,
     batteryPercent: 85,
+    batteryWhRemaining: 550,
     speedKmH: 0,
     cadenceRpm: 0,
     riderPowerWatts: 0,
@@ -66,6 +77,9 @@ export function App() {
   const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false);
   const [showBoschModal, setShowBoschModal] = useState(false);
   const [showRideSummaryModal, setShowRideSummaryModal] = useState(false);
+  const [showGpxImportModal, setShowGpxImportModal] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
 
   // Initialize Data & Pre-generate "Heute-Tour"
   useEffect(() => {
@@ -101,6 +115,13 @@ export function App() {
       OfflineMapService.prefetchRouteCorridor(currentRoute.pathCoordinates);
     }
   }, [currentRoute]);
+
+  // Battery Emergency Range Detection (Threshold <= 15%)
+  useEffect(() => {
+    if (telemetry.batteryPercent <= 15 && !emergencyAlertDismissed && !showEmergencyModal) {
+      setShowEmergencyModal(true);
+    }
+  }, [telemetry.batteryPercent, emergencyAlertDismissed, showEmergencyModal]);
 
   // Handlers
   const handleConnectBLE = async () => {
@@ -173,6 +194,30 @@ export function App() {
     }
   };
 
+  const handleRerouteToStation = (station: ChargingStation) => {
+    if (!currentRoute) return;
+    const detourRoute: Route = {
+      ...currentRoute,
+      id: `detour-${station.id}`,
+      title: `Umleitung zu: ${station.name}`,
+      pathCoordinates: [
+        [userLocation.lat, userLocation.lng],
+        [station.lat, station.lng],
+      ],
+      waypoints: [
+        { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Aktuelle Position' },
+        { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
+      ],
+    };
+    setCurrentRoute(detourRoute);
+  };
+
+  const handleAddStationReview = async (review: { rating: number; comment: string; tags: string[] }) => {
+    console.log('[App] Review added for station:', selectedStationForReview?.name, review);
+    // Reward +10 Tokens
+    await handleAddTokens(10);
+  };
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {/* OLED Black Saver Cockpit Overlay */}
@@ -231,6 +276,16 @@ export function App() {
           <div className="glass-pill glow-text-gold" style={{ padding: '6px 14px', fontWeight: 'bold', fontSize: '0.85rem' }}>
             🪙 {tokenBalance} Tok.
           </div>
+
+          {/* GPX Import Button */}
+          <button
+            className="btn-cyberpunk"
+            onClick={() => setShowGpxImportModal(true)}
+            style={{ padding: '8px 12px' }}
+            title="GPX Track von Komoot / Strava importieren"
+          >
+            <UploadCloud size={15} /> GPX
+          </button>
 
           {/* Sunlight Mode Toggle (High-Noon High Contrast) */}
           <button
@@ -309,6 +364,7 @@ export function App() {
         chargingStations={chargingStations}
         onSelectStation={() => {}}
         onAutoReroute={handleAutoReroute}
+        onOpenReviewModal={(station) => setSelectedStationForReview(station)}
       />
 
       {/* Floating Voice Assistant Mic */}
@@ -385,6 +441,43 @@ export function App() {
             isOpen={showRideSummaryModal}
             onAddTokens={handleAddTokens}
             onClose={() => setShowRideSummaryModal(false)}
+          />
+        )}
+
+        {/* GPX Track Import Modal */}
+        {showGpxImportModal && (
+          <GpxImportModal
+            isOpen={showGpxImportModal}
+            onRouteLoaded={(importedRoute) => {
+              setCurrentRoute(importedRoute);
+              setShowGpxImportModal(false);
+            }}
+            onClose={() => setShowGpxImportModal(false)}
+          />
+        )}
+
+        {/* No-Coast Emergency Low Battery Range Modal */}
+        {showEmergencyModal && (
+          <EmergencyRangeModal
+            isOpen={showEmergencyModal}
+            batteryPercent={telemetry.batteryPercent}
+            remainingWh={telemetry.batteryWhRemaining || 80}
+            nearestStations={chargingStations}
+            onRerouteToStation={handleRerouteToStation}
+            onClose={() => {
+              setShowEmergencyModal(false);
+              setEmergencyAlertDismissed(true);
+            }}
+          />
+        )}
+
+        {/* Community Charging Station Review Modal */}
+        {selectedStationForReview && (
+          <StationReviewModal
+            isOpen={!!selectedStationForReview}
+            station={selectedStationForReview}
+            onAddReview={handleAddStationReview}
+            onClose={() => setSelectedStationForReview(null)}
           />
         )}
       </Suspense>

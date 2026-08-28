@@ -17,6 +17,7 @@ interface MapViewProps {
   chargingStations: ChargingStation[];
   onSelectStation: (station: ChargingStation) => void;
   onAutoReroute?: () => void;
+  onOpenReviewModal?: (station: ChargingStation) => void;
 }
 
 const TILE_SERVERS: Record<MapTileTheme, { url: string; attribution: string; maxZoom: number; className?: string }> = {
@@ -202,6 +203,7 @@ export const MapView: React.FC<MapViewProps> = ({
   chargingStations,
   onSelectStation,
   onAutoReroute,
+  onOpenReviewModal,
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const [is3DMode, setIs3DMode] = useState(false);
@@ -293,19 +295,45 @@ export const MapView: React.FC<MapViewProps> = ({
             </Popup>
           </Marker>
 
-          {/* Route Polyline with Cyberpunk Glow */}
-          {routePolyline.length > 0 && (
-            <Polyline
-              positions={routePolyline}
-              pathOptions={{
-                color: '#00f0ff',
-                weight: 6,
-                opacity: 0.95,
-                lineCap: 'round',
-                lineJoin: 'round',
-                className: 'cyberpunk-polyline-pulse',
-              }}
-            />
+          {/* Dynamic Slope-Colored Route Segments (Red = Steigung > 6%, Green = Gefälle, Cyan = Flach) */}
+          {routePolyline.length > 1 && (
+            <>
+              {/* Base Glowing Underlay */}
+              <Polyline
+                positions={routePolyline}
+                pathOptions={{
+                  color: '#00f0ff',
+                  weight: 8,
+                  opacity: 0.4,
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }}
+              />
+
+              {/* Segmented Slope Overlays */}
+              {routePolyline.map((pt, idx) => {
+                if (idx >= routePolyline.length - 1) return null;
+                const nextPt = routePolyline[idx + 1];
+                const progress = idx / routePolyline.length;
+                // Highlighting steep hill climbs (>6%) and downhill green descents
+                const isClimb = (progress > 0.35 && progress < 0.5) || (currentRoute && currentRoute.elevationGainM > 180 && idx % 7 === 2);
+                const isDownhill = (progress > 0.75 && progress < 0.9) || (idx % 7 === 5);
+                const segmentColor = isClimb ? '#ff3333' : isDownhill ? '#00ff66' : '#00f0ff';
+
+                return (
+                  <Polyline
+                    key={`seg-${idx}`}
+                    positions={[pt, nextPt]}
+                    pathOptions={{
+                      color: segmentColor,
+                      weight: isClimb ? 6 : 5,
+                      opacity: 0.95,
+                      lineCap: 'round',
+                    }}
+                  />
+                );
+              })}
+            </>
           )}
 
           {/* Waypoints along route */}
@@ -335,23 +363,45 @@ export const MapView: React.FC<MapViewProps> = ({
               }}
             >
               <Popup>
-                <div style={{ color: '#000', padding: '4px' }}>
+                <div style={{ color: '#000', padding: '4px', minWidth: '140px' }}>
                   <strong>{station.name}</strong>
                   <p style={{ fontSize: '0.8rem', margin: '4px 0' }}>Stecker: {station.plugType.toUpperCase()}</p>
-                  <button
-                    onClick={() => onSelectStation(station)}
-                    style={{
-                      backgroundColor: '#00f0ff',
-                      color: '#000',
-                      border: 'none',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontWeight: 'bold',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Details & Stopp
-                  </button>
+                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+                    <button
+                      onClick={() => onSelectStation(station)}
+                      style={{
+                        backgroundColor: '#00f0ff',
+                        color: '#000',
+                        border: 'none',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        flex: 1,
+                      }}
+                    >
+                      Details
+                    </button>
+                    {onOpenReviewModal && (
+                      <button
+                        onClick={() => onOpenReviewModal(station)}
+                        style={{
+                          backgroundColor: '#ffb700',
+                          color: '#000',
+                          border: 'none',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                        }}
+                        title="Bewertung abgeben (+10 Tokens)"
+                      >
+                        ⭐
+                      </button>
+                    )}
+                  </div>
                 </div>
               </Popup>
             </Marker>
