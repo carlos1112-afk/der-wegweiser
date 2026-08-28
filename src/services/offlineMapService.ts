@@ -37,6 +37,34 @@ function latToTileY(lat: number, zoom: number): number {
  */
 export class OfflineMapService {
   /**
+   * Automatically pre-caches a 1-2km corridor along an active E-Bike route
+   * ensuring zero map tile pop-in during forest / dead zone rides.
+   */
+  public static async prefetchRouteCorridor(coordinates: [number, number][]): Promise<boolean> {
+    if (!coordinates || coordinates.length === 0) return false;
+
+    let minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
+    coordinates.forEach(([lat, lng]) => {
+      if (lat < minLat) minLat = lat;
+      if (lat > maxLat) maxLat = lat;
+      if (lng < minLng) minLng = lng;
+      if (lng > maxLng) maxLng = lng;
+    });
+
+    // Add 1.5km buffer around route
+    const buffer = 0.015;
+    const bounds: OfflineRegionBounds = {
+      minLat: minLat - buffer,
+      maxLat: maxLat + buffer,
+      minLng: minLng - buffer,
+      maxLng: maxLng + buffer,
+    };
+
+    console.log('[OfflineMapService] Auto-prefetching route corridor tiles in background...');
+    return await this.downloadOfflineRegion('Aktive Route Korridor', bounds, () => {});
+  }
+
+  /**
    * Pre-fetches map tiles for a specified geographic bounding box and zoom levels,
    * storing them directly in CacheStorage for offline map availability.
    */
@@ -73,67 +101,68 @@ export class OfflineMapService {
         return true;
       }
 
-      const cache = await caches.open(TILE_CACHE_NAME);
-      let completed = 0;
-      let totalBytes = 0;
-      const totalTiles = tileUrls.length;
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        const cache = await caches.open(TILE_CACHE_NAME);
+        let completed = 0;
+        let totalBytes = 0;
+        const totalTiles = tileUrls.length;
 
-      onProgress(0);
+        onProgress(0);
 
-      // Fetch in controlled batches to avoid overwhelming browser network connections
-      const batchSize = 6;
-      for (let i = 0; i < totalTiles; i += batchSize) {
-        const batch = tileUrls.slice(i, i + batchSize);
-        await Promise.all(
-          batch.map(async (url) => {
-            try {
-              const cached = await cache.match(url);
-              if (!cached) {
-                const response = await fetch(url, { mode: 'cors' });
-                if (response.ok) {
-                  const cloned = response.clone();
-                  await cache.put(url, response);
-                  const blob = await cloned.blob();
+        // Fetch in controlled batches to avoid overwhelming browser network connections
+        const batchSize = 6;
+        for (let i = 0; i < totalTiles; i += batchSize) {
+          const batch = tileUrls.slice(i, i + batchSize);
+          await Promise.all(
+            batch.map(async (url) => {
+              try {
+                const cached = await cache.match(url);
+                if (!cached) {
+                  const response = await fetch(url, { mode: 'cors' });
+                  if (response.ok) {
+                    const cloned = response.clone();
+                    await cache.put(url, response);
+                    const blob = await cloned.blob();
+                    totalBytes += blob.size;
+                  }
+                } else {
+                  const blob = await cached.blob();
                   totalBytes += blob.size;
                 }
-              } else {
-                const blob = await cached.blob();
-                totalBytes += blob.size;
+              } catch {
+                // Silently ignore single tile network fails
+              } finally {
+                completed++;
+                const percent = Math.min(100, Math.round((completed / totalTiles) * 100));
+                onProgress(percent);
               }
-            } catch (err) {
-              console.warn(`[OfflineMapService] Failed to pre-fetch tile: ${url}`, err);
-            } finally {
-              completed++;
-              const percent = Math.min(100, Math.round((completed / totalTiles) * 100));
-              onProgress(percent);
-            }
-          })
-        );
+            })
+          );
+        }
+
+        const estimatedSizeMb = totalBytes > 0 
+          ? parseFloat((totalBytes / (1024 * 1024)).toFixed(2))
+          : parseFloat((totalTiles * 0.022).toFixed(2));
+
+        const currentRegions = await this.getDownloadedRegions();
+        const existingIndex = currentRegions.findIndex((r) => r.name.toLowerCase() === regionName.toLowerCase());
+
+        const newRegion: DownloadedRegionInfo = {
+          name: regionName,
+          sizeMb: Math.max(0.5, estimatedSizeMb),
+          date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+          tileCount: totalTiles,
+        };
+
+        if (existingIndex >= 0) {
+          currentRegions[existingIndex] = newRegion;
+        } else {
+          currentRegions.push(newRegion);
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentRegions));
       }
 
-      // Estimate size in MB (default fallback estimation if zero byte headers returned)
-      const estimatedSizeMb = totalBytes > 0 
-        ? parseFloat((totalBytes / (1024 * 1024)).toFixed(2))
-        : parseFloat((totalTiles * 0.022).toFixed(2)); // ~22 KB per tile average
-
-      // Save region metadata in LocalStorage
-      const currentRegions = await this.getDownloadedRegions();
-      const existingIndex = currentRegions.findIndex((r) => r.name.toLowerCase() === regionName.toLowerCase());
-
-      const newRegion: DownloadedRegionInfo = {
-        name: regionName,
-        sizeMb: Math.max(0.5, estimatedSizeMb),
-        date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-        tileCount: totalTiles,
-      };
-
-      if (existingIndex >= 0) {
-        currentRegions[existingIndex] = newRegion;
-      } else {
-        currentRegions.push(newRegion);
-      }
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentRegions));
       onProgress(100);
       return true;
     } catch (error) {
@@ -158,7 +187,6 @@ export class OfflineMapService {
       console.warn('[OfflineMapService] Could not parse stored offline regions:', e);
     }
 
-    // Default pre-cached demo regions for Berlin & surrounding areas
     const defaultRegions: DownloadedRegionInfo[] = [
       {
         name: 'Berlin Zentrum & Badesee',
@@ -174,7 +202,6 @@ export class OfflineMapService {
       },
     ];
 
-    // Persist defaults if empty
     localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultRegions));
     return defaultRegions;
   }
@@ -195,6 +222,6 @@ export class OfflineMapService {
   }
 }
 
-// Export functions directly for flexible import options
 export const downloadOfflineRegion = OfflineMapService.downloadOfflineRegion.bind(OfflineMapService);
 export const getDownloadedRegions = OfflineMapService.getDownloadedRegions.bind(OfflineMapService);
+export const prefetchRouteCorridor = OfflineMapService.prefetchRouteCorridor.bind(OfflineMapService);

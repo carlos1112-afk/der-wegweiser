@@ -369,3 +369,57 @@ body {
     box-shadow: 0 0 0 0 rgba(255, 0, 127, 0);
   }
 }
+
+/* Ultra-Bright Sunlight Mode (High-Noon Outdoor Visibility) */
+body.sunlight-mode {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.96);
+  --accent-cyan: #0284c7;
+  --accent-neon-green: #15803d;
+  --accent-gold: #b45309;
+  --accent-pink: #be123c;
+  --text-primary: #0f172a;
+  --text-muted: #334155;
+  --border-glass: rgba(15, 23, 42, 0.25);
+  --glow-cyan: none;
+  --glow-green: none;
+  --glow-gold: none;
+}
+
+body.sunlight-mode .glass-panel {
+  background: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  border: 1.5px solid #0f172a !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.sunlight-mode .glass-pill {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #0f172a !important;
+}
+
+body.sunlight-mode .btn-cyberpunk {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1.5px solid #0f172a !important;
+}
+
+body.sunlight-mode .map-tile-dark {
+  filter: none !important;
+}
+
+/* Responsive Landscape Cockpit for Bike Mounts */
+@media (orientation: landscape) and (max-height: 520px) {
+  .top-header-hud {
+    top: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    gap: 6px !important;
+  }
+
+  .hide-on-landscape {
+    display: none !important;
+  }
+}

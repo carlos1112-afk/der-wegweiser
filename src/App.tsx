@@ -1,15 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { MapView } from './components/Map/MapView';
 import { BatteryHUD } from './components/BatteryHUD/BatteryHUD';
 import { WeatherHUD } from './components/WeatherHUD/WeatherHUD';
-import { AnticipationModal } from './components/AiAssistant/AnticipationModal';
-import { ScannerModal } from './components/ChargingScanner/ScannerModal';
-import { LoungeModal } from './components/ChargeAndEarn/LoungeModal';
-import { AnalyticsModal } from './components/Analytics/AnalyticsModal';
-import { VoiceSettingsModal } from './components/AiAssistant/VoiceSettingsModal';
-import { BoschConnectModal } from './components/Ble/BoschConnectModal';
 import { GpxRecorderHUD } from './components/Recording/GpxRecorderHUD';
-import { RideSummaryModal } from './components/Recording/RideSummaryModal';
 import { OledBlackMode } from './components/DisplayModes/OledBlackMode';
 import { FloatingMicButton } from './components/AiAssistant/FloatingMicButton';
 import type { Route, ChargingStation, LiveBikeTelemetry, UserPreferences, UserMemoryPattern } from './types/navigation';
@@ -17,9 +10,33 @@ import { dataRepository } from './services/dataRepository';
 import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService';
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
-import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2 } from 'lucide-react';
+import { OfflineMapService } from './services/offlineMapService';
+import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
+
+// Code-Splitting: Lazy load heavy modals for sub-second cold start
+const AnticipationModal = lazy(() =>
+  import('./components/AiAssistant/AnticipationModal').then((m) => ({ default: m.AnticipationModal }))
+);
+const ScannerModal = lazy(() =>
+  import('./components/ChargingScanner/ScannerModal').then((m) => ({ default: m.ScannerModal }))
+);
+const LoungeModal = lazy(() =>
+  import('./components/ChargeAndEarn/LoungeModal').then((m) => ({ default: m.LoungeModal }))
+);
+const AnalyticsModal = lazy(() =>
+  import('./components/Analytics/AnalyticsModal').then((m) => ({ default: m.AnalyticsModal }))
+);
+const VoiceSettingsModal = lazy(() =>
+  import('./components/AiAssistant/VoiceSettingsModal').then((m) => ({ default: m.VoiceSettingsModal }))
+);
+const BoschConnectModal = lazy(() =>
+  import('./components/Ble/BoschConnectModal').then((m) => ({ default: m.BoschConnectModal }))
+);
+const RideSummaryModal = lazy(() =>
+  import('./components/Recording/RideSummaryModal').then((m) => ({ default: m.RideSummaryModal }))
+);
 
 export function App() {
   const geo = useGeolocation();
@@ -31,6 +48,7 @@ export function App() {
   const [chargingStations, setChargingStations] = useState<ChargingStation[]>([]);
   const [tokenBalance, setTokenBalance] = useState(60);
   const [isOledModeActive, setIsOledModeActive] = useState(false);
+  const [isSunlightMode, setIsSunlightMode] = useState(false);
   const [telemetry, setTelemetry] = useState<LiveBikeTelemetry>({
     isConnected: false,
     batteryPercent: 85,
@@ -76,6 +94,13 @@ export function App() {
 
     initData();
   }, [userLocation.lat, userLocation.lng]);
+
+  // Background Corridor Offline Cache
+  useEffect(() => {
+    if (currentRoute && currentRoute.pathCoordinates && currentRoute.pathCoordinates.length > 0) {
+      OfflineMapService.prefetchRouteCorridor(currentRoute.pathCoordinates);
+    }
+  }, [currentRoute]);
 
   // Handlers
   const handleConnectBLE = async () => {
@@ -138,6 +163,16 @@ export function App() {
     }
   };
 
+  const handleToggleSunlightMode = () => {
+    const next = !isSunlightMode;
+    setIsSunlightMode(next);
+    if (next) {
+      document.body.classList.add('sunlight-mode');
+    } else {
+      document.body.classList.remove('sunlight-mode');
+    }
+  };
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {/* OLED Black Saver Cockpit Overlay */}
@@ -148,8 +183,9 @@ export function App() {
         />
       )}
 
-      {/* Top Floating Glass Header HUD */}
+      {/* Top Floating Glass Header HUD (Responsive Landscape Mode Support) */}
       <div
+        className="top-header-hud"
         style={{
           position: 'absolute',
           top: '16px',
@@ -159,14 +195,14 @@ export function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '12px',
+          gap: '10px',
           flexWrap: 'wrap',
         }}
       >
         {/* App Logo Badge */}
-        <div className="glass-panel" style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Navigation size={22} className="glow-text-cyan" />
-          <span style={{ fontSize: '1.1rem', fontWeight: 'bold', letterSpacing: '1px' }} className="glow-text-cyan">
+        <div className="glass-panel" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Navigation size={20} className="glow-text-cyan" />
+          <span style={{ fontSize: '1rem', fontWeight: 'bold', letterSpacing: '0.5px' }} className="glow-text-cyan">
             DER WEGWEISER
           </span>
         </div>
@@ -183,7 +219,7 @@ export function App() {
         <WeatherHUD userLocation={userLocation} />
 
         {/* Action Buttons HUD */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {/* GPX Track Recorder Pill */}
           <GpxRecorderHUD
             userLocation={userLocation}
@@ -192,42 +228,74 @@ export function App() {
           />
 
           {/* Token Balance */}
-          <div className="glass-pill glow-text-gold" style={{ padding: '8px 16px', fontWeight: 'bold' }}>
-            🪙 {tokenBalance} Tokens
+          <div className="glass-pill glow-text-gold" style={{ padding: '6px 14px', fontWeight: 'bold', fontSize: '0.85rem' }}>
+            🪙 {tokenBalance} Tok.
           </div>
+
+          {/* Sunlight Mode Toggle (High-Noon High Contrast) */}
+          <button
+            className="btn-cyberpunk"
+            onClick={handleToggleSunlightMode}
+            style={{ padding: '8px 12px' }}
+            title="Sonnenlicht High-Contrast Modus umschalten"
+          >
+            {isSunlightMode ? <Moon size={15} /> : <Sun size={15} />}
+          </button>
 
           {/* Voice Personas & Audio Settings Button */}
           <button
-            className="btn-cyberpunk"
+            className="btn-cyberpunk hide-on-landscape"
             onClick={() => setShowVoiceSettingsModal(true)}
+            style={{ padding: '8px 12px' }}
             title="KI-Stimmen & Audio-Einstellungen"
           >
-            <Volume2 size={16} /> Stimme
+            <Volume2 size={15} /> Stimme
           </button>
 
           {/* OLED Battery Saver Button */}
-          <button className="btn-cyberpunk" onClick={handleToggleOledMode} title="OLED Beeline Spar-Modus">
-            <EyeOff size={16} /> OLED Saver
+          <button
+            className="btn-cyberpunk hide-on-landscape"
+            onClick={handleToggleOledMode}
+            style={{ padding: '8px 12px' }}
+            title="OLED Beeline Spar-Modus"
+          >
+            <EyeOff size={15} /> OLED
           </button>
 
           {/* Analytics Button */}
-          <button className="btn-cyberpunk" onClick={() => setShowAnalyticsModal(true)}>
-            <BarChart3 size={16} /> Analytics & GPX
+          <button
+            className="btn-cyberpunk hide-on-landscape"
+            onClick={() => setShowAnalyticsModal(true)}
+            style={{ padding: '8px 12px' }}
+          >
+            <BarChart3 size={15} /> Touren
           </button>
 
           {/* Scanner Button */}
-          <button className="btn-cyberpunk" onClick={() => setShowScannerModal(true)}>
-            <Camera size={16} /> + Ladesäule
+          <button
+            className="btn-cyberpunk hide-on-landscape"
+            onClick={() => setShowScannerModal(true)}
+            style={{ padding: '8px 12px' }}
+          >
+            <Camera size={15} /> + Säule
           </button>
 
           {/* Lounge Button */}
-          <button className="btn-cyberpunk btn-gold" onClick={() => setShowLoungeModal(true)}>
-            <Gamepad2 size={16} /> Lade-Lounge
+          <button
+            className="btn-cyberpunk btn-gold"
+            onClick={() => setShowLoungeModal(true)}
+            style={{ padding: '8px 14px' }}
+          >
+            <Gamepad2 size={15} /> Lounge
           </button>
 
           {/* KI Heute-Tour Button */}
-          <button className="btn-cyberpunk" onClick={() => setShowAnticipationModal(true)}>
-            <Sparkles size={16} /> Heute-Tour
+          <button
+            className="btn-cyberpunk"
+            onClick={() => setShowAnticipationModal(true)}
+            style={{ padding: '8px 12px' }}
+          >
+            <Sparkles size={15} /> Tour
           </button>
         </div>
       </div>
@@ -253,71 +321,73 @@ export function App() {
         onRegenerateTour={() => handleRegenerateRoute()}
       />
 
-      {/* Modals */}
-      {showAnticipationModal && currentRoute && (
-        <AnticipationModal
-          route={currentRoute}
-          onAcceptRoute={(route) => {
-            setCurrentRoute(route);
-            setShowAnticipationModal(false);
-          }}
-          onRegenerate={handleRegenerateRoute}
-          onClose={() => setShowAnticipationModal(false)}
-        />
-      )}
+      {/* Lazy Modals with Suspense */}
+      <Suspense fallback={null}>
+        {showAnticipationModal && currentRoute && (
+          <AnticipationModal
+            route={currentRoute}
+            onAcceptRoute={(route) => {
+              setCurrentRoute(route);
+              setShowAnticipationModal(false);
+            }}
+            onRegenerate={handleRegenerateRoute}
+            onClose={() => setShowAnticipationModal(false)}
+          />
+        )}
 
-      {showScannerModal && (
-        <ScannerModal
-          userLocation={userLocation}
-          onStationAdded={handleStationAdded}
-          onClose={() => setShowScannerModal(false)}
-        />
-      )}
+        {showScannerModal && (
+          <ScannerModal
+            userLocation={userLocation}
+            onStationAdded={handleStationAdded}
+            onClose={() => setShowScannerModal(false)}
+          />
+        )}
 
-      {showLoungeModal && (
-        <LoungeModal
-          tokenBalance={tokenBalance}
-          onAddTokens={handleAddTokens}
-          onClose={() => setShowLoungeModal(false)}
-        />
-      )}
+        {showLoungeModal && (
+          <LoungeModal
+            tokenBalance={tokenBalance}
+            onAddTokens={handleAddTokens}
+            onClose={() => setShowLoungeModal(false)}
+          />
+        )}
 
-      {showAnalyticsModal && (
-        <AnalyticsModal
-          isOpen={showAnalyticsModal}
-          currentRoute={currentRoute}
-          onClose={() => setShowAnalyticsModal(false)}
-        />
-      )}
+        {showAnalyticsModal && (
+          <AnalyticsModal
+            isOpen={showAnalyticsModal}
+            currentRoute={currentRoute}
+            onClose={() => setShowAnalyticsModal(false)}
+          />
+        )}
 
-      {/* Voice Personas & Audio Settings Modal */}
-      {showVoiceSettingsModal && (
-        <VoiceSettingsModal
-          isOpen={showVoiceSettingsModal}
-          onClose={() => setShowVoiceSettingsModal(false)}
-        />
-      )}
+        {/* Voice Personas & Audio Settings Modal */}
+        {showVoiceSettingsModal && (
+          <VoiceSettingsModal
+            isOpen={showVoiceSettingsModal}
+            onClose={() => setShowVoiceSettingsModal(false)}
+          />
+        )}
 
-      {/* Bosch Smart System BES3 Modal */}
-      {showBoschModal && (
-        <BoschConnectModal
-          isOpen={showBoschModal}
-          onConnected={(liveData) => {
-            setTelemetry(liveData);
-            setShowBoschModal(false);
-          }}
-          onClose={() => setShowBoschModal(false)}
-        />
-      )}
+        {/* Bosch Smart System BES3 Modal */}
+        {showBoschModal && (
+          <BoschConnectModal
+            isOpen={showBoschModal}
+            onConnected={(liveData) => {
+              setTelemetry(liveData);
+              setShowBoschModal(false);
+            }}
+            onClose={() => setShowBoschModal(false)}
+          />
+        )}
 
-      {/* Ride Summary & GPX Export Modal */}
-      {showRideSummaryModal && (
-        <RideSummaryModal
-          isOpen={showRideSummaryModal}
-          onAddTokens={handleAddTokens}
-          onClose={() => setShowRideSummaryModal(false)}
-        />
-      )}
+        {/* Ride Summary & GPX Export Modal */}
+        {showRideSummaryModal && (
+          <RideSummaryModal
+            isOpen={showRideSummaryModal}
+            onAddTokens={handleAddTokens}
+            onClose={() => setShowRideSummaryModal(false)}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

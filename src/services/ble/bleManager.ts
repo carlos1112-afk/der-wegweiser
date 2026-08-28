@@ -9,7 +9,19 @@ import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEME
 export class BleManager {
   private static telemetryInterval: number | null = null;
   private static activeGattServer: any = null;
+  private static activeBluetoothDevice: any = null;
   private static activeManufacturer: BikeManufacturer = 'generic';
+  private static reconnectTimer: any = null;
+  private static reconnectAttempts = 0;
+  private static telemetryCallback: ((telemetry: LiveBikeTelemetry) => void) | null = null;
+  private static lastKnownTelemetry: LiveBikeTelemetry = {
+    isConnected: false,
+    batteryPercent: 85,
+    speedKmH: 0,
+    cadenceRpm: 0,
+    riderPowerWatts: 0,
+    motorAssistMode: 'auto',
+  };
 
   /**
    * Detects the manufacturer from BLE device name and advertisement data
@@ -28,7 +40,7 @@ export class BleManager {
 
   /**
    * Scans for and connects to a physical E-Bike or BLE sensor via Web Bluetooth API.
-   * Auto-detects and binds to specialized vendor GATT profiles.
+   * Attaches automatic disconnect listener with exponential backoff.
    */
   public static async connectToBike(): Promise<LiveBikeTelemetry> {
     if (typeof navigator !== 'undefined' && 'bluetooth' in navigator) {
@@ -65,132 +77,17 @@ export class BleManager {
           ],
         });
 
-        const server = await device.gatt.connect();
-        this.activeGattServer = server;
-        const manufacturer = this.detectManufacturer(device.name);
-        this.activeManufacturer = manufacturer;
+        this.activeBluetoothDevice = device;
+        device.addEventListener('gattserverdisconnected', this.onDisconnected.bind(this));
 
-        console.log(`[BleManager] Connected to ${manufacturer.toUpperCase()} Bike:`, device.name);
-
-        let liveState: LiveBikeTelemetry = {
-          isConnected: true,
-          deviceName: device.name || 'Smart E-Bike',
-          manufacturer,
-          batteryPercent: 85,
-          batteryWhRemaining: 540,
-          speedKmH: 0,
-          cadenceRpm: 0,
-          riderPowerWatts: 0,
-          motorPowerWatts: 0,
-          motorAssistMode: 'auto',
-        };
-
-        // 1. Standard Battery Service (0x180F)
-        try {
-          const batteryService = await server.getPrimaryService('battery_service');
-          const batteryChar = await batteryService.getCharacteristic('battery_level');
-          const val = await batteryChar.readValue();
-          liveState = { ...liveState, ...parseBatteryLevel(val) };
-          await batteryChar.startNotifications();
-          batteryChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parseBatteryLevel(e.target.value) };
-          });
-        } catch {
-          // Battery service optional
-        }
-
-        // 2. Standard Cycling Power Service (0x1818)
-        try {
-          const powerService = await server.getPrimaryService('cycling_power');
-          const powerChar = await powerService.getCharacteristic('cycling_power_measurement');
-          await powerChar.startNotifications();
-          powerChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parsePowerMeasurement(e.target.value) };
-          });
-        } catch {
-          // Power service optional
-        }
-
-        // 3. Standard Cycling Speed & Cadence (0x1816)
-        try {
-          const cscService = await server.getPrimaryService('cycling_speed_and_cadence');
-          const cscChar = await cscService.getCharacteristic('csc_measurement');
-          await cscChar.startNotifications();
-          cscChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parseCscMeasurement(e.target.value) };
-          });
-        } catch {
-          // CSC optional
-        }
-
-        // 4. Specialized Turbo Service
-        try {
-          const specService = await server.getPrimaryService(SPECIALIZED_SERVICE_UUID);
-          const specChar = await specService.getCharacteristic(SPECIALIZED_TELEMETRY_CHAR);
-          await specChar.startNotifications();
-          specChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parseSpecializedTelemetry(e.target.value), manufacturer: 'specialized' };
-          });
-        } catch {
-          // Specialized optional
-        }
-
-        // 5. Mahle SmartBike Service
-        try {
-          const mahleService = await server.getPrimaryService(MAHLE_SERVICE_UUID);
-          const mahleChar = await mahleService.getCharacteristic(MAHLE_TELEMETRY_CHAR);
-          await mahleChar.startNotifications();
-          mahleChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parseMahleTelemetry(e.target.value), manufacturer: 'mahle' };
-          });
-        } catch {
-          // Mahle optional
-        }
-
-        // 6. Shimano D-Fly Service
-        try {
-          const shimanoService = await server.getPrimaryService(SHIMANO_DFLY_SERVICE_UUID);
-          const shimanoChar = await shimanoService.getCharacteristic(SHIMANO_TELEMETRY_CHAR);
-          await shimanoChar.startNotifications();
-          shimanoChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parseShimanoTelemetry(e.target.value), manufacturer: 'shimano' };
-          });
-        } catch {
-          // Shimano optional
-        }
-
-        // 7. Bafang CAN-over-BLE Service
-        try {
-          const bafangService = await server.getPrimaryService(BAFANG_UART_SERVICE_UUID);
-          const bafangChar = await bafangService.getCharacteristic(BAFANG_TX_CHAR);
-          await bafangChar.startNotifications();
-          bafangChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parseBafangPacket(e.target.value), manufacturer: 'bafang' };
-          });
-        } catch {
-          // Bafang optional
-        }
-
-        // 8. Bosch Diagnostic Service
-        try {
-          const boschService = await server.getPrimaryService(BOSCH_DIAGNOSTIC_SERVICE_UUID);
-          const boschChar = await boschService.getCharacteristic(BOSCH_LDI_TELEMETRY_CHAR);
-          await boschChar.startNotifications();
-          boschChar.addEventListener('characteristicvaluechanged', (e: any) => {
-            liveState = { ...liveState, ...parseBoschLdiTelemetry(e.target.value), manufacturer: 'bosch' };
-          });
-        } catch {
-          // Bosch optional
-        }
-
-        return liveState;
+        return await this.setupGattConnection(device);
       } catch (err) {
         console.warn('[BleManager] Web-Bluetooth pairing cancelled or unavailable, activating simulation mode', err);
       }
     }
 
     // High quality multi-sensor simulation fallback
-    return {
+    this.lastKnownTelemetry = {
       isConnected: true,
       deviceName: 'Bosch Smart System (Simuliert)',
       manufacturer: 'bosch',
@@ -205,6 +102,167 @@ export class BleManager {
       motorAssistMode: 'auto',
       rangeRemainingKm: 64,
     };
+
+    return this.lastKnownTelemetry;
+  }
+
+  private static async setupGattConnection(device: any): Promise<LiveBikeTelemetry> {
+    const server = await device.gatt.connect();
+    this.activeGattServer = server;
+    const manufacturer = this.detectManufacturer(device.name);
+    this.activeManufacturer = manufacturer;
+    this.reconnectAttempts = 0;
+
+    console.log(`[BleManager] GATT Connected to ${manufacturer.toUpperCase()} Bike:`, device.name);
+
+    let liveState: LiveBikeTelemetry = {
+      isConnected: true,
+      deviceName: device.name || 'Smart E-Bike',
+      manufacturer,
+      batteryPercent: 85,
+      batteryWhRemaining: 540,
+      speedKmH: 0,
+      cadenceRpm: 0,
+      riderPowerWatts: 0,
+      motorPowerWatts: 0,
+      motorAssistMode: 'auto',
+    };
+
+    // 1. Standard Battery Service (0x180F)
+    try {
+      const batteryService = await server.getPrimaryService('battery_service');
+      const batteryChar = await batteryService.getCharacteristic('battery_level');
+      const val = await batteryChar.readValue();
+      liveState = { ...liveState, ...parseBatteryLevel(val) };
+      await batteryChar.startNotifications();
+      batteryChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parseBatteryLevel(e.target.value) });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 2. Standard Cycling Power Service (0x1818)
+    try {
+      const powerService = await server.getPrimaryService('cycling_power');
+      const powerChar = await powerService.getCharacteristic('cycling_power_measurement');
+      await powerChar.startNotifications();
+      powerChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parsePowerMeasurement(e.target.value) });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 3. Standard Cycling Speed & Cadence (0x1816)
+    try {
+      const cscService = await server.getPrimaryService('cycling_speed_and_cadence');
+      const cscChar = await cscService.getCharacteristic('csc_measurement');
+      await cscChar.startNotifications();
+      cscChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parseCscMeasurement(e.target.value) });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 4. Specialized Turbo Service
+    try {
+      const specService = await server.getPrimaryService(SPECIALIZED_SERVICE_UUID);
+      const specChar = await specService.getCharacteristic(SPECIALIZED_TELEMETRY_CHAR);
+      await specChar.startNotifications();
+      specChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parseSpecializedTelemetry(e.target.value), manufacturer: 'specialized' });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 5. Mahle SmartBike Service
+    try {
+      const mahleService = await server.getPrimaryService(MAHLE_SERVICE_UUID);
+      const mahleChar = await mahleService.getCharacteristic(MAHLE_TELEMETRY_CHAR);
+      await mahleChar.startNotifications();
+      mahleChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parseMahleTelemetry(e.target.value), manufacturer: 'mahle' });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 6. Shimano D-Fly Service
+    try {
+      const shimanoService = await server.getPrimaryService(SHIMANO_DFLY_SERVICE_UUID);
+      const shimanoChar = await shimanoService.getCharacteristic(SHIMANO_TELEMETRY_CHAR);
+      await shimanoChar.startNotifications();
+      shimanoChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parseShimanoTelemetry(e.target.value), manufacturer: 'shimano' });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 7. Bafang CAN-over-BLE Service
+    try {
+      const bafangService = await server.getPrimaryService(BAFANG_UART_SERVICE_UUID);
+      const bafangChar = await bafangService.getCharacteristic(BAFANG_TX_CHAR);
+      await bafangChar.startNotifications();
+      bafangChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parseBafangPacket(e.target.value), manufacturer: 'bafang' });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 8. Bosch Diagnostic Service
+    try {
+      const boschService = await server.getPrimaryService(BOSCH_DIAGNOSTIC_SERVICE_UUID);
+      const boschChar = await boschService.getCharacteristic(BOSCH_LDI_TELEMETRY_CHAR);
+      await boschChar.startNotifications();
+      boschChar.addEventListener('characteristicvaluechanged', (e: any) => {
+        this.updateState({ ...parseBoschLdiTelemetry(e.target.value), manufacturer: 'bosch' });
+      });
+    } catch {
+      // Optional
+    }
+
+    this.lastKnownTelemetry = liveState;
+    return liveState;
+  }
+
+  private static updateState(partial: Partial<LiveBikeTelemetry>) {
+    this.lastKnownTelemetry = { ...this.lastKnownTelemetry, ...partial };
+    if (this.telemetryCallback) {
+      this.telemetryCallback(this.lastKnownTelemetry);
+    }
+  }
+
+  /**
+   * Automatic background reconnection with exponential backoff on signal loss
+   */
+  private static onDisconnected() {
+    console.warn('[BleManager] Bluetooth connection lost! Initiating auto-reconnect backoff...');
+    this.activeGattServer = null;
+    this.updateState({ isConnected: false });
+
+    if (!this.activeBluetoothDevice) return;
+
+    const delay = Math.min(30000, Math.pow(1.8, this.reconnectAttempts) * 1500);
+    this.reconnectAttempts += 1;
+
+    clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = setTimeout(async () => {
+      if (this.activeBluetoothDevice && !this.activeGattServer) {
+        console.log(`[BleManager] Auto-reconnect attempt #${this.reconnectAttempts}...`);
+        try {
+          await this.setupGattConnection(this.activeBluetoothDevice);
+          console.log('[BleManager] Successfully reconnected to E-Bike!');
+        } catch (e) {
+          console.warn('[BleManager] Reconnection failed, scheduling next retry:', e);
+          this.onDisconnected();
+        }
+      }
+    }, delay);
   }
 
   /**
@@ -250,6 +308,9 @@ export class BleManager {
     initialState: LiveBikeTelemetry,
     onUpdate: (telemetry: LiveBikeTelemetry) => void
   ): () => void {
+    this.telemetryCallback = onUpdate;
+    this.lastKnownTelemetry = initialState;
+
     if (this.telemetryInterval) {
       clearInterval(this.telemetryInterval);
     }
@@ -267,17 +328,13 @@ export class BleManager {
         currentBattery = Math.max(1, currentBattery - 1);
       }
 
-      const updated: LiveBikeTelemetry = {
-        ...initialState,
-        isConnected: true,
-        batteryPercent: currentBattery,
+      this.updateState({
         speedKmH,
         cadenceRpm,
         riderPowerWatts,
         motorPowerWatts,
-      };
-
-      onUpdate(updated);
+        batteryPercent: currentBattery,
+      });
     }, 2000);
 
     return () => {
@@ -285,6 +342,7 @@ export class BleManager {
         clearInterval(this.telemetryInterval);
         this.telemetryInterval = null;
       }
+      this.telemetryCallback = null;
     };
   }
 }
