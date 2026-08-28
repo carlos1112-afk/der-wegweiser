@@ -2,6 +2,7 @@ import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount, Route } from '../types/navigation';
 import { ChargingStationImportService } from './chargingStationImportService';
+import { CURATED_CHARGING_STATIONS, CURATED_ROUTES } from './curatedDatabase';
 
 // Utility for Haversine distance
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -39,55 +40,7 @@ export interface IDataRepository {
 
 // In-Memory & LocalStorage Fallback Cache with Live Firebase Firestore integration
 class LocalAndFirestoreRepository implements IDataRepository {
-  private memoryStations: ChargingStation[] = [
-    {
-      id: 'cs-1',
-      name: 'E-Bike Tankstelle Café Badesee',
-      lat: 52.518,
-      lng: 13.415,
-      plugType: 'bosch',
-      isWeatherproof: true,
-      isFree: true,
-      openingHours: '08:00 - 20:00',
-      nearbyAmenities: ['Café', 'Sitzbänke', 'WLAN', 'Fahrradständer'],
-      photoUrl: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=500',
-      verifiedByCount: 14,
-      createdAt: new Date().toISOString(),
-      createdByUserId: 'user-community',
-      isVerifiedBikeInfrastructure: true,
-    },
-    {
-      id: 'cs-2',
-      name: 'Öffentlicher 230V Schuko Lade-Locker',
-      lat: 52.525,
-      lng: 13.402,
-      plugType: 'schuko_230v',
-      isWeatherproof: true,
-      isFree: true,
-      openingHours: '24/7',
-      nearbyAmenities: ['Luftpumpe', 'Werkzeugstation'],
-      photoUrl: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=500',
-      verifiedByCount: 8,
-      createdAt: new Date().toISOString(),
-      createdByUserId: 'user-community',
-      isVerifiedBikeInfrastructure: true,
-    },
-    {
-      id: 'cs-3',
-      name: 'BikeEnergy Schnellladestation Waldschänke',
-      lat: 52.505,
-      lng: 13.435,
-      plugType: 'bike_energy',
-      isWeatherproof: true,
-      isFree: false,
-      openingHours: '10:00 - 22:00',
-      nearbyAmenities: ['Biergarten', 'WC', 'Werkzeug'],
-      verifiedByCount: 22,
-      createdAt: new Date().toISOString(),
-      createdByUserId: 'user-community',
-      isVerifiedBikeInfrastructure: true,
-    }
-  ];
+  private memoryStations: ChargingStation[] = [...CURATED_CHARGING_STATIONS];
 
   async getChargingStations(bounds?: { minLat: number; maxLat: number; minLng: number; maxLng: number }): Promise<ChargingStation[]> {
     let firestoreStations: ChargingStation[] = [];
@@ -401,10 +354,15 @@ class LocalAndFirestoreRepository implements IDataRepository {
     }
 
     try {
-      return JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      const local = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      if (local && local.length > 0) {
+        return local;
+      }
     } catch {
-      return [];
+      // Fallback
     }
+
+    return [...CURATED_ROUTES];
   }
 
   async addPartnerLead(lead: { businessName: string; email: string; plan: string; type: string }): Promise<void> {

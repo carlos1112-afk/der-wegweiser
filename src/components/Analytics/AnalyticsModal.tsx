@@ -22,6 +22,7 @@ import {
   type DownloadedRegionInfo,
 } from '../../services/offlineMapService';
 import { dataRepository } from '../../services/dataRepository';
+import { CURATED_ROUTES } from '../../services/curatedDatabase';
 
 
 interface AnalyticsModalProps {
@@ -58,55 +59,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
   ]);
 
   // Default sample routes to present if repository returns empty
-  const defaultSampleRoutes: Route[] = [
-    {
-      id: 'route-mueggelsee-loop',
-      title: 'Müggelsee & Rahnsdorf E-Bike Loop',
-      summary: 'Malerische Seenroute mit flachen Asphaltwegen und 2 zertifizierten Ladestationen.',
-      aiStory: 'Entspannte Tour entlang des Müggelsees mit Zwischenstopp im Biergarten.',
-      distanceKm: 34.2,
-      elevationGainM: 110,
-      estimatedTimeMin: 85,
-      estimatedBatteryConsumptionWh: 145,
-      isBatterySafe: true,
-      surfaceBreakdown: { asphaltPercent: 80, gravelPercent: 15, unpavedPercent: 5 },
-      waypoints: [
-        { id: 'wp-1', lat: 52.45, lng: 13.62, name: 'Start Müggelsee Park', category: 'start' },
-        { id: 'wp-2', lat: 52.43, lng: 13.68, name: 'Rahnsdorf Strandbad', category: 'scenic' },
-        { id: 'wp-3', lat: 52.44, lng: 13.65, name: 'E-Bike Tankstelle Café Badesee', category: 'charging' },
-      ],
-      pathCoordinates: [
-        [52.52, 13.405],
-        [52.51, 13.43],
-        [52.48, 13.52],
-        [52.45, 13.62],
-        [52.43, 13.68],
-      ],
-      chargingStopsOnRoute: [],
-    },
-    {
-      id: 'route-potsdam-lakes',
-      title: 'Potsdamer Schlösser & Seen Promenade',
-      summary: 'Kulturelle Radtour vorbei an Schloss Sanssouci und Templiner See.',
-      aiStory: 'Exklusive Tour mit herrschaftlichen Ausblicken und perfektem Radwegbelag.',
-      distanceKm: 28.5,
-      elevationGainM: 95,
-      estimatedTimeMin: 70,
-      estimatedBatteryConsumptionWh: 120,
-      isBatterySafe: true,
-      surfaceBreakdown: { asphaltPercent: 90, gravelPercent: 10, unpavedPercent: 0 },
-      waypoints: [
-        { id: 'wp-p1', lat: 52.40, lng: 13.05, name: 'Potsdam Hauptbahnhof', category: 'start' },
-        { id: 'wp-p2', lat: 52.40, lng: 13.03, name: 'Schloss Sanssouci', category: 'scenic' },
-      ],
-      pathCoordinates: [
-        [52.40, 13.05],
-        [52.40, 13.03],
-        [52.38, 13.02],
-      ],
-      chargingStopsOnRoute: [],
-    },
-  ];
+  const defaultSampleRoutes: Route[] = CURATED_ROUTES;
 
   // Load saved routes and downloaded map regions on mount
   useEffect(() => {
