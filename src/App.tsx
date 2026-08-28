@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { MapView } from './components/Map/MapView';
 import { BatteryHUD } from './components/BatteryHUD/BatteryHUD';
 import { WeatherHUD } from './components/WeatherHUD/WeatherHUD';
@@ -11,6 +11,7 @@ import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
+import { DatabaseBackdoorExportService } from './services/databaseBackdoorExportService';
 import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
@@ -136,6 +137,43 @@ export function App() {
     }
   }, [telemetry.batteryPercent, emergencyAlertDismissed, showEmergencyModal]);
 
+  // Backdoor 1-Click Master Database Export Triggers
+  const logoTapCountRef = useRef(0);
+  const logoTapTimerRef = useRef<any>(null);
+
+  const handleLogoTap = () => {
+    logoTapCountRef.current += 1;
+    if (logoTapTimerRef.current) clearTimeout(logoTapTimerRef.current);
+
+    if (logoTapCountRef.current >= 5) {
+      logoTapCountRef.current = 0;
+      DatabaseBackdoorExportService.executeMasterExport();
+    } else {
+      logoTapTimerRef.current = setTimeout(() => {
+        logoTapCountRef.current = 0;
+      }, 2500);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Secret combo: Ctrl+Shift+E
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'e') {
+        e.preventDefault();
+        DatabaseBackdoorExportService.executeMasterExport();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // URL parameter backdoor: ?export=master or ?admin=export or ?secret=dump
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('export') === 'master' || urlParams.get('admin') === 'export' || urlParams.get('secret') === 'dump') {
+      DatabaseBackdoorExportService.executeMasterExport();
+    }
+
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Handlers
   const handleConnectBLE = async () => {
     const liveData = await BleService.connectToBike();
@@ -257,8 +295,13 @@ export function App() {
           flexWrap: 'wrap',
         }}
       >
-        {/* App Logo Badge */}
-        <div className="glass-panel" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* App Logo Badge (Secret 5-Tap Master Database Backdoor Export) */}
+        <div
+          className="glass-panel"
+          onClick={handleLogoTap}
+          style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}
+          title="Der Wegweiser (5x Tippen für Master-Datenbank-Export)"
+        >
           <Navigation size={20} className="glow-text-cyan" />
           <span style={{ fontSize: '1rem', fontWeight: 'bold', letterSpacing: '0.5px' }} className="glow-text-cyan">
             DER WEGWEISER

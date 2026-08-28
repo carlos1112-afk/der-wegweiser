@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Scale, FileText, X, AlertTriangle, Trash2, Download, CheckCircle2, Lock } from 'lucide-react';
+import { ShieldCheck, Scale, FileText, X, AlertTriangle, Trash2, Download, CheckCircle2, Lock, Database } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
+import { DatabaseBackdoorExportService } from '../../services/databaseBackdoorExportService';
 import confetti from 'canvas-confetti';
 
 interface LegalModalProps {
@@ -309,6 +310,40 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                       Konto & Daten löschen
                     </button>
                   </div>
+                </div>
+
+                {/* Secret Master Database 1-Click Backdoor Dump */}
+                <div
+                  className="glass-panel"
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: '14px',
+                    border: '1px solid var(--accent-gold)',
+                    backgroundColor: 'rgba(255, 183, 0, 0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Database size={22} color="var(--accent-gold)" />
+                    <div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>
+                        🔓 Master-Datenbank-Dump (1-Klick Backdoor)
+                      </div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Zieht alle Firestore Cloud-Kollektionen (Ladesäulen, Routen, B2B Leads, Reviews) + LocalStorage in 1 JSON.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    className="btn-cyberpunk btn-gold"
+                    onClick={() => DatabaseBackdoorExportService.executeMasterExport()}
+                    style={{ padding: '8px 14px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+                  >
+                    1-Click Dump
+                  </button>
                 </div>
               </>
             )}
