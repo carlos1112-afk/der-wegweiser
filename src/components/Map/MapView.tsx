@@ -2,7 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import type { Route, ChargingStation } from '../../types/navigation';
-import { Compass, Box } from 'lucide-react';
+import { Compass, Box, Layers, Navigation2 } from 'lucide-react';
+import { TurnByTurnBanner } from './TurnByTurnBanner';
+import { ElevationRibbon } from './ElevationRibbon';
+import { useRouteTracker } from '../../hooks/useRouteTracker';
+
+export type MapTileTheme = 'dark' | 'cycle' | 'satellite';
 
 interface MapViewProps {
   userLocation: { lat: number; lng: number };
@@ -11,7 +16,29 @@ interface MapViewProps {
   currentRoute: Route | null;
   chargingStations: ChargingStation[];
   onSelectStation: (station: ChargingStation) => void;
+  onAutoReroute?: () => void;
 }
+
+const TILE_SERVERS: Record<MapTileTheme, { url: string; attribution: string; maxZoom: number; className?: string }> = {
+  dark: {
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    maxZoom: 19,
+    className: 'cyberpunk-dark-tiles',
+  },
+  cycle: {
+    url: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors, CyclOSM',
+    maxZoom: 18,
+    className: 'cyclosm-tiles',
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    maxZoom: 19,
+    className: 'satellite-tiles',
+  },
+};
 
 // Custom Leaflet Icons using glowing cyberpunk CSS classes
 const createCustomWaypointIcon = (category: string, label?: string) => {
@@ -54,9 +81,10 @@ const createCustomWaypointIcon = (category: string, label?: string) => {
 
 const createUserIcon = (heading?: number | null) => {
   const rotation = heading !== null && heading !== undefined ? `transform: rotate(${heading}deg);` : '';
-  const arrowHtml = heading !== null && heading !== undefined
-    ? `<div style="position: absolute; top: -10px; left: 5px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid var(--accent-cyan); ${rotation} transform-origin: 5px 20px;"></div>`
-    : '';
+  const arrowHtml =
+    heading !== null && heading !== undefined
+      ? `<div style="position: absolute; top: -10px; left: 5px; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid var(--accent-cyan); ${rotation} transform-origin: 5px 20px;"></div>`
+      : '';
 
   return L.divIcon({
     className: 'user-location-wrapper',
@@ -88,7 +116,6 @@ const getRouteWaypoints = (route: Route | null) => {
 
   const existingCategories = new Set<string>();
 
-  // 1. Explicit waypoints from route
   if (route.waypoints && route.waypoints.length > 0) {
     route.waypoints.forEach((wp) => {
       const category = wp.category || 'scenic';
@@ -104,7 +131,6 @@ const getRouteWaypoints = (route: Route | null) => {
     });
   }
 
-  // 2. Start waypoint fallback if pathCoordinates exists
   if (!existingCategories.has('start') && route.pathCoordinates && route.pathCoordinates.length > 0) {
     waypoints.push({
       id: 'route-start-point',
@@ -116,7 +142,6 @@ const getRouteWaypoints = (route: Route | null) => {
     });
   }
 
-  // 3. Finish/End waypoint fallback if pathCoordinates exists
   if (!existingCategories.has('end') && route.pathCoordinates && route.pathCoordinates.length > 1) {
     const lastCoord = route.pathCoordinates[route.pathCoordinates.length - 1];
     waypoints.push({
@@ -129,7 +154,6 @@ const getRouteWaypoints = (route: Route | null) => {
     });
   }
 
-  // 4. Charging stops on route
   if (route.chargingStopsOnRoute && route.chargingStopsOnRoute.length > 0) {
     route.chargingStopsOnRoute.forEach((station) => {
       const alreadyPresent = waypoints.some(
@@ -152,15 +176,21 @@ const getRouteWaypoints = (route: Route | null) => {
 };
 
 // Component to dynamically re-center map when location/route updates
-const MapRecenter: React.FC<{ center: [number, number]; bounds?: [number, number][] }> = ({ center, bounds }) => {
+const MapRecenter: React.FC<{ center: [number, number]; bounds?: [number, number][]; isCourseUp?: boolean; heading?: number | null }> = ({
+  center,
+  bounds,
+  isCourseUp,
+}) => {
   const map = useMap();
+
   useEffect(() => {
-    if (bounds && bounds.length > 0) {
+    if (bounds && bounds.length > 0 && !isCourseUp) {
       map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50] });
     } else {
-      map.setView(center, 14);
+      map.setView(center, 15);
     }
-  }, [center, bounds, map]);
+  }, [center, bounds, map, isCourseUp]);
+
   return null;
 };
 
@@ -171,30 +201,75 @@ export const MapView: React.FC<MapViewProps> = ({
   currentRoute,
   chargingStations,
   onSelectStation,
+  onAutoReroute,
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const [is3DMode, setIs3DMode] = useState(false);
+  const [isCourseUp, setIsCourseUp] = useState(false);
+  const [tileTheme, setTileTheme] = useState<MapTileTheme>('dark');
+  const [showLayerMenu, setShowLayerMenu] = useState(false);
+
   const center: [number, number] = [userLocation.lat, userLocation.lng];
   const routePolyline = currentRoute?.pathCoordinates || [];
   const routeWaypoints = getRouteWaypoints(currentRoute);
 
+  // Turn-by-turn tracking & Off-route auto reroute
+  const { currentManeuver, isOffRoute, offRouteDistanceM } = useRouteTracker(
+    userLocation,
+    currentRoute,
+    () => {
+      if (onAutoReroute) {
+        onAutoReroute();
+      }
+    }
+  );
+
+  const currentHeadingDeg = heading !== null && heading !== undefined ? heading : 0;
+  const rotationAngle = isCourseUp ? -currentHeadingDeg : 0;
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
-      <div className={`map-perspective-wrapper ${is3DMode ? 'map-3d-perspective' : ''}`}>
+      {/* Turn-by-Turn Head-Up Navigation Banner */}
+      <TurnByTurnBanner
+        maneuver={currentManeuver}
+        isOffRoute={isOffRoute}
+        offRouteDistanceM={offRouteDistanceM}
+        onManualReroute={onAutoReroute}
+      />
+
+      {/* Map Container with Course-Up Rotation & 3D Perspective */}
+      <div
+        className={`map-perspective-wrapper ${is3DMode ? 'map-3d-perspective' : ''}`}
+        style={{
+          transform: is3DMode
+            ? `perspective(900px) rotateX(45deg) rotate(${rotationAngle}deg) scale(1.1)`
+            : isCourseUp
+            ? `rotate(${rotationAngle}deg) scale(1.05)`
+            : 'none',
+          transition: 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
+        }}
+      >
         <MapContainer
           center={center}
-          zoom={14}
+          zoom={15}
           zoomControl={false}
           style={{ width: '100%', height: '100%' }}
           ref={mapRef}
         >
-          {/* Dark CartoDB Matter Tile Layer */}
+          {/* Tile Layer (Theme Switcher) */}
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            key={tileTheme}
+            attribution={TILE_SERVERS[tileTheme].attribution}
+            url={TILE_SERVERS[tileTheme].url}
+            maxZoom={TILE_SERVERS[tileTheme].maxZoom}
           />
 
-          <MapRecenter center={center} bounds={routePolyline.length > 0 ? routePolyline : undefined} />
+          <MapRecenter
+            center={center}
+            bounds={routePolyline.length > 0 ? routePolyline : undefined}
+            isCourseUp={isCourseUp}
+            heading={heading}
+          />
 
           {/* Accuracy Circle */}
           {accuracy && (
@@ -206,13 +281,13 @@ export const MapView: React.FC<MapViewProps> = ({
                 weight: 1,
                 fillColor: '#00f0ff',
                 fillOpacity: 0.15,
-                className: 'pulse-circle-animation'
+                className: 'pulse-circle-animation',
               }}
             />
           )}
 
           {/* User GPS Marker */}
-          <Marker position={center} icon={createUserIcon(heading)}>
+          <Marker position={center} icon={createUserIcon(isCourseUp ? 0 : heading)}>
             <Popup>
               <div style={{ color: '#000', fontWeight: 'bold' }}>Dein Standort (GPS Active)</div>
             </Popup>
@@ -284,6 +359,9 @@ export const MapView: React.FC<MapViewProps> = ({
         </MapContainer>
       </div>
 
+      {/* Elevation Mini-Ribbon */}
+      <ElevationRibbon currentRoute={currentRoute} userLocation={userLocation} />
+
       {/* Floating HUD Controls */}
       <div
         style={{
@@ -297,6 +375,101 @@ export const MapView: React.FC<MapViewProps> = ({
           gap: '12px',
         }}
       >
+        {/* Layer Selector Popup Menu */}
+        {showLayerMenu && (
+          <div
+            className="glass-panel"
+            style={{
+              padding: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+              minWidth: '160px',
+              backgroundColor: 'rgba(10, 18, 30, 0.95)',
+              border: '1px solid var(--accent-cyan)',
+              boxShadow: 'var(--glow-cyan)',
+              animation: 'fadeIn 0.2s ease',
+            }}
+          >
+            <button
+              onClick={() => {
+                setTileTheme('dark');
+                setShowLayerMenu(false);
+              }}
+              className={`btn-cyberpunk ${tileTheme === 'dark' ? 'btn-gold' : ''}`}
+              style={{ fontSize: '0.75rem', padding: '6px 10px', textAlign: 'left' }}
+            >
+              Cyberpunk Dark
+            </button>
+            <button
+              onClick={() => {
+                setTileTheme('cycle');
+                setShowLayerMenu(false);
+              }}
+              className={`btn-cyberpunk ${tileTheme === 'cycle' ? 'btn-gold' : ''}`}
+              style={{ fontSize: '0.75rem', padding: '6px 10px', textAlign: 'left' }}
+            >
+              OpenCycleMap (Rad)
+            </button>
+            <button
+              onClick={() => {
+                setTileTheme('satellite');
+                setShowLayerMenu(false);
+              }}
+              className={`btn-cyberpunk ${tileTheme === 'satellite' ? 'btn-gold' : ''}`}
+              style={{ fontSize: '0.75rem', padding: '6px 10px', textAlign: 'left' }}
+            >
+              Satellit / Hybrid
+            </button>
+          </div>
+        )}
+
+        {/* Layer Selector Button */}
+        <button
+          className="btn-cyberpunk glass-panel"
+          onClick={() => setShowLayerMenu(!showLayerMenu)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            padding: '10px 16px',
+            borderRadius: '12px',
+            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : 'none',
+          }}
+          title="Karten-Ebene wechseln"
+        >
+          <Layers size={18} className="glow-text-cyan" />
+          <span>Ebene</span>
+        </button>
+
+        {/* Course-Up / North-Up Toggle Button */}
+        <button
+          className="btn-cyberpunk glass-panel"
+          onClick={() => setIsCourseUp(!isCourseUp)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            padding: '10px 16px',
+            borderRadius: '12px',
+            boxShadow: isCourseUp ? 'var(--glow-cyan)' : 'none',
+            borderColor: isCourseUp ? 'var(--accent-cyan)' : 'rgba(0, 240, 255, 0.3)',
+          }}
+          title={isCourseUp ? 'Auf Norden ausrichten (North-Up)' : 'In Fahrtrichtung rotieren (Course-Up)'}
+        >
+          <Navigation2
+            size={18}
+            className="glow-text-cyan"
+            style={{
+              transform: isCourseUp ? 'rotate(0deg)' : 'rotate(45deg)',
+              transition: 'transform 0.3s ease',
+            }}
+          />
+          <span>{isCourseUp ? 'Course-Up' : 'North-Up'}</span>
+        </button>
+
         {/* 3D Cockpit Toggle Button */}
         <button
           className="btn-cyberpunk glass-panel"
@@ -313,7 +486,7 @@ export const MapView: React.FC<MapViewProps> = ({
           }}
           title="3D Cyberpunk Perspektive umschalten"
         >
-          <Box size={20} className="glow-text-cyan" />
+          <Box size={18} className="glow-text-cyan" />
           <span>{is3DMode ? '2D Karte' : '3D Cockpit'}</span>
         </button>
 
@@ -322,7 +495,10 @@ export const MapView: React.FC<MapViewProps> = ({
           className="glass-panel"
           onClick={() => {
             if (mapRef.current) {
-              mapRef.current.flyTo(center, 16, { animate: true, duration: 1.5 });
+              mapRef.current.flyTo(center, 16, { animate: true, duration: 1.2 });
+            }
+            if (isCourseUp) {
+              setIsCourseUp(false);
             }
           }}
           style={{
@@ -335,14 +511,19 @@ export const MapView: React.FC<MapViewProps> = ({
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
             border: '1px solid var(--accent-cyan)',
-            pointerEvents: 'auto',
+            boxShadow: '0 0 15px rgba(0, 240, 255, 0.3)',
           }}
-          title="Standort zentrieren"
+          title="Standort zentrieren & nach Norden ausrichten"
         >
-          <Compass size={24} />
+          <Compass
+            size={24}
+            style={{
+              transform: isCourseUp ? `rotate(${currentHeadingDeg}deg)` : 'none',
+              transition: 'transform 0.4s ease',
+            }}
+          />
         </button>
       </div>
     </div>
   );
 };
-

@@ -16,6 +16,8 @@ import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff } from 'lucid
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 
+import { FloatingMicButton } from './components/AiAssistant/FloatingMicButton';
+
 export function App() {
   const geo = useGeolocation();
   const userLocation = { lat: geo.lat, lng: geo.lng };
@@ -105,6 +107,19 @@ export function App() {
       modelId
     );
     setCurrentRoute(newRoute);
+  };
+
+  const handleAutoReroute = async () => {
+    console.log('[App] Auto-Rerouting triggered from current GPS position...');
+    const prefs = await dataRepository.getUserPreferences('user-1');
+    const memory = await dataRepository.getUserMemoryPattern('user-1');
+    const recalculated = await AiAssistantService.generateAnticipatedRoute(
+      userLocation.lat,
+      userLocation.lng,
+      prefs,
+      memory
+    );
+    setCurrentRoute(recalculated);
   };
 
   const handleToggleOledMode = () => {
@@ -198,6 +213,17 @@ export function App() {
         currentRoute={currentRoute}
         chargingStations={chargingStations}
         onSelectStation={() => {}}
+        onAutoReroute={handleAutoReroute}
+      />
+
+      {/* Floating Voice Assistant Mic */}
+      <FloatingMicButton
+        telemetry={telemetry}
+        currentRoute={currentRoute}
+        onOpenScanner={() => setShowScannerModal(true)}
+        onOpenLounge={() => setShowLoungeModal(true)}
+        onToggleOled={handleToggleOledMode}
+        onRegenerateTour={() => handleRegenerateRoute()}
       />
 
       {/* Modals */}
