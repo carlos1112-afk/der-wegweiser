@@ -71,3 +71,11 @@ Sie haben jederzeit folgende Rechte:
 
 ## 6. Jugendschutz
 Die Nutzung der App ist für Personen ab 16 Jahren bestimmt. Personen unter 16 Jahren bedürfen zur Nutzung kostenpflichtiger In-App-Funktionen der Zustimmung ihrer Erziehungsberechtigten.
+
+---
+
+## 7. Eigentum an aggregierten Navigationsdaten & Geschäftsgeheimnisschutz
+1. **Kein Personenbezug bei aggregierten Daten**: Sämtliche durch die Nutzung anonymisierten und aggregierten Navigationsmuster, Steigungskalibrierungen, E-Bike Verbrauchskurven und verifizierten Ladeinfrastrukturdaten unterliegen nicht dem Personenbezug im Sinne des Art. 4 Nr. 1 DSGVO.
+2. **Ausschließliches Eigentum des Betreibers**: Diese aggregierten Daten und mathematischen Routing-Modelle sind gemäß §§ 87a ff. UrhG und dem Geschäftsgeheimnisgesetz (GeschGehG) das alleinige geistige Eigentum des Betreibers (Carlos). Sie unterliegen der Geheimhaltung und sind vor unberechtigtem Scraping, Vervielfältigung oder Drittverwertung gesetzlich geschützt.
+3. **Datenbank-Administration & Wiederherstellung**: Das Recht des Nutzers auf Löschung seiner personenbezogenen Daten (Art. 17 DSGVO) berührt nicht das Recht des Betreibers, die anonymisierte Gesamt-Navigationsdatenbank zu pflegen, zu sichern, ganz oder teilweise neu aufzubauen oder über autorisierte Backups wiederherzustellen.
+

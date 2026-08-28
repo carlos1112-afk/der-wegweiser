@@ -64,13 +64,19 @@ Das Widerrufsrecht erlischt bei einem Vertrag über die Lieferung von nicht auf 
 
 ---
 
-## § 8 Urheberrecht & Open Source Lizenzen
-1. Kartenmaterial: © OpenStreetMap contributors (ODbL), © CARTO, © CyclOSM.
-2. Höhendaten: Open-Meteo SRTM Elevation Data.
-3. Alle Markennamen (Bosch®, Shimano®, Specialized®, Mahle®, Fazua®, Bafang®) sind eingetragene Warenzeichen ihrer jeweiligen Inhaber und werden ausschließlich zur Beschreibung der technischen Kompatibilität verwendet.
+## § 8 Geistiges Eigentum, Datenbankherstellerrecht (§ 87a ff. UrhG) & Alleiniges Daten-Eigentum
+1. **Alleiniges und ausschließliches Eigentum des Betreibers**: Sämtliche durch den Betrieb der App generierten, aggregierten, berechneten, verifizierten oder kalibrierten navigations- und telemetrieabhängigen Daten (insbesondere Streckengraphen, Steigungsprofile, topographische Korridor-Caches, E-Bike Verbrauchskurven, Ladeinfrastruktur-Datensätze, B2B-Partnereinträge sowie KI-Antizipationsmodelle) sind und verbleiben zu jedem Zeitpunkt das ausschließliche und uneingeschränkte geistige und kommerzielle Eigentum des Betreibers (Carlos).
+2. **Datenbankherstellerrecht nach § 87a UrhG**: Die Gesamtheit der Navigationsdatenbank stellt eine geschützte Datenbank im Sinne des § 87a UrhG dar. Dem Betreiber steht das ausschließliche Recht zu, die Datenbank im Ganzen oder in wesentlichen Teilen zu vervielfältigen, zu verbreiten und öffentlich zugänglich zu machen.
+3. **Scraping- und Entnahmeverbot**: Jede unbefugte Entnahme, Vervielfältigung, systematische Abfrage (Data Scraping), Dekompilierung oder Weitergabe an Dritte ohne ausdrückliche schriftliche Genehmigung des Betreibers ist untersagt und wird zivil- sowie strafrechtlich verfolgt.
 
 ---
 
-## § 9 Schlussbestimmungen & Gerichtsstand
+## § 9 Geschäftsgeheimnisschutz (GeschGehG) & Datenbank-Neustrukturierung
+1. **Geschäftsgeheimnis**: Die aggregierten Navigationsmodelle, internen Algorithmen und mathematischen Gewichtungen sind als geschütztes Geschäftsgeheimnis gemäß § 2 GeschGehG und der EU-Richtlinie 2016/943 klassifiziert.
+2. **Recht auf Datenbank-Rebuilds & Wiederherstellung**: Der Betreiber behält sich das ausdrückliche Recht vor, die Online-Datenbanken nach eigenem Ermessen zu sichern, ganz oder teilweise zu löschen, neu zu strukturieren oder über gesicherte Master-Backups wiederherzustellen. Bestehende Eigentums- und Schutzrechte an den Daten bleiben von einem Neuaufbau der Datenbank vollumfänglich unberührt.
+
+---
+
+## § 10 Schlussbestimmungen & Gerichtsstand
 1. Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.
 2. Sollte eine Bestimmung dieser Nutzungsbedingungen unwirksam sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen hiervon unberührt.

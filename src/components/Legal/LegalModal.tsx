@@ -194,6 +194,11 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             <p>
               Verbrauchern steht bei Erwerb von In-App Token-Pässen ein 14-tägiges gesetzliches Widerrufsrecht zu, es sei denn, der Nutzer hat ausdrücklich zugestimmt, dass vor Ablauf der Widerrufsfrist mit der Ausführung begonnen wird.
             </p>
+
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Geistiges Eigentum, Datenbankherstellerrecht (§ 87a UrhG) & Geschäftsgeheimnisse</h4>
+            <p>
+              Sämtliche navigations- und telemetrieabhängigen Daten (aggregierte Streckengraphen, Steigungsprofile, E-Bike Verbrauchskurven, Ladeinfrastrukturdaten und KI-Modelle) sind und verbleiben zu jedem Zeitpunkt das <strong>alleinige und ausschließliche geistige Eigentum des Betreibers (Carlos)</strong>. Die Datenbank ist nach §§ 87a ff. UrhG und dem Geschäftsgeheimnisgesetz (GeschGehG) geschützt. Jegliches Scraping, unbefugte Entnahme oder Drittverwertung ist untersagt. Der Betreiber ist jederzeit berechtigt, die Datenbankstruktur zu sichern, zu bereinigen, neu aufzubauen oder über autorisierte Backups wiederherzustellen.
+            </p>
           </div>
         )}
 
