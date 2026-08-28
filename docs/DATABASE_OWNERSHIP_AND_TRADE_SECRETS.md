@@ -26,7 +26,7 @@
 ---
 
 ## 3. Schutz als Geschäftsgeheimnis (GeschGehG & EU-Richtlinie 2016/943)
-1. **Geheimhaltungsstatus**: Die interne Zusammensetzung der Routing-Gewichtungen, Rohdatenbanken, Korridorberechnungen und Telemetriekalibrierungen ist nicht allgemein bekannt oder ohne weiteres zugänglich, besitzt einen erheblichen wirtschaftlichen Wert und wird durch angemessene technische Schutzmaßnahmen (Verschlüsselung, Zugriffskontrollen, Backdoor-Absicherung) geheim gehalten (**§ 2 Nr. 1 GeschGehG**).
+1. **Geheimhaltungsstatus**: Die interne Zusammensetzung der Routing-Gewichtungen, Rohdatenbanken, Korridorberechnungen und Telemetriekalibrierungen ist nicht allgemein bekannt oder ohne weiteres zugänglich, besitzt einen erheblichen wirtschaftlichen Wert und wird durch angemessene technische Schutzmaßnahmen (Verschlüsselung, Zugriffskontrollen, isolierte lokale Betreiber-Werkzeuge) geheim gehalten (**§ 2 Nr. 1 GeschGehG**).
 2. **Rechtsfolgen bei Verletzung**: Die unbefugte Erlangung, Nutzung oder Offenlegung dieser Geschäftsgeheimnisse stellt eine rechtswidrige Handlung nach § 4 GeschGehG dar und wird zivil- und strafrechtlich verfolgt.
 
 ---
@@ -40,7 +40,7 @@
 ## 5. Berechtigung zu Datenbank-Neustrukturierung & Wiederaufbau
 1. **Volle administrative Hoheit**: Der Betreiber ist jederzeit berechtigt:
    * Die Online-Cloud-Datenbank (Firestore/GCP) ganz oder teilweise zu löschen, zu bereinigen oder neu zu initialisieren,
-   * Gesicherte Master-Dumps über autorisierte Backdoors oder Speicherarchive wieder einzuspielen,
+   * Gesicherte Master-Dumps über autorisierte lokale Betreiber-Werkzeuge oder Speicherarchive wieder einzuspielen,
    * Datenbankschemata und Speicherarchitekturen nach eigenem Ermessen zu migrieren oder neu aufzubauen.
 2. **Rechtssicherheit bei Re-Builds**: Ein Neuaufbau oder eine Re-Initialisierung der Datenbank berührt weder die bestehenden Schutzrechte noch die Eigentumsverhältnisse an den zugrundeliegenden Daten.
 
