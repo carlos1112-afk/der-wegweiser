@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Scale, FileText, X, AlertTriangle, Trash2, Download, CheckCircle2, Lock, Database } from 'lucide-react';
+import { ShieldCheck, Scale, FileText, X, AlertTriangle, Trash2, Download, CheckCircle2, Lock } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
-import { DatabaseBackdoorExportService } from '../../services/databaseBackdoorExportService';
 import confetti from 'canvas-confetti';
 
 interface LegalModalProps {
   isOpen: boolean;
-  initialTab?: 'privacy' | 'terms' | 'imprint' | 'cockpit';
+  initialTab?: 'terms' | 'privacy' | 'imprint' | 'cockpit';
   onClose: () => void;
 }
 
@@ -15,43 +14,50 @@ export const LegalModal: React.FC<LegalModalProps> = ({
   initialTab = 'terms',
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<'privacy' | 'terms' | 'imprint' | 'cockpit'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'terms' | 'privacy' | 'imprint' | 'cockpit'>(initialTab);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
 
   if (!isOpen) return null;
 
+  // 1-Click User Data Export (Art. 20 DSGVO - Local Data)
   const handleExportAllData = () => {
     SoundFxService.playSuccessChime();
-    const exportData: Record<string, any> = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) {
-        try {
-          exportData[key] = JSON.parse(localStorage.getItem(key) || '""');
-        } catch {
-          exportData[key] = localStorage.getItem(key);
-        }
-      }
-    }
+    confetti({ particleCount: 50, spread: 60 });
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const exportPayload = {
+      exportDate: new Date().toISOString(),
+      user: 'local-user',
+      preferences: localStorage.getItem('wegweiser_user_prefs') || '{}',
+      customStations: localStorage.getItem('wegweiser_custom_stations') || '[]',
+      customRoutes: localStorage.getItem('wegweiser_custom_routes') || '[]',
+      tokens: localStorage.getItem('wegweiser_tokens') || '60',
+      offlineRegions: localStorage.getItem('wegweiser_offline_regions') || '[]',
+    };
+
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `der-wegweiser-user-data-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `der-wegweiser-lokale-daten-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    confetti({ particleCount: 50, spread: 60 });
   };
 
+  // 1-Click Complete Local Reset (Art. 17 DSGVO)
   const handleDeleteAllUserData = () => {
-    if (window.confirm('Möchtest du wirklich alle lokal und remote gespeicherten Daten (Routen, Tokens, Einstellungen) unwiderruflich löschen?')) {
+    const confirmWipe = window.confirm(
+      '⚠️ ACHTUNG: Möchtest du wirklich alle lokalen App-Daten, gespeicherten Touren und Tokens unwiderruflich von diesem Gerät löschen?'
+    );
+
+    if (confirmWipe) {
+      SoundFxService.playWarningTone();
       localStorage.clear();
       setIsDataDeleted(true);
-      SoundFxService.playWarningTone();
       setTimeout(() => {
         window.location.reload();
-      }, 2000);
+      }, 1500);
     }
   };
 
@@ -62,7 +68,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
         inset: 0,
         backgroundColor: 'rgba(5, 10, 20, 0.92)',
         backdropFilter: 'blur(16px)',
-        zIndex: 2600,
+        zIndex: 2500,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -74,8 +80,8 @@ export const LegalModal: React.FC<LegalModalProps> = ({
         className="glass-panel"
         style={{
           width: '100%',
-          maxWidth: '740px',
-          maxHeight: '92vh',
+          maxWidth: '680px',
+          maxHeight: '90vh',
           overflowY: 'auto',
           padding: '24px',
           borderRadius: '24px',
@@ -86,69 +92,57 @@ export const LegalModal: React.FC<LegalModalProps> = ({
           gap: '16px',
         }}
       >
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="glow-text-cyan">
-            <Scale size={26} />
-            <div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>RECHTLICHE HINWEISE & DATENSCHUTZ</h3>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Der Wegweiser • DSGVO, StVO-Sicherheit, Widerruf & Impressum
-              </p>
-            </div>
+        {/* Header with Tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(0, 240, 255, 0.2)', paddingBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="glow-text-cyan">
+            <ShieldCheck size={24} />
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+              RECHT &amp; DATENSCHUTZ
+            </h3>
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#8a99ad', cursor: 'pointer', fontSize: '1.3rem' }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              padding: '4px',
+            }}
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Tab Selector */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
           <button
-            onClick={() => {
-              SoundFxService.playClick();
-              setActiveTab('terms');
-            }}
             className={`btn-cyberpunk ${activeTab === 'terms' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.7rem', justifyContent: 'center' }}
+            onClick={() => setActiveTab('terms')}
+            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
-            <FileText size={13} /> AGB & StVO
+            <Scale size={13} /> AGB &amp; StVO
           </button>
-
           <button
-            onClick={() => {
-              SoundFxService.playClick();
-              setActiveTab('privacy');
-            }}
             className={`btn-cyberpunk ${activeTab === 'privacy' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.7rem', justifyContent: 'center' }}
+            onClick={() => setActiveTab('privacy')}
+            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
             <ShieldCheck size={13} /> DSGVO
           </button>
-
           <button
-            onClick={() => {
-              SoundFxService.playClick();
-              setActiveTab('imprint');
-            }}
             className={`btn-cyberpunk ${activeTab === 'imprint' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.7rem', justifyContent: 'center' }}
+            onClick={() => setActiveTab('imprint')}
+            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
-            <Scale size={13} /> Impressum
+            <FileText size={13} /> Impressum
           </button>
-
           <button
-            onClick={() => {
-              SoundFxService.playClick();
-              setActiveTab('cockpit');
-            }}
             className={`btn-cyberpunk ${activeTab === 'cockpit' ? 'btn-gold' : ''}`}
-            style={{ padding: '8px 4px', fontSize: '0.7rem', justifyContent: 'center' }}
+            onClick={() => setActiveTab('cockpit')}
+            style={{ padding: '8px 4px', fontSize: '0.75rem', justifyContent: 'center' }}
           >
-            <Lock size={13} /> Daten löschen
+            <Lock size={13} /> Daten-Cockpit
           </button>
         </div>
 
@@ -175,12 +169,12 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               </div>
             </div>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 1 Geltungsbereich & Sicherheit</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 1 Geltungsbereich &amp; Markenunabhängigkeit</h4>
             <p>
-              "Der Wegweiser" dient als intelligente Navigations- und Telemetriehilfe für E-Bikes und Fahrräder. Die manuelle Bedienung des Smartphones während der Fahrt ohne sichere Halterung ist verboten.
+              "Der Wegweiser" dient als universelle, markenoffene Navigations- und Telemetriehilfe für alle E-Bikes, Pedelecs und Fahrräder ohne jegliche Bindung an bestimmte Konzerne oder Hersteller. Die manuelle Bedienung des Smartphones während der Fahrt ohne sichere Halterung ist verboten.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 2 E-Bike Reichweiten- & Akkuberechnung</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 2 E-Bike Reichweiten- &amp; Akkuberechnung</h4>
             <p>
               Sämtliche Angaben zu Restreichweiten (km), Energieverbrauch (~Wh), Höhenmetern und Steigungen sind <strong>mathematisch-physikalische Modellschätzungen</strong>. Witterungseinflüsse (Gegenwind, Kälte), Reifendruck, Zuladung und Akkuzustand können die tatsächliche Reichweite erheblich beeinflussen. Der Betreiber haftet nicht für das Liegenbleiben aufgrund entladener Akkus.
             </p>
@@ -195,12 +189,12 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               Verbrauchern steht bei Erwerb von In-App Token-Pässen ein 14-tägiges gesetzliches Widerrufsrecht zu, es sei denn, der Nutzer hat ausdrücklich zugestimmt, dass vor Ablauf der Widerrufsfrist mit der Ausführung begonnen wird.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Geistiges Eigentum, Datenbankherstellerrecht (§ 87a UrhG) & Geschäftsgeheimnisse</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Geistiges Eigentum &amp; Datenbankherstellerrecht (§ 87a UrhG)</h4>
             <p>
               Sämtliche navigations- und telemetrieabhängigen Daten (aggregierte Streckengraphen, Steigungsprofile, E-Bike Verbrauchskurven, Ladeinfrastrukturdaten und KI-Modelle) sind und verbleiben zu jedem Zeitpunkt das <strong>alleinige und ausschließliche geistige Eigentum des Betreibers (Carlos)</strong>. Die Datenbank ist nach §§ 87a ff. UrhG und dem Geschäftsgeheimnisgesetz (GeschGehG) geschützt. Jegliches Scraping, unbefugte Entnahme oder Drittverwertung ist untersagt. Der Betreiber ist jederzeit berechtigt, die Datenbankstruktur zu sichern, zu bereinigen, neu aufzubauen oder über autorisierte Backups wiederherzustellen.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 6 Exklusive Datenabgabe & Garantierter Ausschluss des Datenverkaufs</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 6 Exklusive Datenabgabe &amp; Garantierter Ausschluss des Datenverkaufs</h4>
             <p>
               Der Nutzer übermittelt Daten <strong>ausschließlich an den Betreiber persönlich (Carlos)</strong>. Die Verarbeitung ist strikt auf die Kernfunktionen der App beschränkt. Ein Verkauf, eine Veräußerung oder Weitergabe von Nutzerdaten an Datenbroker oder fremde Dritte ist <strong>dauerhaft und ausnahmslos ausgeschlossen</strong>.
             </p>
@@ -212,15 +206,15 @@ export const LegalModal: React.FC<LegalModalProps> = ({
           <div style={{ fontSize: '0.82rem', lineHeight: '1.5', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>1. Verantwortlicher</h4>
             <p>
-              Carlos & Team "Der Wegweiser"<br />
+              Carlos &amp; Team "Der Wegweiser"<br />
               E-Mail: <strong>carlos.condios96@gmail.com</strong><br />
               Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`).
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>2. Erhebung von Standort- & Bluetooth-Daten</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>2. Erhebung von Standort- &amp; Bluetooth-Daten</h4>
             <p>
-              * <strong>GPS & Hintergrund-Navigation (Art. 6 Abs. 1 lit. b DSGVO)</strong>: Standortdaten werden zur Live-Navigation, Kursausrichtung und GPX-Aufzeichnung im Vordergrund und Hintergrund verarbeitet. Es erfolgt kein dauerhaftes Bewegungsprofiling auf zentralen Servern.<br />
-              * <strong>Bluetooth BLE Telemetrie</strong>: Akku- und Motordaten (Bosch, Shimano, Mahle, etc.) werden zur Reichweitenanalyse verarbeitet und verbleiben lokal auf dem Gerät.
+              * <strong>GPS &amp; Hintergrund-Navigation (Art. 6 Abs. 1 lit. b DSGVO)</strong>: Standortdaten werden zur Live-Navigation, Kursausrichtung und GPX-Aufzeichnung im Vordergrund und Hintergrund verarbeitet. Es erfolgt kein dauerhaftes Bewegungsprofiling auf zentralen Servern.<br />
+              * <strong>Bluetooth BLE Telemetrie</strong>: Vollkommen markenunabhängig kompatibel mit allen E-Bikes, Pedelecs und offenen Bluetooth-Sensoren. Telemetriedaten verbleiben lokal auf dem Gerät.
             </p>
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>3. Garantierter Ausschluss des Datenverkaufs (No-Sale Policy)</h4>
@@ -228,7 +222,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               Deine Daten werden <strong>ausschließlich an den Betreiber (Carlos)</strong> übermittelt. Wir verkaufen niemals Nutzerdaten, Bewegungsprofile oder Telemetriewerte an Dritte oder Datenhändler. Angebote zum Kauf unserer Nutzerdaten werden kategorisch abgelehnt.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>4. Drittanbieter & Monetarisierung</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>4. Drittanbieter &amp; Monetarisierung</h4>
             <p>
               * <strong>BitLabs / CPX Research</strong>: Bei freiwilliger Teilnahme an bezahlten Marktforschungsumfragen werden pseudonyme Nutzer-IDs übermittelt.<br />
               * <strong>Google AdMob</strong>: Verarbeitung standardisierter Werbe-IDs gemäß Google Play Store Richtlinien.
@@ -236,7 +230,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>5. Deine Rechte (Art. 15–21 DSGVO)</h4>
             <p>
-              Du hast jederzeit das Recht auf Auskunft, Berichtigung, Löschung und Datenübertragbarkeit deiner gespeicherten Daten. Nutze dafür gerne auch unser integriertes Daten-Cockpit im nächsten Tab.
+              Du hast jederzeit das Recht auf Auskunft, Berichtigung, Löschung und Datenübertragbarkeit deiner lokal gespeicherten Daten. Nutze dafür gerne unser integriertes Daten-Cockpit im nächsten Tab.
             </p>
           </div>
         )}
@@ -247,28 +241,28 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Angaben gemäß § 5 TMG</h4>
             <p>
               <strong>Der Wegweiser — Autonomous E-Bike Co-Pilot</strong><br />
-              Vertreten durch: Carlos & Team<br />
+              Vertreten durch: Carlos &amp; Team<br />
               Kontakt: carlos.condios96@gmail.com<br />
               Projekt: GCP `der-wegweiser` (europe-west3)
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Karten- & Datenlizenzen</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Karten- &amp; Datenlizenzen</h4>
             <p>
-              * Kartenkacheln & POIs: © OpenStreetMap contributors (Open Database License ODbL), © CARTO, © CyclOSM.<br />
+              * Kartenkacheln &amp; POIs: © OpenStreetMap contributors (Open Database License ODbL), © CARTO, © CyclOSM.<br />
               * Höhendaten: Open-Meteo SRTM Digital Elevation Model.<br />
-              * Markenzeichen: Bosch®, Shimano®, Specialized®, Mahle®, Fazua® und Bafang® sind eingetragene Warenzeichen ihrer jeweiligen Eigentümer.
+              * Markenunabhängigkeit: "Der Wegweiser" ist ein 100 % unabhängiges Navigationssystem ohne Bindung an einzelne Fahrrad- oder Antriebshersteller.
             </p>
           </div>
         )}
 
-        {/* Tab 4: Privacy Cockpit, Data Export & 1-Click Wipe (Art. 17 & 20 DSGVO) */}
+        {/* Tab 4: Local Privacy Cockpit, Data Export & 1-Click Wipe (Art. 17 & 20 DSGVO) */}
         {activeTab === 'cockpit' && (
           <div style={{ fontSize: '0.82rem', lineHeight: '1.5', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {isDataDeleted ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>
                 <CheckCircle2 size={48} color="#00ff66" style={{ margin: '0 auto 12px' }} />
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', marginBottom: '6px' }}>
-                  Alle Daten wurden erfolgreich gelöscht.
+                  Alle lokalen Gerätedaten wurden erfolgreich gelöscht.
                 </h4>
                 <p style={{ color: 'var(--text-muted)' }}>Die App wird neu gestartet...</p>
               </div>
@@ -276,10 +270,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               <>
                 <div style={{ padding: '12px', backgroundColor: 'rgba(0, 240, 255, 0.08)', borderRadius: '12px', border: '1px solid var(--accent-cyan)' }}>
                   <div style={{ fontWeight: 'bold', color: 'var(--accent-cyan)', marginBottom: '4px' }}>
-                    🛡️ Deine Datenhoheit nach Art. 17 & 20 DSGVO:
+                    🛡️ Deine lokale Datenhoheit auf diesem Smartphone:
                   </div>
                   <p style={{ fontSize: '0.75rem', color: '#e2e8f0' }}>
-                    Du hast die volle Kontrolle. Exportiere alle deine gespeicherten Touren, Telemetrie-Profile und Tokens oder lösche deinen gesamten Speicher mit 1 Klick.
+                    Deine individuellen Touren, Telemetrie-Caches und Einstellungen liegen lokal auf deinem Endgerät. Auf unseren Servern werden keine personenbezogenen Bewegungsprofile gespeichert.
                   </p>
                 </div>
 
@@ -291,7 +285,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                         <Download size={16} className="glow-text-cyan" /> Daten Exportieren
                       </div>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        Download aller Touren, Tokens und Einstellungen als JSON (Art. 20 DSGVO).
+                        Download aller lokal gespeicherten Touren, Tokens und Einstellungen als JSON (Art. 20 DSGVO).
                       </p>
                     </div>
                     <button className="btn-cyberpunk" onClick={handleExportAllData} style={{ padding: '8px', fontSize: '0.75rem', justifyContent: 'center' }}>
@@ -303,10 +297,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                   <div className="glass-panel" style={{ padding: '14px', borderRadius: '14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px', border: '1px solid rgba(255, 50, 50, 0.4)' }}>
                     <div>
                       <div style={{ fontWeight: 'bold', color: '#ff5555', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Trash2 size={16} /> Alle Daten Löschen
+                        <Trash2 size={16} /> Lokalen Speicher Leeren
                       </div>
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                        Recht auf Vergessenwerden (Art. 17 DSGVO). Setzt die App komplett zurück.
+                        Recht auf Vergessenwerden (Art. 17 DSGVO). Löscht alle Daten vom Smartphone und setzt die App zurück.
                       </p>
                     </div>
                     <button
@@ -322,56 +316,14 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                         fontWeight: 'bold',
                       }}
                     >
-                      Konto & Daten löschen
+                      Gerätespeicher leeren
                     </button>
                   </div>
-                </div>
-
-                {/* Secret Master Database 1-Click Backdoor Dump */}
-                <div
-                  className="glass-panel"
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: '14px',
-                    border: '1px solid var(--accent-gold)',
-                    backgroundColor: 'rgba(255, 183, 0, 0.08)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '12px',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Database size={22} color="var(--accent-gold)" />
-                    <div>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>
-                        🔓 Master-Datenbank-Dump (1-Klick Backdoor)
-                      </div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                        Zieht alle Firestore Cloud-Kollektionen (Ladesäulen, Routen, B2B Leads, Reviews) + LocalStorage in 1 JSON.
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    className="btn-cyberpunk btn-gold"
-                    onClick={() => DatabaseBackdoorExportService.executeMasterExport()}
-                    style={{ padding: '8px 14px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
-                  >
-                    1-Click Dump
-                  </button>
                 </div>
               </>
             )}
           </div>
         )}
-
-        <button
-          className="btn-cyberpunk btn-gold"
-          onClick={onClose}
-          style={{ padding: '10px', justifyContent: 'center', marginTop: '6px' }}
-        >
-          Schließen
-        </button>
       </div>
     </div>
   );

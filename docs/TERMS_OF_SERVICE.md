@@ -6,9 +6,10 @@ Bitte lesen Sie die folgenden Nutzungsbedingungen und Sicherheitshinweise sorgf�
 
 ---
 
-## § 1 Geltungsbereich und Zweck der App
+## § 1 Geltungsbereich, Zweck & Vollkommene Markenoffenheit
 1. "Der Wegweiser" ist eine spezialisierte mobile Navigations-, Telemetrie- und Touren-Planungsanwendung für E-Bikes, Pedelecs und Fahrräder.
-2. Die App bietet KI-gestützte Routenvorschläge, Höhenprofil-Analysen, Windwiderstands-Schätzungen, Bluetooth-Telemetriedaten (u. a. für Bosch, Shimano, Mahle, Specialized) sowie Informationen zu öffentlichen E-Bike Ladepunkten.
+2. **Volle Markenunabhängigkeit & universelle Kompatibilität**: Die App ist 100 % unabhängig von einzelnen Fahrrad-, Motoren- oder Akku-Konzernen. Unser Anspruch ist es, für jedes E-Bike und jeden Antrieb – ganz gleich von welchem Hersteller – bei technischer Machbarkeit eine lückenlose Zusammenarbeit und Telemetrieanbindung über offene Standards und Schnittstellen zu ermöglichen.
+3. Die App bietet KI-gestützte Routenvorschläge, Höhenprofil-Analysen, Windwiderstands-Schätzungen, Echtzeit-Telemetriedaten sowie Informationen zu öffentlichen E-Bike Ladepunkten.
 
 ---
 

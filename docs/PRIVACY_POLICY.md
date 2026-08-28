@@ -34,7 +34,7 @@ GCP-Projekt: `der-wegweiser` (europe-west3)
 
 ### b) Bluetooth- & E-Bike Telemetriedaten (BLE)
 * **Zweck**: Anzeige von Akkustand (SoC %), verbleibenden Wattstunden (Wh), Trittfrequenz (RPM), Fahrer- und Motorleistung (Watt), Gangstufe und Motortemperatur.
-* **Kompatible Systeme**: Bosch Smart System (BES3), Shimano STEPS, Mahle SmartBike, Specialized Turbo, Bafang CAN und Standard Bluetooth Cycling Sensoren.
+* **Universelle Kompatibilität**: Völlig unabhängig und offen für alle E-Bikes, Antriebe und Bluetooth-Sensoren ohne Bevorzugung einzelner Hersteller.
 * **Rechtsgrundlage**: Art. 6 Abs. 1 lit. b DSGVO. Alle Telemetriedaten verbleiben lokal auf Ihrem Smartphone.
 
 ### c) Lade-Infrastruktur & Community-Beiträge
