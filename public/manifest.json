@@ -1,24 +1,24 @@
 {
   "short_name": "Der Wegweiser",
-  "name": "Der Wegweiser - KI E-Bike Navi",
+  "name": "Der Wegweiser - Autonomous E-Bike Co-Pilot",
   "description": "KI-optimierte E-Bike & Pedelec Navigation mit Offline-Karten und Ladeinfrastruktur",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192 512x512",
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192 512x512",
-      "purpose": "any"
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": "/",
-  "background_color": "#05081f",
-  "theme_color": "#05081f",
+  "background_color": "#050a14",
+  "theme_color": "#050a14",
   "display": "standalone",
   "orientation": "portrait"
 }

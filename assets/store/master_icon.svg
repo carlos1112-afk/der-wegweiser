@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0c1a2e"/>
+      <stop offset="60%" stop-color="#050a14"/>
+      <stop offset="100%" stop-color="#02050a"/>
+    </radialGradient>
+
+    <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="28" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <linearGradient id="arrowCyanLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#00a3cc"/>
+    </linearGradient>
+
+    <linearGradient id="arrowCyanDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#009bb3"/>
+      <stop offset="100%" stop-color="#004d66"/>
+    </linearGradient>
+
+    <linearGradient id="goldBoltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff275"/>
+      <stop offset="60%" stop-color="#ffb700"/>
+      <stop offset="100%" stop-color="#ff8800"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bgGrad)"/>
+
+  <circle cx="512" cy="512" r="410" fill="none" stroke="#00f0ff" stroke-width="6" stroke-opacity="0.25"/>
+  <circle cx="512" cy="512" r="380" fill="none" stroke="#00f0ff" stroke-width="12" stroke-opacity="0.8" stroke-dasharray="14 18" filter="url(#cyanGlow)"/>
+  <circle cx="512" cy="512" r="350" fill="none" stroke="#00f0ff" stroke-width="3" stroke-opacity="0.4"/>
+
+  <line x1="512" y1="90" x2="512" y2="150" stroke="#00f0ff" stroke-width="10" stroke-linecap="round" filter="url(#cyanGlow)"/>
+  <line x1="512" y1="874" x2="512" y2="934" stroke="#00f0ff" stroke-width="10" stroke-linecap="round" stroke-opacity="0.6"/>
+  <line x1="90" y1="512" x2="150" y2="512" stroke="#00f0ff" stroke-width="10" stroke-linecap="round" stroke-opacity="0.6"/>
+  <line x1="874" y1="512" x2="934" y2="512" stroke="#00f0ff" stroke-width="10" stroke-linecap="round" stroke-opacity="0.6"/>
+
+  <g transform="translate(512, 512) rotate(45) translate(-512, -512)" filter="url(#cyanGlow)">
+    <polygon points="512,180 512,512 660,512" fill="url(#arrowCyanLight)"/>
+    <polygon points="512,180 364,512 512,512" fill="url(#arrowCyanDark)"/>
+    <polygon points="364,512 512,512 512,680" fill="url(#arrowCyanDark)" opacity="0.85"/>
+    <polygon points="512,512 660,512 512,680" fill="url(#arrowCyanLight)" opacity="0.85"/>
+  </g>
+
+  <g filter="url(#goldGlow)">
+    <polygon points="522,380 472,500 522,500 492,640 562,490 512,490" fill="url(#goldBoltGrad)"/>
+  </g>
+
+  <circle cx="512" cy="512" r="24" fill="#ffffff" filter="url(#cyanGlow)"/>
+  <circle cx="512" cy="512" r="14" fill="#00f0ff"/>
+</svg>
