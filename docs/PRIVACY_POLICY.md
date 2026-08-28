@@ -1,89 +1,86 @@
 # Datenschutzerklärung (Privacy Policy) — Der Wegweiser
 
-**Stand: 28. August 2026**
+**Stand: 29. August 2026**
 
-Der Schutz Ihrer persönlichen Daten ist uns ein zentrales Anliegen. Die vorliegende Datenschutzerklärung informiert Sie transparent darüber, welche personenbezogenen Daten wir bei der Nutzung der App und Webanwendung **"Der Wegweiser"** (im Folgenden: *"App"*) verarbeiten und welche Rechte Ihnen nach der EU-Datenschutz-Grundverordnung (DSGVO), dem Bundesdatenschutzgesetz (BDSG) sowie dem Telekommunikation-Telemedien-Datenschutz-Gesetz (TDDDG) zustehen.
+Der Schutz Ihrer persönlichen Daten ist uns ein zentrales Anliegen. Die vorliegende Datenschutzerklärung informiert Sie transparent darüber, welche personenbezogenen Daten wir bei der Nutzung der App und Webanwendung **"Der Wegweiser"** (im Folgenden: *"App"*) verarbeiten und welche Rechte Ihnen nach der EU-Datenschutz-Grundverordnung (DSGVO), dem Bundesdatenschutzgesetz (BDSG) sowie dem Telekommunikation-Digitale-Dienste-Datenschutz-Gesetz (TDDDG) zustehen.
 
 ---
 
 ## 1. Verantwortlicher für die Datenverarbeitung
-**Carlos & Team "Der Wegweiser"**  
-E-Mail: carlos.condios96@gmail.com  
-Website: https://der-wegweiser.web.app  
-GCP-Projekt: `der-wegweiser` (europe-west3)
+**Carlos — Der Wegweiser**  
+E-Mail: **carlos.condios96@gmail.com**  
+Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`, Art. 28 DSGVO DPA).
 
 ---
 
-## 2. Prominente Information zur Hintergrund-Standortnutzung (Google Play Richtlinie)
+## 2. Prominente Information zur Hintergrund-Standortnutzung (Google Play Policy)
 
 > 📍 **Hintergrund-Standorterfassung**:  
 > Der Wegweiser erfasst und verarbeitet Standortdaten (GPS-Koordinaten, Geschwindigkeit, Höhe und Bewegungsrichtung) im Vordergrund und **im Hintergrund (auch wenn die App geschlossen ist oder das Smartphone-Display gesperrt ist)**.  
-> **Verwendungszwecke**:
+> **Zwecke**:
 > 1. Kontinuierliche **Turn-by-Turn Sprachführung** über Kopfhörer oder Helmlautsprecher während der Fahrt.
-> 2. **Automatische Routen-Neuberechnung**, wenn Sie vom geplanten Radweg abweichen.
-> 3. **Notfall-Reichweiten-Warnungen** bei kritischem E-Bike-Akkustand (< 15 %).
-> 4. Lückenlose **GPX-Tourenaufzeichnung** zur späteren Synchronisation mit Strava oder Komoot.
+> 2. **Automatische Routen-Neuberechnung** bei Abweichung vom Radweg.
+> 3. **Notfall-Reichweiten-Warnungen** bei kritischem E-Bike-Akkustand (&le; 15 %).
+> 4. Lückenlose **GPX-Tourenaufzeichnung** für die eigene Historie.
 
 ---
 
-## 3. Erhobene Daten und Rechtsgrundlagen nach DSGVO
+## 3. Erhobene Daten, Zwecke & Rechtsgrundlagen nach DSGVO
 
-### a) Standortdaten (GPS, Höhe, Bewegungsrichtung)
-* **Rechtsgrundlage**: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung zur Bereitstellung der Navigationsfunktion) sowie Art. 6 Abs. 1 lit. a DSGVO (ausdrückliche Einwilligung).
-* **Speicherung**: Standortdaten werden primär lokal auf Ihrem Endgerät verarbeitet. Es erfolgt kein dauerhaftes Bewegungsprofiling auf zentralen Servern ohne Ihre explizite Freigabe.
+### a) Standort- & Navigationsdaten (Pseudonymisierte Daten)
+* **Status**: GPS-Koordinatenketten und Tracks werden von uns als **pseudonymisierte personenbezogene Daten (Art. 4 Nr. 1 DSGVO)** behandelt, da durch wiederkehrende Start- und Zielpunkte (z. B. Wohnort) eine Reidentifizierbarkeit theoretisch möglich sein kann.
+* **Zweck**: Live-Navigation, Turn-by-Turn Führung, Erstellung aggregierter Höhen- und Verbrauchsprofile. Zur Überprüfung der Datenfrische wird das Aufnahmedatum ohne Uhrzeit (`recordDate: "YYYY-MM-DD"`) gespeichert.
+* **Rechtsgrundlage**: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung zur Navigation) und Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Verbesserung von Radwegenetzen).
 
-### b) Bluetooth- & E-Bike Telemetriedaten (BLE)
-* **Zweck**: Anzeige von Akkustand (SoC %), verbleibenden Wattstunden (Wh), Trittfrequenz (RPM), Fahrer- und Motorleistung (Watt), Gangstufe und Motortemperatur.
-* **Universelle Kompatibilität**: Völlig unabhängig und offen für alle E-Bikes, Antriebe und Bluetooth-Sensoren ohne Bevorzugung einzelner Hersteller.
-* **Rechtsgrundlage**: Art. 6 Abs. 1 lit. b DSGVO. Alle Telemetriedaten verbleiben lokal auf Ihrem Smartphone.
+### b) Bluetooth Low Energy (BLE) E-Bike Telemetriedaten
+* **Zweck**: Abruf von Akkustand (SoC %), verbleibenden Wattstunden (Wh), Trittfrequenz und Motorleistung. Markenunabhängig für alle offenen BLE-Sensoren.
+* **Rechtsgrundlage**: Art. 6 Abs. 1 lit. b DSGVO. Die Telemetrie verbleibt primär flüchtig im lokalen Speicher des Endgeräts.
 
-### c) Lade-Infrastruktur & Community-Beiträge
-* **Zweck**: Beim Hinzufügen oder Bewerten von Ladestationen werden die Standortkoordinaten, Fotos, Steckertypen und Bewertungskommentare in unserer Google Cloud Firestore Datenbank gespeichert, um allen Nutzern zur Verfügung zu stehen.
-* **Rechtsgrundlage**: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Pflege und Qualitätssicherung des Ladesäulen-Netzes).
+### c) Ladeinfrastruktur & Community-Meldungen
+* **Zweck**: Hinzufügen, Korrigieren und Verifizieren von E-Bike Ladesäulen, Schlauchautomaten und Wegequalitäten (Map-Quests).
+* **Rechtsgrundlage**: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Netzwerkintegrität und Ladesicherheit).
+* **Widerspruchsrecht (Art. 21 DSGVO)**: Nutzer können der Weiterverarbeitung gemeldeter Punkte jederzeit formlos per E-Mail an carlos.condios96@gmail.com widersprechen.
 
-### d) Marktforschungsumfragen & Werbedienste (Monetarisierung)
-* **BitLabs / CPX Research Offerwall**: Bei freiwilliger Teilnahme an bezahlten Marktforschungsumfragen werden pseudonyme Benutzer-IDs (UID) zur Zuordnung der verdienten Tokens an den jeweiligen Umfrageanbieter übermittelt.
-* **Google AdMob**: Bei Anzeige von Werbespots werden von Google standardmäßige Werbe-IDs (z. B. Google Advertising ID) unter Einhaltung der Google-Play-Datenschutzrichtlinien verarbeitet.
-* **Rechtsgrundlage**: Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).
-
----
-
-## 4. Eingesetzte Dienstleister & Drittanbieter
-
-| Dienstleister | Zweck | Sitz / Serverstandort |
-|---|---|---|
-| **Google Firebase / Google Cloud Platform** | Datenbank (Firestore), Authentifizierung, App Hosting | Frankfurt am Main, Deutschland (`europe-west3`) |
-| **OpenStreetMap & CartoDB** | Kartenkacheln, POI-Daten und Routing | EU / USA (Standardvertragsklauseln) |
-| **Open-Meteo API** | Wetter-, Wind- und SRTM-Höhenprofildaten | EU / Deutschland (anonymisiert) |
-| **BitLabs Inc. / CPX Research** | Freiwillige bezahlte Umfragen in der Lade-Lounge | EU / USA |
+### d) § 25 TDDDG (Zugriff auf Endgeräte-Speicher)
+* **Technisch erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG)**: Speicherung von aktiven Routensitzungen, essentiellen Offline-Kartenkacheln, Display-WakeLock-Zuständen und Einwilligungs-Status im lokalen Speicher (`localStorage` / `IndexedDB`).
+* **Einwilligungspflichtig (§ 25 Abs. 1 TDDDG)**: Optionale Werbe- und Umfragemodule (z. B. Offerwalls).
 
 ---
 
-## 5. In-App Datenschutz-Cockpit & Betroffenenrechte (Art. 15–21 DSGVO)
+## 4. Drittanbieter-Dienste & Reale Datenflüsse
 
-Sie haben jederzeit folgende Rechte:
-* **Recht auf Datenübertragbarkeit (Art. 20 DSGVO)**: Über das in der App integrierte Datenschutz-Cockpit (`Recht -> Daten löschen -> Daten Exportieren`) können Sie alle gespeicherten Touren, Tokens und Einstellungen als strukturierte JSON-Datei herunterladen.
-* **Recht auf Löschung / Recht auf Vergessenwerden (Art. 17 DSGVO)**: Über den Button *"Konto & Daten löschen"* können Sie sämtliche lokalen und Cloud-Daten mit 1 Klick unwiderruflich vernichten.
+| Dienst / Anbieter | Zweck | Übermittelte Daten | Rechtsgrundlage & Garantien | Speicherfrist |
+| :--- | :--- | :--- | :--- | :--- |
+| **Google Firebase / GCP** | Datenbank (Firestore), Auth, App Hosting | Pseudonyme Segmente, Leads, Server-IP | Art. 6 Abs. 1 lit. b/f DSGVO; DPA Frankfurt (`europe-west3`); SCC | Betriebsnotwendig; Server-Access-Logs max. 30 Tage |
+| **Google Gemini API** (`@google/generative-ai`) | KI-Antizipations-Storys | Routen-Start-/Endorte ohne User-ID | Art. 6 Abs. 1 lit. b DSGVO; Google API Terms (Kein Modelltraining) | Flüchtig während Inferenz |
+| **CartoDB & OpenStreetMap** | Kartendarstellung & Basiskacheln | Kachel-Koordinaten, IP-Adresse | Art. 6 Abs. 1 lit. b DSGVO; ODbL Lizenz | CDN-Access-Logs 7–30 Tage |
+| **Open-Meteo API** | Wind-, Wetter- & Höhenabfragen | Koordinaten, IP-Adresse | Art. 6 Abs. 1 lit. b DSGVO; EU-Server | Flüchtig im RAM; Server-Logs max. 14 Tage zur DDoS-Abwehr |
+| **BitLabs / CPX Research** | Freiwillige bezahlte Marktforschung | Pseudonyme User-ID, Session-ID | Art. 6 Abs. 1 lit. a DSGVO; EU-US Data Privacy Framework / SCC | Gemäß Richtlinien des jeweiligen Umfrage-Partners |
+
+---
+
+## 5. Vollständige Data-Deletion- & Export-Matrix
+
+| Datenebene | Speicherort | Export (Art. 20 DSGVO) | Löschung (Art. 17 DSGVO) |
+| :--- | :--- | :--- | :--- |
+| **Lokale App-Daten** | `localStorage`, `IndexedDB` (Endgerät) | 1-Klick JSON-Download im In-App Cockpit | 1-Klick "Daten löschen" im In-App Cockpit (Sofortige Löschung) |
+| **Cloud-Token-Konto** | Firestore `user_tokens` | E-Mail-Anfrage an Betreiber | Formlose E-Mail an Betreiber (Löschung binnen gesetzlicher Frist) |
+| **B2B-Partner-Leads** | Firestore `partner_leads` | E-Mail-Anfrage an Betreiber | Formlose E-Mail an Betreiber (Löschung nach Wegfall des Geschäftszwecks) |
+| **Third-Party Server Logs** | CDN / Cloud-Provider Logs | Bei den jeweiligen Anbietern | Automatische rollierende Löschung nach 14–30 Tagen |
+
+---
+
+## 6. Betroffenenrechte (Art. 15–22 DSGVO)
 * **Auskunft & Berichtigung (Art. 15, 16 DSGVO)**: Formlos per E-Mail an **carlos.condios96@gmail.com**.
-* **Widerruf erteilter Einwilligungen (Art. 7 Abs. 3 DSGVO)**: Sie können erteilte Einwilligungen (z. B. für Werbung oder Umfragen) jederzeit im Datenschutz-Cockpit der App widerrufen.
+* **Löschung & Datenübertragbarkeit (Art. 17, 20 DSGVO)**: Über das integrierte Daten-Cockpit im Menü `Recht -> Daten-Cockpit` oder per E-Mail.
+* **Widerruf von Einwilligungen (Art. 7 Abs. 3 DSGVO)**: Jederzeit im Einstellungs-Menü der App änderbar.
+* **Beschwerderecht (Art. 77 DSGVO)**: Recht auf Beschwerde bei der zuständigen Datenschutz-Aufsichtsbehörde (z. B. Landesbeauftragte für Datenschutz).
 
 ---
 
-## 6. Jugendschutz
-Die Nutzung der App ist für Personen ab 16 Jahren bestimmt. Personen unter 16 Jahren bedürfen zur Nutzung kostenpflichtiger In-App-Funktionen der Zustimmung ihrer Erziehungsberechtigten.
-
----
-
-## 7. Eigentum an aggregierten Navigationsdaten & Geschäftsgeheimnisschutz
-1. **Kein Personenbezug bei aggregierten Daten**: Sämtliche durch die Nutzung anonymisierten und aggregierten Navigationsmuster, Steigungskalibrierungen, E-Bike Verbrauchskurven und verifizierten Ladeinfrastrukturdaten unterliegen nicht dem Personenbezug im Sinne des Art. 4 Nr. 1 DSGVO.
-2. **Ausschließliches Eigentum des Betreibers**: Diese aggregierten Daten und mathematischen Routing-Modelle sind gemäß §§ 87a ff. UrhG und dem Geschäftsgeheimnisgesetz (GeschGehG) das alleinige geistige Eigentum des Betreibers (Carlos). Sie unterliegen der Geheimhaltung und sind vor unberechtigtem Scraping, Vervielfältigung oder Drittverwertung gesetzlich geschützt.
-3. **Datenbank-Administration & Wiederherstellung**: Das Recht des Nutzers auf Löschung seiner personenbezogenen Daten (Art. 17 DSGVO) berührt nicht das Recht des Betreibers, die anonymisierte Gesamt-Navigationsdatenbank zu pflegen, zu sichern, ganz oder teilweise neu aufzubauen oder über autorisierte Backups wiederherzustellen.
-
----
-
-## 8. Garantierter Ausschluss des Datenverkaufs (No-Data-Brokerage / No-Sale Policy)
-1. **Exklusive Datenabgabe an den Betreiber**: Der Nutzer übermittelt Daten ausschließlich an den Betreiber (Carlos). Eine Weitergabe an nicht für den Kernbetrieb erforderliche Dritte findet nicht statt.
-2. **Strikte Zweckbindung**: Die Verarbeitung aller Daten ist strengstens auf die Kernfunktionen der App "Der Wegweiser" (Turn-by-Turn Navigation, Akku-Telemetrie, Reichweiten-Kalkulation, Offline-Routing) limitiert.
-3. **Absolutes Verkaufsverbot**: Ein Weiterverkauf, Handel, Vermieten oder eine Veräußerung von Nutzer-, Fahr- oder Telemetriedaten an Datenhändler (Data Brokers), fremde Werbekonzerne oder sonstige Dritte ist von vornherein und für alle Zeiten vertraglich und datenschutzrechtlich ausgeschlossen. Kommerzielle Kaufangebote bezüglich unserer Nutzerdatenbanken werden kategorisch abgelehnt.
+## 7. Datenbankherstellerrecht (§§ 87a ff. UrhG) & No-Sale Policy
+1. **Investitionsschutz nach § 87a UrhG**: Die Gesamtheit der Navigationsdatenbank stellt eine geschützte Datenbank des Betreibers (Carlos) dar. Nutzer erhalten kein Eigentum an der Gesamt-Datenbank.
+2. **Nutzungsrechte**: Übermittelte Korrekturen und Wegeattribute werden dem Betreiber als einfaches, unentgeltliches Nutzungsrecht zur Pflege der Navigationskarte eingeräumt.
+3. **Absolutes Verkaufsverbot**: Ein Weiterverkauf von Nutzerdaten an Datenhändler (Data Brokers) oder fremde Werbekonzerne ist für alle Zeiten vertraglich und datenschutzrechtlich ausgeschlossen.
 
 

@@ -95,9 +95,13 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
         <h2 style={{ fontSize: '1.4rem', fontWeight: 'bold', marginBottom: '8px' }} className="glow-text-cyan">
           {route.title}
         </h2>
-        <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: '1.5', marginBottom: '16px' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: '1.5', marginBottom: '8px' }}>
           {route.aiStory}
         </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+          <Sparkles size={12} color="var(--accent-cyan)" />
+          <span>🤖 KI-generierte Tourenanalyse &amp; Streckenbeschreibung (Gemini 2.0 Flash) gem. Art. 50 EU AI Act</span>
+        </div>
 
         {/* Scout Mission Banner */}
         {route.isScoutMission && (

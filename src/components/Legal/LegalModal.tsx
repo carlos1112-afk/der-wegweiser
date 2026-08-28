@@ -160,77 +160,77 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 gap: '10px',
               }}
             >
-              <AlertTriangle size={24} color="var(--accent-gold)" />
+              <AlertTriangle size={24} color="var(--accent-gold)" style={{ flexShrink: 0 }} />
               <div>
                 <strong style={{ color: 'var(--accent-gold)' }}>Wichtiger StVO-Sicherheitshinweis:</strong>
                 <p style={{ fontSize: '0.75rem', color: '#fff', marginTop: '2px' }}>
-                  Die Straßenverkehrsordnung (StVO) und die Aufmerksamkeit auf das Verkehrsgeschehen haben stets uneingeschränkten Vorrang vor Audio- und Navigationsanweisungen.
+                  Die Straßenverkehrsordnung (StVO) und die eigene Aufmerksamkeit auf das Verkehrsgeschehen haben stets uneingeschränkten Vorrang vor Audio- und Navigationsanweisungen. Das Smartphone darf während der Fahrt nur in einer sicheren Lenkerhalterung betrieben werden.
                 </p>
               </div>
             </div>
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 1 Geltungsbereich &amp; Markenunabhängigkeit</h4>
             <p>
-              "Der Wegweiser" dient als universelle, markenoffene Navigations- und Telemetriehilfe für alle E-Bikes, Pedelecs und Fahrräder ohne jegliche Bindung an bestimmte Konzerne oder Hersteller. Die manuelle Bedienung des Smartphones während der Fahrt ohne sichere Halterung ist verboten.
+              "Der Wegweiser" ist ein markenoffenes, herstellerunabhängiges Navigations- und Telemetriesystem für Fahrräder und E-Bikes aller Hersteller.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 2 E-Bike Reichweiten- &amp; Akkuberechnung</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 2 Haftungsbeschränkung (§ 309 Nr. 7 BGB konform)</h4>
             <p>
-              Sämtliche Angaben zu Restreichweiten (km), Energieverbrauch (~Wh), Höhenmetern und Steigungen sind <strong>mathematisch-physikalische Modellschätzungen</strong>. Witterungseinflüsse (Gegenwind, Kälte), Reifendruck, Zuladung und Akkuzustand können die tatsächliche Reichweite erheblich beeinflussen. Der Betreiber haftet nicht für das Liegenbleiben aufgrund entladener Akkus.
+              (1) Der Betreiber haftet unbeschränkt für Vorsatz, grobe Fahrlässigkeit sowie für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit.<br />
+              (2) Bei leicht fahrlässiger Verletzung wesentlicher Vertragspflichten (Kardinalpflichten) ist die Haftung der Höhe nach auf den bei Vertragsschluss vorhersehbaren, vertragstypischen Schaden begrenzt.<br />
+              (3) Reichweitenprognosen (~Wh, Rest-km) und Höhenprofile sind mathematisch-physikalische Modellschätzungen (abhängig von Wind, Reifendruck, Witterung). Eine Garantie für das Erreichen eines Ziels ohne Nachladen wird bei einfacher Fahrlässigkeit nicht übernommen.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 3 Ladeinfrastruktur</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 3 Urheberrechte, Datenbankherstellerrecht &amp; Nutzungsrechte</h4>
             <p>
-              Angaben zu öffentlichen Ladepunkten und Steckdosen basieren auf OpenStreetMap- und Community-Daten. Es wird keine Gewähr für ständige Verfügbarkeit, Funktion oder Stromversorgung übernommen.
+              (1) Der Betreiber (Carlos) ist Hersteller der aggregierten Navigationsdatenbank gem. §§ 87a ff. UrhG.<br />
+              (2) Soweit der Nutzer Wegezustandsmeldungen, Quests oder Bewertungen übermittelt, räumt er dem Betreiber hieran ein einfaches, unentgeltliches, zeitlich und räumlich unbeschränktes Nutzungsrecht zur Integration in das Navigationssystem ein. Personenbezogene Rohdaten verbleiben beim Betreiber geschützt und werden nicht veräußert.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 4 Widerrufsbelehrung für digitale Inhalte (EU-Recht)</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 4 Widerrufsbelehrung &amp; Digitale Inhalte (§ 356 Abs. 5 BGB)</h4>
             <p>
-              Verbrauchern steht bei Erwerb von In-App Token-Pässen ein 14-tägiges gesetzliches Widerrufsrecht zu, es sei denn, der Nutzer hat ausdrücklich zugestimmt, dass vor Ablauf der Widerrufsfrist mit der Ausführung begonnen wird.
+              Bei Erwerb digitaler Tokens/Pässe erlischt das 14-tägige gesetzliche Widerrufsrecht vorzeitig, wenn der Nutzer im Checkout ausdrücklich zustimmt, dass vor Ablauf der Frist mit der Ausführung begonnen wird, und seine Kenntnis über den Verlust des Widerrufsrechts bestätigt.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Geistiges Eigentum &amp; Datenbankherstellerrecht (§ 87a UrhG)</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Barrierefreiheit (BFSG)</h4>
             <p>
-              Sämtliche navigations- und telemetrieabhängigen Daten (aggregierte Streckengraphen, Steigungsprofile, E-Bike Verbrauchskurven, Ladeinfrastrukturdaten und KI-Modelle) sind und verbleiben zu jedem Zeitpunkt das <strong>alleinige und ausschließliche geistige Eigentum des Betreibers (Carlos)</strong>. Die Datenbank ist nach §§ 87a ff. UrhG und dem Geschäftsgeheimnisgesetz (GeschGehG) geschützt. Jegliches Scraping, unbefugte Entnahme oder Drittverwertung ist untersagt. Der Betreiber ist jederzeit berechtigt, die Datenbankstruktur zu sichern, zu bereinigen, neu aufzubauen oder über autorisierte Backups wiederherzustellen.
-            </p>
-
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 6 Exklusive Datenabgabe &amp; Garantierter Ausschluss des Datenverkaufs</h4>
-            <p>
-              Der Nutzer übermittelt Daten <strong>ausschließlich an den Betreiber persönlich (Carlos)</strong>. Die Verarbeitung ist strikt auf die Kernfunktionen der App beschränkt. Ein Verkauf, eine Veräußerung oder Weitergabe von Nutzerdaten an Datenbroker oder fremde Dritte ist <strong>dauerhaft und ausnahmslos ausgeschlossen</strong>.
+              Gemäß § 3 Abs. 1 Barrierefreiheitsstärkungsgesetz (BFSG) fällt das Angebot unter die gesetzliche Kleinstunternehmer-Ausnahme (unter 10 Mitarbeiter und Jahresumsatz &le; 2 Mio. €). Die App bietet dennoch hohe Kontraste (Sunlight Mode) und skalierbare Schriften.
             </p>
           </div>
         )}
 
-        {/* Tab 2: Privacy Policy (GDPR / DSGVO) */}
+        {/* Tab 2: Privacy Policy (GDPR / DSGVO & TDDDG) */}
         {activeTab === 'privacy' && (
           <div style={{ fontSize: '0.82rem', lineHeight: '1.5', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>1. Verantwortlicher</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>1. Verantwortlicher &amp; Kontakt</h4>
             <p>
-              Carlos &amp; Team "Der Wegweiser"<br />
+              Carlos — Der Wegweiser<br />
               E-Mail: <strong>carlos.condios96@gmail.com</strong><br />
-              Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`).
+              Server: Google Cloud Platform (Frankfurt `europe-west3`, Art. 28 DSGVO DPA).
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>2. Erhebung von Standort- &amp; Bluetooth-Daten</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>2. Verarbeitung von Standortdaten (Pseudonymisierung)</h4>
             <p>
-              * <strong>GPS &amp; Hintergrund-Navigation (Art. 6 Abs. 1 lit. b DSGVO)</strong>: Standortdaten werden zur Live-Navigation, Kursausrichtung und GPX-Aufzeichnung im Vordergrund und Hintergrund verarbeitet. Es erfolgt kein dauerhaftes Bewegungsprofiling auf zentralen Servern.<br />
-              * <strong>Bluetooth BLE Telemetrie</strong>: Vollkommen markenunabhängig kompatibel mit allen E-Bikes, Pedelecs und offenen Bluetooth-Sensoren. Telemetriedaten verbleiben lokal auf dem Gerät.
+              GPS-Vektoren und Routen werden zur Navigation und Aggregation verarbeitet. Da GPS-Spuren durch Start-/Zielpunkte theoretisch reidentifizierbar sein können, behandeln wir sie als <strong>pseudonymisierte personenbezogene Daten</strong> (Art. 6 Abs. 1 lit. b &amp; f DSGVO). Zur Datenfrische wird das Aufnahmedatum ohne Uhrzeit (`recordDate: YYYY-MM-DD`) erfasst.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>3. Garantierter Ausschluss des Datenverkaufs (No-Sale Policy)</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>3. § 25 TDDDG (Endgerätespeicher)</h4>
             <p>
-              Deine Daten werden <strong>ausschließlich an den Betreiber (Carlos)</strong> übermittelt. Wir verkaufen niemals Nutzerdaten, Bewegungsprofile oder Telemetriewerte an Dritte oder Datenhändler. Angebote zum Kauf unserer Nutzerdaten werden kategorisch abgelehnt.
+              Die Speicherung von Routensitzungen und Kacheln im lokalen Speicher (`localStorage`/`IndexedDB`) ist für den Betrieb der App technisch zwingend erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG). Optionale Werbe- und Umfragemodule erfordern eine gesonderte Einwilligung (§ 25 Abs. 1 TDDDG).
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>4. Drittanbieter &amp; Monetarisierung</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>4. Drittanbieter &amp; Datenflüsse</h4>
             <p>
-              * <strong>BitLabs / CPX Research</strong>: Bei freiwilliger Teilnahme an bezahlten Marktforschungsumfragen werden pseudonyme Nutzer-IDs übermittelt.<br />
-              * <strong>Google AdMob</strong>: Verarbeitung standardisierter Werbe-IDs gemäß Google Play Store Richtlinien.
+              * <strong>Open-Meteo API</strong>: Abfrage von Wind &amp; Höhenmetern. Die IP-Adresse wird zur Übertragung verarbeitet und in flüchtigen Server-Logs (max. 14 Tage) zur DDoS-Prävention gehalten.<br />
+              * <strong>Google Gemini API</strong>: Inferenz für KI-Antizipation. Prompts enthalten keine Nutzer-Identifikatoren.<br />
+              * <strong>BitLabs / CPX</strong>: Bei freiwilliger Umfrageteilnahme (Art. 6 Abs. 1 lit. a DSGVO) wird eine pseudonyme ID an die Umfrageplattform übertragen.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>5. Deine Rechte (Art. 15–21 DSGVO)</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>5. Betroffenenrechte &amp; Daten-Löschmatrix</h4>
             <p>
-              Du hast jederzeit das Recht auf Auskunft, Berichtigung, Löschung und Datenübertragbarkeit deiner lokal gespeicherten Daten. Nutze dafür gerne unser integriertes Daten-Cockpit im nächsten Tab.
+              * <strong>Art. 17 DSGVO (Löschung)</strong>: Lokale Daten können mit 1 Klick im Cockpit gelöscht werden. Für Cloud-Leads oder Einträge genügt eine E-Mail an carlos.condios96@gmail.com.<br />
+              * <strong>Art. 20 DSGVO (Export)</strong>: 1-Klick JSON-Export im Daten-Cockpit.<br />
+              * <strong>Art. 21 DSGVO (Widerspruch)</strong>: Gegen Verarbeitungen nach Art. 6 Abs. 1 lit. f DSGVO kann jederzeit widersprochen werden.
             </p>
           </div>
         )}
@@ -238,19 +238,21 @@ export const LegalModal: React.FC<LegalModalProps> = ({
         {/* Tab 3: Imprint & Open Source Licenses */}
         {activeTab === 'imprint' && (
           <div style={{ fontSize: '0.82rem', lineHeight: '1.5', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Angaben gemäß § 5 TMG</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</h4>
             <p>
               <strong>Der Wegweiser — Autonomous E-Bike Co-Pilot</strong><br />
-              Vertreten durch: Carlos &amp; Team<br />
-              Kontakt: carlos.condios96@gmail.com<br />
-              Projekt: GCP `der-wegweiser` (europe-west3)
+              Diensteanbieter: Carlos<br />
+              E-Mail: carlos.condios96@gmail.com<br />
+              EU-Streitbeilegung: Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: https://ec.europa.eu/consumers/odr/
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Karten- &amp; Datenlizenzen</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Open-Source Lizenzen</h4>
             <p>
-              * Kartenkacheln &amp; POIs: © OpenStreetMap contributors (Open Database License ODbL), © CARTO, © CyclOSM.<br />
-              * Höhendaten: Open-Meteo SRTM Digital Elevation Model.<br />
-              * Markenunabhängigkeit: "Der Wegweiser" ist ein 100 % unabhängiges Navigationssystem ohne Bindung an einzelne Fahrrad- oder Antriebshersteller.
+              * React, React-DOM, Capacitor: MIT License<br />
+              * Leaflet: BSD-2-Clause License<br />
+              * Firebase SDK, Google Generative AI SDK: Apache License 2.0<br />
+              * Lucide Icons, Canvas Confetti: ISC License<br />
+              * Kartendaten: © OpenStreetMap contributors (ODbL), © CARTO.
             </p>
           </div>
         )}

@@ -25,6 +25,7 @@ import {
   Compass,
   Map as MapIcon,
   Check,
+  X,
 } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
 import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
@@ -303,6 +304,11 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   const [questAnswers, setQuestAnswers] = useState<Record<number, string>>({});
   const [completedQuestIds, setCompletedQuestIds] = useState<string[]>([]);
   const [questPinConfirmed, setQuestPinConfirmed] = useState(false);
+
+  // Digital Token Pack Checkout State (§ 356 Abs. 5 BGB Compliance)
+  const [pendingPurchase, setPendingPurchase] = useState<{ amount: number; priceEur: string } | null>(null);
+  const [consentInstantDelivery, setConsentInstantDelivery] = useState(false);
+  const [consentWaiverRight, setConsentWaiverRight] = useState(false);
 
   const handleStartQuest = (quest: MapQuest) => {
     SoundFxService.playClick();
@@ -595,11 +601,36 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     setRedeemedCodes((prev) => ({ ...prev, [item.id]: item.code || 'REDEEMED-2026' }));
   };
 
-  const handleBuyTokenPack = (amount: number, priceEur: string) => {
+  const handleInitiateBuyTokenPack = (amount: number, priceEur: string) => {
+    SoundFxService.playClick();
+    setPendingPurchase({ amount, priceEur });
+    setConsentInstantDelivery(false);
+    setConsentWaiverRight(false);
+  };
+
+  const handleConfirmPurchase = () => {
+    if (!pendingPurchase || !consentInstantDelivery || !consentWaiverRight) {
+      SoundFxService.playWarningTone();
+      return;
+    }
+
+    // Compliant receipt logging according to § 356 Abs. 5 BGB
+    const receipt = {
+      timestamp: new Date().toISOString(),
+      pack: `${pendingPurchase.amount} Tokens`,
+      price: pendingPurchase.priceEur,
+      consentInstantDelivery: true,
+      consentWaiverRightOfWithdrawal: true,
+      legalBasis: '§ 356 Abs. 5 BGB',
+    };
+    const existing = JSON.parse(localStorage.getItem('wegweiser_token_purchases') || '[]');
+    localStorage.setItem('wegweiser_token_purchases', JSON.stringify([...existing, receipt]));
+
+    onAddTokens(pendingPurchase.amount);
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 80, spread: 80 });
-    onAddTokens(amount);
-    alert(`🎉 Erfolgreich gekauft: +${amount} Tokens für ${priceEur}! Vielen Dank für deinen Support!`);
+    alert(`🎉 Kauf erfolgreich! +${pendingPurchase.amount} Tokens gutgeschrieben. Vielen Dank für deinen Support!`);
+    setPendingPurchase(null);
   };
 
   const handleStartSurvey = (survey: AvailableSurvey) => {
@@ -1451,7 +1482,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                 <div style={{ padding: '10px', backgroundColor: 'rgba(255, 183, 0, 0.08)', borderRadius: '10px', border: '1px solid rgba(255, 183, 0, 0.2)' }}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>☕ Mini-Pack (100 Tok.)</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', marginBottom: '8px' }}>1,99 € einmalig</div>
-                  <button onClick={() => handleBuyTokenPack(100, '1,99 €')} className="btn-cyberpunk btn-gold" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
+                  <button onClick={() => handleInitiateBuyTokenPack(100, '1,99 €')} className="btn-cyberpunk btn-gold" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
                     Kaufen (1,99 €)
                   </button>
                 </div>
@@ -1459,7 +1490,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                 <div style={{ padding: '10px', backgroundColor: 'rgba(0, 240, 255, 0.08)', borderRadius: '10px', border: '1px solid rgba(0, 240, 255, 0.2)' }}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>🚀 Power-Pack (500 Tok.)</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', marginBottom: '8px' }}>4,99 € (Beliebt)</div>
-                  <button onClick={() => handleBuyTokenPack(500, '4,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
+                  <button onClick={() => handleInitiateBuyTokenPack(500, '4,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
                     Kaufen (4,99 €)
                   </button>
                 </div>
@@ -1467,7 +1498,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                 <div style={{ padding: '10px', backgroundColor: 'rgba(255, 0, 127, 0.08)', borderRadius: '10px', border: '1px solid rgba(255, 0, 127, 0.2)' }}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>👑 Supporter Pro</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--accent-pink)', marginBottom: '8px' }}>9,99 € Lifetime</div>
-                  <button onClick={() => handleBuyTokenPack(2000, '9,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center', borderColor: 'var(--accent-pink)', color: 'var(--accent-pink)' }}>
+                  <button onClick={() => handleInitiateBuyTokenPack(2000, '9,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center', borderColor: 'var(--accent-pink)', color: 'var(--accent-pink)' }}>
                     Freischalten (9,99 €)
                   </button>
                 </div>
@@ -1712,6 +1743,112 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                 }}
               >
                 {adTimeLeft > 0 ? `Warte ${adTimeLeft}s` : '🪙 +20 Tokens Einlösen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Digital Content Checkout Confirmation Modal (§ 356 Abs. 5 BGB / Verbraucherrechte) */}
+      {pendingPurchase && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(5, 10, 20, 0.94)',
+            backdropFilter: 'blur(16px)',
+            zIndex: 3500,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+            animation: 'fadeIn 0.2s ease',
+          }}
+        >
+          <div
+            className="glass-panel"
+            style={{
+              maxWidth: '480px',
+              width: '100%',
+              padding: '24px',
+              borderRadius: '20px',
+              border: '2px solid var(--accent-gold)',
+              boxShadow: 'var(--glow-gold)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 183, 0, 0.2)', paddingBottom: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="glow-text-gold">
+                <CreditCard size={22} />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>Kaufabschluss &amp; Widerruf</h3>
+              </div>
+              <button
+                onClick={() => setPendingPurchase(null)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ padding: '12px', backgroundColor: 'rgba(255, 183, 0, 0.08)', borderRadius: '12px', border: '1px solid rgba(255, 183, 0, 0.2)' }}>
+              <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.95rem' }}>
+                Ausgewählt: +{pendingPurchase.amount} Tokens ({pendingPurchase.priceEur})
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Sofortige Gutschrift auf dein In-App Token-Konto
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.75rem', color: '#fff', lineHeight: '1.4' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={consentInstantDelivery}
+                  onChange={(e) => setConsentInstantDelivery(e.target.checked)}
+                  style={{ marginTop: '3px' }}
+                />
+                <span>
+                  Ich verlange und stimme ausdrücklich zu, dass der Anbieter vor Ablauf der 14-tägigen Widerrufsfrist mit der Ausführung des Vertrags (Bereitstellung der digitalen Tokens) beginnt.
+                </span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={consentWaiverRight}
+                  onChange={(e) => setConsentWaiverRight(e.target.checked)}
+                  style={{ marginTop: '3px' }}
+                />
+                <span>
+                  Mir ist bekannt, dass ich durch diese Zustimmung mit Beginn der Ausführung des Vertrags mein gesetzliches Widerrufsrecht für diese digitalen Inhalte verliere (§ 356 Abs. 5 BGB).
+                </span>
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+              <button
+                onClick={() => setPendingPurchase(null)}
+                className="btn-cyberpunk"
+                style={{ flex: 1, padding: '10px', fontSize: '0.8rem', justifyContent: 'center' }}
+              >
+                Abbrechen
+              </button>
+              <button
+                disabled={!consentInstantDelivery || !consentWaiverRight}
+                onClick={handleConfirmPurchase}
+                className="btn-cyberpunk btn-gold"
+                style={{
+                  flex: 1.5,
+                  padding: '10px',
+                  fontSize: '0.8rem',
+                  justifyContent: 'center',
+                  opacity: (!consentInstantDelivery || !consentWaiverRight) ? 0.4 : 1,
+                  cursor: (!consentInstantDelivery || !consentWaiverRight) ? 'not-allowed' : 'pointer',
+                }}
+              >
+                Jetzt Kaufen ({pendingPurchase.priceEur})
               </button>
             </div>
           </div>

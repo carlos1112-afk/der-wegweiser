@@ -14,14 +14,14 @@
 
 ---
 
-## 2. Alleiniges Eigentum an navigationsabhängigen Daten
-1. **Umfang der proprietären Daten**: Zu den proprietären, navigationsabhängigen Daten des Betreibers zählen zu jedem Zeitpunkt und ohne Einschränkung:
+## 2. Urheberrechte, Datenbankherstellerrecht & Nutzungsrechte
+1. **Proprietäre Datenbank nach § 87a UrhG**: Zu den nach § 87a UrhG geschützten Inhalten der aggregierten Datenbank des Betreibers zählen:
    * Sämtliche kuratierten Streckengraphen, Höhenprofile und Steigungs-Farbsegmente,
    * Sämtliche mathematischen E-Bike Verbrauchs- und Reichweiten-Prädiktionsmodelle (Wh/km-Algorithmen),
-   * Sämtliche aggregierten anonymisierten Telemetriedaten (Watt, Trittfrequenz, Motorunterstützung, Rollwiderstände),
+   * Sämtliche aggregierten Telemetriedaten (Watt, Trittfrequenz, Motorunterstützung, Rollwiderstände),
    * Sämtliche Ladesäulen-Verifizierungen, Öffnungszeiten-Kalibrierungen, Stecker-Typologisierungen und Community-Bewertungen,
    * Sämtliche KI-Antizipationsparameter und probabilistische "Heute-Tour"-Muster.
-2. **Ausschluss fremder Eigentumsansprüche**: Nutzer, Partner oder Drittplattformen erwerben durch die Nutzung der App oder die Eingabe von Daten keinerlei Eigentums- oder Verwertungsrechte an der Datenbank oder den aggregierten Navigationsmodellen.
+2. **Nutzungsrechte der Community-Beiträge**: Soweit Nutzer Wegezustände, Quests oder Bewertungen übermitteln, räumen sie dem Betreiber ein einfaches, unentgeltliches, räumlich und zeitlich unbeschränktes Nutzungsrecht zur dauerhaften Integration in die Datenbank ein. Nutzer erwerben kein Miteigentum an der Gesamtdatenbank.
 
 ---
 
@@ -31,9 +31,9 @@
 
 ---
 
-## 4. Klare Abgrenzung zu personenbezogenen Daten (DSGVO)
-1. **Personenbezogene Daten (Art. 4 Nr. 1 DSGVO)**: Personenbezogene Nutzerdaten (z. B. lokale Kontoeinstellungen, individuelle Favoriten) unterliegen dem Schutz der DSGVO. Nutzer haben das Recht auf Datenübertragbarkeit (Art. 20 DSGVO) und Löschung (Art. 17 DSGVO).
-2. **Anonymisierte Navigations- & Streckendaten**: Sobald Telemetrie- und Routeninformationen anonymisiert oder mit der Gesamtkarte fusioniert werden, verlieren sie den Personenbezug. Sie sind und bleiben uneingeschränktes Eigentum des Betreibers und sind von Nutzerlöschungsanträgen unberührt.
+## 4. Datenschutzrechtliche Einordnung (DSGVO)
+1. **Pseudonymisierte personenbezogene Daten (Art. 4 Nr. 1 DSGVO)**: GPS-Rohdaten und Tourenverläufe werden als pseudonymisierte personenbezogene Daten behandelt. Nutzer haben das Recht auf Datenübertragbarkeit (Art. 20 DSGVO) und Löschung (Art. 17 DSGVO).
+2. **Aggregierte Vektoren**: Sobald Einzelpunkte zu allgemeinen Straßenattributen (z. B. "Steigung 8% auf Segment X", "Belag Schotter") aggregiert werden, entfällt der Personenbezug. Diese aggregierten Vektorattribute bilden den Kern der geschützten Datenbank nach § 87a UrhG.
 
 ---
 
@@ -42,7 +42,7 @@
    * Die Online-Cloud-Datenbank (Firestore/GCP) ganz oder teilweise zu löschen, zu bereinigen oder neu zu initialisieren,
    * Gesicherte Master-Dumps über autorisierte lokale Betreiber-Werkzeuge oder Speicherarchive wieder einzuspielen,
    * Datenbankschemata und Speicherarchitekturen nach eigenem Ermessen zu migrieren oder neu aufzubauen.
-2. **Rechtssicherheit bei Re-Builds**: Ein Neuaufbau oder eine Re-Initialisierung der Datenbank berührt weder die bestehenden Schutzrechte noch die Eigentumsverhältnisse an den zugrundeliegenden Daten.
+2. **Rechtssicherheit bei Re-Builds**: Ein Neuaufbau oder eine Re-Initialisierung der Datenbank berührt weder die bestehenden Schutzrechte nach § 87a UrhG noch die Nutzungsrechte an den zugrundeliegenden aggregierten Daten.
 
 ---
 
