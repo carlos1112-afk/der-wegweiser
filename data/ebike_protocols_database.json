@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-08-16T03:36:00Z",
+  "manufacturers": [
+    {
+      "id": "bosch",
+      "name": "Bosch eBike Systems",
+      "market_share_eu": "approx. 45-50%",
+      "models": ["Classic Line", "BES2 (Active, Performance, CX Gen 2/4)", "BES3 Smart System (Performance Line CX, SX, Performance Line)"],
+      "displays": ["Purion", "Intuvia", "Kiox", "Nyon (Gen 1 & 2)", "LED Remote", "Purion 200", "Kiox 300", "Kiox 500", "Kiox 400C", "SmartphoneGrip"],
+      "protocols": ["CAN-Bus (Classic/BES2)", "BLE (BES3 Smart System)", "eBike Flow Cloud API"],
+      "ble_details": {
+        "services": [
+          "0000fe59-0000-1000-8000-00805f9b34fb (Bosch Diagnostic Service)",
+          "Proprietary Live Data Interface (LDI) 128-bit UUIDs"
+        ],
+        "characteristics": [
+          "Live Telemetry Stream (Speed, Cadence, Rider Power, Motor Power)",
+          "Battery SoC & State of Health (SOH)",
+          "Active Assist Mode & Navigation Sync"
+        ],
+        "handshake": "Verschlüsselt, erfordert 'Just Works' Bonding via Bosch Flow App oder BLE Passkey.",
+        "payload_structure": "MCSP (Motor Communication System Protocol) fragmentiert mit Protocol Buffers (protobuf) Binärformat."
+      },
+      "read_access": "Eingeschränkt. Live-Sensor-Telemetrie via LDI mit Pairing auslesbar; Vollzugriff erfordert Bosch Partner Cloud API (OAuth2) oder Hardware-Bridge (ESP32).",
+      "write_access": "Hochgradig abgesichert. Modus-Umschaltung und Navigations-Routen-Push über eBike Flow Cloud API oder Display-Sync.",
+      "sample_implementation": {
+        "type": "WebBluetooth / ESP32 Bridge",
+        "service_uuid": "0000fe59-0000-1000-8000-00805f9b34fb",
+        "characteristic_uuid": "00000001-0000-1000-8000-00805f9b34fb"
+      }
+    },
+    {
+      "id": "shimano",
+      "name": "Shimano STEPS",
+      "market_share_eu": "approx. 20-25%",
+      "models": ["E5000", "E6100", "E7000", "E8000", "EP8 (DU-EP800)", "EP801 (DU-EP801)", "EP6 (DU-EP600)"],
+      "displays": ["SC-E5000", "SC-E6100", "SC-E7000", "SC-E8000", "SC-EM800", "SC-EN600", "SC-EN500", "EW-EN100 (Junction)"],
+      "protocols": ["D-Fly Wireless (BLE & ANT+ Private)", "Shimano E-TUBE Bus (proprietär CAN-ähnlich)"],
+      "ble_details": {
+        "services": [
+          "00001818-0000-1000-8000-00805f9b34fb (Cycling Power)",
+          "00001816-0000-1000-8000-00805f9b34fb (Cycling Speed/Cadence)",
+          "Proprietary Shimano D-Fly Service"
+        ],
+        "characteristics": [
+          "D-Fly Telemetry (Current Gear Di2, Battery Level %, Assist Mode, Range, Cadence, Speed)",
+          "Command & Parameter Configuration"
+        ],
+        "handshake": "Challenge-Response Handshake mit E-TUBE App. E-TUBE Passkey (Standard: 000000) erforderlich.",
+        "payload_structure": "Proprietäres Binärformat, erfordert Entschlüsselung / D-Fly Frame Unpacking."
+      },
+      "read_access": "Standard-Fahrdaten (Watt, Trittfrequenz, Geschwindigkeit) offen via ANT+ und BLE CSC/Power; detaillierte Di2/Akkudaten via D-Fly.",
+      "write_access": "Gesperrt. Parameteränderungen (z.B. Motor-Profile Basic/Fine Tune) nur über authentifizierte E-TUBE Verbindung; Anti-Tampering aktiv."
+    },
+    {
+      "id": "specialized",
+      "name": "Specialized Turbo",
+      "market_share_eu": "approx. 8-10% (Premium/eMTB)",
+      "models": ["Turbo Levo (Gen 1-4)", "Turbo Kenevo", "Turbo Vado", "Turbo Como", "Turbo Creo SL", "Turbo Tero"],
+      "displays": ["TCU (Top Tube)", "MasterMind TCU", "TCD (Turbo Connect Display)"],
+      "protocols": ["BLE GATT (Custom Turbo Service)", "ANT+ LEV & ANT+ Power"],
+      "ble_details": {
+        "services": [
+          "00000000-3dd4-425e-8d3e-3ff16a611bda (Specialized Custom Turbo Service)",
+          "00001818-0000-1000-8000-00805f9b34fb (Cycling Power)",
+          "00001816-0000-1000-8000-00805f9b34fb (Cycling Speed/Cadence)",
+          "0000180f-0000-1000-8000-00805f9b34fb (Battery Service)"
+        ],
+        "characteristics": [
+          "00000001-3dd4-425e-8d3e-3ff16a611bda (Motor & Battery Real-time Telemetry)",
+          "00000002-3dd4-425e-8d3e-3ff16a611bda (Assist Mode Read/Write)",
+          "00000003-3dd4-425e-8d3e-3ff16a611bda (Smart Control Tuning & Range Limiter)"
+        ],
+        "handshake": "BLE PIN-Pairing erforderlich. 6-stelliger PIN ist physisch auf der TCU/MasterMind Einheit abgedruckt.",
+        "payload_structure": "Direkte Little-Endian Byte-Werte für Telemetrie (Battery %, Speed, Cadence, Rider Power, Motor Power, Temp). Hex-Befehle für Support-Levels (0=Off, 1=Eco, 2=Trail, 3=Turbo)."
+      },
+      "read_access": "Mit BLE-PIN vollständig auslesbar (reverse engineered in Projekten wie ha-specialized-turbo).",
+      "write_access": "Unterstützungsstufen, MicroTune und SmartControl-Limits können direkt per BLE geschrieben werden."
+    },
+    {
+      "id": "mahle",
+      "name": "Mahle SmartBike Systems",
+      "market_share_eu": "approx. 6-8% (Lightweight e-Road / Urban)",
+      "models": ["Ebikemotion X35", "X35+", "X20", "M40"],
+      "displays": ["iWoc ONE (Top Tube Button)", "iWoc TRIO", "Pulsar ONE (Wireless Display)"],
+      "protocols": ["BLE GATT (My SmartBike)", "ANT+ LEV (Light Electric Vehicle) Standard", "CAN Bus"],
+      "ble_details": {
+        "services": [
+          "0000180f-0000-1000-8000-00805f9b34fb (Battery)",
+          "00001816-0000-1000-8000-00805f9b34fb (CSC)",
+          "Custom Mahle Telemetry & Control Service"
+        ],
+        "characteristics": [
+          "State of Charge (Wh & %)",
+          "Range Extender Battery Status",
+          "Motor Temperature & System Errors",
+          "Assist Level (0-3)"
+        ],
+        "handshake": "Offener Standard. Häufig ohne zwingendes PIN-Bonding direkt per Web Bluetooth ansprechbar.",
+        "payload_structure": "Unverschlüsselte Hex-Payloads für Sensor- und Statusdaten."
+      },
+      "read_access": "Hervorragend via ANT+ LEV (offener Standard) und BLE.",
+      "write_access": "Unterstützungsstufen per BLE Write Characteristic schaltbar."
+    },
+    {
+      "id": "fazua",
+      "name": "Fazua (Porsche eBike Performance)",
+      "market_share_eu": "approx. 4-6% (e-Gravel / Light e-MTB)",
+      "models": ["Evation 1.0", "Evation 2.0", "Ride 50 Evation/Trail", "Ride 60"],
+      "displays": ["Remote bX", "Remote fX", "Ring Control", "Control Hub (LED Hub)"],
+      "protocols": ["BLE GATT (Standard Bluetooth SIG)", "ANT+", "USB (Fazua Toolbox Desktop)"],
+      "ble_details": {
+        "services": [
+          "0x1818 (Cycling Power)",
+          "0x1816 (Cycling Speed and Cadence)",
+          "0x180F (Battery Service)",
+          "0x180A (Device Information)"
+        ],
+        "characteristics": [
+          "0x2A63 (Power Measurement)",
+          "0x2A5B (CSC Measurement)",
+          "0x2A19 (Battery Level)"
+        ],
+        "handshake": "Kein proprietäres Bonding für standardisierte Sensor-Profile. Plug & Play mit Garmin/Wahoo und Web Bluetooth.",
+        "payload_structure": "Offizielle Bluetooth SIG Spezifikation."
+      },
+      "read_access": "Vollständig offen und nativ über Browser-Web-Bluetooth auslesbar.",
+      "write_access": "Firmware und individuelle Motor-Charakteristiken nur über Fazua Toolbox Software."
+    },
+    {
+      "id": "giant",
+      "name": "Giant / Liv",
+      "market_share_eu": "approx. 5-7%",
+      "models": ["SyncDrive Life", "SyncDrive Core", "SyncDrive Sport", "SyncDrive Pro (Yamaha-Basis)", "SyncDrive Move"],
+      "displays": ["RideControl One", "RideControl Ergo", "RideControl Ergo 2", "RideControl Dash 2in1", "RideDash EVO"],
+      "protocols": ["BLE GATT (RideControl App)", "ANT+ LEV", "CAN-Bus"],
+      "ble_details": {
+        "services": ["Proprietary Giant BLE Services", "0x180F (Battery)", "0x1816 (CSC)"],
+        "characteristics": ["Battery Percentage, Range Km, Assist Level, Cadence, Speed"],
+        "handshake": "Just-Works BLE Pairing. Nur eine simultane Bluetooth-Verbindung zulässig.",
+        "payload_structure": "Gekapselte CAN-Bus Datagramme über BLE Characteristic Notifications."
+      },
+      "read_access": "Auslesbar über BLE Sniffing & ANT+ LEV.",
+      "write_access": "Unterstützungsstufen und Tuning-Profile über RideControl App-Protokoll ansprechbar."
+    },
+    {
+      "id": "brose",
+      "name": "Brose Drive",
+      "market_share_eu": "approx. 4-5%",
+      "models": ["Drive C", "Drive T", "Drive TF (S-Pedelec)", "Drive S Alu", "Drive S Mag"],
+      "displays": ["Marquardt Comfort/Remote", "Brose Display Allround", "Brose Display Central", "Brose Display Remote"],
+      "protocols": ["CAN-Bus (intern)", "BLE (Brose e-Bike App)", "ANT+ LEV"],
+      "ble_details": {
+        "services": ["Custom 128-bit UUIDs"],
+        "characteristics": ["Live Telemetry, Motor Diagnostics"],
+        "handshake": "Proprietäres App-Bonding.",
+        "payload_structure": "Protocol Buffers (protobuf) serialisiert."
+      },
+      "read_access": "CAN-Bus auf Hardware-Ebene vollständig dekodiert; BLE mit App-Pairing lesbar.",
+      "write_access": "Schreibzugriff nur für zertifizierte Brose Service Tool Händler."
+    },
+    {
+      "id": "yamaha",
+      "name": "Yamaha e-Bike Systems",
+      "market_share_eu": "approx. 4-6%",
+      "models": ["PWseries CE", "PWseries TE", "PWseries ST", "PW-X2", "PW-X3", "PWseries S2"],
+      "displays": ["Display A (Sideswitch)", "Display C (Multi-function 2.8\")", "Interface X (Minimalist STEM)", "Display CrossCore"],
+      "protocols": ["BLE (Yamaha e-Sync)", "ANT+ LEV (bei Display C & Interface X)"],
+      "ble_details": {
+        "services": ["Yamaha Custom Services", "ANT+ LEV Standard Device Profile"],
+        "characteristics": ["Encrypted Telemetry stream, Assist mode indicator"],
+        "handshake": "Erfordert App-Koppelung für BLE.",
+        "payload_structure": "Binäre Pakete; ANT+ LEV verwendet standardisierte Page 16-34."
+      },
+      "read_access": "Hervorragend auslesbar über ANT+ LEV; BLE proprietär.",
+      "write_access": "Gesperrt ohne Yamaha Service-Signatur."
+    },
+    {
+      "id": "bafang",
+      "name": "Bafang",
+      "market_share_eu": "approx. 5-7% (Urban / Retrofit / Cargo)",
+      "models": ["M200", "M400 (Max Drive)", "M410", "M500", "M510", "M600", "M620 (Ultra)", "H400/H600"],
+      "displays": ["DP C18", "DP C240", "DP E160", "Bafang Go BLE Displays"],
+      "protocols": ["CAN-Bus (250 kbit/s Standard)", "UART (ältere Modelle)", "BLE (Bafang Go)"],
+      "ble_details": {
+        "services": ["Bafang Go BLE Services", "Standard UART-over-BLE"],
+        "characteristics": ["Rx / Tx Characteristic Data Stream"],
+        "handshake": "Offen / Standard BLE Pin oder No-Security.",
+        "payload_structure": "CAN-Bus Frames direkt über BLE Tx/Rx getunnelt (0x59 Header / Checksumme)."
+      },
+      "read_access": "Vollständig offen. Community-Tools (OpenBafangTool) unterstützen direktes Live-Monitoring.",
+      "write_access": "Vollständig offen. Motor-Parameter (Max Amps, Speed Limits, Assist Ratios) können per CAN/BLE programmiert werden."
+    }
+  ],
+  "bluetooth_sig_standard_profiles": [
+    {
+      "service_name": "Cycling Power Service",
+      "uuid_16bit": "0x1818",
+      "uuid_128bit": "00001818-0000-1000-8000-00805f9b34fb",
+      "characteristics": [
+        {
+          "name": "Cycling Power Measurement",
+          "uuid": "0x2A63",
+          "properties": ["Notify"],
+          "description": "Liefert Instantaneous Power in Watt, Cadence und Pedal Power Balance"
+        },
+        {
+          "name": "Cycling Power Feature",
+          "uuid": "0x2A65",
+          "properties": ["Read"],
+          "description": "Definiert unterstützte Leistungsmetriken des Sensors"
+        }
+      ]
+    },
+    {
+      "service_name": "Cycling Speed and Cadence Service (CSC)",
+      "uuid_16bit": "0x1816",
+      "uuid_128bit": "00001816-0000-1000-8000-00805f9b34fb",
+      "characteristics": [
+        {
+          "name": "CSC Measurement",
+          "uuid": "0x2A5B",
+          "properties": ["Notify"],
+          "description": "Kumulierte Radumdrehungen, Raddrehzeit, Kurbelumdrehungen für präzise Geschwindigkeits- und Trittfrequenzberechnung"
+        }
+      ]
+    },
+    {
+      "service_name": "Battery Service",
+      "uuid_16bit": "0x180F",
+      "uuid_128bit": "0000180F-0000-1000-8000-00805f9b34fb",
+      "characteristics": [
+        {
+          "name": "Battery Level",
+          "uuid": "0x2A19",
+          "properties": ["Read", "Notify"],
+          "description": "Batterieladestand in Prozent (0 - 100)"
+        }
+      ]
+    },
+    {
+      "service_name": "Fitness Machine Service (FTMS)",
+      "uuid_16bit": "0x1826",
+      "uuid_128bit": "00001826-0000-1000-8000-00805f9b34fb",
+      "characteristics": [
+        {
+          "name": "Indoor Bike Data",
+          "uuid": "0x2AD2",
+          "properties": ["Notify"],
+          "description": "Kombinierte Telemetriedaten (Speed, Cadence, Power, Heart Rate, Resistance Level)"
+        }
+      ]
+    }
+  ]
+}

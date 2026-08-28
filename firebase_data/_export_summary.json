@@ -1,0 +1,15 @@
+{
+  "exportedAt": "2026-08-16T01:22:05.159Z",
+  "projectId": "der-wegweiser",
+  "collections": {
+    "charging_stations": 0,
+    "user_preferences": 0,
+    "user_memory_patterns": 0,
+    "user_tokens": 0,
+    "routes": 0,
+    "users": 0,
+    "analytics": 0,
+    "logs": 0,
+    "feedback": 0
+  }
+}

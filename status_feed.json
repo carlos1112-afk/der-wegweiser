@@ -1,0 +1,16 @@
+{
+  "agentStatus": "RUNNING",
+  "currentTask": "55-Minuten Autonome Entwicklungs-Session",
+  "progressPercent": 35,
+  "logs": [
+    {
+      "timestamp": "23:41:15",
+      "text": "🚀 Control Server Gestartet auf Port 3001"
+    },
+    {
+      "timestamp": "23:41:15",
+      "text": "⚡ Subagent (coder) & Lead Agent arbeiten autonom"
+    }
+  ],
+  "emergencyCommands": []
+}

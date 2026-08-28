@@ -1,0 +1,13 @@
+{
+  "appId": "app.derwegweiser.navi",
+  "appName": "Der Wegweiser",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "Geolocation": {
+      "requestPermissions": true
+    }
+  }
+}

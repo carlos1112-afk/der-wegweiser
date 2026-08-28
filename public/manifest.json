@@ -1,0 +1,24 @@
+{
+  "short_name": "Der Wegweiser",
+  "name": "Der Wegweiser - KI E-Bike Navi",
+  "description": "KI-optimierte E-Bike & Pedelec Navigation mit Offline-Karten und Ladeinfrastruktur",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#05081f",
+  "theme_color": "#05081f",
+  "display": "standalone",
+  "orientation": "portrait"
+}

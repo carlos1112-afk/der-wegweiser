@@ -1,0 +1,124 @@
+{
+  "name": "phi-pilot-fusion",
+  "displayName": "Phi Pilot Fusion",
+  "description": "Phi-3 based AI assistant with Pilot Studio features for AGY-IDE/VS Code. Replaces Gemini Code Assist.",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "phi-pilot-fusion-sidebar",
+          "title": "Phi Pilot",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "views": {
+      "phi-pilot-fusion-sidebar": [
+        {
+          "type": "webview",
+          "id": "phiPilotFusion.chatView",
+          "name": "Phi Pilot Chat",
+          "icon": "$(sparkle)"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "phiPilotFusion.openChat",
+        "title": "Phi Pilot: Open Chat",
+        "category": "Phi Pilot"
+      },
+      {
+        "command": "phiPilotFusion.openSettings",
+        "title": "Phi Pilot: Open Settings",
+        "category": "Phi Pilot"
+      },
+      {
+        "command": "phiPilotFusion.openTerminal",
+        "title": "Phi Pilot: Open Terminal",
+        "category": "Phi Pilot"
+      },
+      {
+        "command": "phiPilotFusion.clearChat",
+        "title": "Phi Pilot: Clear Chat",
+        "category": "Phi Pilot"
+      },
+      {
+        "command": "phiPilotFusion.runCommand",
+        "title": "Phi Pilot: Run Command",
+        "category": "Phi Pilot"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "phiPilotFusion.runCommand",
+        "key": "ctrl+shift+space",
+        "mac": "cmd+shift+space",
+        "when": "phiPilotFusion.active"
+      }
+    ],
+    "configuration": {
+      "title": "Phi Pilot Fusion",
+      "properties": {
+        "phiPilotFusion.huggingfaceApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "HuggingFace API Token for Phi-3 inference",
+          "scope": "application"
+        },
+        "phiPilotFusion.model": {
+          "type": "string",
+          "default": "microsoft/Phi-3-mini-4k-instruct",
+          "description": "HuggingFace model ID for Phi Pilot Fusion"
+        },
+        "phiPilotFusion.agent": {
+          "type": "string",
+          "default": "phi-pilot-fusion",
+          "description": "Active agent ID from the Pilot Studio registry"
+        },
+        "phiPilotFusion.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API key (overrides .env.local)",
+          "scope": "application"
+        },
+        "phiPilotFusion.openrouterApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenRouter API key (overrides .env.local)",
+          "scope": "application"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.80.0",
+    "@vscode/vsce": "^3.9.2",
+    "typescript": "^5.0.0"
+  },
+  "publisher": "pilotstudio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pilotstudio/phi-pilot-fusion"
+  }
+}

@@ -1,0 +1,43 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Charging Stations (Community-shared bike infrastructure)
+    match /charging_stations/{stationId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAuthenticated();
+    }
+
+    // User Preferences
+    match /user_preferences/{userId} {
+      allow read, write: if true; // Fallback for demo users
+    }
+
+    // User Memory Patterns
+    match /user_memory_patterns/{userId} {
+      allow read, write: if true; // Fallback for demo users
+    }
+
+    // User Token Accounts & Gamification
+    match /user_tokens/{userId} {
+      allow read, write: if true; // Fallback for demo users
+    }
+
+    // Saved Routes
+    match /routes/{routeId} {
+      allow read, write: if true;
+    }
+
+    // Default match-all for development & prototyping
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

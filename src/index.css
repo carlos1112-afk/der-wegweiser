@@ -1,0 +1,276 @@
+@import "leaflet/dist/leaflet.css";
+
+:root {
+  --bg-primary: #0a0d14;
+  --bg-secondary: #121824;
+  --bg-card: rgba(20, 27, 40, 0.75);
+  --accent-cyan: #00f0ff;
+  --accent-neon-green: #00ff66;
+  --accent-gold: #ffb700;
+  --accent-pink: #ff007f;
+  --text-primary: #f0f4f8;
+  --text-muted: #8a99ad;
+  --border-glass: rgba(0, 240, 255, 0.15);
+  --glow-cyan: 0 0 15px rgba(0, 240, 255, 0.35);
+  --glow-green: 0 0 15px rgba(0, 255, 102, 0.35);
+  --glow-gold: 0 0 15px rgba(255, 183, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.glass-pill {
+  background: rgba(18, 24, 36, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 9999px;
+  box-shadow: var(--glow-cyan);
+}
+
+/* Glowing Neon Elements */
+.glow-text-cyan {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.glow-text-green {
+  color: var(--accent-neon-green);
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+}
+
+.glow-text-gold {
+  color: var(--accent-gold);
+  text-shadow: 0 0 10px rgba(255, 183, 0, 0.6);
+}
+
+.btn-cyberpunk {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 255, 102, 0.1));
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+.btn-cyberpunk:hover {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(0, 255, 102, 0.3));
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.25), rgba(255, 0, 127, 0.15));
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.45), rgba(255, 0, 127, 0.3));
+  box-shadow: var(--glow-gold);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
+}
+
+/* Leaflet Dark Theme Overrides */
+.leaflet-container {
+  background-color: #0b0e17 !important;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.leaflet-tile {
+  filter: brightness(0.7) invert(1) contrast(1.35) hue-rotate(200deg) saturate(0.35) !important;
+}
+
+/* Custom Marker Pulsing Effect */
+.user-location-marker {
+  width: 20px;
+  height: 20px;
+  background-color: var(--accent-cyan);
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 20px var(--accent-cyan);
+  animation: pulse-marker 2s infinite;
+}
+
+@keyframes pulse-marker {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(0, 240, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0);
+  }
+}
+
+
+/* Scanner Animation */
+@keyframes scanline {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.scanner-line {
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-neon-green), transparent);
+  box-shadow: 0 0 15px var(--accent-neon-green);
+  animation: scanline 2.5s ease-in-out infinite;
+}
+
+/* 3D Cyberpunk Cockpit Perspective */
+.map-3d-perspective {
+  transform: perspective(900px) rotateX(45deg) scale(1.1);
+  transform-origin: center 80%;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.map-perspective-wrapper {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center 80%;
+}
+
+/* Glowing Cyberpunk Pulse Animations */
+@keyframes cyberpunk-pulse {
+  0% {
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 18px currentColor, 0 0 30px currentColor;
+    transform: scale(1.08);
+  }
+  100% {
+    box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+    transform: scale(1);
+  }
+}
+
+/* Waypoint & Charging Pins Styles */
+.cyberpunk-marker-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  font-weight: bold;
+  font-size: 14px;
+  animation: cyberpunk-pulse 2s infinite ease-in-out;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.marker-start {
+  background-color: var(--accent-neon-green);
+  color: #000000;
+  width: 34px;
+  height: 34px;
+  box-shadow: 0 0 15px var(--accent-neon-green);
+}
+
+.marker-end {
+  background-color: var(--accent-pink);
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  box-shadow: 0 0 15px var(--accent-pink);
+}
+
+.marker-charging {
+  background-color: var(--accent-neon-green);
+  color: #000000;
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 0 12px var(--accent-neon-green);
+}
+
+.marker-gastro {
+  background-color: var(--accent-gold);
+  color: #000000;
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 0 12px var(--accent-gold);
+}
+
+.marker-scenic {
+  background-color: var(--accent-cyan);
+  color: #000000;
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 0 12px var(--accent-cyan);
+}
+
+/* Route Polyline Pulse */
+.cyberpunk-polyline-pulse {
+  filter: drop-shadow(0 0 8px var(--accent-cyan)) drop-shadow(0 0 18px rgba(0, 240, 255, 0.8));
+  animation: polyline-pulse 2s infinite ease-in-out;
+}
+
+@keyframes polyline-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px var(--accent-cyan));
+    opacity: 0.85;
+  }
+  50% {
+    filter: drop-shadow(0 0 16px var(--accent-cyan)) drop-shadow(0 0 28px rgba(0, 240, 255, 0.9));
+    opacity: 1;
+  }
+}
+
