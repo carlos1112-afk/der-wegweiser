@@ -14,6 +14,7 @@ import { OfflineMapService } from './services/offlineMapService';
 import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
+import { useAppLifecycle } from './hooks/useAppLifecycle';
 
 // Code-Splitting: Lazy load heavy modals for sub-second cold start
 const AnticipationModal = lazy(() =>
@@ -54,9 +55,17 @@ const ConsentModal = lazy(() =>
 );
 
 export function App() {
-  const geo = useGeolocation();
-  const userLocation = { lat: geo.lat, lng: geo.lng };
-  const wakeLock = useScreenWakeLock();
+  // Modal States (Declared first to supply active modal context to lifecycle)
+  const [showAnticipationModal, setShowAnticipationModal] = useState(true);
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [showLoungeModal, setShowLoungeModal] = useState(false);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false);
+  const [showBoschModal, setShowBoschModal] = useState(false);
+  const [showRideSummaryModal, setShowRideSummaryModal] = useState(false);
+  const [showGpxImportModal, setShowGpxImportModal] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
+  const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
 
   // State
   const [currentRoute, setCurrentRoute] = useState<Route | null>(null);
@@ -75,24 +84,28 @@ export function App() {
     motorAssistMode: 'auto',
   });
 
+  // App Lifecycle Controller
+  const activeModalName = showLoungeModal
+    ? 'lounge'
+    : showScannerModal
+    ? 'scanner'
+    : showAnticipationModal
+    ? 'anticipation'
+    : null;
+  const isNavigating = !showAnticipationModal && !!currentRoute;
+  const lifecycle = useAppLifecycle(activeModalName, isNavigating, telemetry.speedKmH);
+
+  // Hardware & Sensor Bindings throttled by Lifecycle Mode
+  const geo = useGeolocation(lifecycle.isHighAccuracyGps);
+  const userLocation = { lat: geo.lat, lng: geo.lng };
+  useScreenWakeLock(lifecycle.isWakeLockActive || isOledModeActive);
+
   // Legal & Consent State
   const [showConsentModal, setShowConsentModal] = useState<boolean>(() => {
     return !localStorage.getItem('der_wegweiser_legal_consent');
   });
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms' | 'imprint' | 'cockpit'>('terms');
-
-  // Modal States
-  const [showAnticipationModal, setShowAnticipationModal] = useState(true);
-  const [showScannerModal, setShowScannerModal] = useState(false);
-  const [showLoungeModal, setShowLoungeModal] = useState(false);
-  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
-  const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false);
-  const [showBoschModal, setShowBoschModal] = useState(false);
-  const [showRideSummaryModal, setShowRideSummaryModal] = useState(false);
-  const [showGpxImportModal, setShowGpxImportModal] = useState(false);
-  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
-  const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
 
   // Initialize Data & Pre-generate "Heute-Tour"
   useEffect(() => {
@@ -188,13 +201,7 @@ export function App() {
   };
 
   const handleToggleOledMode = () => {
-    if (!isOledModeActive) {
-      wakeLock.requestWakeLock();
-      setIsOledModeActive(true);
-    } else {
-      wakeLock.releaseWakeLock();
-      setIsOledModeActive(false);
-    }
+    setIsOledModeActive((prev) => !prev);
   };
 
   const handleToggleSunlightMode = () => {
@@ -278,6 +285,38 @@ export function App() {
 
         {/* Action Buttons HUD */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Lifecycle Mode Indicator Pill */}
+          <div
+            className="glass-pill"
+            style={{
+              padding: '6px 12px',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              borderColor:
+                lifecycle.currentMode === 'ride'
+                  ? 'var(--accent-cyan)'
+                  : lifecycle.currentMode === 'charge'
+                  ? 'var(--accent-gold)'
+                  : 'var(--accent-neon-green)',
+              color:
+                lifecycle.currentMode === 'ride'
+                  ? 'var(--accent-cyan)'
+                  : lifecycle.currentMode === 'charge'
+                  ? 'var(--accent-gold)'
+                  : 'var(--accent-neon-green)',
+            }}
+            title="App Lifecycle: Module & Sensoren laufen nur bei echtem Bedarf zur Akkusparung"
+          >
+            {lifecycle.currentMode === 'ride'
+              ? '⚡ Fahrt-Modus'
+              : lifecycle.currentMode === 'charge'
+              ? '🔋 Lade-Lounge'
+              : '🗺️ Planung'}
+          </div>
+
           {/* GPX Track Recorder Pill */}
           <GpxRecorderHUD
             userLocation={userLocation}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export function useScreenWakeLock() {
+export function useScreenWakeLock(enabled: boolean = false) {
   const [isSupported] = useState<boolean>(
     typeof window !== 'undefined' && 'wakeLock' in navigator
   );
@@ -13,12 +13,10 @@ export function useScreenWakeLock() {
       const sentinel = await (navigator as any).wakeLock.request('screen');
       setWakeLockSentinel(sentinel);
       setIsLocked(true);
-      console.log('[WakeLock] Screen Wake Lock acquired.');
 
       sentinel.addEventListener('release', () => {
         setIsLocked(false);
         setWakeLockSentinel(null);
-        console.log('[WakeLock] Screen Wake Lock released.');
       });
       return true;
     } catch (err) {
@@ -30,16 +28,29 @@ export function useScreenWakeLock() {
 
   const releaseWakeLock = useCallback(async () => {
     if (wakeLockSentinel) {
-      await wakeLockSentinel.release();
+      try {
+        await wakeLockSentinel.release();
+      } catch (e) {
+        console.warn('[WakeLock] Release error:', e);
+      }
       setWakeLockSentinel(null);
       setIsLocked(false);
     }
   }, [wakeLockSentinel]);
 
+  // Automatically acquire or release based on enabled state
+  useEffect(() => {
+    if (enabled) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+  }, [enabled, requestWakeLock, releaseWakeLock]);
+
   // Re-acquire lock if tab regains visibility
   useEffect(() => {
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && isLocked && !wakeLockSentinel) {
+      if (document.visibilityState === 'visible' && enabled && !wakeLockSentinel) {
         await requestWakeLock();
       }
     };
@@ -47,7 +58,7 @@ export function useScreenWakeLock() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isLocked, wakeLockSentinel, requestWakeLock]);
+  }, [enabled, wakeLockSentinel, requestWakeLock]);
 
   return {
     isSupported,

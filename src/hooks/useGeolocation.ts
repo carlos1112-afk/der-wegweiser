@@ -12,7 +12,7 @@ interface GeolocationState {
 
 const DEFAULT_LOCATION = { lat: 52.52, lng: 13.405 }; // Berlin Alexanderplatz
 
-export function useGeolocation() {
+export function useGeolocation(enableHighAccuracy: boolean = true) {
   const [state, setState] = useState<GeolocationState>({
     lat: DEFAULT_LOCATION.lat,
     lng: DEFAULT_LOCATION.lng,
@@ -52,9 +52,9 @@ export function useGeolocation() {
         }));
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
+        enableHighAccuracy,
+        timeout: enableHighAccuracy ? 10000 : 25000,
+        maximumAge: enableHighAccuracy ? 0 : 30000,
       }
     );
 
@@ -62,7 +62,7 @@ export function useGeolocation() {
       navigator.geolocation.clearWatch(watchId);
       setState(s => ({ ...s, isTracking: false }));
     };
-  }, []);
+  }, [enableHighAccuracy]);
 
   return state;
 }
