@@ -11,7 +11,7 @@ import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
-import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud } from 'lucide-react';
+import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 
@@ -46,6 +46,12 @@ const EmergencyRangeModal = lazy(() =>
 const StationReviewModal = lazy(() =>
   import('./components/ChargingScanner/StationReviewModal').then((m) => ({ default: m.StationReviewModal }))
 );
+const LegalModal = lazy(() =>
+  import('./components/Legal/LegalModal').then((m) => ({ default: m.LegalModal }))
+);
+const ConsentModal = lazy(() =>
+  import('./components/Legal/ConsentModal').then((m) => ({ default: m.ConsentModal }))
+);
 
 export function App() {
   const geo = useGeolocation();
@@ -68,6 +74,13 @@ export function App() {
     riderPowerWatts: 0,
     motorAssistMode: 'auto',
   });
+
+  // Legal & Consent State
+  const [showConsentModal, setShowConsentModal] = useState<boolean>(() => {
+    return !localStorage.getItem('der_wegweiser_legal_consent');
+  });
+  const [showLegalModal, setShowLegalModal] = useState(false);
+  const [legalTab, setLegalTab] = useState<'privacy' | 'terms' | 'imprint'>('terms');
 
   // Modal States
   const [showAnticipationModal, setShowAnticipationModal] = useState(true);
@@ -352,6 +365,19 @@ export function App() {
           >
             <Sparkles size={15} /> Tour
           </button>
+
+          {/* Legal / DSGVO Button */}
+          <button
+            className="btn-cyberpunk hide-on-landscape"
+            onClick={() => {
+              setLegalTab('terms');
+              setShowLegalModal(true);
+            }}
+            style={{ padding: '8px 12px' }}
+            title="Rechtliches, AGB & Datenschutz"
+          >
+            <ShieldCheck size={15} /> Recht
+          </button>
         </div>
       </div>
 
@@ -478,6 +504,27 @@ export function App() {
             station={selectedStationForReview}
             onAddReview={handleAddStationReview}
             onClose={() => setSelectedStationForReview(null)}
+          />
+        )}
+
+        {/* Initial First-Launch Legal Consent Modal */}
+        {showConsentModal && (
+          <ConsentModal
+            isOpen={showConsentModal}
+            onAccept={() => setShowConsentModal(false)}
+            onOpenDetails={(tab) => {
+              setLegalTab(tab);
+              setShowLegalModal(true);
+            }}
+          />
+        )}
+
+        {/* Full Legal & Privacy Terms Modal */}
+        {showLegalModal && (
+          <LegalModal
+            isOpen={showLegalModal}
+            initialTab={legalTab}
+            onClose={() => setShowLegalModal(false)}
           />
         )}
       </Suspense>
