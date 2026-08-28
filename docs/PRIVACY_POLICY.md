@@ -7,9 +7,12 @@ Der Schutz Ihrer persönlichen Daten ist uns ein zentrales Anliegen. Die vorlieg
 ---
 
 ## 1. Verantwortlicher für die Datenverarbeitung
-**Carlos — Der Wegweiser**  
-E-Mail: **carlos.condios96@gmail.com**  
+**Pascal Gregor**  
+Lindenstraße 8, 02979 Spreetal  
+E-Mail: **wegweiser-app@proton.me**  
 Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`, Art. 28 DSGVO DPA).
+
+*Hinweis zur Reichweite der Verarbeitungszwecke*: Die in dieser Erklärung genannten Zwecke und Rechtsgrundlagen beziehen sich auf den Betrieb, die Bereitstellung, Wartung und kontinuierliche Weiterentwicklung von "Der Wegweiser" einschließlich technisch oder organisatorisch nachfolgender Versionen desselben Dienstes durch den Verantwortlichen.
 
 ---
 
@@ -39,7 +42,7 @@ Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`
 ### c) Ladeinfrastruktur & Community-Meldungen
 * **Zweck**: Hinzufügen, Korrigieren und Verifizieren von E-Bike Ladesäulen, Schlauchautomaten und Wegequalitäten (Map-Quests).
 * **Rechtsgrundlage**: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Netzwerkintegrität und Ladesicherheit).
-* **Widerspruchsrecht (Art. 21 DSGVO)**: Nutzer können der Weiterverarbeitung gemeldeter Punkte jederzeit formlos per E-Mail an carlos.condios96@gmail.com widersprechen.
+* **Widerspruchsrecht (Art. 21 DSGVO)**: Nutzer können der Weiterverarbeitung gemeldeter Punkte jederzeit formlos per E-Mail an wegweiser-app@proton.me widersprechen.
 
 ### d) § 25 TDDDG (Zugriff auf Endgeräte-Speicher)
 * **Technisch erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG)**: Speicherung von aktiven Routensitzungen, essentiellen Offline-Kartenkacheln, Display-WakeLock-Zuständen und Einwilligungs-Status im lokalen Speicher (`localStorage` / `IndexedDB`).
@@ -71,16 +74,16 @@ Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`
 ---
 
 ## 6. Betroffenenrechte (Art. 15–22 DSGVO)
-* **Auskunft & Berichtigung (Art. 15, 16 DSGVO)**: Formlos per E-Mail an **carlos.condios96@gmail.com**.
+* **Auskunft & Berichtigung (Art. 15, 16 DSGVO)**: Formlos per E-Mail an **wegweiser-app@proton.me**.
 * **Löschung & Datenübertragbarkeit (Art. 17, 20 DSGVO)**: Über das integrierte Daten-Cockpit im Menü `Recht -> Daten-Cockpit` oder per E-Mail.
 * **Widerruf von Einwilligungen (Art. 7 Abs. 3 DSGVO)**: Jederzeit im Einstellungs-Menü der App änderbar.
 * **Beschwerderecht (Art. 77 DSGVO)**: Recht auf Beschwerde bei der zuständigen Datenschutz-Aufsichtsbehörde (z. B. Landesbeauftragte für Datenschutz).
 
 ---
 
-## 7. Datenbankherstellerrecht (§§ 87a ff. UrhG) & No-Sale Policy
-1. **Investitionsschutz nach § 87a UrhG**: Die Gesamtheit der Navigationsdatenbank stellt eine geschützte Datenbank des Betreibers (Carlos) dar. Nutzer erhalten kein Eigentum an der Gesamt-Datenbank.
-2. **Nutzungsrechte**: Übermittelte Korrekturen und Wegeattribute werden dem Betreiber als einfaches, unentgeltliches Nutzungsrecht zur Pflege der Navigationskarte eingeräumt.
+## 7. Datenbankherstellerrecht (§§ 87a ff. UrhG), Rechtsnachfolge & No-Sale Policy
+1. **Investitionsschutz nach § 87a UrhG**: Die Gesamtheit der Navigationsdatenbank stellt eine geschützte Datenbank des Diensteanbieters (Pascal Gregor) dar.
+2. **Nutzungsrechte & Weiterführung**: Übermittelte Korrekturen und Wegeattribute werden dem Diensteanbieter als einfaches, unentgeltliches Nutzungsrecht zur Pflege der Navigationskarte eingeräumt. Bei Fortführung des Betriebs unter einer eingetragenen Geschäftsbezeichnung oder als Einzelunternehmen bleibt die Rechtsinhaberschaft von Pascal Gregor unverändert bestehen. Eine spätere Übertragung auf eine eigenständige juristische Person (z. B. UG/GmbH) erfolgt unter Einhaltung eines gesonderten, transparenten Verantwortlichenwechsels gem. DSGVO.
 3. **Absolutes Verkaufsverbot**: Ein Weiterverkauf von Nutzerdaten an Datenhändler (Data Brokers) oder fremde Werbekonzerne ist für alle Zeiten vertraglich und datenschutzrechtlich ausgeschlossen.
 
 

@@ -183,8 +183,8 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 3 Urheberrechte, Datenbankherstellerrecht &amp; Nutzungsrechte</h4>
             <p>
-              (1) Der Betreiber (Carlos) ist Hersteller der aggregierten Navigationsdatenbank gem. §§ 87a ff. UrhG.<br />
-              (2) Soweit der Nutzer Wegezustandsmeldungen, Quests oder Bewertungen übermittelt, räumt er dem Betreiber hieran ein einfaches, unentgeltliches, zeitlich und räumlich unbeschränktes Nutzungsrecht zur Integration in das Navigationssystem ein. Personenbezogene Rohdaten verbleiben beim Betreiber geschützt und werden nicht veräußert.
+              (1) Der Diensteanbieter (Pascal Gregor) ist Hersteller der aggregierten Navigations- und Topographiedatenbank gem. §§ 87a ff. UrhG.<br />
+              (2) Soweit der Nutzer Wegezustandsmeldungen, Quests oder Bewertungen übermittelt, räumt er dem Diensteanbieter hieran ein einfaches, unentgeltliches, zeitlich und räumlich unbeschränktes Nutzungsrecht zur dauerhaften Integration in das Navigationssystem "Der Wegweiser" einschließlich künftiger Versionen desselben Dienstes ein.
             </p>
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 4 Widerrufsbelehrung &amp; Digitale Inhalte (§ 356 Abs. 5 BGB)</h4>
@@ -192,9 +192,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               Bei Erwerb digitaler Tokens/Pässe erlischt das 14-tägige gesetzliche Widerrufsrecht vorzeitig, wenn der Nutzer im Checkout ausdrücklich zustimmt, dass vor Ablauf der Frist mit der Ausführung begonnen wird, und seine Kenntnis über den Verlust des Widerrufsrechts bestätigt.
             </p>
 
-            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Barrierefreiheit (BFSG)</h4>
+            <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Barrierefreiheit (BFSG) &amp; Diensteanbieter</h4>
             <p>
-              Gemäß § 3 Abs. 1 Barrierefreiheitsstärkungsgesetz (BFSG) fällt das Angebot unter die gesetzliche Kleinstunternehmer-Ausnahme (unter 10 Mitarbeiter und Jahresumsatz &le; 2 Mio. €). Die App bietet dennoch hohe Kontraste (Sunlight Mode) und skalierbare Schriften.
+              (1) Gemäß § 3 Abs. 1 Barrierefreiheitsstärkungsgesetz (BFSG) fällt das Angebot unter die gesetzliche Kleinstunternehmer-Ausnahme (unter 10 Mitarbeiter und Jahresumsatz &le; 2 Mio. €).<br />
+              (2) Vertragspartner ist Pascal Gregor. Eine spätere Fortführung unter einer behördlich angemeldeten Geschäftsbezeichnung oder als Einzelunternehmen berührt die bestehenden Verträge und Rechte nicht, da die Rechtsidentität des Inhabers gewahrt bleibt.
             </p>
           </div>
         )}
@@ -204,9 +205,13 @@ export const LegalModal: React.FC<LegalModalProps> = ({
           <div style={{ fontSize: '0.82rem', lineHeight: '1.5', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>1. Verantwortlicher &amp; Kontakt</h4>
             <p>
-              Carlos — Der Wegweiser<br />
-              E-Mail: <strong>carlos.condios96@gmail.com</strong><br />
-              Server: Google Cloud Platform (Frankfurt `europe-west3`, Art. 28 DSGVO DPA).
+              <strong>Pascal Gregor</strong><br />
+              Lindenstraße 8, 02979 Spreetal<br />
+              E-Mail: <strong>wegweiser-app@proton.me</strong><br />
+              Server: Google Cloud Platform (Frankfurt `europe-west3`, Art. 28 DSGVO DPA).<br />
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Die Verarbeitungszwecke umfassen den Betrieb, die Bereitstellung und Weiterentwicklung von "Der Wegweiser" einschließlich nachfolgender Versionen des Dienstes durch den Verantwortlichen.
+              </span>
             </p>
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>2. Verarbeitung von Standortdaten (Pseudonymisierung)</h4>
@@ -228,7 +233,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>5. Betroffenenrechte &amp; Daten-Löschmatrix</h4>
             <p>
-              * <strong>Art. 17 DSGVO (Löschung)</strong>: Lokale Daten können mit 1 Klick im Cockpit gelöscht werden. Für Cloud-Leads oder Einträge genügt eine E-Mail an carlos.condios96@gmail.com.<br />
+              * <strong>Art. 17 DSGVO (Löschung)</strong>: Lokale Daten können mit 1 Klick im Cockpit gelöscht werden. Für Cloud-Leads oder Einträge genügt eine E-Mail an wegweiser-app@proton.me.<br />
               * <strong>Art. 20 DSGVO (Export)</strong>: 1-Klick JSON-Export im Daten-Cockpit.<br />
               * <strong>Art. 21 DSGVO (Widerspruch)</strong>: Gegen Verarbeitungen nach Art. 6 Abs. 1 lit. f DSGVO kann jederzeit widersprochen werden.
             </p>
@@ -241,8 +246,11 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</h4>
             <p>
               <strong>Der Wegweiser — Autonomous E-Bike Co-Pilot</strong><br />
-              Diensteanbieter: Carlos<br />
-              E-Mail: carlos.condios96@gmail.com<br />
+              Diensteanbieter / Verantwortlich für den Inhalt:<br />
+              <strong>Pascal Gregor</strong><br />
+              Lindenstraße 8<br />
+              02979 Spreetal<br />
+              E-Mail: <strong>wegweiser-app@proton.me</strong><br />
               EU-Streitbeilegung: Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: https://ec.europa.eu/consumers/odr/
             </p>
 
