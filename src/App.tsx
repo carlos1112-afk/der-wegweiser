@@ -7,6 +7,9 @@ import { ScannerModal } from './components/ChargingScanner/ScannerModal';
 import { LoungeModal } from './components/ChargeAndEarn/LoungeModal';
 import { AnalyticsModal } from './components/Analytics/AnalyticsModal';
 import { VoiceSettingsModal } from './components/AiAssistant/VoiceSettingsModal';
+import { BoschConnectModal } from './components/Ble/BoschConnectModal';
+import { GpxRecorderHUD } from './components/Recording/GpxRecorderHUD';
+import { RideSummaryModal } from './components/Recording/RideSummaryModal';
 import { OledBlackMode } from './components/DisplayModes/OledBlackMode';
 import { FloatingMicButton } from './components/AiAssistant/FloatingMicButton';
 import type { Route, ChargingStation, LiveBikeTelemetry, UserPreferences, UserMemoryPattern } from './types/navigation';
@@ -43,6 +46,8 @@ export function App() {
   const [showLoungeModal, setShowLoungeModal] = useState(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false);
+  const [showBoschModal, setShowBoschModal] = useState(false);
+  const [showRideSummaryModal, setShowRideSummaryModal] = useState(false);
 
   // Initialize Data & Pre-generate "Heute-Tour"
   useEffect(() => {
@@ -167,13 +172,25 @@ export function App() {
         </div>
 
         {/* Battery & Telemetry HUD */}
-        <BatteryHUD telemetry={telemetry} currentRoute={currentRoute} onConnectBLE={handleConnectBLE} />
+        <BatteryHUD
+          telemetry={telemetry}
+          currentRoute={currentRoute}
+          onConnectBLE={handleConnectBLE}
+          onOpenBoschModal={() => setShowBoschModal(true)}
+        />
 
         {/* Weather & Wind HUD */}
         <WeatherHUD userLocation={userLocation} />
 
         {/* Action Buttons HUD */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* GPX Track Recorder Pill */}
+          <GpxRecorderHUD
+            userLocation={userLocation}
+            telemetry={telemetry}
+            onFinishRide={() => setShowRideSummaryModal(true)}
+          />
+
           {/* Token Balance */}
           <div className="glass-pill glow-text-gold" style={{ padding: '8px 16px', fontWeight: 'bold' }}>
             🪙 {tokenBalance} Tokens
@@ -278,6 +295,27 @@ export function App() {
         <VoiceSettingsModal
           isOpen={showVoiceSettingsModal}
           onClose={() => setShowVoiceSettingsModal(false)}
+        />
+      )}
+
+      {/* Bosch Smart System BES3 Modal */}
+      {showBoschModal && (
+        <BoschConnectModal
+          isOpen={showBoschModal}
+          onConnected={(liveData) => {
+            setTelemetry(liveData);
+            setShowBoschModal(false);
+          }}
+          onClose={() => setShowBoschModal(false)}
+        />
+      )}
+
+      {/* Ride Summary & GPX Export Modal */}
+      {showRideSummaryModal && (
+        <RideSummaryModal
+          isOpen={showRideSummaryModal}
+          onAddTokens={handleAddTokens}
+          onClose={() => setShowRideSummaryModal(false)}
         />
       )}
     </div>

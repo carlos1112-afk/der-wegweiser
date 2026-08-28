@@ -7,6 +7,7 @@ interface BatteryHUDProps {
   telemetry: LiveBikeTelemetry;
   currentRoute: Route | null;
   onConnectBLE: () => void;
+  onOpenBoschModal?: () => void;
 }
 
 const manufacturerColors: Record<BikeManufacturer, { bg: string; text: string; label: string }> = {
@@ -19,7 +20,7 @@ const manufacturerColors: Record<BikeManufacturer, { bg: string; text: string; l
   generic: { bg: 'rgba(148, 163, 184, 0.2)', text: '#94a3b8', label: 'BLE SENSOR' },
 };
 
-export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute, onConnectBLE }) => {
+export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute, onConnectBLE, onOpenBoschModal }) => {
   const isBatterySafe = currentRoute ? currentRoute.isBatterySafe : true;
   const [showModeSelector, setShowModeSelector] = useState(false);
   const mBadge = manufacturerColors[telemetry.manufacturer || 'generic'];
@@ -176,11 +177,28 @@ export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute,
         </>
       )}
 
-      {/* Connect BLE Button if not connected */}
+      {/* Connect BLE Buttons */}
       {!telemetry.isConnected && (
-        <button className="btn-cyberpunk" onClick={onConnectBLE} style={{ marginLeft: 'auto', fontSize: '0.75rem', padding: '6px 12px' }}>
-          eBike BLE Sync
-        </button>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px' }}>
+          {onOpenBoschModal && (
+            <button
+              className="btn-cyberpunk"
+              onClick={onOpenBoschModal}
+              style={{
+                fontSize: '0.75rem',
+                padding: '6px 10px',
+                borderColor: '#00509d',
+                color: '#60a5fa',
+              }}
+              title="Bosch Smart System BES3 Kopplungs-Assistent"
+            >
+              Bosch BES3
+            </button>
+          )}
+          <button className="btn-cyberpunk" onClick={onConnectBLE} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
+            Auto-BLE
+          </button>
+        </div>
       )}
     </div>
   );
