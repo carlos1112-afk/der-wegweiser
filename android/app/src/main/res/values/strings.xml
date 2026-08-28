@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Der Wegweiser</string>
+    <string name="title_activity_main">Der Wegweiser</string>
+    <string name="package_name">app.derwegweiser.navi</string>
+    <string name="custom_url_scheme">app.derwegweiser.navi</string>
+</resources>

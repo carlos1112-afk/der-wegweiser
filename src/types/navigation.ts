@@ -91,13 +91,22 @@ export interface Route {
   chargingStopsOnRoute: ChargingStation[];
 }
 
+export type BikeManufacturer = 'bosch' | 'shimano' | 'specialized' | 'mahle' | 'fazua' | 'bafang' | 'generic';
+
 export interface LiveBikeTelemetry {
   isConnected: boolean;
   deviceName?: string;
+  manufacturer?: BikeManufacturer;
   batteryPercent: number;
+  batteryWhRemaining?: number;
+  batteryHealthPercent?: number; // SOH
   speedKmH: number;
   cadenceRpm: number;
   riderPowerWatts: number;
+  motorPowerWatts?: number;
+  motorTemperatureC?: number;
+  currentGear?: number; // Di2 electronic shifting
+  rangeRemainingKm?: number;
   motorAssistMode: 'eco' | 'tour' | 'auto' | 'turbo' | 'off';
 }
 
