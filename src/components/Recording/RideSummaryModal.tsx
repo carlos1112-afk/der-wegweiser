@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trophy, Download, Share2, Sparkles, CheckCircle2, X } from 'lucide-react';
 import { GpxRecorderService, type RideSummary } from '../../services/gpxRecorderService';
+import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
 import { SoundFxService } from '../../services/soundFxService';
 import confetti from 'canvas-confetti';
 
@@ -36,9 +37,20 @@ export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
     await GpxRecorderService.shareGpxTrack(`wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`);
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     SoundFxService.playSuccessChime();
     onAddTokens(summary.tokensEarned);
+
+    // Anonymously sanitize and merge navigational intelligence into collective map
+    if (summary.coordinates && summary.coordinates.length > 0) {
+      await SpatialTelemetrySanitizerService.sanitizeAndMergeTrack(
+        summary.coordinates,
+        summary.elevationGainM,
+        summary.distanceKm,
+        summary.energyWhUsed
+      );
+    }
+
     onClose();
   };
 

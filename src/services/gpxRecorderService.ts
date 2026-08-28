@@ -21,6 +21,7 @@ export interface RideSummary {
   energyWhUsed: number;
   tokensEarned: number;
   trackPointsCount: number;
+  coordinates: [number, number][];
   gpxXmlString: string;
 }
 
@@ -162,6 +163,7 @@ export class GpxRecorderService {
     const energyWhUsed = Math.round((socDiff / 100) * 625);
 
     const gpxXmlString = this.generateGpxXml();
+    const coordinates: [number, number][] = this.recordedPoints.map((p) => [p.lat, p.lng]);
 
     return {
       distanceKm,
@@ -172,6 +174,7 @@ export class GpxRecorderService {
       energyWhUsed,
       tokensEarned,
       trackPointsCount: this.recordedPoints.length,
+      coordinates,
       gpxXmlString,
     };
   }
