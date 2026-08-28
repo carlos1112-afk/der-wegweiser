@@ -3,6 +3,7 @@ import { getAI, getGenerativeModel, AgentPlatformBackend, GoogleAIBackend } from
 import { app as firebaseApp } from '../firebase';
 import type { Route, UserPreferences, UserMemoryPattern, PlugType } from '../types/navigation';
 import { RoutingService } from './routingService';
+import { AiGatewayService } from './ai/aiGatewayService';
 
 // =============================================================================
 // Agent / Model Registry
@@ -361,7 +362,7 @@ export class AiAssistantService {
     userLng: number,
     userPrefs: UserPreferences,
     memory: UserMemoryPattern,
-    modelId: ModelId = DEFAULT_MODEL
+    _modelId: ModelId = DEFAULT_MODEL
   ): Promise<Route> {
     const targetDistanceKm = memory.preferredDistanceKm || 28;
     const mainTheme = memory.frequentDestinations?.[0] || 'Badesee';
@@ -382,16 +383,14 @@ export class AiAssistantService {
       userPrefs
     );
 
-    const prompt = `Erstelle eine kurze, begeisternde Story (max. 2-3 Sätze) auf Deutsch für eine E-Bike Tour.
-Details:
-- Startort Koordinate: ${userLat}, ${userLng}
-- Distanz: ${targetDistanceKm} km
-- Hauptziel/Thema: ${mainTheme}
-- Präferenzen: ${memory.aiNotes?.join(', ') || 'Asphaltierte Wege & Ladesäulen'}
-- Fahrrad-Typ: ${userPrefs.bikeType}
-Antworte ausschließlich mit dem fertigen Story-Text.`;
-
-    const storyText = await this.callModel(modelId, prompt);
+    // Route through vendor-neutral AI Gateway
+    const storyText = await AiGatewayService.planRoute({
+      start: { lat: userLat, lng: userLng },
+      distanceKm: targetDistanceKm,
+      elevationGainM: route.elevationGainM || 120,
+      surfaceType: userPrefs.preferredSurface === 'asphalt' ? 'Asphalt' : 'Mischbelag',
+      isScoutMission: route.isScoutMission,
+    });
     if (storyText?.trim()) route.aiStory = storyText.trim();
 
     return route;

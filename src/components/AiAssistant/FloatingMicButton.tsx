@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mic, Volume2 } from 'lucide-react';
 import { VoiceGuidanceService } from '../../services/voiceGuidanceService';
+import { AiGatewayService } from '../../services/ai/aiGatewayService';
 import type { LiveBikeTelemetry, Route } from '../../types/navigation';
 
 interface FloatingMicButtonProps {
@@ -96,9 +97,18 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
       VoiceGuidanceService.speak(msg);
       onRegenerateTour();
     } else {
-      const msg = `Ich habe verstanden: "${cmd}". Was möchtest du tun?`;
-      setLastResponse(msg);
-      VoiceGuidanceService.speak(msg);
+      AiGatewayService.voiceDialogue({
+        userQuery: cmd,
+        batteryPercent: telemetry.batteryPercent,
+        speedKmH: telemetry.speedKmH,
+      }).then((reply) => {
+        setLastResponse(reply);
+        VoiceGuidanceService.speak(reply);
+      }).catch(() => {
+        const msg = `Ich habe verstanden: "${cmd}". Alles im Blick.`;
+        setLastResponse(msg);
+        VoiceGuidanceService.speak(msg);
+      });
     }
   };
 
