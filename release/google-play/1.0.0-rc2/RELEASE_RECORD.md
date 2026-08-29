@@ -7,7 +7,8 @@
 * **Version Code**: `1` — **VERBRAUCHT (VON GOOGLE PLAY AKZEPTIERT)**
 * **Distribution**: `Kostenlos` (Free)
 * **Aktiver Track**: `Internal Testing` (Interner Test — Google Play)
-* **Release Commit**: `dff62de748752b49d10435577a277a197fafa21d`
+* **Installationsquelle**: `Google Play Internal Testing` (Offizieller Store-Build)
+* **Release Commit**: `eb8cf54c844f3acdc0b435ad5fa98167764f7d87`
 * **Artifact Source Commit (Binary)**: `8f07c7f30df618ceb900b56a047a73064a06c402`
 * **Git Tag**: `v1.0.0-rc2`
 * **Build-Datum**: `2026-08-29`
@@ -25,7 +26,20 @@
 * **Upload-Zertifikat Subject**: `CN=Der Wegweiser Android Upload Key, O=Der Wegweiser, C=DE`
 * **Upload-Key SHA-256**: `61:69:23:60:E5:96:27:DC:75:7E:15:67:C9:7C:C9:62:ED:EC:1F:C1:1F:85:65:C7:46:42:CD:83:AD:03:CC:10`
 * **Upload-Key SHA-1**: `88:CB:0D:62:3F:42:33:CD:5D:9F:7B:04:D4:34:67:07:08:CE:2B:79`
-* **Google Play App Signing**: Von Google Play eingerichtet und in Firebase Console registriert.
+* **Google Play App Signing**: Von Google Play eingerichtet und in Firebase Console unter *Android-App `app.derwegweiser.navi`* registriert.
+
+---
+
+## 📱 Reale Geräte-Validierung (Physical Device Test)
+
+* **Status**: **PASSED (BESTANDEN)**
+* **Geprüfte Punkte**:
+  * Lifecycle: Kaltstart, Warmstart, Force-Stop & Reboot ohne Datenverlust.
+  * Berechtigungen: Präziser Standort & Notification granted; 0 Abfrage von `ACCESS_BACKGROUND_LOCATION`.
+  * Navigation & FGS: Turn-by-Turn, persistente Foreground Notification, Audioführung bei gesperrtem Bildschirm, Re-Routing.
+  * FGS-Demovideo: **FGS VIDEO READY** (30s Aufnahme am echten Store-Build erstellt).
+  * Offline-Modus: Flugmodus mit Offline-Kacheln, Routing-Korridor und Vertrauens-Degradationswarnung.
+  * Datenschutz & DSGVO Art. 17: Datenexport und vollständige Kontolöschung via In-App-Cockpit.
 
 ---
 
@@ -35,16 +49,9 @@
 
 ---
 
-## 🔒 Standort- & Berechtigungs-Status
+## 👥 Closed Testing Anforderungen (Nächste Phase)
 
-* **ACCESS_BACKGROUND_LOCATION**: **Entfernt (Nicht im Manifest)**. Keine gesonderte Background-Location-Permission-Erklärung erforderlich.
-* **Standortberechtigungen im Manifest**: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`.
-* **Vordergrunddienste & Benachrichtigungen**: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, `POST_NOTIFICATIONS`, `WAKE_LOCK`.
-* **Play Console Erklärungen**: `PLAY_FOREGROUND_SERVICE_DECLARATION.md` und `PLAY_PRECISE_LOCATION_DECLARATION.md` vollständig hinterlegt.
-
----
-
-## 🌐 Live-Web-Ressourcen (LIVE VERIFIED)
-
-* **Datenschutzerklärung (HTTPS)**: `https://der-wegweiser.web.app/privacy.html` — **LIVE VERIFIED (HTTP 200)**
-* **Konto- & Datenlöschseite (HTTPS)**: `https://der-wegweiser.web.app/account-deletion.html` — **LIVE VERIFIED (HTTP 200)**
+* **Google Play Policy (für persönliche Entwicklerkonten ab Nov 2023)**:
+  * Mindestanzahl Tester: **12 Tester**
+  * Mindestdauer: **14 aufeinanderfolgende Tage Opt-in**
+  * Track: **Closed Testing** (Geschlossener Test)
