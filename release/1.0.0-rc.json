@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "releaseCandidate": "RC2",
-  "releaseCommit": "eb8cf54c844f3acdc0b435ad5fa98167764f7d87",
+  "releaseCommit": "8db3bc29d88bfbeddc5daf78c08cb4a3001ba7f8",
   "gitTag": "v1.0.0-rc2",
   "android": {
     "versionCode": 1,
@@ -19,15 +19,20 @@
     "internalTestingActive": true,
     "installSource": "Google Play Internal Testing",
     "realDeviceTestPassed": true,
+    "aiGatewayDeviceTestPassed": true,
+    "weatherDeviceTestPassed": true,
+    "elevationDeviceTestPassed": true,
+    "exportDeviceTestPassed": true,
+    "bleReconnectTestPassed": true,
     "fgsVideoReady": true,
-    "blePhysicalTestPassed": "hardware_fallback_verified",
     "closedTestingRequired": true,
     "closedTestingMinTesters": 12,
-    "closedTestingMinDays": 14
+    "closedTestingMinDays": 14,
+    "closedTestingActive": true
   },
   "ios": {
     "buildNumber": "1",
-    "sourceCommit": "eb8cf54c844f3acdc0b435ad5fa98167764f7d87",
+    "sourceCommit": "8db3bc29d88bfbeddc5daf78c08cb4a3001ba7f8",
     "deploymentTarget": "15.0",
     "minXcodeVersion": "26.0"
   },
