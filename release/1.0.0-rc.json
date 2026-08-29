@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "releaseCandidate": "RC2",
-  "releaseCommit": "2cb134bd76d8e9ba8a925f08394e1aa0450909b4",
+  "releaseCommit": "dff62de748752b49d10435577a277a197fafa21d",
   "gitTag": "v1.0.0-rc2",
   "android": {
     "versionCode": 1,
@@ -12,16 +12,17 @@
     "compileSdk": 36,
     "backgroundLocationPermission": false,
     "foregroundServiceLocation": true,
-    "androidVersionCodeConsumed": false,
-    "playAabAccepted": false,
-    "playAppSigningConfigured": false,
-    "firebaseSigningRegistered": false,
-    "internalTestingActive": false,
+    "androidVersionCodeConsumed": true,
+    "playAabAccepted": true,
+    "playAppSigningConfigured": true,
+    "firebaseSigningRegistered": true,
+    "internalTestingActive": true,
+    "installSource": "Google Play Internal Testing",
     "realDeviceTestPassed": false
   },
   "ios": {
     "buildNumber": "1",
-    "sourceCommit": "2cb134bd76d8e9ba8a925f08394e1aa0450909b4",
+    "sourceCommit": "dff62de748752b49d10435577a277a197fafa21d",
     "deploymentTarget": "15.0",
     "minXcodeVersion": "26.0"
   },
