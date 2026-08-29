@@ -1,12 +1,14 @@
-# RELEASE RECORD — DER WEGWEISER 1.0.0 (IOS RC1)
+# RELEASE RECORD — DER WEGWEISER 1.0.0 (IOS RC)
 
-* **Release Name**: `1.0.0 (1) - iOS RC1`
+* **Release Name**: `1.0.0 (1) - iOS RC2`
 * **App Name**: `Der Wegweiser`
 * **Bundle ID**: `app.derwegweiser.navi`
 * **Marketing Version**: `1.0.0`
 * **Build Number**: `1`
 * **Distribution**: `Kostenlos` (Free)
 * **Initialer Track**: `TestFlight (Internal Testing)`
+* **Git Commit Hash**: `f19d296423f4c2834044c4c2e5cbc3c65368c560`
+* **Git Tag**: `v1.0.0-rc2`
 * **Deployment Target**: `iOS 15.0+`
 * **Ziel-Toolchain für Mac-Build**: `Xcode >= 26.0` / `iOS SDK >= 26.0` (auf `macOS Sequoia >= 15.6` oder neuer)
 * **Status**: **IOS SOURCE-/KONFIGURATIONSSEITIG VERIFIZIERT – XCODE/TESTFLIGHT AUSSTEHEND**
@@ -29,7 +31,7 @@ Sobald ein Mac mit Xcode 26+ verfügbar ist:
 
 ```bash
 # 1. Gemeinsamen Release-Stand auschecken
-git checkout v1.0.0-rc1
+git checkout v1.0.0-rc2
 
 # 2. Web Production Build & Sync
 npm ci && npm run build && npx cap sync ios

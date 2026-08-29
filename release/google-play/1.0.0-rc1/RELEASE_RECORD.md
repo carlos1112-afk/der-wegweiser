@@ -1,14 +1,14 @@
-# RELEASE RECORD — DER WEGWEISER 1.0.0 (RC1)
+# RELEASE RECORD — DER WEGWEISER 1.0.0 (RC)
 
-* **Release Name**: `1.0.0 (1) - RC1`
+* **Release Name**: `1.0.0 (1) - RC2`
 * **App Name**: `Der Wegweiser`
 * **Package / Application ID**: `app.derwegweiser.navi`
 * **Version Name**: `1.0.0`
 * **Version Code**: `1`
 * **Distribution**: `Kostenlos` (Free)
 * **Initialer Track**: `Internal Testing` (Interner Test)
-* **Git Commit Hash**: `e1f12e0ad520ca6ff22a2ba4e9a4f823b592cac8`
-* **Git Tag**: `v1.0.0-rc1`
+* **Git Commit Hash**: `f19d296423f4c2834044c4c2e5cbc3c65368c560`
+* **Git Tag**: `v1.0.0-rc2`
 * **Build-Datum**: `2026-08-29`
 * **Compile SDK**: `36` (Android 16)
 * **Target SDK**: `36` (Android 16 — Google Play Store konform)
@@ -27,12 +27,12 @@
 
 ---
 
-## 🔒 Standort- & Berechtigungs-Status (Permission-Minimierung)
+## 🔒 Standort- & Berechtigungs-Status
 
-* **ACCESS_BACKGROUND_LOCATION**: **Entfernt (Nicht im Manifest)**.
+* **ACCESS_BACKGROUND_LOCATION**: **Entfernt (Nicht im Manifest)**. Keine gesonderte Background-Location-Permission-Erklärung erforderlich.
 * **Standortberechtigungen im Manifest**: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`.
 * **Vordergrunddienste & Benachrichtigungen**: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, `POST_NOTIFICATIONS`, `WAKE_LOCK`.
-* **Google Play Sonderprüfung**: Da keine Background-Location-Permission vorhanden ist, entfällt der gesonderte Google Play Video-Prüfungs- und Deklarationsaufwand.
+* **Play Console Erklärungen**: `PLAY_FOREGROUND_SERVICE_DECLARATION.md` und `PLAY_PRECISE_LOCATION_DECLARATION.md` vollständig hinterlegt.
 
 ---
 
