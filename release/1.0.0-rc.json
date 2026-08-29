@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "releaseCandidate": "RC2",
-  "releaseCommit": "8db3bc29d88bfbeddc5daf78c08cb4a3001ba7f8",
+  "releaseCommit": "8d6b34df51c6620e067c2fd4725ab01773b88aef",
   "gitTag": "v1.0.0-rc2",
   "android": {
     "versionCode": 1,
@@ -32,9 +32,14 @@
   },
   "ios": {
     "buildNumber": "1",
-    "sourceCommit": "8db3bc29d88bfbeddc5daf78c08cb4a3001ba7f8",
+    "sourceCommit": "8f07c7f30df618ceb900b56a047a73064a06c402",
     "deploymentTarget": "15.0",
-    "minXcodeVersion": "26.0"
+    "minXcodeVersion": "26.0",
+    "iosSourceCheckPassed": true,
+    "macArchiveCreated": false,
+    "xcodeValidationPassed": false,
+    "testFlightUploaded": false,
+    "testFlightProcessed": false
   },
   "backend": {
     "firestoreRulesCommit": "2cb134bd76d8e9ba8a925f08394e1aa0450909b4",

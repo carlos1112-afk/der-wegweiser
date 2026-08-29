@@ -7,15 +7,16 @@
 * **Build Number**: `1`
 * **Distribution**: `Kostenlos` (Free)
 * **Initialer Track**: `TestFlight (Internal Testing)`
-* **Git Commit Hash**: `a0aedb6c219c9328e701b87b7c088c07518ed6e5`
+* **Release Manifest Commit**: `8d6b34df51c6620e067c2fd4725ab01773b88aef`
+* **App Source Commit (Binary & Native Code)**: `8f07c7f30df618ceb900b56a047a73064a06c402`
 * **Git Tag**: `v1.0.0-rc2`
 * **Deployment Target**: `iOS 15.0+`
-* **Ziel-Toolchain für Mac-Build**: `Xcode >= 26.0` / `iOS SDK >= 26.0` (auf `macOS Sequoia >= 15.6` oder neuer)
-* **Status**: **IOS SOURCE-/KONFIGURATIONSSEITIG VERIFIZIERT – XCODE/TESTFLIGHT AUSSTEHEND**
+* **Ziel-Toolchain für Mac-Build**: `Xcode >= 26.0` / `iOS SDK >= 26.0` (dynamisch gekoppelt an die vom Apple Developer Portal für die konkrete Xcode-26-Version geforderte macOS-Version).
+* **Status**: **IOS SOURCE CHECK BESTANDEN – EXTERNER MAC/XCODE ARCHIVE & VALIDATION AUSSTEHEND**
 
 ---
 
-## 🔒 Quellcode- & Compliance-Verifikation
+## 🔒 Quellcode- & Compliance-Verifikation (Source Verified)
 
 * **Export Compliance**: `<key>ITSAppUsesNonExemptEncryption</key><false/>` (Standard HTTPS/TLS 1.2+).
 * **Tracking & Datenschutz**: Kein IDFA-Tracking, `NSPrivacyTracking = false`.
@@ -33,10 +34,17 @@ Sobald ein Mac mit Xcode 26+ verfügbar ist:
 # 1. Gemeinsamen Release-Stand auschecken
 git checkout v1.0.0-rc2
 
-# 2. Web Production Build & Sync
+# 2. Dynamische Versionsprüfung auf dem Mac
+xcodebuild -version
+sw_vers
+
+# 3. Web Production Build & Native iOS Sync
 npm ci && npm run build && npx cap sync ios
 
-# 3. Xcode öffnen und Release-Archiv erstellen
+# 4. Lokalen iOS Release Check auf dem Mac wiederholen
+./release-check-ios.sh
+
+# 5. Xcode öffnen
 open ios/App/App.xcworkspace
-# In Xcode: Product -> Archive -> Distribute App -> TestFlight
+# In Xcode: Product -> Archive -> Organizer -> Validate App -> Distribute App -> TestFlight
 ```
