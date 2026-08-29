@@ -53,7 +53,15 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && (resource.data.createdByUserId == request.auth.uid);
     }
 
-    // 4. Scout Reports
+    // 4. Station Reviews & Ratings
+    match /station_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isNotSuspended();
+      allow update: if isAuthenticated() && isNotSuspended();
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid);
+    }
+
+    // 5. Scout Reports
     match /scout_reports/{reportId} {
       allow read: if true;
       allow create: if isNotSuspended();

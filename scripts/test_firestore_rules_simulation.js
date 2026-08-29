@@ -97,12 +97,14 @@ const active_user_ctx = {
 
 // Suspended user writes
 assert(!evaluateRule('isNotSuspended()', suspended_ctx), 'Suspended user CREATE charging_stations is strictly BLOCKED');
+assert(!evaluateRule('isNotSuspended()', suspended_ctx), 'Suspended user CREATE station_reviews is strictly BLOCKED');
 assert(!evaluateRule('isNotSuspended()', suspended_ctx), 'Suspended user CREATE routes is strictly BLOCKED');
 assert(!evaluateRule('isNotSuspended()', suspended_ctx), 'Suspended user CREATE scout_reports is strictly BLOCKED');
 assert(!evaluateRule('isAuthenticated() && isNotSuspended()', suspended_ctx), 'Suspended user CREATE content_reports is strictly BLOCKED');
 
 // Unsuspended / Active user writes
 assert(evaluateRule('isNotSuspended()', active_user_ctx), 'Active user CREATE charging_stations is ALLOWED');
+assert(evaluateRule('isNotSuspended()', active_user_ctx), 'Active user CREATE station_reviews is ALLOWED');
 assert(evaluateRule('isNotSuspended()', active_user_ctx), 'Active user CREATE routes is ALLOWED');
 assert(evaluateRule('isNotSuspended()', active_user_ctx), 'Active user CREATE scout_reports is ALLOWED');
 
