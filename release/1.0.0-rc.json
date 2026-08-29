@@ -1,12 +1,32 @@
 {
   "version": "1.0.0",
-  "sourceCommit": "f19d296423f4c2834044c4c2e5cbc3c65368c560",
+  "releaseCandidate": "RC2",
+  "releaseCommit": "a0aedb6c219c9328e701b87b7c088c07518ed6e5",
   "gitTag": "v1.0.0-rc2",
-  "androidVersionCode": 1,
-  "androidAabSha256": "51c2b1b416ad1e0db469075bce81febca8fb7aeede8116068e1c1ae53bf4e26d",
-  "iosBuildNumber": "1",
-  "targetSdk": 36,
-  "backgroundLocationPermission": false,
-  "foregroundServiceLocation": true,
-  "createdAt": "2026-08-29T03:35:40+02:00"
+  "android": {
+    "versionCode": 1,
+    "artifactPath": "release/google-play/1.0.0-rc2/app-release.aab",
+    "artifactSourceCommit": "8f07c7f30df618ceb900b56a047a73064a06c402",
+    "artifactSha256": "51c2b1b416ad1e0db469075bce81febca8fb7aeede8116068e1c1ae53bf4e26d",
+    "targetSdk": 36,
+    "compileSdk": 36,
+    "backgroundLocationPermission": false,
+    "foregroundServiceLocation": true
+  },
+  "ios": {
+    "buildNumber": "1",
+    "sourceCommit": "a0aedb6c219c9328e701b87b7c088c07518ed6e5",
+    "deploymentTarget": "15.0",
+    "minXcodeVersion": "26.0"
+  },
+  "backend": {
+    "firestoreRulesCommit": "8f07c7f30df618ceb900b56a047a73064a06c402",
+    "firestoreRulesLive": false
+  },
+  "web": {
+    "privacyUrl": "https://der-wegweiser.web.app/privacy.html",
+    "privacyLive": false,
+    "accountDeletionUrl": "https://der-wegweiser.web.app/account-deletion.html",
+    "accountDeletionLive": false
+  }
 }
