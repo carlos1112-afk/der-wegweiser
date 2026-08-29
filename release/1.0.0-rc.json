@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "sourceCommit": "e1f12e0ad520ca6ff22a2ba4e9a4f823b592cac8",
+  "gitTag": "v1.0.0-rc1",
+  "androidVersionCode": 1,
+  "androidAabSha256": "51c2b1b416ad1e0db469075bce81febca8fb7aeede8116068e1c1ae53bf4e26d",
+  "iosBuildNumber": "1",
+  "targetSdk": 36,
+  "createdAt": "2026-08-29T03:34:30+02:00"
+}
