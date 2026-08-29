@@ -73,8 +73,8 @@ async function runTests() {
   });
   assert(res2.status === 403 || res2.status === 401 || res2.status === 400, `Unauthenticated write to /users/ rejected (HTTP ${res2.status})`);
 
-  // 3. Test content_reports inbound creation (MUST BE ALLOWED)
-  console.log('\n[3] Inbound Create to /content_reports (Apple Guideline 1.2)...');
+  // 3. Test unauthenticated create to /content_reports (MUST BE FORBIDDEN 403)
+  console.log('\n[3] Unauthenticated Create to /content_reports (MUST BE FORBIDDEN)...');
   const testReportId = `test-report-${Date.now()}`;
   const res3 = await makeRequest('PATCH', `/content_reports/${testReportId}`, {
     fields: {
@@ -85,7 +85,7 @@ async function runTests() {
       createdAt: { stringValue: new Date().toISOString() }
     }
   });
-  assert(res3.status === 200, `Inbound create to /content_reports allowed (HTTP ${res3.status})`);
+  assert(res3.status === 403 || res3.status === 401, `Unauthenticated write to /content_reports blocked (HTTP ${res3.status})`);
 
   // 4. Test public read on /content_reports (MUST BE FORBIDDEN 403)
   console.log('\n[4] Public Read on /content_reports (MUST BE FORBIDDEN)...');

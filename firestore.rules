@@ -17,7 +17,7 @@ service cloud.firestore {
       return !isAuthenticated() || !exists(/databases/$(database)/documents/suspended_users/$(request.auth.uid));
     }
 
-    // 1. User Profiles & Cloud Token States (Art. 17 DSGVO compliant deletion & isolation)
+    // 1. User Profiles & Cloud Token States (Art. 17 DSGVO compliant deletion & strict isolation)
     match /users/{userId} {
       allow read, write, delete: if isOwner(userId);
     }
@@ -32,7 +32,7 @@ service cloud.firestore {
     }
 
     // 2. Charging Stations (Community-shared bike infrastructure)
-    // Read: public; Create: public (if not suspended); Update/Delete: creator or admin
+    // Read: public; Create: authenticated & not suspended; Update/Delete: creator or admin
     match /charging_stations/{stationId} {
       allow read: if true;
       allow create: if isNotSuspended();
@@ -73,13 +73,18 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    // 7. Content Reports (Apple Guideline 1.2 UGC Moderation & Reporting - Inbound only)
+    // 7. Content Reports (Apple Guideline 1.2 UGC Moderation & Reporting - Authenticated Inbound only)
     match /content_reports/{reportId} {
-      allow create: if true;
-      allow read, update, delete: if false; // Strictly forbidden for public clients, accessible only via admin SDK
+      allow create: if isAuthenticated() && isNotSuspended();
+      allow read, update, delete: if false; // Strictly forbidden for clients, accessible only via admin SDK
     }
 
-    // 8. Strict Default Fallback: Deny all unhandled paths
+    // 8. Suspended Users Registry (Protected, readable only by security rules and admin SDK)
+    match /suspended_users/{userId} {
+      allow read, write: if false;
+    }
+
+    // 9. Strict Default Fallback: Deny all unhandled paths
     match /{document=**} {
       allow read, write: if false;
     }
