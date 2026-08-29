@@ -1,4 +1,4 @@
-# MAC HANDOFF — DER WEGWEISER 1.0.0 (IOS)
+# MAC HANDOFF — DER WEGWEISER 1.0.0 (IOS RC2)
 
 * **App Name**: `Der Wegweiser`
 * **Bundle ID**: `app.derwegweiser.navi`
@@ -10,30 +10,33 @@
 
 ---
 
-## 🔒 Provenance & Quellstand
+## 🔒 Provenance & Quellstand (Authoritative Source of Truth)
 
-* **iOS Source Commit**: `8f07c7f30df618ceb900b56a047a73064a06c402`
-* **Git Tag**: `v1.0.0-rc2` (Commit: `7500348e4c064bfcf29263ff4f3b0927c4c1725d`)
-* **Checkout Target**: `8f07c7f30df618ceb900b56a047a73064a06c402` (oder Tag `v1.0.0-rc2`)
+* **iosSourceCommit**: `8f07c7f30df618ceb900b56a047a73064a06c402`
+* **checkoutTarget**: `8f07c7f30df618ceb900b56a047a73064a06c402`
+* **releaseTag**: `v1.0.0-rc2`
+* **releaseTagTarget**: `4afbf57f22e62068be34caea675afaddc468d386`
 
 ---
 
 ## 📊 Status-Matrix
 
-* **iosSourceCheckPassed**: `true`
+* **iosSourceCheckPassed**: `true` (Lokal unter Linux verifiziert)
 * **macArchiveCreated**: `false` (Ausstehend auf realem Mac)
 * **xcodeValidationPassed**: `false` (Ausstehend auf realem Mac)
 * **testFlightUploaded**: `false` (Ausstehend)
+* **testFlightProcessed**: `false` (Ausstehend)
 * **testFlightAvailable**: `false` (Ausstehend)
+* **realIphoneTestPassed**: `false` (Ausstehend)
 
 ---
 
-## 🛠️ Befehlssequenz für den Mac
+## 🛠️ Verbindliche Befehlssequenz für den Mac
 
-Auf dem Mac im Terminal ausführen:
+Auf dem Ziel-Mac im Terminal ausführen:
 
 ```bash
-# 1. Quellstand auschecken
+# 1. Verbindlichen Quellstand auschecken
 git checkout 8f07c7f30df618ceb900b56a047a73064a06c402
 
 # 2. Toolchain verifizieren
