@@ -17,18 +17,18 @@ service cloud.firestore {
       return !isAuthenticated() || !exists(/databases/$(database)/documents/suspended_users/$(request.auth.uid));
     }
 
-    // 1. User Profiles & Cloud Token States (Art. 17 DSGVO compliant deletion)
+    // 1. User Profiles & Cloud Token States (Art. 17 DSGVO compliant deletion & isolation)
     match /users/{userId} {
       allow read, write, delete: if isOwner(userId);
     }
     match /user_preferences/{userId} {
-      allow read, write, delete: if isOwner(userId) || request.auth == null;
+      allow read, write, delete: if isOwner(userId);
     }
     match /user_memory_patterns/{userId} {
-      allow read, write, delete: if isOwner(userId) || request.auth == null;
+      allow read, write, delete: if isOwner(userId);
     }
     match /user_tokens/{userId} {
-      allow read, write, delete: if isOwner(userId) || request.auth == null;
+      allow read, write, delete: if isOwner(userId);
     }
 
     // 2. Charging Stations (Community-shared bike infrastructure)
@@ -73,16 +73,15 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    // 7. Content Reports (Apple Guideline 1.2 UGC Moderation & Reporting)
+    // 7. Content Reports (Apple Guideline 1.2 UGC Moderation & Reporting - Inbound only)
     match /content_reports/{reportId} {
       allow create: if true;
-      allow read, update, delete: if false; // Only accessible via backend/admin SDK
+      allow read, update, delete: if false; // Strictly forbidden for public clients, accessible only via admin SDK
     }
 
-    // 8. Default Fallback: Read-only
+    // 8. Strict Default Fallback: Deny all unhandled paths
     match /{document=**} {
-      allow read: if true;
-      allow write: if false;
+      allow read, write: if false;
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "releaseCandidate": "RC2",
-  "releaseCommit": "a0aedb6c219c9328e701b87b7c088c07518ed6e5",
+  "releaseCommit": "081484701d199ca9edc74756914a240c0f7e05b7",
   "gitTag": "v1.0.0-rc2",
   "android": {
     "versionCode": 1,
@@ -15,18 +15,21 @@
   },
   "ios": {
     "buildNumber": "1",
-    "sourceCommit": "a0aedb6c219c9328e701b87b7c088c07518ed6e5",
+    "sourceCommit": "081484701d199ca9edc74756914a240c0f7e05b7",
     "deploymentTarget": "15.0",
     "minXcodeVersion": "26.0"
   },
   "backend": {
-    "firestoreRulesCommit": "8f07c7f30df618ceb900b56a047a73064a06c402",
-    "firestoreRulesLive": false
+    "firestoreRulesCommit": "081484701d199ca9edc74756914a240c0f7e05b7",
+    "firestoreRulesLive": true,
+    "rulesDeployedAt": "2026-08-29T03:43:18+02:00"
   },
   "web": {
+    "hostingSite": "der-wegweiser",
     "privacyUrl": "https://der-wegweiser.web.app/privacy.html",
-    "privacyLive": false,
+    "privacyLive": true,
     "accountDeletionUrl": "https://der-wegweiser.web.app/account-deletion.html",
-    "accountDeletionLive": false
+    "accountDeletionLive": true,
+    "hostingDeployedAt": "2026-08-29T03:43:41+02:00"
   }
 }

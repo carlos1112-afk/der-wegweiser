@@ -7,7 +7,7 @@
 * **Version Code**: `1`
 * **Distribution**: `Kostenlos` (Free)
 * **Initialer Track**: `Internal Testing` (Interner Test)
-* **Release Commit (Docs & Manifest)**: `a0aedb6c219c9328e701b87b7c088c07518ed6e5`
+* **Release Commit (Docs & Manifest)**: `081484701d199ca9edc74756914a240c0f7e05b7`
 * **Artifact Source Commit (Binary)**: `8f07c7f30df618ceb900b56a047a73064a06c402`
 * **Git Tag**: `v1.0.0-rc2`
 * **Build-Datum**: `2026-08-29`
@@ -28,6 +28,12 @@
 
 ---
 
+## 🔒 Backend & Firestore Rules
+
+* **Firestore Rules**: **LIVE VERIFIED** (Erfolgreich nach `der-wegweiser` deployed am 2026-08-29T03:43:18+02:00; Mandantentrennung, `isNotSuspended()` und `/content_reports/` Schutz live verifiziert).
+
+---
+
 ## 🔒 Standort- & Berechtigungs-Status
 
 * **ACCESS_BACKGROUND_LOCATION**: **Entfernt (Nicht im Manifest)**. Keine gesonderte Background-Location-Permission-Erklärung erforderlich.
@@ -37,7 +43,7 @@
 
 ---
 
-## 🌐 Live-Web-Ressourcen
+## 🌐 Live-Web-Ressourcen (LIVE VERIFIED)
 
-* **Datenschutzerklärung (HTTPS)**: `https://der-wegweiser.web.app/privacy.html`
-* **Konto- & Datenlöschseite (HTTPS)**: `https://der-wegweiser.web.app/account-deletion.html`
+* **Datenschutzerklärung (HTTPS)**: `https://der-wegweiser.web.app/privacy.html` — **LIVE VERIFIED (HTTP 200)**
+* **Konto- & Datenlöschseite (HTTPS)**: `https://der-wegweiser.web.app/account-deletion.html` — **LIVE VERIFIED (HTTP 200)**
