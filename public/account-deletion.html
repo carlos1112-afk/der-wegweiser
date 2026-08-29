@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Konto- & Datenlöschung — Der Wegweiser</title>
+  <style>
+    :root {
+      --bg: #050a14;
+      --card-bg: rgba(15, 23, 42, 0.9);
+      --accent: #00f0ff;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(0, 240, 255, 0.25);
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 680px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.15);
+    }
+    h1 {
+      color: var(--accent);
+      font-size: 1.5rem;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.15rem;
+      margin-top: 24px;
+      color: #38bdf8;
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    strong {
+      color: var(--text);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+    .form-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+    input[type="email"], textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+      margin-top: 6px;
+      margin-bottom: 14px;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .footer {
+      margin-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">Google Play & DSGVO Konformität</div>
+    <h1>Konto- und Datenlöschung für „Der Wegweiser“</h1>
+    
+    <p>
+      Gemäß Art. 17 DSGVO sowie den Richtlinien des Google Play Store hast du jederzeit das Recht, die vollständige und dauerhafte Löschung deines Nutzerkontos und aller damit verknüpften personenbezogenen Daten zu verlangen.
+    </p>
+
+    <h2>1. Löschung direkt in der App (Sofortausführung)</h2>
+    <p>
+      Öffne in der App das Menü <strong>Recht & Datenschutz &rarr; Daten-Cockpit</strong> und klicke auf <strong>„Alle Daten unwiderruflich löschen“</strong>. Dies löscht sofort und automatisiert:
+    </p>
+    <ul>
+      <li>Dein Firebase Authentication Nutzerkonto</li>
+      <li>Deine Cloud-Token-Salden & Präferenzen in Cloud Firestore (<code>users</code>, <code>user_tokens</code>, <code>user_preferences</code>)</li>
+      <li>Deine erstellten Routen, Scout-Meldungen und hochgeladenen Fotos</li>
+      <li>Alle lokalen Caches und Offline-Karten auf deinem Gerät</li>
+    </ul>
+
+    <h2>2. Web-Löschanfrage ohne installierte App</h2>
+    <p>
+      Falls du keinen Zugriff mehr auf die App besitzt, kannst du deine Löschanfrage direkt über dieses Formular oder per E-Mail an den Diensteanbieter senden:
+    </p>
+
+    <div class="form-box">
+      <form onsubmit="handleWebDeletionSubmit(event)">
+        <label for="userEmail"><strong>Deine registrierte E-Mail-Adresse / Benutzer-ID:</strong></label>
+        <input type="email" id="userEmail" required placeholder="name@beispiel.de">
+        
+        <label for="deletionReason"><strong>Hinweis / Bestätigung:</strong></label>
+        <textarea id="deletionReason" rows="2" placeholder="Ich beantrage die vollständige Löschung meines Benutzerkontos und aller zugehörigen Cloud-Daten gem. Art. 17 DSGVO."></textarea>
+        
+        <button type="submit" class="btn">Löschanfrage verbindlich absenden</button>
+      </form>
+      <div id="statusMessage" style="margin-top: 12px; font-weight: bold; color: var(--accent); display: none;"></div>
+    </div>
+
+    <script>
+      function handleWebDeletionSubmit(e) {
+        e.preventDefault();
+        const email = document.getElementById('userEmail').value;
+        const msg = document.getElementById('deletionReason').value || 'Vollständige Kontolöschung gem. Art. 17 DSGVO';
+        
+        const mailtoUrl = `mailto:wegweiser-app@proton.me?subject=${encodeURIComponent('Antrag auf Kontolöschung (Der Wegweiser) - ' + email)}&body=${encodeURIComponent('Benutzer-E-Mail: ' + email + '\n\n' + msg)}`;
+        
+        const statusEl = document.getElementById('statusMessage');
+        statusEl.innerText = 'Öffne E-Mail-Client zur Übermittlung an den Diensteanbieter...';
+        statusEl.style.display = 'block';
+        
+        window.location.href = mailtoUrl;
+      }
+    </script>
+
+    <h2>3. Was wird gelöscht? Was wird aufbewahrt?</h2>
+    <ul>
+      <li><strong>Gelöscht werden:</strong> Benutzerkonto, Authentifizierungsdaten, persönliche Tour-Historien, individuelle Telemetriepunkte, Token-Salden.</li>
+      <li><strong>Aufbewahrung:</strong> Gesetzliche steuer- und handelsrechtliche Aufbewahrungspflichten für getätigte In-App-Käufe (§ 147 AO, 10 Jahre) verbleiben unberührt. Aggregierte, anonymisierte Straßennetzattribute (z. B. Steigungsangaben ohne Personenbezug) verbleiben in der allgemeinen Navigationskarte.</li>
+    </ul>
+
+    <div class="footer">
+      Diensteanbieter: Pascal Gregor · Lindenstraße 8, 02979 Spreetal · E-Mail: wegweiser-app@proton.me
+    </div>
+  </div>
+</body>
+</html>

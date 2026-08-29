@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Scale, FileText, X, AlertTriangle, Trash2, Download, CheckCircle2, Lock } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
+import { LEGAL_CONFIG } from '../../config/legalConfig';
+import { AccountDeletionService } from '../../services/accountDeletionService';
 import confetti from 'canvas-confetti';
 
 interface LegalModalProps {
@@ -45,19 +47,23 @@ export const LegalModal: React.FC<LegalModalProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  // 1-Click Complete Local Reset (Art. 17 DSGVO)
-  const handleDeleteAllUserData = () => {
+  // 1-Click Complete Account & Data Deletion (Art. 17 DSGVO & Google Play Policy)
+  const handleDeleteAllUserData = async () => {
     const confirmWipe = window.confirm(
-      '⚠️ ACHTUNG: Möchtest du wirklich alle lokalen App-Daten, gespeicherten Touren und Tokens unwiderruflich von diesem Gerät löschen?'
+      '⚠️ ACHTUNG: Möchtest du dein Konto sowie alle Cloud- und lokalen Daten unwiderruflich löschen?'
     );
 
     if (confirmWipe) {
       SoundFxService.playWarningTone();
-      localStorage.clear();
-      setIsDataDeleted(true);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      const result = await AccountDeletionService.executeFullAccountDeletion();
+      if (result.success) {
+        setIsDataDeleted(true);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        alert(result.message);
+      }
     }
   };
 
@@ -183,7 +189,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 3 Urheberrechte, Datenbankherstellerrecht &amp; Nutzungsrechte</h4>
             <p>
-              (1) Der Diensteanbieter (Pascal Gregor) ist Hersteller der aggregierten Navigations- und Topographiedatenbank gem. §§ 87a ff. UrhG.<br />
+              (1) Der Diensteanbieter ({LEGAL_CONFIG.operatorName}) ist Hersteller der aggregierten Navigations- und Topographiedatenbank gem. §§ 87a ff. UrhG.<br />
               (2) Soweit der Nutzer Wegezustandsmeldungen, Quests oder Bewertungen übermittelt, räumt er dem Diensteanbieter hieran ein einfaches, unentgeltliches, zeitlich und räumlich unbeschränktes Nutzungsrecht zur dauerhaften Integration in das Navigationssystem "Der Wegweiser" einschließlich künftiger Versionen desselben Dienstes ein.
             </p>
 
@@ -195,7 +201,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>§ 5 Barrierefreiheit (BFSG) &amp; Diensteanbieter</h4>
             <p>
               (1) Gemäß § 3 Abs. 1 Barrierefreiheitsstärkungsgesetz (BFSG) fällt das Angebot unter die gesetzliche Kleinstunternehmer-Ausnahme (unter 10 Mitarbeiter und Jahresumsatz &le; 2 Mio. €).<br />
-              (2) Vertragspartner ist Pascal Gregor. Eine spätere Fortführung unter einer behördlich angemeldeten Geschäftsbezeichnung oder als Einzelunternehmen berührt die bestehenden Verträge und Rechte nicht, da die Rechtsidentität des Inhabers gewahrt bleibt.
+              (2) Vertragspartner ist {LEGAL_CONFIG.operatorName}. Der Übergang in ein vom selben Inhaber betriebenes Einzelunternehmen führt grundsätzlich nicht zu einem Wechsel der natürlichen Person als Rechtsträger. Änderungen von Verarbeitungszwecken, Vertragsbedingungen oder Geschäftsmodell sind davon unabhängig gesondert zu prüfen. Eine spätere Übertragung auf eine eigenständige juristische Person (z. B. UG oder GmbH) stellt einen gesonderten Verantwortlichenwechsel dar.
             </p>
           </div>
         )}
@@ -205,10 +211,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({
           <div style={{ fontSize: '0.82rem', lineHeight: '1.5', color: '#e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>1. Verantwortlicher &amp; Kontakt</h4>
             <p>
-              <strong>Pascal Gregor</strong><br />
-              Lindenstraße 8, 02979 Spreetal<br />
-              E-Mail: <strong>wegweiser-app@proton.me</strong><br />
-              Server: Google Cloud Platform (Frankfurt `europe-west3`, Art. 28 DSGVO DPA).<br />
+              <strong>{LEGAL_CONFIG.operatorName}</strong><br />
+              {LEGAL_CONFIG.operatorAddress}<br />
+              E-Mail: <strong>{LEGAL_CONFIG.operatorEmail}</strong><br />
+              Server: {LEGAL_CONFIG.serverLocation}<br />
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Die Verarbeitungszwecke umfassen den Betrieb, die Bereitstellung und Weiterentwicklung von "Der Wegweiser" einschließlich nachfolgender Versionen des Dienstes durch den Verantwortlichen.
               </span>
@@ -226,14 +232,14 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>4. Drittanbieter &amp; Datenflüsse</h4>
             <p>
-              * <strong>Open-Meteo API</strong>: Abfrage von Wind &amp; Höhenmetern. Die IP-Adresse wird zur Übertragung verarbeitet und in flüchtigen Server-Logs (max. 14 Tage) zur DDoS-Prävention gehalten.<br />
-              * <strong>Google Gemini API</strong>: Inferenz für KI-Antizipation. Prompts enthalten keine Nutzer-Identifikatoren.<br />
+              * <strong>Open-Meteo API</strong>: Abfrage von Wind &amp; Wetterdaten. Die IP-Adresse wird zur Übertragung verarbeitet und in flüchtigen Server-Logs zur Missbrauchsprävention gehalten.<br />
+              * <strong>AI-Gateway (Backend-Proxy)</strong>: Inferenz für KI-Antizipation. Prompts enthalten keine Nutzer-Identifikatoren.<br />
               * <strong>BitLabs / CPX</strong>: Bei freiwilliger Umfrageteilnahme (Art. 6 Abs. 1 lit. a DSGVO) wird eine pseudonyme ID an die Umfrageplattform übertragen.
             </p>
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>5. Betroffenenrechte &amp; Daten-Löschmatrix</h4>
             <p>
-              * <strong>Art. 17 DSGVO (Löschung)</strong>: Lokale Daten können mit 1 Klick im Cockpit gelöscht werden. Für Cloud-Leads oder Einträge genügt eine E-Mail an wegweiser-app@proton.me.<br />
+              * <strong>Art. 17 DSGVO (Löschung)</strong>: Lokale Daten können mit 1 Klick im Cockpit gelöscht werden. Für Cloud-Leads oder Einträge genügt eine E-Mail an {LEGAL_CONFIG.operatorEmail}.<br />
               * <strong>Art. 20 DSGVO (Export)</strong>: 1-Klick JSON-Export im Daten-Cockpit.<br />
               * <strong>Art. 21 DSGVO (Widerspruch)</strong>: Gegen Verarbeitungen nach Art. 6 Abs. 1 lit. f DSGVO kann jederzeit widersprochen werden.
             </p>
@@ -247,11 +253,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({
             <p>
               <strong>Der Wegweiser — Autonomous E-Bike Co-Pilot</strong><br />
               Diensteanbieter / Verantwortlich für den Inhalt:<br />
-              <strong>Pascal Gregor</strong><br />
-              Lindenstraße 8<br />
-              02979 Spreetal<br />
-              E-Mail: <strong>wegweiser-app@proton.me</strong><br />
-              EU-Streitbeilegung: Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: https://ec.europa.eu/consumers/odr/
+              <strong>{LEGAL_CONFIG.operatorName}</strong><br />
+              {LEGAL_CONFIG.operatorAddress}<br />
+              E-Mail: <strong>{LEGAL_CONFIG.operatorEmail}</strong><br />
+              EU-Streitbeilegung: Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung bereit: {LEGAL_CONFIG.disputeResolutionUrl}
             </p>
 
             <h4 style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>Open-Source Lizenzen</h4>

@@ -16,7 +16,8 @@ export interface RouteGenerationParams {
 export class RoutingService {
   /**
    * Generates a road-snapped bike loop using the BRouter bike routing API.
-   * Calculates real elevation gain, surface profile, and estimated e-bike Wh consumption.
+   * If the routing server is unavailable, explicitly flags the route as an unverified
+   * geometric corridor rather than pretending it is turn-by-turn navigable road data.
    */
   public static async generateBikeRoute(
     params: RouteGenerationParams,
@@ -33,6 +34,8 @@ export class RoutingService {
     let pathCoordinates: [number, number][] = [];
     let realDistanceKm = distance;
     let elevationGainM = Math.round(distance * 4.5);
+    let isRoadSnapped = false;
+    let routingEngineStatus: 'online_brouter' | 'offline_cached' | 'offline_corridor_unverified' = 'offline_corridor_unverified';
 
     try {
       // BRouter API call: start -> via -> start
@@ -49,13 +52,15 @@ export class RoutingService {
           if (props?.['track-length']) {
             realDistanceKm = +(parseFloat(props['track-length']) / 1000).toFixed(1);
           }
+          isRoadSnapped = true;
+          routingEngineStatus = 'online_brouter';
         }
       }
     } catch (err) {
-      console.warn('[RoutingService] BRouter API unavailable, using fallback loop generator:', err);
+      console.warn('[RoutingService] BRouter API unavailable, using unverified offline corridor:', err);
     }
 
-    // Fallback mathematical loop generation if BRouter API fails
+    // Fallback mathematical corridor generation if BRouter API fails
     if (pathCoordinates.length === 0) {
       const pointsCount = 40;
       for (let i = 0; i <= pointsCount; i++) {
@@ -65,9 +70,11 @@ export class RoutingService {
         const lng = params.startLng + rNoise * Math.cos(angle);
         pathCoordinates.push([lat, lng]);
       }
+      isRoadSnapped = false;
+      routingEngineStatus = 'offline_corridor_unverified';
     }
 
-    // Calculate real elevation profiles if we have coordinates
+    // Calculate elevation profiles if we have coordinates
     if (pathCoordinates.length > 0) {
       const sampleCoords = pathCoordinates.filter((_, idx) => idx % Math.ceil(pathCoordinates.length / 20) === 0);
       const elevations = await ElevationService.getElevations(sampleCoords);
@@ -84,46 +91,60 @@ export class RoutingService {
     // 5 waypoints along the route
     const waypoints: Waypoint[] = [
       { id: 'wp-1', lat: params.startLat, lng: params.startLng, name: 'Startpunkt', category: 'start' },
-      { id: 'wp-2', lat: viaLat, lng: viaLng, name: isScout ? '🔍 Scout-Sektor: Kiefernkamm' : 'Badesee Promenade', category: 'scenic' },
-      { id: 'wp-3', lat: params.startLat + radius * 1.2, lng: params.startLng - radius * 0.4, name: 'E-Bike Lade-Café Waldidyll', category: 'charging' },
-      { id: 'wp-4', lat: params.startLat + radius * 0.3, lng: params.startLng - radius * 1.1, name: 'Panorama Aussichtspunkt', category: 'scenic' },
+      { id: 'wp-2', lat: viaLat, lng: viaLng, name: isScout ? '🔍 Scout-Sektor: Kiefernkamm' : (isRoadSnapped ? 'Badesee Promenade' : 'Zwischenziel (Peilung)'), category: 'scenic' },
+      { id: 'wp-3', lat: params.startLat + radius * 1.2, lng: params.startLng - radius * 0.4, name: 'Lademöglichkeit Region', category: 'charging' },
+      { id: 'wp-4', lat: params.startLat + radius * 0.3, lng: params.startLng - radius * 1.1, name: 'Aussichtspunkt Korridor', category: 'scenic' },
       { id: 'wp-5', lat: params.startLat, lng: params.startLng, name: 'Ziel & Rückkehr', category: 'end' },
     ];
 
-    // Wh calculation: ~8.5Wh per km + 0.12Wh per meter elevation gain
+    // Wh calculation: ~8.5Wh per km + 0.12Wh per meter elevation gain (plus reserve if offline)
     const WhPerKm = params.bikeType === 'cargo' ? 12 : 8.5;
-    const totalWhNeeded = Math.round(realDistanceKm * WhPerKm + elevationGainM * 0.12);
+    const safetyFactor = isRoadSnapped ? 1.0 : 1.15; // 15% safety penalty for unverified corridor detours
+    const totalWhNeeded = Math.round((realDistanceKm * WhPerKm + elevationGainM * 0.12) * safetyFactor);
 
     const availableWh = (userPrefs.batteryCapacityWh * params.batteryPercent) / 100;
     const isBatterySafe = availableWh >= totalWhNeeded * 1.15;
 
-    const title = isScout
-      ? `🗺️ Karten-Scout: ${params.themes?.[0] || 'Topographie'} Aktualisierung (+35 Tokens)`
-      : `KI-Runde: ${params.themes?.[0] || 'Badesee'} & Panoramatour`;
+    let title: string;
+    let summary: string;
+    let aiStory: string;
 
-    const aiStory = isScout
-      ? `Karten-Scout Mission: Diese Route führt dich über einen Sektor mit veralteten Topographie-Daten (> 180 Tage). Deine anonymen Sensordaten aktualisieren Steigung & Belag für alle E-Biker. Bonus bei Tour-Abschluss: +35 Tokens!`
-      : `Diese Route wurde speziell für dich zusammengestellt: Sie führt über sanfte, asphaltierte Radwege am Badesee entlang, vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}% und beinhaltet eine perfekte Lademöglichkeit beim Café Waldidyll bei KM 18.`;
+    if (isRoadSnapped) {
+      title = isScout
+        ? `🗺️ Karten-Scout: ${params.themes?.[0] || 'Topographie'} Aktualisierung (+35 Tokens)`
+        : `KI-Runde: ${params.themes?.[0] || 'Badesee'} & Panoramatour`;
+
+      summary = `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie (+35 Tok.)' : 'Asphalt & Uferwege'}`;
+
+      aiStory = isScout
+        ? `Karten-Scout Mission: Diese Route führt dich über einen Sektor mit veralteten Topographie-Daten (> 180 Tage). Deine anonymen Sensordaten aktualisieren Steigung & Belag für alle E-Biker. Bonus bei Tour-Abschluss: +35 Tokens!`
+        : `Diese Route wurde straßengenau zusammengestellt: Sie führt über verifizierte Radwege, vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}% und beinhaltet eine Lademöglichkeit bei KM 18.`;
+    } else {
+      title = `⚠️ Ungeprüfter Offline-Korridor (${realDistanceKm} km)`;
+      summary = `${realDistanceKm} km • ~${elevationGainM}m Hm • ⚠️ Keine Straßenbindung (Offline-Peilung)`;
+      aiStory = `⚠️ Achtung: Der Routing-Server ist offline. Die angezeigte Linie ist ein mathematischer Orientierungskorridor ohne Straßen- oder Wegenetzprüfung. Bitte achte eigenständig auf Flüsse, Bahnlinien, Privatwege und Verkehrsregeln.`;
+    }
 
     return {
       id: `route-${Date.now()}`,
       title,
-      summary: `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie (+35 Tok.)' : 'Asphalt & Uferwege'}`,
+      summary,
       aiStory,
       distanceKm: realDistanceKm,
       elevationGainM,
       estimatedTimeMin: Math.round((realDistanceKm / 19) * 60),
       estimatedBatteryConsumptionWh: totalWhNeeded,
       isBatterySafe,
-      surfaceBreakdown: {
-        asphaltPercent: 82,
-        gravelPercent: 15,
-        unpavedPercent: 3,
-      },
+      surfaceBreakdown: isRoadSnapped 
+        ? { asphaltPercent: 82, gravelPercent: 15, unpavedPercent: 3 }
+        : { asphaltPercent: 50, gravelPercent: 30, unpavedPercent: 20 },
       waypoints,
       pathCoordinates,
       isScoutMission: isScout,
       scoutBountyTokens: isScout ? 35 : 0,
+      isRoadSnapped,
+      isOfflineFallbackCorridor: !isRoadSnapped,
+      routingEngineStatus,
       chargingStopsOnRoute: [
         {
           id: 'cs-route-1',

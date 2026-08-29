@@ -8,48 +8,78 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // 1. Charging Stations (Community-shared bike infrastructure)
-    // Read: public; Create: public; Update: auth users; Delete: strictly forbidden for clients!
-    match /charging_stations/{stationId} {
-      allow read: if true;
-      allow create: if true;
-      allow update: if isAuthenticated();
-      allow delete: if false;
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // 2. Spatial Road Intelligence (Anonymous topography & slope segments)
-    // Read & Create: public; Delete: strictly forbidden for clients!
+    // User suspension check for Apple Guideline 1.2 compliance
+    function isNotSuspended() {
+      return !isAuthenticated() || !exists(/databases/$(database)/documents/suspended_users/$(request.auth.uid));
+    }
+
+    // 1. User Profiles & Cloud Token States (Art. 17 DSGVO compliant deletion)
+    match /users/{userId} {
+      allow read, write, delete: if isOwner(userId);
+    }
+    match /user_preferences/{userId} {
+      allow read, write, delete: if isOwner(userId) || request.auth == null;
+    }
+    match /user_memory_patterns/{userId} {
+      allow read, write, delete: if isOwner(userId) || request.auth == null;
+    }
+    match /user_tokens/{userId} {
+      allow read, write, delete: if isOwner(userId) || request.auth == null;
+    }
+
+    // 2. Charging Stations (Community-shared bike infrastructure)
+    // Read: public; Create: public (if not suspended); Update/Delete: creator or admin
+    match /charging_stations/{stationId} {
+      allow read: if true;
+      allow create: if isNotSuspended();
+      allow update: if isAuthenticated() && isNotSuspended();
+      allow delete: if isAuthenticated() && (resource.data.createdByUserId == request.auth.uid);
+    }
+    match /charging_stations_v2/{stationId} {
+      allow read: if true;
+      allow create: if isNotSuspended();
+      allow update: if isAuthenticated() && isNotSuspended();
+      allow delete: if isAuthenticated() && (resource.data.createdByUserId == request.auth.uid);
+    }
+
+    // 3. Saved Routes & GPX Tracks
+    match /routes/{routeId} {
+      allow read: if true;
+      allow create, update: if isNotSuspended();
+      allow delete: if isAuthenticated() && (resource.data.createdByUserId == request.auth.uid);
+    }
+
+    // 4. Scout Reports
+    match /scout_reports/{reportId} {
+      allow read: if true;
+      allow create: if isNotSuspended();
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid);
+    }
+
+    // 5. Spatial Road Intelligence (Anonymous topography & slope segments)
     match /spatial_road_intelligence/{segmentId} {
       allow read: if true;
       allow create, update: if true;
-      allow delete: if false;
+      allow delete: if false; // Anonymized database content
     }
 
-    // 3. User Preferences & Local Token States
-    match /user_preferences/{userId} {
-      allow read, write: if true;
-    }
-    match /user_memory_patterns/{userId} {
-      allow read, write: if true;
-    }
-    match /user_tokens/{userId} {
-      allow read, write: if true;
-    }
-
-    // 4. Saved Routes & GPX Tracks
-    match /routes/{routeId} {
-      allow read: if true;
-      allow create, update: if true;
-      allow delete: if false;
-    }
-
-    // 5. B2B Partner Leads (Inbound only, read/delete strictly forbidden for public clients)
+    // 6. B2B Partner Leads (Inbound only, read/delete strictly forbidden for public clients)
     match /partner_leads/{leadId} {
       allow create: if true;
       allow read, update, delete: if false;
     }
 
-    // 6. Default Fallback: Read-only, no unauthorized writes or deletions
+    // 7. Content Reports (Apple Guideline 1.2 UGC Moderation & Reporting)
+    match /content_reports/{reportId} {
+      allow create: if true;
+      allow read, update, delete: if false; // Only accessible via backend/admin SDK
+    }
+
+    // 8. Default Fallback: Read-only
     match /{document=**} {
       allow read: if true;
       allow write: if false;

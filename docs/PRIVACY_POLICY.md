@@ -52,13 +52,15 @@ Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`
 
 ## 4. Drittanbieter-Dienste & Reale Datenflüsse
 
-| Dienst / Anbieter | Zweck | Übermittelte Daten | Rechtsgrundlage & Garantien | Speicherfrist |
+| Dienst / Komponente | Zweck | Übermittelte Daten | Datenstandort / Rechtsgrundlage & Garantien | Speicherfrist |
 | :--- | :--- | :--- | :--- | :--- |
-| **Google Firebase / GCP** | Datenbank (Firestore), Auth, App Hosting | Pseudonyme Segmente, Leads, Server-IP | Art. 6 Abs. 1 lit. b/f DSGVO; DPA Frankfurt (`europe-west3`); SCC | Betriebsnotwendig; Server-Access-Logs max. 30 Tage |
-| **Google Gemini API** (`@google/generative-ai`) | KI-Antizipations-Storys | Routen-Start-/Endorte ohne User-ID | Art. 6 Abs. 1 lit. b DSGVO; Google API Terms (Kein Modelltraining) | Flüchtig während Inferenz |
-| **CartoDB & OpenStreetMap** | Kartendarstellung & Basiskacheln | Kachel-Koordinaten, IP-Adresse | Art. 6 Abs. 1 lit. b DSGVO; ODbL Lizenz | CDN-Access-Logs 7–30 Tage |
-| **Open-Meteo API** | Wind-, Wetter- & Höhenabfragen | Koordinaten, IP-Adresse | Art. 6 Abs. 1 lit. b DSGVO; EU-Server | Flüchtig im RAM; Server-Logs max. 14 Tage zur DDoS-Abwehr |
-| **BitLabs / CPX Research** | Freiwillige bezahlte Marktforschung | Pseudonyme User-ID, Session-ID | Art. 6 Abs. 1 lit. a DSGVO; EU-US Data Privacy Framework / SCC | Gemäß Richtlinien des jeweiligen Umfrage-Partners |
+| **Cloud Firestore (GCP)** | Persistente NoSQL-Datenbank | Pseudonyme Segmente, Leads, Token-Salden | **Frankfurt (`europe-west3`)**; Art. 6 Abs. 1 lit. b DSGVO; GCP DPA | Betriebsnotwendig bis Kontolöschung |
+| **Firebase Authentication** | Nutzer-Authentifizierung & Token-Signierung | Pseudonyme Auth-Tokens, Login-Status | **USA (Google Global Auth Infrastructure)**; Art. 6 Abs. 1 lit. b DSGVO; EU-US DPF / SCC | Dauer der aktiven Sitzung / Registrierung |
+| **Firebase App Hosting / CDN** | Bereitstellung der statischen Web-Assets | Server-Access-IP, User-Agent | **Global Edge Network**; Art. 6 Abs. 1 lit. f DSGVO | Rollierende Webserver-Access-Logs |
+| **AI-Gateway (Backend-Proxy)** | KI-Antizipations-Storys & Sprachassistent | Start-/Zielorte & Parameter ohne Personen-ID | **Frankfurt (`europe-west3`)**; Art. 6 Abs. 1 lit. b DSGVO; Eigener Backend-Proxy | Flüchtig im RAM während Inferenz |
+| **CartoDB & OpenStreetMap** | Kartendarstellung & Basiskacheln | Kachel-Koordinaten, IP-Adresse | **Global CDN / EU**; Art. 6 Abs. 1 lit. b DSGVO; ODbL Lizenz | Server-Access-Logs der CDN-Provider |
+| **Open-Meteo API** | Wind-, Wetter- & Höhenabfragen | Geografische Koordinaten, IP-Adresse | **EU (Open-Meteo GmbH)**; Art. 6 Abs. 1 lit. b DSGVO; Open-Meteo Terms | Flüchtig zur Übertragung; Server-Logs werden nach max. 90 Tagen gelöscht |
+| **BitLabs / CPX Research** | Freiwillige bezahlte Marktforschung | Pseudonyme User-ID, Session-ID | **USA / EU**; Art. 6 Abs. 1 lit. a DSGVO; EU-US Data Privacy Framework / SCC | Gemäß Richtlinien des jeweiligen Umfrage-Partners |
 
 ---
 
@@ -83,7 +85,7 @@ Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`
 
 ## 7. Datenbankherstellerrecht (§§ 87a ff. UrhG), Rechtsnachfolge & No-Sale Policy
 1. **Investitionsschutz nach § 87a UrhG**: Die Gesamtheit der Navigationsdatenbank stellt eine geschützte Datenbank des Diensteanbieters (Pascal Gregor) dar.
-2. **Nutzungsrechte & Weiterführung**: Übermittelte Korrekturen und Wegeattribute werden dem Diensteanbieter als einfaches, unentgeltliches Nutzungsrecht zur Pflege der Navigationskarte eingeräumt. Bei Fortführung des Betriebs unter einer eingetragenen Geschäftsbezeichnung oder als Einzelunternehmen bleibt die Rechtsinhaberschaft von Pascal Gregor unverändert bestehen. Eine spätere Übertragung auf eine eigenständige juristische Person (z. B. UG/GmbH) erfolgt unter Einhaltung eines gesonderten, transparenten Verantwortlichenwechsels gem. DSGVO.
+2. **Nutzungsrechte & Weiterführung**: Übermittelte Korrekturen und Wegeattribute werden dem Diensteanbieter als einfaches, unentgeltliches Nutzungsrecht zur Pflege der Navigationskarte eingeräumt. Der Übergang in ein vom selben Inhaber betriebenes Einzelunternehmen führt grundsätzlich nicht zu einem Wechsel der natürlichen Person als Rechtsträger. Änderungen von Verarbeitungszwecken, Vertragsbedingungen oder Geschäftsmodell sind davon unabhängig gesondert zu prüfen. Eine spätere Übertragung auf eine eigenständige juristische Person (z. B. UG oder GmbH) erfolgt unter Einhaltung eines gesonderten, transparenten Verantwortlichenwechsels gem. DSGVO.
 3. **Absolutes Verkaufsverbot**: Ein Weiterverkauf von Nutzerdaten an Datenhändler (Data Brokers) oder fremde Werbekonzerne ist für alle Zeiten vertraglich und datenschutzrechtlich ausgeschlossen.
 
 

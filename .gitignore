@@ -21,6 +21,16 @@ dist-ssr
 *serviceaccount*.json
 *.service-account.json
 telegram_bot_token.txt
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+credentials/
+release/*.aab
+release/*.apk
+release/**/*.aab
+release/**/*.apk
+release/**/*.zip
 
 # Private Admin Scripts, Local Dashboards & Database Backups (Strictly Local for Carlos)
 scripts/admin*

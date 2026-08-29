@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Wind, Thermometer, Sun, CloudRain, AlertTriangle } from 'lucide-react';
+import { Wind, Thermometer, Sun, CloudRain, AlertTriangle, CloudOff } from 'lucide-react';
 import { WeatherService, type WeatherData } from '../../services/weatherService';
 
 interface WeatherHUDProps {
@@ -36,7 +36,9 @@ export const WeatherHUD: React.FC<WeatherHUDProps> = ({ userLocation }) => {
     >
       {/* Condition Icon */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        {weather.weatherCondition === 'rain' ? (
+        {weather.weatherStatus === 'unavailable' ? (
+          <CloudOff size={18} style={{ color: 'var(--accent-gold)' }} />
+        ) : weather.weatherCondition === 'rain' ? (
           <CloudRain size={18} className="glow-text-cyan" />
         ) : (
           <Sun size={18} style={{ color: '#ffb700' }} />
@@ -45,20 +47,24 @@ export const WeatherHUD: React.FC<WeatherHUDProps> = ({ userLocation }) => {
       </div>
 
       {/* Temperature */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)' }}>
-        <Thermometer size={14} />
-        <span style={{ color: '#fff', fontWeight: 'bold' }}>{weather.temperatureC}°C</span>
-      </div>
+      {weather.temperatureC !== undefined && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)' }}>
+          <Thermometer size={14} />
+          <span style={{ color: '#fff', fontWeight: 'bold' }}>{weather.temperatureC}°C</span>
+        </div>
+      )}
 
       {/* Wind */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)' }}>
-        <Wind size={14} />
-        <span style={{ color: '#fff', fontWeight: 'bold' }}>
-          {weather.windSpeedKmH} km/h ({weather.windDirectionCompass})
-        </span>
-      </div>
+      {weather.windSpeedKmH !== undefined && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-muted)' }}>
+          <Wind size={14} />
+          <span style={{ color: '#fff', fontWeight: 'bold' }}>
+            {weather.windSpeedKmH} km/h ({weather.windDirectionCompass || 'Wind'})
+          </span>
+        </div>
+      )}
 
-      {/* Headwind Battery Penalty Warning */}
+      {/* Battery Penalty / Uncertainty Buffer Warning */}
       {weather.batteryPenaltyPercent > 0 && (
         <div
           style={{
@@ -74,7 +80,9 @@ export const WeatherHUD: React.FC<WeatherHUDProps> = ({ userLocation }) => {
           }}
         >
           <AlertTriangle size={12} />
-          <span>+{weather.batteryPenaltyPercent}% Akku-Korrektur (Wind)</span>
+          <span>
+            +{weather.batteryPenaltyPercent}% Akku-Korrektur ({weather.weatherStatus === 'unavailable' ? 'Reserve' : 'Wind'})
+          </span>
         </div>
       )}
     </div>

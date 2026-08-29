@@ -35,7 +35,7 @@
 ## 4. Datenschutzrechtliche Einordnung (DSGVO) & Rechtsnachfolge
 1. **Pseudonymisierte personenbezogene Daten (Art. 4 Nr. 1 DSGVO)**: GPS-Rohdaten und Tourenverläufe werden als pseudonymisierte personenbezogene Daten behandelt. Nutzer haben das Recht auf Datenübertragbarkeit (Art. 20 DSGVO) und Löschung (Art. 17 DSGVO).
 2. **Aggregierte Vektoren**: Sobald Einzelpunkte zu allgemeinen Straßenattributen (z. B. "Steigung 8% auf Segment X", "Belag Schotter") aggregiert werden, entfällt der Personenbezug. Diese aggregierten Vektorattribute bilden den Kern der geschützten Datenbank nach § 87a UrhG.
-3. **Zukunftssichere Rechtsinhaberschaft**: Rechtsinhaber und Diensteanbieter ist Pascal Gregor. Soweit der Dienst zukünftig unter einer behördlich angemeldeten Geschäftsbezeichnung oder als Einzelunternehmen fortgeführt wird, bleibt die Rechtsidentität des Inhabers und der Schutz nach § 87a UrhG vollumfänglich gewahrt. Eine etwaige spätere Übertragung auf eine eigenständige juristische Person (z. B. UG oder GmbH) erfolgt unter Einhaltung eines gesonderten, transparenten Verantwortlichenwechsels gem. DSGVO.
+3. **Zukunftssichere Rechtsinhaberschaft**: Rechtsinhaber und Diensteanbieter ist Pascal Gregor. Der Übergang in ein vom selben Inhaber betriebenes Einzelunternehmen führt grundsätzlich nicht zu einem Wechsel der natürlichen Person als Rechtsträger. Änderungen von Verarbeitungszwecken, Vertragsbedingungen oder Geschäftsmodell sind davon unabhängig gesondert zu prüfen. Eine spätere Übertragung auf eine eigenständige juristische Person (z. B. UG oder GmbH) erfolgt unter Einhaltung eines gesonderten, transparenten Verantwortlichenwechsels gem. DSGVO.
 
 ---
 

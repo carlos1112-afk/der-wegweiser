@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "description": "Baseline database schema for Der Wegweiser 1.0.0",
+  "appliedAt": "2026-08-29T00:00:00Z",
+  "collections": {
+    "users": {
+      "fields": {
+        "uid": "string",
+        "email": "string",
+        "displayName": "string",
+        "createdAt": "timestamp",
+        "schemaVersion": "number"
+      },
+      "pii": true
+    },
+    "user_tokens": {
+      "fields": {
+        "uid": "string",
+        "balance": "number",
+        "updatedAt": "timestamp"
+      },
+      "pii": true
+    },
+    "user_preferences": {
+      "fields": {
+        "uid": "string",
+        "batteryCapacityWh": "number",
+        "bikeType": "string",
+        "mapStyle": "string"
+      },
+      "pii": true
+    },
+    "routes": {
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "title": "string",
+        "coordinates": "array",
+        "distanceKm": "number",
+        "elevationGainM": "number",
+        "isRoadSnapped": "boolean"
+      },
+      "pii": true
+    },
+    "charging_stations": {
+      "fields": {
+        "id": "string",
+        "name": "string",
+        "lat": "number",
+        "lng": "number",
+        "plugs": "array",
+        "isVerified": "boolean",
+        "createdByUserId": "string"
+      },
+      "pii": false,
+      "anonymizationFieldOnDelete": "createdByUserId"
+    },
+    "scout_reports": {
+      "fields": {
+        "id": "string",
+        "stationId": "string",
+        "userId": "string",
+        "status": "string",
+        "createdAt": "timestamp"
+      },
+      "pii": true
+    }
+  }
+}

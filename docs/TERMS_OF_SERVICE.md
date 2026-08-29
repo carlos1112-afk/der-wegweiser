@@ -75,7 +75,7 @@ Bitte lesen Sie die folgenden Nutzungsbedingungen und Sicherheitshinweise sorgf�
 
 ## § 10 Barrierefreiheitsstärkungsgesetz (BFSG) & Gewerberecht
 1. **Kleinstunternehmer-Ausnahme**: Das Angebot unterliegt der gesetzlichen Kleinstunternehmer-Ausnahme gemäß § 3 Abs. 1 BFSG (unter 10 Beschäftigte und Jahresumsatz &le; 2 Mio. €).
-2. **Gewerbliche Bereitstellung & Unternehmensfortführung**: Die Bereitstellung digitaler In-App-Käufe, Partner-Angebote und Werbeeinbindungen stellt eine gewerbliche Tätigkeit dar und wird durch Pascal Gregor (bzw. als Einzelunternehmer unter der Geschäftsbezeichnung "Der Wegweiser") betrieben. Eine spätere Fortführung unter einer behördlich angemeldeten Geschäftsbezeichnung oder als Einzelunternehmen berührt die Personen- und Rechtsidentität des Anbieters sowie bestehende Verträge nicht.
+2. **Gewerbliche Bereitstellung & Unternehmensfortführung**: Die Bereitstellung digitaler In-App-Käufe, Partner-Angebote und Werbeeinbindungen stellt eine gewerbliche Tätigkeit dar und wird durch Pascal Gregor (bzw. als Einzelunternehmer unter der Geschäftsbezeichnung "Der Wegweiser") betrieben. Der Übergang in ein vom selben Inhaber betriebenes Einzelunternehmen führt grundsätzlich nicht zu einem Wechsel der natürlichen Person als Rechtsträger. Änderungen von Verarbeitungszwecken, Vertragsbedingungen oder Geschäftsmodell sind davon unabhängig gesondert zu prüfen. Eine spätere Übertragung auf eine eigenständige juristische Person (z. B. UG oder GmbH) stellt einen gesonderten Verantwortlichenwechsel dar.
 
 ---
 

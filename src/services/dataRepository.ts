@@ -4,7 +4,7 @@ import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount,
 import { ChargingStationImportService } from './chargingStationImportService';
 import { CURATED_CHARGING_STATIONS, CURATED_ROUTES } from './curatedDatabase';
 
-// Utility for Haversine distance
+// Haversine distance utility
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3; // Radius of the earth in m
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -15,6 +15,20 @@ function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2
     Math.sin(dLon/2) * Math.sin(dLon/2); 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
   return R * c; // Distance in m
+}
+
+// UGC Profanity & Spam Filter (Apple Guideline 1.2 Compliance)
+const PROFANITY_PATTERN = /\b(hure|nazi|hitler|arsch|fick|schei[sß]|idiot|bastard|fotze|wichser|spast|penis|porn|viagra|casino)\b/i;
+
+export function filterUgcText(text: string): { isClean: boolean; reason?: string } {
+  if (!text || !text.trim()) return { isClean: true };
+  if (PROFANITY_PATTERN.test(text)) {
+    return { isClean: false, reason: 'Beitrag enthält unzulässige oder beleidigende Ausdrücke.' };
+  }
+  if (text.length > 500) {
+    return { isClean: false, reason: 'Text überschreitet die Maximallänge von 500 Zeichen.' };
+  }
+  return { isClean: true };
 }
 
 export interface IDataRepository {
@@ -36,6 +50,9 @@ export interface IDataRepository {
   // Routes
   saveRoute(userId: string, route: Route): Promise<string>;
   getSavedRoutes(userId: string): Promise<Route[]>;
+
+  // UGC Content Reporting (Apple Guideline 1.2)
+  reportContent(report: { contentType: 'station' | 'review' | 'route'; contentId: string; reason: string; reportedByUserId?: string }): Promise<void>;
 }
 
 // In-Memory & LocalStorage Fallback Cache with Live Firebase Firestore integration
@@ -372,6 +389,30 @@ class LocalAndFirestoreRepository implements IDataRepository {
       await setDoc(docRef, { ...lead, createdAt: new Date().toISOString() });
     } catch (e) {
       console.warn('Could not save partner lead to Firestore:', e);
+    }
+  }
+
+  async reportContent(report: { contentType: 'station' | 'review' | 'route'; contentId: string; reason: string; reportedByUserId?: string }): Promise<void> {
+    const reportId = `rep-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const payload = {
+      reportId,
+      ...report,
+      createdAt: new Date().toISOString(),
+      status: 'pending',
+    };
+
+    try {
+      const docRef = doc(db, 'content_reports', reportId);
+      await setDoc(docRef, payload);
+    } catch (e) {
+      console.warn('Could not persist content report to Firestore, saving locally:', e);
+      try {
+        const existing = JSON.parse(localStorage.getItem('der_wegweiser_reports') || '[]');
+        existing.push(payload);
+        localStorage.setItem('der_wegweiser_reports', JSON.stringify(existing));
+      } catch {
+        // ignore
+      }
     }
   }
 }

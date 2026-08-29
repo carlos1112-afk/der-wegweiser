@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Star, MessageSquare, CheckCircle2, Sparkles, X } from 'lucide-react';
+import { Star, MessageSquare, CheckCircle2, Sparkles, X, Flag, AlertTriangle } from 'lucide-react';
 import type { ChargingStation } from '../../types/navigation';
 import { SoundFxService } from '../../services/soundFxService';
+import { dataRepository, filterUgcText } from '../../services/dataRepository';
 import confetti from 'canvas-confetti';
 
 interface StationReviewModalProps {
@@ -19,8 +20,12 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
 }) => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [filterError, setFilterError] = useState<string | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>(['Überdacht / Wetterfest', 'Steckdose aktiv']);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportSuccess, setReportSuccess] = useState(false);
 
   if (!isOpen || !station) return null;
 
@@ -44,10 +49,30 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFilterError(null);
+    if (comment) {
+      const check = filterUgcText(comment);
+      if (!check.isClean) {
+        setFilterError(check.reason || 'Beitrag enthält unzulässige Begriffe.');
+        return;
+      }
+    }
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 70, spread: 70 });
     onAddReview({ rating, comment, tags: selectedTags });
     setIsSubmitted(true);
+  };
+
+  const handleSendReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reportReason) return;
+    await dataRepository.reportContent({
+      contentType: 'station',
+      contentId: station.id,
+      reason: reportReason,
+    });
+    SoundFxService.playSuccessChime();
+    setReportSuccess(true);
   };
 
   return (
@@ -83,7 +108,9 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="glow-text-gold">
             <MessageSquare size={26} />
             <div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold' }}>LADEPUNKT BEWERTEN</h3>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold' }}>
+                {isReporting ? 'INHALT MELDEN' : 'LADEPUNKT BEWERTEN'}
+              </h3>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 {station.name}
               </p>
@@ -97,7 +124,61 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
           </button>
         </div>
 
-        {isSubmitted ? (
+        {reportSuccess ? (
+          <div style={{ textAlign: 'center', padding: '24px 12px' }}>
+            <CheckCircle2 size={54} color="#00ff66" style={{ margin: '0 auto 12px' }} />
+            <h4 style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>
+              Meldung eingegangen
+            </h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '18px' }}>
+              Vielen Dank. Unsere Moderation prüft diesen Eintrag innerhalb von 24 Stunden.
+            </p>
+            <button className="btn-cyberpunk btn-gold" onClick={onClose} style={{ padding: '10px 24px' }}>
+              Schließen
+            </button>
+          </div>
+        ) : isReporting ? (
+          <form onSubmit={handleSendReport} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', fontSize: '0.85rem' }}>
+              <AlertTriangle size={18} />
+              <span>Unangemessenen oder fehlerhaften Inhalt melden:</span>
+            </div>
+            <textarea
+              rows={3}
+              required
+              placeholder="Grund der Meldung (z. B. falscher Standort, Belästigung, Spam, defekt)..."
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                backgroundColor: 'rgba(10, 15, 25, 0.8)',
+                border: '1px solid var(--border-glass)',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '0.85rem',
+                resize: 'none',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                className="btn-cyberpunk"
+                onClick={() => setIsReporting(false)}
+                style={{ flex: 1, padding: '10px', justifyContent: 'center' }}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="submit"
+                className="btn-cyberpunk"
+                style={{ flex: 1, padding: '10px', justifyContent: 'center', borderColor: '#ef4444', color: '#ef4444' }}
+              >
+                Meldung Absenden
+              </button>
+            </div>
+          </form>
+        ) : isSubmitted ? (
           <div style={{ textAlign: 'center', padding: '24px 12px' }}>
             <CheckCircle2 size={54} color="#00ff66" style={{ margin: '0 auto 12px' }} />
             <h4 style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>
@@ -187,11 +268,35 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
                   resize: 'none',
                 }}
               />
+              {filterError && (
+              <div style={{ color: '#ef4444', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <AlertTriangle size={14} /> {filterError}
+              </div>
+            )}
             </div>
 
-            <button type="submit" className="btn-cyberpunk btn-gold" style={{ padding: '12px', justifyContent: 'center', marginTop: '6px' }}>
-              <Sparkles size={16} /> Bewertung Absenden (+10 Tokens)
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setIsReporting(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: 'pointer',
+                }}
+              >
+                <Flag size={14} /> Eintrag melden
+              </button>
+
+              <button type="submit" className="btn-cyberpunk btn-gold" style={{ padding: '10px 18px' }}>
+                <Sparkles size={16} /> Bewertung Absenden (+10)
+              </button>
+            </div>
           </form>
         )}
       </div>

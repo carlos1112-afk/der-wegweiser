@@ -100,7 +100,7 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
           <Sparkles size={12} color="var(--accent-cyan)" />
-          <span>🤖 KI-generierte Tourenanalyse &amp; Streckenbeschreibung (Gemini 2.0 Flash) gem. Art. 50 EU AI Act</span>
+          <span>🤖 KI-generierte Tourenanalyse &amp; Streckenbeschreibung gem. Art. 50 EU AI Act</span>
         </div>
 
         {/* Scout Mission Banner */}

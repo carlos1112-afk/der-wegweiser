@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datenschutzerklärung — Der Wegweiser</title>
+  <style>
+    :root {
+      --bg: #050a14;
+      --card-bg: rgba(15, 23, 42, 0.9);
+      --accent: #00f0ff;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(0, 240, 255, 0.25);
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 780px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.15);
+    }
+    h1 {
+      color: var(--accent);
+      font-size: 1.6rem;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 1.2rem;
+      margin-top: 24px;
+      color: #38bdf8;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 6px;
+    }
+    h3 {
+      font-size: 1.05rem;
+      color: #7dd3fc;
+    }
+    p, li {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    strong {
+      color: var(--text);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 8px 12px;
+      text-align: left;
+    }
+    th {
+      background: rgba(0, 240, 255, 0.1);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">DSGVO & TDDDG KONFORM</div>
+    <h1>Datenschutzerklärung</h1>
+    <p><strong>App:</strong> Der Wegweiser (Version 1.0)<br>
+    <strong>Stand:</strong> 29. August 2026</p>
+
+    <h2>1. Verantwortlicher für die Datenverarbeitung</h2>
+    <p>
+      <strong>Pascal Gregor</strong><br>
+      Lindenstraße 8, 02979 Spreetal, Deutschland<br>
+      E-Mail: <a href="mailto:wegweiser-app@proton.me">wegweiser-app@proton.me</a><br>
+      Server-Standort: Google Cloud Platform (Frankfurt am Main, Region <code>europe-west3</code>).
+    </p>
+
+    <h2>2. Standortverarbeitung & Navigation (Foreground Service)</h2>
+    <p>
+      Der Wegweiser erfasst und verarbeitet Standortdaten (GPS-Koordinaten, Geschwindigkeit, Höhe und Bewegungsrichtung) ausschließlich während einer aktiv vom Nutzer gestarteten Navigations- oder Tourenaufzeichnungssitzung.
+    </p>
+    <p>
+      Damit Radfahrer akustische Abbiegehinweise auch bei gesperrtem Display oder bei kurzzeitigem Wechsel in eine andere App erhalten, wird die Standorterfassung über einen sichtbaren <strong>Android Foreground Service (Vordergrunddienst) mit permanenter Benachrichtigung</strong> in der Statusleiste ausgeführt.
+    </p>
+    <ul>
+      <li><strong>Turn-by-Turn Sprachführung</strong>: Akustische Abbiegehinweise vor Kreuzungen.</li>
+      <li><strong>Automatisches Re-Routing</strong>: Streckenneuberechnung bei Verlassen des Radwegs.</li>
+      <li><strong>Topografische Reichweitenanalyse</strong>: Berechnung des E-Bike Akkuverbrauchs anhand von Höhenmetern.</li>
+    </ul>
+    <p>Die Standorterfassung endet automatisch, sobald die Navigation beendet wird.</p>
+
+    <h2>3. Datenkategorien & Speicherdauer</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Kategorie</th>
+          <th>Zweck</th>
+          <th>Rechtsgrundlage</th>
+          <th>Löschung</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>GPS-Standort</strong></td>
+          <td>Turn-by-Turn Navigation</td>
+          <td>Art. 6 (1) b DSGVO</td>
+          <td>Flüchtig / lokal im RAM; nicht dauerhaft in Cloud gespeichert.</td>
+        </tr>
+        <tr>
+          <td><strong>Nutzerkonto & E-Mail</strong></td>
+          <td>Authentifizierung</td>
+          <td>Art. 6 (1) b DSGVO</td>
+          <td>Vollständig gelöscht bei Kontolöschung.</td>
+        </tr>
+        <tr>
+          <td><strong>E-Bike Telemetrie (BLE)</strong></td>
+          <td>Verbrauchsanalyse</td>
+          <td>Art. 6 (1) b DSGVO</td>
+          <td>Verbleibt rein lokal auf dem Smartphone.</td>
+        </tr>
+        <tr>
+          <td><strong>Eigene Routen</strong></td>
+          <td>Tourenverwaltung</td>
+          <td>Art. 6 (1) b DSGVO</td>
+          <td>Vollständig gelöscht bei Kontolöschung.</td>
+        </tr>
+        <tr>
+          <td><strong>Community-Ladesäulen</strong></td>
+          <td>Öffentliche Radinfrastruktur</td>
+          <td>Art. 6 (1) f DSGVO</td>
+          <td>Nutzerbezug wird bei Kontolöschung auf <code>anonymous_community</code> anonymisiert.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Rechte der betroffenen Person (Art. 15–21 DSGVO)</h2>
+    <p>Sie haben das Recht auf Auskunft, Berichtigung, Datenübertragbarkeit und Löschung Ihrer Daten nach Art. 17 DSGVO.</p>
+    <p>
+      Zur Ausübung Ihres Löschrechts nutzen Sie bitte die In-App-Löschfunktion in Ihrem Profil oder das öffentliche Formular unter:<br>
+      👉 <a href="account-deletion.html">Konto & Daten löschen (account-deletion.html)</a>
+    </p>
+  </div>
+</body>
+</html>
