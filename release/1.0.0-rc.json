@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "releaseCandidate": "RC2",
-  "releaseCommit": "081484701d199ca9edc74756914a240c0f7e05b7",
+  "releaseCommit": "2cb134bd76d8e9ba8a925f08394e1aa0450909b4",
   "gitTag": "v1.0.0-rc2",
   "android": {
     "versionCode": 1,
@@ -11,18 +11,24 @@
     "targetSdk": 36,
     "compileSdk": 36,
     "backgroundLocationPermission": false,
-    "foregroundServiceLocation": true
+    "foregroundServiceLocation": true,
+    "androidVersionCodeConsumed": false,
+    "playAabAccepted": false,
+    "playAppSigningConfigured": false,
+    "firebaseSigningRegistered": false,
+    "internalTestingActive": false,
+    "realDeviceTestPassed": false
   },
   "ios": {
     "buildNumber": "1",
-    "sourceCommit": "081484701d199ca9edc74756914a240c0f7e05b7",
+    "sourceCommit": "2cb134bd76d8e9ba8a925f08394e1aa0450909b4",
     "deploymentTarget": "15.0",
     "minXcodeVersion": "26.0"
   },
   "backend": {
-    "firestoreRulesCommit": "081484701d199ca9edc74756914a240c0f7e05b7",
+    "firestoreRulesCommit": "2cb134bd76d8e9ba8a925f08394e1aa0450909b4",
     "firestoreRulesLive": true,
-    "rulesDeployedAt": "2026-08-29T03:43:18+02:00"
+    "rulesDeployedAt": "2026-08-29T04:04:12+02:00"
   },
   "web": {
     "hostingSite": "der-wegweiser",
