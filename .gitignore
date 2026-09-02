@@ -38,6 +38,8 @@ admin*
 admin_*/**
 backups/
 backups/*
+firebase_data/
+firebase_data/*
 *.dump.json
 
 # Editor directories and files
