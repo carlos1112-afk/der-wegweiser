@@ -10,6 +10,7 @@
     "build:apk": "npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
     "build:ios": "npm run build && npx cap sync ios",
     "sync": "npx cap sync",
+    "test:scenarios": "node scripts/test_15_scenarios.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },

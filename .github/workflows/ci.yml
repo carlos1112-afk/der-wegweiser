@@ -27,6 +27,9 @@ jobs:
       - name: Automated Secret Scan
         run: node scripts/scan_secrets.js
 
+      - name: Run 15 Android Mission-Critical Scenarios Test
+        run: node scripts/test_15_scenarios.mjs
+
       - name: Run Linting (Oxlint)
         run: npm run lint
 
