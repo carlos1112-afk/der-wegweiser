@@ -5,7 +5,7 @@ import * as path from 'path';
 
 const firebaseConfig = {
   projectId: 'der-wegweiser',
-  apiKey: 'AIzaSyAH-TY9WiTKtKPWW3bTVTKZrv66D5bjro4',
+  apiKey: process.env.VITE_FIREBASE_API_KEY || '',
   authDomain: 'der-wegweiser.firebaseapp.com',
   storageBucket: 'der-wegweiser.firebasestorage.app',
   appId: '1:430891513864:web:6e7dedec657640a139f9bd',
