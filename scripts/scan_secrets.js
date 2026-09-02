@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
 
 console.log('🔒 ========================================================');
 console.log('🔒 COMPREHENSIVE REPOSITORY SECRET & KEY SCANNER');
