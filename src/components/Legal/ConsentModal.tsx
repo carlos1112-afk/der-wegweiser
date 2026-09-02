@@ -290,13 +290,13 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
               />
             </div>
 
-            {/* Personalized Ads (AdMob) */}
+            {/* Partner Recommendations (Zero Tracking) */}
             <div className="glass-panel" style={{ padding: '12px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Scale size={18} color="var(--accent-cyan)" />
                 <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>4. Personalisierte Werbung (AdMob)</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Relevante E-Bike Angebote & Zubehör-Werbung</div>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>4. Lokale Partner-Empfehlungen (Kein Tracking)</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Relevante E-Bike Angebote & Zubehör (ohne externe Tracker)</div>
                 </div>
               </div>
               <input

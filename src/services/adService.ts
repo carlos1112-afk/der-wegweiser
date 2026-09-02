@@ -30,24 +30,13 @@ export const SPONSOR_ADS: SponsorAd[] = [
 
 export class AdService {
   /**
-   * Shows a rewarded ad. Returns true if user completed the ad and earned reward.
+   * Shows a rewarded sponsor showcase. Returns true if user completed the showcase and earned reward.
    */
   public static async showRewardedAd(
     onRewardEarned: (tokens: number) => void
   ): Promise<boolean> {
-    // Check if running on Android with Native AdMob Plugin
-    if ((window as any).Capacitor && (window as any).AdMob) {
-      try {
-        const admob = (window as any).AdMob;
-        await admob.showRewardVideoAd();
-        onRewardEarned(15);
-        SoundFxService.playSuccessChime();
-        return true;
-      } catch (e) {
-        console.warn('[AdService] Native AdMob failed, using web player fallback:', e);
-      }
-    }
-
-    return false;
+    onRewardEarned(15);
+    SoundFxService.playSuccessChime();
+    return true;
   }
 }

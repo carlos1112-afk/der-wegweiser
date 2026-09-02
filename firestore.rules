@@ -71,13 +71,13 @@ service cloud.firestore {
     // 5. Spatial Road Intelligence (Anonymous topography & slope segments)
     match /spatial_road_intelligence/{segmentId} {
       allow read: if true;
-      allow create, update: if true;
+      allow create, update: if isNotSuspended();
       allow delete: if false; // Anonymized database content
     }
 
     // 6. B2B Partner Leads (Inbound only, read/delete strictly forbidden for public clients)
     match /partner_leads/{leadId} {
-      allow create: if true;
+      allow create: if isNotSuspended();
       allow read, update, delete: if false;
     }
 

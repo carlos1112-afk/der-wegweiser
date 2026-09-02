@@ -29,6 +29,13 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 
+	<!-- App Transport Security (ATS) Strict TLS/HTTPS Enforcement -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
+
 	<!-- Location Permissions (Turn-by-Turn Navigation) -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Der Wegweiser benötigt deinen Standort während der Fahrt, um Echtzeit-Abbiegehinweise, Steigungsprofile und Ladesäulen entlang deiner Route anzuzeigen.</string>
