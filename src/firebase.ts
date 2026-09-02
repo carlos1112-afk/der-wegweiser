@@ -16,5 +16,23 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-export const auth = getAuth(app);
-export const storage = getStorage(app);
+
+// Resilient Auth initialization (prevents startup crash if apiKey is missing in offline/local mode)
+let safeAuth: any = { currentUser: null };
+try {
+  if (firebaseConfig.apiKey) {
+    safeAuth = getAuth(app);
+  }
+} catch (e) {
+  console.warn('[Firebase] Safe fallback: Auth initialization deferred:', e);
+}
+export const auth = safeAuth;
+
+// Resilient Storage initialization
+let safeStorage: any = null;
+try {
+  safeStorage = getStorage(app);
+} catch (e) {
+  console.warn('[Firebase] Safe fallback: Storage initialization deferred:', e);
+}
+export const storage = safeStorage;
