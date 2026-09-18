@@ -17,6 +17,7 @@ All notable changes to **Der Wegweiser** will be documented in this file.
   * **Bottom-Right**: `⚡ Fahrt-Modus` button stacked cleanly above the floating voice-guided microphone button.
   * **Top-Right**: Sunlight and OLED high-contrast toggle buttons.
 * **Telemetry Ribbon Integration**: Integrated live battery state of charge (SoC %), estimated range, and motor power directly into the bottom elevation profile ribbon during active navigation.
+* **Brand-Agnostic Display Push**: Renamed and generalized the route export button in AI Anticipation Modal to **"Push to E-Bike"** (`EBikeDisplayService`), supporting all connected displays (Bosch, Specialized, Shimano, Mahle, Bafang).
 
 ### 🔑 Authentication & OAuth Expansion
 * **Removed GitHub OAuth**: Replaced developer-focused GitHub authentication with consumer social logins.

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Sparkles, Navigation, Battery, Mountain, CheckCircle2, RefreshCw, Send, ChevronDown, Bot } from 'lucide-react';
 import type { Route } from '../../types/navigation';
-import { BoschFlowService } from '../../services/boschFlowService';
+import { EBikeDisplayService } from '../../services/ebikeDisplayService';
 import { agentRegistry, DEFAULT_MODEL } from '../../services/aiAssistantService';
 import type { ModelId } from '../../services/aiAssistantService';
 
@@ -27,7 +27,7 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
   onClose,
 }) => {
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [boschMessage, setBoschMessage] = useState<string | null>(null);
+  const [ebikeMessage, setEbikeMessage] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelId>(DEFAULT_MODEL);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -38,10 +38,10 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
     setTimeout(() => setIsRegenerating(false), 800);
   };
 
-  const handlePushToBoschDisplay = async () => {
-    setBoschMessage('Sende Route an Bosch Kiox/Display...');
-    const result = await BoschFlowService.pushRouteToBoschDisplay(route);
-    setBoschMessage(result.message);
+  const handlePushToEBike = async () => {
+    setEbikeMessage('Übertrage Route an E-Bike Display...');
+    const result = await EBikeDisplayService.pushRouteToEBike(route);
+    setEbikeMessage(result.message);
   };
 
   const currentAgent = agentRegistry[selectedModel];
@@ -282,8 +282,8 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
         </div>
         {/* ─────────────────────────────────────────────────── */}
 
-        {/* Bosch Sync Notification Banner */}
-        {boschMessage && (
+        {/* E-Bike Sync Notification Banner */}
+        {ebikeMessage && (
           <div
             style={{
               marginBottom: '20px',
@@ -297,7 +297,7 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
               textAlign: 'center',
             }}
           >
-            {boschMessage}
+            {ebikeMessage}
           </div>
         )}
 
@@ -311,8 +311,8 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
             <RefreshCw size={16} className={isRegenerating ? 'spin' : ''} /> Andere Route
           </button>
 
-          <button className="btn-cyberpunk btn-gold" onClick={handlePushToBoschDisplay}>
-            <Send size={16} /> Bosch Display Push
+          <button className="btn-cyberpunk btn-gold" onClick={handlePushToEBike}>
+            <Send size={16} /> Push to E-Bike
           </button>
 
           <button

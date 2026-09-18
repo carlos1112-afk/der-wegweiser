@@ -441,4 +441,12 @@ export class BleManager {
       this.telemetryCallback = null;
     };
   }
+
+  public static getConnectedDevice(): { deviceName: string; manufacturer: BikeManufacturer } | null {
+    if (!this.lastKnownTelemetry.isConnected) return null;
+    return {
+      deviceName: this.lastKnownTelemetry.deviceName || 'Smart E-Bike',
+      manufacturer: this.lastKnownTelemetry.manufacturer || this.activeManufacturer,
+    };
+  }
 }
