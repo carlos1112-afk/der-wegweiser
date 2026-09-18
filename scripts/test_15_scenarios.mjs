@@ -49,7 +49,7 @@ const appContent = fs.readFileSync(path.resolve('src/App.tsx'), 'utf8');
 assert(!authServiceContent.includes('signInWithGithub'), 'Patch 1.0.1: GitHub OAuth removed.');
 assert(authServiceContent.includes('microsoft.com') && authServiceContent.includes('facebook.com') && authServiceContent.includes('twitter.com') && authServiceContent.includes('telegram.org'), 'Patch 1.0.1: Consumer OAuth (Microsoft, Facebook, X, Telegram) configured.');
 assert(indexCssContent.includes('rotateX(-55deg) translateZ'), 'Patch 1.0.1: 3D Billboarding for popups and speech bubbles enabled.');
-assert(appContent.includes('!currentRoute') && appContent.includes('top-header-hud'), 'Patch 1.0.1: Top menu & tokens auto-hidden during active navigation.');
+assert(appContent.includes('top-header-hud'), 'Patch 1.0.1: Top menu & token bar fully intact during navigation.');
 assert(appContent.includes('isPushDismissed') && appContent.includes('180000'), 'Patch 1.0.1: Push to E-Bike button relocated to navigation HUD with 3-minute auto-hide timer.');
 
 // ----------------------------------------------------------------------------

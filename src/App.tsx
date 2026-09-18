@@ -404,90 +404,88 @@ export function App() {
         />
       )}
 
-      {/* Top Floating Glass Header HUD (Hidden during active navigation) */}
-      {!currentRoute && (
-        <div
-          className="top-header-hud"
-          style={{
-            position: 'absolute',
-            top: '10px',
-            left: '10px',
-            right: '10px',
-            zIndex: 2000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '6px',
-          }}
-        >
-          {/* Left: Brand & OAuth Auth Pill */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
-            <div className="glass-panel header-brand-pill" style={{ padding: '5px 9px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <Navigation size={16} className="glow-text-cyan" />
-              <span style={{ fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '0.4px' }} className="brand-text glow-text-cyan">
-                WEGWEISER
-              </span>
-            </div>
-
-            <button
-              className={`btn-cyberpunk auth-btn-mobile ${authUser ? 'btn-cyan' : 'btn-gold'}`}
-              onClick={() => setShowAuthModal(true)}
-              style={{
-                padding: '5px 8px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                fontSize: '0.72rem',
-                cursor: 'pointer',
-              }}
-              title="Account & OAuth-Anmeldung (Google / Apple / Microsoft / Facebook / X / Telegram)"
-            >
-              {authUser ? (
-                <>
-                  {authUser.photoURL ? (
-                    <img
-                      src={authUser.photoURL}
-                      alt={authUser.displayName || 'User'}
-                      style={{ width: '16px', height: '16px', borderRadius: '50%' }}
-                    />
-                  ) : (
-                    <UserIcon size={13} />
-                  )}
-                  <span style={{ fontWeight: 'bold' }}>{authUser.displayName ? authUser.displayName.split(' ')[0] : 'Konto'}</span>
-                </>
-              ) : (
-                <>
-                  <LogIn size={13} />
-                  <span className="auth-btn-text">Anmelden</span>
-                </>
-              )}
-            </button>
+      {/* Top Floating Glass Header HUD (Always fully visible) */}
+      <div
+        className="top-header-hud"
+        style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          right: '10px',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '6px',
+        }}
+      >
+        {/* Left: Brand & OAuth Auth Pill */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+          <div className="glass-panel header-brand-pill" style={{ padding: '5px 9px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Navigation size={16} className="glow-text-cyan" />
+            <span style={{ fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '0.4px' }} className="brand-text glow-text-cyan">
+              WEGWEISER
+            </span>
           </div>
 
-          {/* Right: Telemetry, Weather & Token */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
-            <BatteryHUD
-              telemetry={telemetry}
-              currentRoute={currentRoute}
-              onConnectBLE={handleConnectBLE}
-              onOpenBoschModal={() => setShowBoschModal(true)}
-            />
-            <WeatherHUD userLocation={userLocation} />
-            <div className="glass-pill glow-text-gold hud-token-pill" style={{ padding: '5px 7px', fontWeight: 'bold', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <span>🪙</span>
-              <span>{tokenBalance}</span>
-            </div>
+          <button
+            className={`btn-cyberpunk auth-btn-mobile ${authUser ? 'btn-cyan' : 'btn-gold'}`}
+            onClick={() => setShowAuthModal(true)}
+            style={{
+              padding: '5px 8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              fontSize: '0.72rem',
+              cursor: 'pointer',
+            }}
+            title="Account & OAuth-Anmeldung (Google / Apple / Microsoft / Facebook / X / Telegram)"
+          >
+            {authUser ? (
+              <>
+                {authUser.photoURL ? (
+                  <img
+                    src={authUser.photoURL}
+                    alt={authUser.displayName || 'User'}
+                    style={{ width: '16px', height: '16px', borderRadius: '50%' }}
+                  />
+                ) : (
+                  <UserIcon size={13} />
+                )}
+                <span style={{ fontWeight: 'bold' }}>{authUser.displayName ? authUser.displayName.split(' ')[0] : 'Konto'}</span>
+              </>
+            ) : (
+              <>
+                <LogIn size={13} />
+                <span className="auth-btn-text">Anmelden</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Right: Telemetry, Weather & Token */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+          <BatteryHUD
+            telemetry={telemetry}
+            currentRoute={currentRoute}
+            onConnectBLE={handleConnectBLE}
+            onOpenBoschModal={() => setShowBoschModal(true)}
+          />
+          <WeatherHUD userLocation={userLocation} />
+          <div className="glass-pill glow-text-gold hud-token-pill" style={{ padding: '5px 7px', fontWeight: 'bold', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
+            <span>🪙</span>
+            <span>{tokenBalance}</span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Top-Right Sunlight & OLED Switches during Active Navigation */}
       {currentRoute && (
-        <div style={{ position: 'fixed', top: 'max(10px, env(safe-area-inset-top))', right: '12px', zIndex: 2100, display: 'flex', gap: '6px' }}>
+        <div style={{ position: 'fixed', top: '56px', right: '12px', zIndex: 2100, display: 'flex', gap: '6px' }}>
           <button
             className="btn-cyberpunk"
             onClick={handleToggleSunlightMode}
-            style={{ padding: '7px 10px', fontSize: '0.75rem' }}
+            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
             title="Sonnenlicht High-Contrast Modus"
           >
             {isSunlightMode ? <Moon size={14} /> : <Sun size={14} />}
@@ -495,7 +493,7 @@ export function App() {
           <button
             className="btn-cyberpunk"
             onClick={handleToggleOledMode}
-            style={{ padding: '7px 10px', fontSize: '0.75rem' }}
+            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
             title="OLED Sparmodus"
           >
             <EyeOff size={14} /> OLED
@@ -508,7 +506,7 @@ export function App() {
         <div
           style={{
             position: 'fixed',
-            top: 'max(10px, env(safe-area-inset-top))',
+            top: '56px',
             left: '12px',
             zIndex: 2100,
             display: 'flex',
@@ -564,27 +562,31 @@ export function App() {
         </div>
       )}
 
-      {/* Repositioned Bottom-Left Ladesäulen-Foto Scanner Button during Navigation */}
+      {/* Round Scanner (+ Säule) Button stacked directly ABOVE the Floating Microphone Button on the RIGHT */}
       {currentRoute && (
         <button
-          className="btn-cyberpunk"
+          className="btn-cyberpunk btn-gold"
           onClick={() => setShowScannerModal(true)}
           style={{
             position: 'fixed',
-            bottom: '85px',
-            left: '12px',
+            bottom: isBottomCardOpen ? '165px' : '88px',
+            right: '16px',
             zIndex: 1800,
-            padding: '8px 12px',
-            borderRadius: '12px',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 15px rgba(255, 183, 0, 0.4)',
           }}
           title="Ladesäule scannen / Foto hochladen"
         >
-          <Camera size={15} /> + Säule
+          <Camera size={22} />
         </button>
       )}
 
-      {/* Repositioned Bottom-Right Fahrt-Modus Button above Mic Button during Navigation */}
+      {/* Relocated Fahrt-Modus Button on the LEFT side, positioned higher */}
       {currentRoute && (
         <button
           className="btn-cyberpunk"
@@ -594,18 +596,23 @@ export function App() {
           }}
           style={{
             position: 'fixed',
-            bottom: isBottomCardOpen ? '165px' : '90px',
-            right: '12px',
+            bottom: isBottomCardOpen ? '165px' : '105px',
+            left: '16px',
             zIndex: 1800,
-            padding: '8px 12px',
-            borderRadius: '12px',
+            padding: '8px 14px',
+            borderRadius: '20px',
             borderColor: 'var(--accent-cyan)',
             color: 'var(--accent-cyan)',
             boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '0.8rem',
+            fontWeight: 'bold',
           }}
           title="Modus umschalten"
         >
-          ⚡ Fahrt-Modus
+          <Zap size={16} /> Fahrt-Modus
         </button>
       )}
 
