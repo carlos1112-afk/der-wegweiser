@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Sparkles, Navigation, Battery, Mountain, CheckCircle2, RefreshCw, Send, ChevronDown, Bot } from 'lucide-react';
+import { Sparkles, Navigation, Battery, Mountain, CheckCircle2, RefreshCw, ChevronDown, Bot } from 'lucide-react';
 import type { Route } from '../../types/navigation';
-import { EBikeDisplayService } from '../../services/ebikeDisplayService';
 import { agentRegistry, DEFAULT_MODEL } from '../../services/aiAssistantService';
 import type { ModelId } from '../../services/aiAssistantService';
 
@@ -27,7 +26,6 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
   onClose,
 }) => {
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [ebikeMessage, setEbikeMessage] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelId>(DEFAULT_MODEL);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -36,12 +34,6 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
     setDropdownOpen(false);
     onRegenerate(selectedModel);
     setTimeout(() => setIsRegenerating(false), 800);
-  };
-
-  const handlePushToEBike = async () => {
-    setEbikeMessage('Übertrage Route an E-Bike Display...');
-    const result = await EBikeDisplayService.pushRouteToEBike(route);
-    setEbikeMessage(result.message);
   };
 
   const currentAgent = agentRegistry[selectedModel];
@@ -282,25 +274,6 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
         </div>
         {/* ─────────────────────────────────────────────────── */}
 
-        {/* E-Bike Sync Notification Banner */}
-        {ebikeMessage && (
-          <div
-            style={{
-              marginBottom: '20px',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 183, 0, 0.15)',
-              border: '1px solid var(--accent-gold)',
-              color: 'var(--accent-gold)',
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              textAlign: 'center',
-            }}
-          >
-            {ebikeMessage}
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
           <button
@@ -309,10 +282,6 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
             onClick={handleRegenerateClick}
           >
             <RefreshCw size={16} className={isRegenerating ? 'spin' : ''} /> Andere Route
-          </button>
-
-          <button className="btn-cyberpunk btn-gold" onClick={handlePushToEBike}>
-            <Send size={16} /> Push to E-Bike
           </button>
 
           <button

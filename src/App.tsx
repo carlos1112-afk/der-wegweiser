@@ -13,8 +13,9 @@ import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
 import { AuthService } from './services/authService';
 import { RoutingService } from './services/routingService';
+import { EBikeDisplayService } from './services/ebikeDisplayService';
 import type { User } from 'firebase/auth';
-import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck, User as UserIcon, LogIn, Play, Pause, Zap } from 'lucide-react';
+import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck, User as UserIcon, LogIn, Play, Pause, Zap, Send, X } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 import { useAppLifecycle } from './hooks/useAppLifecycle';
@@ -138,6 +139,35 @@ export function App() {
     heading: number;
     speedKmH: number;
   } | null>(null);
+
+  // Auto-hiding Push to E-Bike button state during navigation (3 min auto-hide + manual dismiss)
+  const [isPushDismissed, setIsPushDismissed] = useState(false);
+  const [ebikePushMessage, setEbikePushMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!currentRoute) {
+      setIsPushDismissed(false);
+      setEbikePushMessage(null);
+      return;
+    }
+    setIsPushDismissed(false);
+    const timer = setTimeout(() => {
+      setIsPushDismissed(true);
+    }, 180000); // Auto-hide after 3 minutes (180,000 ms)
+
+    return () => clearTimeout(timer);
+  }, [currentRoute]);
+
+  const handlePushToEBikeNav = async () => {
+    if (!currentRoute) return;
+    setEbikePushMessage('Übertrage Route...');
+    const result = await EBikeDisplayService.pushRouteToEBike(currentRoute);
+    setEbikePushMessage(result.message);
+    setTimeout(() => {
+      setEbikePushMessage(null);
+      setIsPushDismissed(true);
+    }, 3000);
+  };
 
   useEffect(() => {
     if (!isSimulatingRoute || !currentRoute || !currentRoute.pathCoordinates || currentRoute.pathCoordinates.length < 2) {
@@ -470,6 +500,67 @@ export function App() {
           >
             <EyeOff size={14} /> OLED
           </button>
+        </div>
+      )}
+
+      {/* Auto-Hiding Push to E-Bike Banner during Active Navigation (First 3 Min + Manual Close X) */}
+      {currentRoute && !isPushDismissed && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 'max(10px, env(safe-area-inset-top))',
+            left: '12px',
+            zIndex: 2100,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 8px',
+            borderRadius: '20px',
+            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid var(--accent-gold)',
+            boxShadow: '0 4px 15px rgba(255, 183, 0, 0.3)',
+          }}
+        >
+          {ebikePushMessage ? (
+            <span style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: 'bold', padding: '0 4px' }}>
+              {ebikePushMessage}
+            </span>
+          ) : (
+            <>
+              <button
+                className="btn-cyberpunk btn-gold"
+                onClick={handlePushToEBikeNav}
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '0.72rem',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  borderRadius: '14px',
+                }}
+                title="Route an verbundenes E-Bike Display senden"
+              >
+                <Send size={13} /> Push to E-Bike
+              </button>
+              <button
+                onClick={() => setIsPushDismissed(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: '2px 4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title="Ausblenden"
+              >
+                <X size={14} />
+              </button>
+            </>
+          )}
         </div>
       )}
 
