@@ -1,19 +1,19 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --bg-primary: #0a0d14;
-  --bg-secondary: #121824;
-  --bg-card: rgba(20, 27, 40, 0.75);
-  --accent-cyan: #00f0ff;
+  --bg-primary: #050811;
+  --bg-secondary: #0a0f1d;
+  --bg-card: #090e1a;
+  --accent-cyan: #00e5ff;
   --accent-neon-green: #00ff66;
   --accent-gold: #ffb700;
   --accent-pink: #ff007f;
-  --text-primary: #f0f4f8;
-  --text-muted: #8a99ad;
-  --border-glass: rgba(0, 240, 255, 0.15);
-  --glow-cyan: 0 0 15px rgba(0, 240, 255, 0.35);
-  --glow-green: 0 0 15px rgba(0, 255, 102, 0.35);
-  --glow-gold: 0 0 15px rgba(255, 183, 0, 0.35);
+  --text-primary: #ffffff;
+  --text-muted: #a0aec0;
+  --border-glass: #00e5ff;
+  --glow-cyan: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 229, 255, 0.6);
+  --glow-green: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 255, 102, 0.6);
+  --glow-gold: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(255, 183, 0, 0.6);
 }
 
 * {
@@ -31,128 +31,44 @@ body {
   width: 100vw;
 }
 
-/* Glassmorphism Panels */
+/* High-Contrast Glass Panels (100% Solid Dark Background) */
 .glass-panel {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
+  background: #090e1a !important;
+  border: 2px solid var(--accent-cyan);
   border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.95), 0 0 18px rgba(0, 229, 255, 0.4);
 }
 
 .glass-pill {
-  background: rgba(18, 24, 36, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 240, 255, 0.25);
+  background: #090e1a !important;
+  border: 2px solid var(--accent-cyan);
   border-radius: 9999px;
-  box-shadow: var(--glow-cyan);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 229, 255, 0.5);
 }
 
 /* Glowing Neon Elements */
 .glow-text-cyan {
   color: var(--accent-cyan);
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+  text-shadow: 0 0 14px rgba(0, 229, 255, 0.85);
 }
 
 .glow-text-green {
   color: var(--accent-neon-green);
-  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+  text-shadow: 0 0 14px rgba(0, 255, 102, 0.85);
 }
 
 .glow-text-gold {
   color: var(--accent-gold);
-  text-shadow: 0 0 10px rgba(255, 183, 0, 0.6);
+  text-shadow: 0 0 14px rgba(255, 183, 0, 0.85);
 }
 
 .btn-cyberpunk {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 255, 102, 0.1));
-  border: 1px solid var(--accent-cyan);
-  color: var(--accent-cyan);
-  padding: 10px 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.85rem;
-}
-
-:root {
-  --bg-primary: #0a0d14;
-  --bg-secondary: #121824;
-  --bg-card: rgba(20, 27, 40, 0.75);
-  --accent-cyan: #00f0ff;
-  --accent-neon-green: #00ff66;
-  --accent-gold: #ffb700;
-  --accent-pink: #ff007f;
-  --text-primary: #f0f4f8;
-  --text-muted: #8a99ad;
-  --border-glass: rgba(0, 240, 255, 0.15);
-  --glow-cyan: 0 0 15px rgba(0, 240, 255, 0.35);
-  --glow-green: 0 0 15px rgba(0, 255, 102, 0.35);
-  --glow-gold: 0 0 15px rgba(255, 183, 0, 0.35);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
-}
-
-/* Glassmorphism Panels */
-.glass-panel {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-}
-
-.glass-pill {
-  background: rgba(18, 24, 36, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 240, 255, 0.25);
-  border-radius: 9999px;
-  box-shadow: var(--glow-cyan);
-}
-
-/* Glowing Neon Elements */
-.glow-text-cyan {
-  color: var(--accent-cyan);
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
-}
-
-.glow-text-green {
-  color: var(--accent-neon-green);
-  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
-}
-
-.glow-text-gold {
-  color: var(--accent-gold);
-  text-shadow: 0 0 10px rgba(255, 183, 0, 0.6);
-}
-
-.btn-cyberpunk {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 255, 102, 0.1));
-  border: 1px solid var(--accent-cyan);
-  color: var(--accent-cyan);
+  background: #090e1a;
+  border: 2px solid var(--accent-cyan);
+  color: #00e5ff;
   padding: 10px 20px;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.25s ease;
   display: inline-flex;
@@ -161,23 +77,45 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 0.85rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 229, 255, 0.45);
 }
 
 .btn-cyberpunk:hover {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(0, 255, 102, 0.3));
-  box-shadow: var(--glow-cyan);
+  background: #00e5ff;
+  color: #000000;
+  box-shadow: 0 0 26px rgba(0, 229, 255, 0.9);
+  border-color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.btn-cyan {
+  background: #00e5ff;
+  border: 2px solid #ffffff;
+  color: #000000;
+  font-weight: 900;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.95), 0 0 22px rgba(0, 229, 255, 0.8);
+}
+
+.btn-cyan:hover {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.95);
   transform: translateY(-2px);
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, rgba(255, 183, 0, 0.25), rgba(255, 0, 127, 0.15));
-  border: 1px solid var(--accent-gold);
+  background: #090e1a;
+  border: 2px solid var(--accent-gold);
   color: var(--accent-gold);
+  font-weight: 800;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(255, 183, 0, 0.5);
 }
 
 .btn-gold:hover {
-  background: linear-gradient(135deg, rgba(255, 183, 0, 0.45), rgba(255, 0, 127, 0.3));
-  box-shadow: var(--glow-gold);
+  background: var(--accent-gold);
+  color: #000000;
+  box-shadow: 0 0 26px rgba(255, 183, 0, 0.9);
+  transform: translateY(-2px);
 }
 
 /* Custom Scrollbar */
@@ -198,14 +136,14 @@ body {
 
 /* Leaflet Dark Theme Overrides */
 .leaflet-container {
-  background-color: #0b0e17 !important;
+  background-color: #050811 !important;
   width: 100%;
   height: 100%;
   z-index: 0;
 }
 
 .leaflet-tile {
-  filter: brightness(0.7) invert(1) contrast(1.35) hue-rotate(200deg) saturate(0.35) !important;
+  filter: brightness(0.55) invert(1) contrast(1.45) hue-rotate(200deg) saturate(0.25) !important;
 }
 
 /* Custom Marker Pulsing Effect */
@@ -589,7 +527,7 @@ body.sunlight-mode .map-tile-dark {
   /* Turn by Turn Banner on Mobile */
   .turn-by-turn-banner {
     position: absolute !important;
-    top: max(100px, calc(env(safe-area-inset-top, 8px) + 90px)) !important;
+    top: max(96px, calc(env(safe-area-inset-top, 8px) + 86px)) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     max-width: calc(100vw - 16px) !important;
@@ -599,7 +537,7 @@ body.sunlight-mode .map-tile-dark {
 
   /* Mic Button */
   .floating-mic-wrapper {
-    right: 52px !important;
+    right: 12px !important;
     bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
   }
 
@@ -619,7 +557,7 @@ body.sunlight-mode .map-tile-dark {
 /* Turn by Turn Banner Default */
 .turn-by-turn-banner {
   position: absolute;
-  top: 104px;
+  top: 96px;
   left: 50%;
   transform: translateX(-50%);
   max-width: calc(100vw - 20px);

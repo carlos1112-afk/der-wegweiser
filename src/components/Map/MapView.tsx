@@ -768,20 +768,21 @@ export const MapView: React.FC<MapViewProps> = ({
               onToggleSimulation();
             }}
             style={{
-              width: '36px',
-              height: '36px',
+              width: '38px',
+              height: '38px',
               borderRadius: '10px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              backgroundColor: '#090e1a',
               color: isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
               cursor: 'pointer',
-              border: `1px solid ${isSimulating ? 'var(--accent-neon-green)' : 'rgba(0, 240, 255, 0.4)'}`,
-              boxShadow: isSimulating ? 'var(--glow-neon-green)' : '0 0 10px rgba(0, 240, 255, 0.2)',
+              border: `2px solid ${isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
+              boxShadow: isSimulating ? 'var(--glow-green)' : 'var(--glow-cyan)',
             }}
             title={isSimulating ? 'GPS-Simulation pausieren' : 'GPS-Simulation starten (Demo-Fahrt)'}
           >
-            {isSimulating ? <Pause size={16} className="glow-text-green" /> : <Play size={16} />}
+            {isSimulating ? <Pause size={18} className="glow-text-green" /> : <Play size={18} />}
           </button>
         )}
 
@@ -793,8 +794,9 @@ export const MapView: React.FC<MapViewProps> = ({
             flexDirection: 'column',
             borderRadius: '10px',
             overflow: 'hidden',
-            border: '1px solid rgba(0, 240, 255, 0.35)',
-            boxShadow: '0 0 10px rgba(0, 240, 255, 0.15)',
+            backgroundColor: '#090e1a',
+            border: '2px solid var(--accent-cyan)',
+            boxShadow: 'var(--glow-cyan)',
           }}
         >
           <button
@@ -803,8 +805,8 @@ export const MapView: React.FC<MapViewProps> = ({
               handleZoomIn();
             }}
             style={{
-              width: '36px',
-              height: '32px',
+              width: '38px',
+              height: '34px',
               background: 'none',
               border: 'none',
               display: 'flex',
@@ -815,17 +817,17 @@ export const MapView: React.FC<MapViewProps> = ({
             }}
             title="Vergrößern (Zoom In)"
           >
-            <Plus size={16} />
+            <Plus size={18} />
           </button>
-          <div style={{ height: '1px', backgroundColor: 'rgba(0, 240, 255, 0.25)' }} />
+          <div style={{ height: '2px', backgroundColor: 'var(--accent-cyan)' }} />
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleZoomOut();
             }}
             style={{
-              width: '36px',
-              height: '32px',
+              width: '38px',
+              height: '34px',
               background: 'none',
               border: 'none',
               display: 'flex',
@@ -836,7 +838,7 @@ export const MapView: React.FC<MapViewProps> = ({
             }}
             title="Verkleinern (Zoom Out)"
           >
-            <Minus size={16} />
+            <Minus size={18} />
           </button>
         </div>
 
@@ -848,20 +850,21 @@ export const MapView: React.FC<MapViewProps> = ({
             handleRecenter();
           }}
           style={{
-            width: '36px',
-            height: '36px',
+            width: '38px',
+            height: '38px',
             borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backgroundColor: '#090e1a',
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: '1px solid var(--accent-cyan)',
+            border: '2px solid var(--accent-cyan)',
             boxShadow: 'var(--glow-cyan)',
           }}
           title="Auf aktuellen GPS-Standort zentrieren"
         >
-          <Crosshair size={17} />
+          <Crosshair size={18} />
         </button>
 
         {/* Layer Selector Button */}
@@ -872,20 +875,21 @@ export const MapView: React.FC<MapViewProps> = ({
             setShowLayerMenu(!showLayerMenu);
           }}
           style={{
-            width: '36px',
-            height: '36px',
+            width: '38px',
+            height: '38px',
             borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backgroundColor: '#090e1a',
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: '1px solid rgba(0, 240, 255, 0.4)',
-            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : 'none',
+            border: '2px solid var(--accent-cyan)',
+            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : '0 4px 18px rgba(0, 0, 0, 0.9)',
           }}
           title="Karten-Ebene wechseln"
         >
-          <Layers size={16} />
+          <Layers size={18} />
         </button>
 
         {/* 3D Cockpit Toggle Button */}
@@ -896,20 +900,21 @@ export const MapView: React.FC<MapViewProps> = ({
             setIs3DMode(!is3DMode);
           }}
           style={{
-            width: '36px',
-            height: '36px',
+            width: '38px',
+            height: '38px',
             borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backgroundColor: '#090e1a',
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: '1px solid rgba(0, 240, 255, 0.4)',
-            boxShadow: is3DMode ? 'var(--glow-cyan)' : 'none',
+            border: '2px solid var(--accent-cyan)',
+            boxShadow: is3DMode ? 'var(--glow-cyan)' : '0 4px 18px rgba(0, 0, 0, 0.9)',
           }}
           title="3D Cyberpunk Perspektive umschalten"
         >
-          <Box size={16} />
+          <Box size={18} />
         </button>
 
         {/* Course-Up / Dynamic Compass Button */}
@@ -920,21 +925,22 @@ export const MapView: React.FC<MapViewProps> = ({
             setIsCourseUp(!isCourseUp);
           }}
           style={{
-            width: '36px',
-            height: '36px',
+            width: '38px',
+            height: '38px',
             borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            backgroundColor: '#090e1a',
             color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: `1px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
-            boxShadow: isCourseUp ? 'var(--glow-neon-green)' : '0 0 12px rgba(0, 240, 255, 0.25)',
+            border: `2px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
+            boxShadow: isCourseUp ? 'var(--glow-green)' : 'var(--glow-cyan)',
           }}
           title={isCourseUp ? 'Auf Norden fixieren (North-Up)' : 'In Fahrtrichtung rotieren (Course-Up)'}
         >
           <Compass
-            size={18}
+            size={20}
             style={{
               transform: isCourseUp ? `rotate(${currentHeadingDeg}deg)` : 'none',
               transition: 'transform 0.3s ease',

@@ -514,10 +514,9 @@ export function App() {
             gap: '6px',
             padding: '4px 8px',
             borderRadius: '20px',
-            backgroundColor: 'rgba(15, 23, 42, 0.92)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid var(--accent-gold)',
-            boxShadow: '0 4px 15px rgba(255, 183, 0, 0.3)',
+            backgroundColor: '#090e1a',
+            border: '2px solid var(--accent-gold)',
+            boxShadow: '0 4px 18px rgba(0, 0, 0, 0.95), 0 0 14px rgba(255, 183, 0, 0.5)',
           }}
         >
           {ebikePushMessage ? (
@@ -532,7 +531,7 @@ export function App() {
                 style={{
                   padding: '5px 10px',
                   fontSize: '0.72rem',
-                  fontWeight: 'bold',
+                  fontWeight: '800',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '5px',
@@ -547,7 +546,7 @@ export function App() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: 'var(--text-muted)',
+                  color: 'var(--accent-gold)',
                   cursor: 'pointer',
                   padding: '2px 4px',
                   display: 'flex',
@@ -578,7 +577,10 @@ export function App() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(255, 183, 0, 0.4)',
+            backgroundColor: '#090e1a',
+            border: '2px solid var(--accent-gold)',
+            color: 'var(--accent-gold)',
+            boxShadow: '0 4px 18px rgba(0, 0, 0, 0.95), 0 0 16px rgba(255, 183, 0, 0.6)',
           }}
           title="Ladesäule scannen / Foto hochladen"
         >
@@ -601,14 +603,15 @@ export function App() {
             zIndex: 1800,
             padding: '8px 14px',
             borderRadius: '20px',
-            borderColor: 'var(--accent-cyan)',
+            backgroundColor: '#090e1a',
+            border: '2px solid var(--accent-cyan)',
             color: 'var(--accent-cyan)',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+            boxShadow: '0 4px 18px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 229, 255, 0.5)',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            fontSize: '0.8rem',
-            fontWeight: 'bold',
+            fontSize: '0.82rem',
+            fontWeight: '800',
           }}
           title="Modus umschalten"
         >
@@ -621,7 +624,7 @@ export function App() {
         className="quick-actions-bar"
         style={{
           position: 'absolute',
-          top: currentRoute ? 'max(10px, env(safe-area-inset-top))' : '52px',
+          top: currentRoute ? '56px' : '52px',
           left: '12px',
           right: currentRoute ? '110px' : '12px',
           zIndex: 1900,
