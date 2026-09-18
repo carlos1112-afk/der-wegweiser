@@ -6,9 +6,11 @@ import { ElevationService } from '../../services/elevationService';
 interface ElevationRibbonProps {
   currentRoute: Route | null;
   userLocation: { lat: number; lng: number };
+  telemetry?: any;
+  isNavigating?: boolean;
 }
 
-export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, userLocation }) => {
+export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, userLocation, telemetry, isNavigating }) => {
   const [elevationProfile, setElevationProfile] = useState<{ distanceKm: number; elevationM: number; slopePercent: number }[]>([]);
   const [currentElevation, setCurrentElevation] = useState<number>(45);
   const [maxElevation, setMaxElevation] = useState<number>(85);
@@ -82,44 +84,53 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, 
 
   return (
     <div
-      className="glass-panel"
+      className="glass-panel elevation-ribbon-wrapper"
+      onClick={(e) => e.stopPropagation()}
       style={{
         position: 'absolute',
-        bottom: '24px',
-        left: '20px',
+        bottom: '20px',
+        left: '12px',
         zIndex: 1000,
-        padding: '10px 14px',
-        borderRadius: '16px',
+        padding: '8px 12px',
+        borderRadius: '14px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '6px',
-        backgroundColor: 'rgba(10, 18, 30, 0.82)',
+        gap: '4px',
+        backgroundColor: 'rgba(10, 18, 30, 0.92)',
         backdropFilter: 'blur(12px)',
         border: '1px solid var(--border-glass)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-        width: '380px',
-        maxWidth: 'calc(100vw - 120px)',
+        width: '320px',
+        maxWidth: 'calc(100vw - 116px)',
       }}
     >
+      {/* Telemetry & Weather compact row during navigation */}
+      {isNavigating && telemetry && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--accent-neon-green)', paddingBottom: '3px', borderBottom: '1px solid rgba(0, 240, 255, 0.15)' }}>
+          <span>🔋 Akku: {telemetry.batteryLevel ?? 85}% ({telemetry.estimatedRangeKm ?? 45}km)</span>
+          <span>⚡ {telemetry.powerWatts ?? 150}W</span>
+        </div>
+      )}
+
       {/* Header Info */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-cyan)', fontWeight: 'bold' }}>
-          <Mountain size={14} />
-          <span>Höhenprofil</span>
-          <span style={{ color: '#ffffff' }}>{currentElevation} m ü. NN</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.73rem', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--accent-cyan)', fontWeight: 'bold' }}>
+          <Mountain size={13} />
+          <span>{currentElevation} m</span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>ü.NN</span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-            <TrendingUp size={12} color={currentSlope > 5 ? 'var(--accent-pink)' : 'var(--accent-neon-green)'} />
+            <TrendingUp size={11} color={currentSlope > 5 ? 'var(--accent-pink)' : 'var(--accent-neon-green)'} />
             {currentSlope > 0 ? `+${currentSlope}%` : `${currentSlope}%`}
           </span>
-          <span>Max: {maxElevation} m</span>
+          <span>Max: {maxElevation}m</span>
         </div>
       </div>
 
       {/* SVG Chart */}
-      <div style={{ position: 'relative', width: '100%', height: `${height}px` }}>
+      <div style={{ position: 'relative', width: '100%', height: '36px' }}>
         <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: '100%', overflow: 'visible' }}>
           <defs>
             <linearGradient id="elevationGrad" x1="0" y1="0" x2="0" y2="1">
@@ -142,7 +153,7 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, 
           />
 
           {/* Current rider marker on curve */}
-          <circle cx="12" cy={points[0].split(',')[1]} r="4" fill="var(--accent-neon-green)" stroke="#ffffff" strokeWidth="1.5" />
+          <circle cx="12" cy={points[0].split(',')[1]} r="3.5" fill="var(--accent-neon-green)" stroke="#ffffff" strokeWidth="1.5" />
         </svg>
       </div>
     </div>

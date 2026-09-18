@@ -13,11 +13,11 @@ interface AnticipationModalProps {
 }
 
 const tierColors: Record<string, string> = {
-  free: '#4ade80',      // green — no cost
-  cloud: '#38bdf8',     // sky blue — GCP credits
-  pro: 'var(--accent-cyan)',
-  flash: '#a78bfa',     // purple
-  lite: '#6ee7b7',      // teal
+  flash: 'var(--accent-cyan)',
+  lite: '#4ade80',
+  pro: '#a78bfa',
+  free: '#4ade80',
+  cloud: '#38bdf8',
 };
 
 export const AnticipationModal: React.FC<AnticipationModalProps> = ({

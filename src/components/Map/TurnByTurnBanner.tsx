@@ -34,41 +34,39 @@ export const TurnByTurnBanner: React.FC<TurnByTurnBannerProps> = ({
   if (isOffRoute) {
     return (
       <div
-        className="glass-panel"
+        className="glass-panel turn-by-turn-banner"
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         style={{
-          position: 'absolute',
-          top: '76px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 1000,
-          padding: '12px 24px',
+          padding: '8px 14px',
           display: 'flex',
           alignItems: 'center',
-          gap: '14px',
+          gap: '10px',
           border: '1px solid var(--accent-gold)',
           boxShadow: 'var(--glow-gold)',
-          backgroundColor: 'rgba(25, 20, 10, 0.9)',
-          borderRadius: '16px',
-          maxWidth: '90%',
-          width: '460px',
+          backgroundColor: 'rgba(25, 20, 10, 0.94)',
+          borderRadius: '14px',
         }}
       >
-        <AlertTriangle size={28} className="glow-text-gold" />
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--accent-gold)' }}>
+        <AlertTriangle size={24} className="glow-text-gold" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--accent-gold)' }}>
             Strecke verlassen ({offRouteDistanceM}m)
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
             Automatische Routenkorrektur aktiv...
           </div>
         </div>
         {onManualReroute && (
           <button
             className="btn-cyberpunk btn-gold"
-            onClick={onManualReroute}
-            style={{ padding: '6px 12px', fontSize: '0.75rem' }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onManualReroute();
+            }}
+            style={{ padding: '6px 10px', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
           >
-            <RefreshCw size={14} className="spin-icon" /> Neu berechnen
+            <RefreshCw size={13} className="spin-icon" /> Neu berechnen
           </button>
         )}
       </div>
@@ -99,39 +97,35 @@ export const TurnByTurnBanner: React.FC<TurnByTurnBannerProps> = ({
 
   return (
     <div
-      className="glass-panel"
+      className="glass-panel turn-by-turn-banner"
+      onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
       style={{
-        position: 'absolute',
-        top: '76px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000,
-        padding: '12px 20px',
+        padding: '8px 14px',
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
-        borderRadius: '16px',
+        gap: '12px',
+        borderRadius: '14px',
         boxShadow: 'var(--glow-cyan)',
         border: '1px solid var(--accent-cyan)',
-        backgroundColor: 'rgba(10, 18, 30, 0.85)',
+        backgroundColor: 'rgba(10, 18, 30, 0.88)',
         backdropFilter: 'blur(16px)',
-        maxWidth: '92%',
-        width: '480px',
         userSelect: 'none',
       }}
     >
       {/* Turn Icon Box */}
       <div
         style={{
-          width: '52px',
-          height: '52px',
-          borderRadius: '12px',
+          width: '44px',
+          height: '44px',
+          borderRadius: '10px',
           backgroundColor: 'rgba(0, 240, 255, 0.15)',
           border: '1px solid var(--accent-cyan)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: '0 0 15px rgba(0, 240, 255, 0.3)',
+          flexShrink: 0,
         }}
       >
         {renderTurnIcon()}

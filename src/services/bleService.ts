@@ -1,9 +1,9 @@
-import type { LiveBikeTelemetry } from '../types/navigation';
+import type { LiveBikeTelemetry, BikeManufacturer } from '../types/navigation';
 import { BleManager } from './ble/bleManager';
 
 export class BleService {
-  public static async connectToBike(): Promise<LiveBikeTelemetry> {
-    return BleManager.connectToBike();
+  public static async connectToBike(targetManufacturer?: BikeManufacturer): Promise<LiveBikeTelemetry> {
+    return BleManager.connectToBike(targetManufacturer);
   }
 
   public static subscribeTelemetry(

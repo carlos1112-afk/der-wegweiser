@@ -70,6 +70,87 @@ body {
   border: 1px solid var(--accent-cyan);
   color: var(--accent-cyan);
   padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+:root {
+  --bg-primary: #0a0d14;
+  --bg-secondary: #121824;
+  --bg-card: rgba(20, 27, 40, 0.75);
+  --accent-cyan: #00f0ff;
+  --accent-neon-green: #00ff66;
+  --accent-gold: #ffb700;
+  --accent-pink: #ff007f;
+  --text-primary: #f0f4f8;
+  --text-muted: #8a99ad;
+  --border-glass: rgba(0, 240, 255, 0.15);
+  --glow-cyan: 0 0 15px rgba(0, 240, 255, 0.35);
+  --glow-green: 0 0 15px rgba(0, 255, 102, 0.35);
+  --glow-gold: 0 0 15px rgba(255, 183, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.glass-pill {
+  background: rgba(18, 24, 36, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  border-radius: 9999px;
+  box-shadow: var(--glow-cyan);
+}
+
+/* Glowing Neon Elements */
+.glow-text-cyan {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.glow-text-green {
+  color: var(--accent-neon-green);
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+}
+
+.glow-text-gold {
+  color: var(--accent-gold);
+  text-shadow: 0 0 10px rgba(255, 183, 0, 0.6);
+}
+
+.btn-cyberpunk {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 255, 102, 0.1));
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 10px 20px;
   border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -150,7 +231,6 @@ body {
   }
 }
 
-
 /* Scanner Animation */
 @keyframes scanline {
   0% {
@@ -173,10 +253,10 @@ body {
   animation: scanline 2.5s ease-in-out infinite;
 }
 
-/* 3D Cyberpunk Cockpit Perspective */
+/* 3D Cyberpunk Cockpit Perspective with Terrain Relief Depth */
 .map-3d-perspective {
-  transform: perspective(900px) rotateX(45deg) scale(1.1);
-  transform-origin: center 80%;
+  transform: perspective(900px) rotateX(55deg) scale(1.15);
+  transform-origin: center 85%;
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -184,7 +264,22 @@ body {
   width: 100%;
   height: 100%;
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: center 80%;
+  transform-origin: center 85%;
+}
+
+/* 3D Billboarding: Counter-rotate speech bubbles / popups and markers so they stand upright! */
+.map-3d-perspective .leaflet-popup {
+  transform-origin: bottom center !important;
+  transform: rotateX(-55deg) translateZ(25px) scale(1.1) !important;
+  transition: transform 0.4s ease-out;
+  filter: drop-shadow(0 15px 12px rgba(0, 0, 0, 0.85));
+}
+
+.map-3d-perspective .leaflet-marker-icon:not(.user-location-marker) {
+  transform-origin: bottom center !important;
+  transform: rotateX(-55deg) translateZ(12px) !important;
+  transition: transform 0.4s ease-out;
+  filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.75));
 }
 
 /* Glowing Cyberpunk Pulse Animations */
@@ -273,7 +368,6 @@ body {
     opacity: 1;
   }
 }
-
 
 /* Tile Layer Overrides */
 .cyberpunk-dark-tiles {
@@ -420,6 +514,141 @@ body.sunlight-mode .map-tile-dark {
   }
 
   .hide-on-landscape {
+    display: none !important;
+  }
+}
+
+/* Smartphone Portrait Layout Optimizations (< 480px) */
+@media (max-width: 480px) {
+  .top-header-hud {
+    top: max(8px, env(safe-area-inset-top, 8px)) !important;
+    left: 8px !important;
+    right: 8px !important;
+    gap: 4px !important;
+  }
+
+  .header-brand-pill {
+    padding: 5px 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .brand-text {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  .auth-btn-mobile {
+    padding: 5px 7px !important;
+    font-size: 0.7rem !important;
+    gap: 4px !important;
+  }
+
+  .quick-actions-bar {
+    top: max(50px, calc(env(safe-area-inset-top, 8px) + 42px)) !important;
+    left: 8px !important;
+    right: 8px !important;
+    gap: 5px !important;
+  }
+
+  .quick-actions-bar button,
+  .quick-actions-bar .glass-pill {
+    padding: 5px 9px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Modals on small mobile screens */
+  .glass-panel-modal {
+    padding: 16px 14px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .mobile-hide-wind,
+  .mobile-hide-assist {
+    display: none !important;
+  }
+
+  /* Bottom sheet action card */
+  .action-bottom-card {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+    padding: 10px 12px !important;
+  }
+
+  /* Right floating controls */
+  .floating-controls-right {
+    right: 8px !important;
+    bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  }
+
+  .floating-controls-right.card-open {
+    bottom: max(100px, calc(env(safe-area-inset-bottom, 14px) + 90px)) !important;
+  }
+
+  /* Turn by Turn Banner on Mobile */
+  .turn-by-turn-banner {
+    position: absolute !important;
+    top: max(100px, calc(env(safe-area-inset-top, 8px) + 90px)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: calc(100vw - 16px) !important;
+    width: 440px !important;
+    z-index: 1500 !important;
+  }
+
+  /* Mic Button */
+  .floating-mic-wrapper {
+    right: 52px !important;
+    bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  }
+
+  .floating-mic-button {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  /* Elevation Ribbon */
+  .elevation-ribbon-wrapper {
+    left: 8px !important;
+    bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+    max-width: calc(100vw - 112px) !important;
+  }
+}
+
+/* Turn by Turn Banner Default */
+.turn-by-turn-banner {
+  position: absolute;
+  top: 104px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 20px);
+  width: 460px;
+  z-index: 1500;
+}
+
+/* Leaflet Attribution Bar Cleanup */
+.leaflet-control-attribution {
+  font-size: 8px !important;
+  background: rgba(10, 15, 25, 0.75) !important;
+  color: rgba(255, 255, 255, 0.35) !important;
+  padding: 0 4px !important;
+  margin: 0 !important;
+  line-height: 12px !important;
+  height: 12px !important;
+}
+
+.leaflet-control-attribution a {
+  color: rgba(0, 240, 255, 0.5) !important;
+  text-decoration: none !important;
+}
+
+/* Ultra-Compact Screens (< 360px) */
+@media (max-width: 360px) {
+  .brand-text {
+    display: none !important;
+  }
+  .auth-btn-text {
     display: none !important;
   }
 }

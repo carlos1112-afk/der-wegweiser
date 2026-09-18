@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import type { Route, ChargingStation } from '../../types/navigation';
-import { Compass, Box, Layers, Navigation2 } from 'lucide-react';
+import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Play, Pause } from 'lucide-react';
 import { TurnByTurnBanner } from './TurnByTurnBanner';
 import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
 
-export type MapTileTheme = 'dark' | 'cycle' | 'satellite';
+export type MapTileTheme = 'dark' | 'cycle' | 'topo' | 'satellite';
 
 interface MapViewProps {
   userLocation: { lat: number; lng: number };
@@ -15,31 +15,57 @@ interface MapViewProps {
   heading?: number | null;
   currentRoute: Route | null;
   chargingStations: ChargingStation[];
-  onSelectStation: (station: ChargingStation) => void;
+  onSelectStation?: (station: ChargingStation) => void;
   onAutoReroute?: () => void;
   onOpenReviewModal?: (station: ChargingStation) => void;
+  onPlanRouteToPoint?: (lat: number, lng: number) => void;
+  onPlanRouteToStation?: (station: ChargingStation) => void;
+  isSimulating?: boolean;
+  onToggleSimulation?: () => void;
+  onCardOpenChange?: (open: boolean) => void;
+  telemetry?: any;
 }
 
-const TILE_SERVERS: Record<MapTileTheme, { url: string; attribution: string; maxZoom: number; className?: string }> = {
+const TILE_SERVERS: Record<MapTileTheme, { name: string; url: string; attribution: string; maxZoom: number; className?: string }> = {
   dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+    name: 'Cyberpunk Dark',
+    url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors, Humanitarian Team',
     maxZoom: 19,
     className: 'cyberpunk-dark-tiles',
   },
   cycle: {
+    name: 'CyclOSM (Fahrrad & Trails)',
     url: 'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
     attribution: '&copy; OpenStreetMap contributors, CyclOSM',
     maxZoom: 18,
     className: 'cyclosm-tiles',
   },
+  topo: {
+    name: 'OpenTopoMap (Höhenlinien)',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors, SRTM',
+    maxZoom: 17,
+  },
   satellite: {
+    name: 'Satellit / Luftbild',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    attribution: '&copy; Esri &mdash; World Imagery',
     maxZoom: 19,
     className: 'satellite-tiles',
   },
 };
+
+function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 // Custom Leaflet Icons using glowing cyberpunk CSS classes
 const createCustomWaypointIcon = (category: string, label?: string) => {
@@ -54,6 +80,10 @@ const createCustomWaypointIcon = (category: string, label?: string) => {
     case 'end':
       markerClass = 'marker-end';
       iconHtml = label || '🎯';
+      break;
+    case 'target':
+      markerClass = 'marker-end';
+      iconHtml = '🎯';
       break;
     case 'charging':
       markerClass = 'marker-charging';
@@ -176,21 +206,68 @@ const getRouteWaypoints = (route: Route | null) => {
   return waypoints;
 };
 
-// Component to dynamically re-center map when location/route updates
-const MapRecenter: React.FC<{ center: [number, number]; bounds?: [number, number][]; isCourseUp?: boolean; heading?: number | null }> = ({
-  center,
-  bounds,
-  isCourseUp,
-}) => {
+// Component to dynamically re-center map when location/route updates without overriding user zoom
+const MapRecenter: React.FC<{
+  center: [number, number];
+  bounds?: [number, number][];
+  isCourseUp?: boolean;
+  heading?: number | null;
+  isAutoFollow?: boolean;
+  onUserInteraction?: () => void;
+}> = ({ center, bounds, isCourseUp, isAutoFollow = true, onUserInteraction }) => {
   const map = useMap();
+  const fittedBoundsKeyRef = useRef<string | null>(null);
 
+  // Pause auto-follow if user manually drags or zooms the map
+  useMapEvents({
+    dragstart() {
+      if (onUserInteraction) onUserInteraction();
+    },
+    zoomstart() {
+      if (onUserInteraction) onUserInteraction();
+    },
+  });
+
+  // Fit bounds ONLY ONCE when a new route is set
   useEffect(() => {
     if (bounds && bounds.length > 0 && !isCourseUp) {
-      map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50] });
+      const boundsKey = JSON.stringify(bounds.slice(0, 3));
+      if (fittedBoundsKeyRef.current !== boundsKey) {
+        map.fitBounds(L.latLngBounds(bounds), { padding: [50, 50] });
+        fittedBoundsKeyRef.current = boundsKey;
+      }
     } else {
-      map.setView(center, 15);
+      fittedBoundsKeyRef.current = null;
     }
-  }, [center, bounds, map, isCourseUp]);
+  }, [bounds, map, isCourseUp]);
+
+  // Recenter map during GPS updates ONLY if auto-follow is active, preserving user's zoom!
+  useEffect(() => {
+    if (!isAutoFollow) return;
+    map.panTo(center, { animate: true, duration: 0.5 });
+  }, [center, isAutoFollow, map]);
+
+  return null;
+};
+
+// Map Click and Resize Handler
+const MapEventHandler: React.FC<{
+  onMapClick: (lat: number, lng: number) => void;
+}> = ({ onMapClick }) => {
+  const map = useMap();
+
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [map]);
 
   return null;
 };
@@ -204,12 +281,29 @@ export const MapView: React.FC<MapViewProps> = ({
   onSelectStation,
   onAutoReroute,
   onOpenReviewModal,
+  onPlanRouteToPoint,
+  onPlanRouteToStation,
+  isSimulating,
+  onToggleSimulation,
+  onCardOpenChange,
+  telemetry,
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const [is3DMode, setIs3DMode] = useState(false);
   const [isCourseUp, setIsCourseUp] = useState(false);
+  const [isAutoFollow, setIsAutoFollow] = useState(true);
   const [tileTheme, setTileTheme] = useState<MapTileTheme>('dark');
   const [showLayerMenu, setShowLayerMenu] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedStationState, setSelectedStationState] = useState<ChargingStation | null>(null);
+
+  const isCardOpen = Boolean(selectedDestination || selectedStationState);
+
+  useEffect(() => {
+    if (onCardOpenChange) {
+      onCardOpenChange(isCardOpen);
+    }
+  }, [isCardOpen, onCardOpenChange]);
 
   const center: [number, number] = [userLocation.lat, userLocation.lng];
   const routePolyline = currentRoute?.pathCoordinates || [];
@@ -229,6 +323,41 @@ export const MapView: React.FC<MapViewProps> = ({
   const currentHeadingDeg = heading !== null && heading !== undefined ? heading : 0;
   const rotationAngle = isCourseUp ? -currentHeadingDeg : 0;
 
+  const handleMapClick = (lat: number, lng: number) => {
+    setSelectedStationState(null);
+    setSelectedDestination({ lat, lng });
+  };
+
+  const handleStationClick = (station: ChargingStation) => {
+    setSelectedDestination(null);
+    setSelectedStationState(station);
+    if (onSelectStation) {
+      onSelectStation(station);
+    }
+  };
+
+  const handleZoomIn = () => {
+    if (mapRef.current) {
+      mapRef.current.zoomIn();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (mapRef.current) {
+      mapRef.current.zoomOut();
+    }
+  };
+
+  const handleRecenter = () => {
+    setIsAutoFollow(true);
+    if (mapRef.current) {
+      mapRef.current.flyTo(center, 16, { animate: true, duration: 1.0 });
+    }
+    if (isCourseUp) {
+      setIsCourseUp(false);
+    }
+  };
+
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
       {/* Turn-by-Turn Head-Up Navigation Banner */}
@@ -244,7 +373,7 @@ export const MapView: React.FC<MapViewProps> = ({
         className={`map-perspective-wrapper ${is3DMode ? 'map-3d-perspective' : ''}`}
         style={{
           transform: is3DMode
-            ? `perspective(900px) rotateX(45deg) rotate(${rotationAngle}deg) scale(1.1)`
+            ? `perspective(900px) rotateX(55deg) rotate(${rotationAngle}deg) scale(1.15)`
             : isCourseUp
             ? `rotate(${rotationAngle}deg) scale(1.05)`
             : 'none',
@@ -255,7 +384,7 @@ export const MapView: React.FC<MapViewProps> = ({
           center={center}
           zoom={15}
           zoomControl={false}
-          style={{ width: '100%', height: '100%' }}
+          style={{ width: '100%', height: '100%', backgroundColor: '#090d16' }}
           ref={mapRef}
         >
           {/* Tile Layer (Theme Switcher) */}
@@ -271,7 +400,11 @@ export const MapView: React.FC<MapViewProps> = ({
             bounds={routePolyline.length > 0 ? routePolyline : undefined}
             isCourseUp={isCourseUp}
             heading={heading}
+            isAutoFollow={isAutoFollow}
+            onUserInteraction={() => setIsAutoFollow(false)}
           />
+
+          <MapEventHandler onMapClick={handleMapClick} />
 
           {/* Accuracy Circle */}
           {accuracy && (
@@ -291,11 +424,23 @@ export const MapView: React.FC<MapViewProps> = ({
           {/* User GPS Marker */}
           <Marker position={center} icon={createUserIcon(isCourseUp ? 0 : heading)}>
             <Popup>
-              <div style={{ color: '#000', fontWeight: 'bold' }}>Dein Standort (GPS Active)</div>
+              <div style={{ color: '#000', fontWeight: 'bold' }}>Dein Standort (GPS Aktiv)</div>
             </Popup>
           </Marker>
 
-          {/* Dynamic Slope-Colored Route Segments (Red = Steigung > 6%, Green = Gefälle, Cyan = Flach) */}
+          {/* User Selected Destination Marker (Click-to-Route) */}
+          {selectedDestination && (
+            <Marker
+              position={[selectedDestination.lat, selectedDestination.lng]}
+              icon={createCustomWaypointIcon('target', '🎯')}
+            >
+              <Popup>
+                <div style={{ color: '#000', fontWeight: 'bold' }}>Gewählter Zielort</div>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* Dynamic Slope-Colored Route Segments */}
           {routePolyline.length > 1 && (
             <>
               {/* Base Glowing Underlay */}
@@ -315,9 +460,10 @@ export const MapView: React.FC<MapViewProps> = ({
                 if (idx >= routePolyline.length - 1) return null;
                 const nextPt = routePolyline[idx + 1];
                 const progress = idx / routePolyline.length;
-                // Highlighting steep hill climbs (>6%) and downhill green descents
-                const isClimb = (progress > 0.35 && progress < 0.5) || (currentRoute && currentRoute.elevationGainM > 180 && idx % 7 === 2);
-                const isDownhill = (progress > 0.75 && progress < 0.9) || (idx % 7 === 5);
+                const isClimb =
+                  (progress > 0.35 && progress < 0.5) ||
+                  (currentRoute && currentRoute.elevationGainM > 180 && idx % 7 === 2);
+                const isDownhill = (progress > 0.75 && progress < 0.9) || idx % 7 === 5;
                 const segmentColor = isClimb ? '#ff3333' : isDownhill ? '#00ff66' : '#00f0ff';
 
                 return (
@@ -341,7 +487,10 @@ export const MapView: React.FC<MapViewProps> = ({
             <Marker
               key={wp.id}
               position={[wp.lat, wp.lng]}
-              icon={createCustomWaypointIcon(wp.category, wp.category === 'start' ? '🏁' : wp.category === 'end' ? '🎯' : undefined)}
+              icon={createCustomWaypointIcon(
+                wp.category,
+                wp.category === 'start' ? '🏁' : wp.category === 'end' ? '🎯' : undefined
+              )}
             >
               <Popup>
                 <div style={{ color: '#000', padding: '4px' }}>
@@ -359,70 +508,219 @@ export const MapView: React.FC<MapViewProps> = ({
               position={[station.lat, station.lng]}
               icon={chargingStationIcon}
               eventHandlers={{
-                click: () => onSelectStation(station),
+                click: () => handleStationClick(station),
               }}
-            >
-              <Popup>
-                <div style={{ color: '#000', padding: '4px', minWidth: '140px' }}>
-                  <strong>{station.name}</strong>
-                  <p style={{ fontSize: '0.8rem', margin: '4px 0' }}>Stecker: {station.plugType.toUpperCase()}</p>
-                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
-                    <button
-                      onClick={() => onSelectStation(station)}
-                      style={{
-                        backgroundColor: '#00f0ff',
-                        color: '#000',
-                        border: 'none',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        flex: 1,
-                      }}
-                    >
-                      Details
-                    </button>
-                    {onOpenReviewModal && (
-                      <button
-                        onClick={() => onOpenReviewModal(station)}
-                        style={{
-                          backgroundColor: '#ffb700',
-                          color: '#000',
-                          border: 'none',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                        }}
-                        title="Bewertung abgeben (+10 Tokens)"
-                      >
-                        ⭐
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
+            />
           ))}
         </MapContainer>
       </div>
 
-      {/* Elevation Mini-Ribbon */}
-      <ElevationRibbon currentRoute={currentRoute} userLocation={userLocation} />
+      {/* Elevation Mini-Ribbon (hidden when interactive action card is active) */}
+      {!selectedDestination && !selectedStationState && (
+        <ElevationRibbon
+          currentRoute={currentRoute}
+          userLocation={userLocation}
+          telemetry={telemetry}
+          isNavigating={Boolean(currentRoute)}
+        />
+      )}
 
-      {/* Floating HUD Controls */}
+      {/* ── Interactive Destination Action Card ─────────────────────────── */}
+      {selectedDestination && (
+        <div
+          className="glass-panel action-bottom-card"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '12px',
+            right: '12px',
+            maxWidth: '520px',
+            margin: '0 auto',
+            zIndex: 2200,
+            padding: '12px 16px',
+            borderRadius: '16px',
+            border: '1px solid var(--accent-cyan)',
+            boxShadow: 'var(--glow-cyan)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '10px',
+            backgroundColor: 'rgba(5, 10, 20, 0.96)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0, 240, 255, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <MapPin size={18} className="glow-text-cyan" />
+            </div>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                Neues Ziel gewählt
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                ~{calculateDistanceKm(userLocation.lat, userLocation.lng, selectedDestination.lat, selectedDestination.lng).toFixed(1)} km Luftlinie
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <button
+              className="btn-cyberpunk btn-gold"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onPlanRouteToPoint) {
+                  onPlanRouteToPoint(selectedDestination.lat, selectedDestination.lng);
+                }
+                setSelectedDestination(null);
+              }}
+              style={{ padding: '6px 12px', fontSize: '0.75rem', fontWeight: 'bold' }}
+            >
+              Route planen
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedDestination(null);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                padding: '4px',
+              }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Interactive Charging Station Action Card ─────────────────────────── */}
+      {selectedStationState && (
+        <div
+          className="glass-panel action-bottom-card"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '12px',
+            right: '12px',
+            maxWidth: '520px',
+            margin: '0 auto',
+            zIndex: 2200,
+            padding: '12px 16px',
+            borderRadius: '16px',
+            border: '1px solid var(--accent-gold)',
+            boxShadow: 'var(--glow-gold)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            backgroundColor: 'rgba(5, 10, 20, 0.96)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 183, 0, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Zap size={18} className="glow-text-gold" />
+              </div>
+              <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                  {selectedStationState.name}
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                  {selectedStationState.plugType.toUpperCase()} · ~{calculateDistanceKm(userLocation.lat, userLocation.lng, selectedStationState.lat, selectedStationState.lng).toFixed(1)} km
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedStationState(null);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                padding: '4px',
+              }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
+            <button
+              className="btn-cyberpunk btn-gold"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onPlanRouteToStation) {
+                  onPlanRouteToStation(selectedStationState);
+                }
+                setSelectedStationState(null);
+              }}
+              style={{ flex: 1, padding: '7px 12px', fontSize: '0.75rem', fontWeight: 'bold' }}
+            >
+              Hierher navigieren
+            </button>
+            {onOpenReviewModal && (
+              <button
+                className="btn-cyberpunk"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenReviewModal(selectedStationState);
+                  setSelectedStationState(null);
+                }}
+                style={{ padding: '7px 12px', fontSize: '0.75rem' }}
+                title="Bewertung abgeben (+10 Tokens)"
+              >
+                ⭐ Bewerten
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Floating HUD Controls (Right Edge) */}
       <div
+        className={`floating-controls-right ${isCardOpen ? 'card-open' : ''}`}
+        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         style={{
           position: 'absolute',
-          bottom: '24px',
-          right: '20px',
+          bottom: isCardOpen ? '106px' : '20px',
+          right: '12px',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: '12px',
+          alignItems: 'center',
+          gap: '5px',
+          transition: 'bottom 0.25s ease',
         }}
       >
         {/* Layer Selector Popup Menu */}
@@ -430,146 +728,216 @@ export const MapView: React.FC<MapViewProps> = ({
           <div
             className="glass-panel"
             style={{
-              padding: '8px',
+              position: 'absolute',
+              bottom: '130px',
+              right: '48px',
+              padding: '10px',
               display: 'flex',
               flexDirection: 'column',
               gap: '6px',
-              minWidth: '160px',
-              backgroundColor: 'rgba(10, 18, 30, 0.95)',
+              minWidth: '190px',
+              backgroundColor: 'rgba(10, 18, 30, 0.98)',
               border: '1px solid var(--accent-cyan)',
               boxShadow: 'var(--glow-cyan)',
-              animation: 'fadeIn 0.2s ease',
+              zIndex: 2500,
             }}
           >
-            <button
-              onClick={() => {
-                setTileTheme('dark');
-                setShowLayerMenu(false);
-              }}
-              className={`btn-cyberpunk ${tileTheme === 'dark' ? 'btn-gold' : ''}`}
-              style={{ fontSize: '0.75rem', padding: '6px 10px', textAlign: 'left' }}
-            >
-              Cyberpunk Dark
-            </button>
-            <button
-              onClick={() => {
-                setTileTheme('cycle');
-                setShowLayerMenu(false);
-              }}
-              className={`btn-cyberpunk ${tileTheme === 'cycle' ? 'btn-gold' : ''}`}
-              style={{ fontSize: '0.75rem', padding: '6px 10px', textAlign: 'left' }}
-            >
-              OpenCycleMap (Rad)
-            </button>
-            <button
-              onClick={() => {
-                setTileTheme('satellite');
-                setShowLayerMenu(false);
-              }}
-              className={`btn-cyberpunk ${tileTheme === 'satellite' ? 'btn-gold' : ''}`}
-              style={{ fontSize: '0.75rem', padding: '6px 10px', textAlign: 'left' }}
-            >
-              Satellit / Hybrid
-            </button>
+            {(Object.keys(TILE_SERVERS) as MapTileTheme[]).map((themeKey) => (
+              <button
+                key={themeKey}
+                onClick={() => {
+                  setTileTheme(themeKey);
+                  setShowLayerMenu(false);
+                }}
+                className={`btn-cyberpunk ${tileTheme === themeKey ? 'btn-gold' : ''}`}
+                style={{ fontSize: '0.75rem', padding: '6px 10px', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              >
+                <span>{TILE_SERVERS[themeKey].name}</span>
+                {tileTheme === themeKey && <span style={{ color: 'var(--accent-gold)' }}>✓</span>}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Layer Selector Button */}
-        <button
-          className="btn-cyberpunk glass-panel"
-          onClick={() => setShowLayerMenu(!showLayerMenu)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            padding: '10px 16px',
-            borderRadius: '12px',
-            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : 'none',
-          }}
-          title="Karten-Ebene wechseln"
-        >
-          <Layers size={18} className="glow-text-cyan" />
-          <span>Ebene</span>
-        </button>
-
-        {/* Course-Up / North-Up Toggle Button */}
-        <button
-          className="btn-cyberpunk glass-panel"
-          onClick={() => setIsCourseUp(!isCourseUp)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            padding: '10px 16px',
-            borderRadius: '12px',
-            boxShadow: isCourseUp ? 'var(--glow-cyan)' : 'none',
-            borderColor: isCourseUp ? 'var(--accent-cyan)' : 'rgba(0, 240, 255, 0.3)',
-          }}
-          title={isCourseUp ? 'Auf Norden ausrichten (North-Up)' : 'In Fahrtrichtung rotieren (Course-Up)'}
-        >
-          <Navigation2
-            size={18}
-            className="glow-text-cyan"
-            style={{
-              transform: isCourseUp ? 'rotate(0deg)' : 'rotate(45deg)',
-              transition: 'transform 0.3s ease',
+        {/* GPS Simulation Toggle Button */}
+        {onToggleSimulation && (
+          <button
+            className="glass-panel"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSimulation();
             }}
-          />
-          <span>{isCourseUp ? 'Course-Up' : 'North-Up'}</span>
-        </button>
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
+              cursor: 'pointer',
+              border: `1px solid ${isSimulating ? 'var(--accent-neon-green)' : 'rgba(0, 240, 255, 0.4)'}`,
+              boxShadow: isSimulating ? 'var(--glow-neon-green)' : '0 0 10px rgba(0, 240, 255, 0.2)',
+            }}
+            title={isSimulating ? 'GPS-Simulation pausieren' : 'GPS-Simulation starten (Demo-Fahrt)'}
+          >
+            {isSimulating ? <Pause size={16} className="glow-text-green" /> : <Play size={16} />}
+          </button>
+        )}
 
-        {/* 3D Cockpit Toggle Button */}
-        <button
-          className="btn-cyberpunk glass-panel"
-          onClick={() => setIs3DMode(!is3DMode)}
+        {/* Zoom In/Out Grouped Pill */}
+        <div
+          className="glass-panel"
           style={{
             display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            padding: '10px 16px',
-            borderRadius: '12px',
-            boxShadow: is3DMode ? 'var(--glow-cyan)' : 'none',
-            borderColor: is3DMode ? 'var(--accent-cyan)' : 'rgba(0, 240, 255, 0.3)',
+            flexDirection: 'column',
+            borderRadius: '10px',
+            overflow: 'hidden',
+            border: '1px solid rgba(0, 240, 255, 0.35)',
+            boxShadow: '0 0 10px rgba(0, 240, 255, 0.15)',
           }}
-          title="3D Cyberpunk Perspektive umschalten"
         >
-          <Box size={18} className="glow-text-cyan" />
-          <span>{is3DMode ? '2D Karte' : '3D Cockpit'}</span>
-        </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomIn();
+            }}
+            style={{
+              width: '36px',
+              height: '32px',
+              background: 'none',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--accent-cyan)',
+              cursor: 'pointer',
+            }}
+            title="Vergrößern (Zoom In)"
+          >
+            <Plus size={16} />
+          </button>
+          <div style={{ height: '1px', backgroundColor: 'rgba(0, 240, 255, 0.25)' }} />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomOut();
+            }}
+            style={{
+              width: '36px',
+              height: '32px',
+              background: 'none',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--accent-cyan)',
+              cursor: 'pointer',
+            }}
+            title="Verkleinern (Zoom Out)"
+          >
+            <Minus size={16} />
+          </button>
+        </div>
 
-        {/* Standort Zentrieren / Compass Button */}
+        {/* Recenter GPS Button */}
         <button
           className="glass-panel"
-          onClick={() => {
-            if (mapRef.current) {
-              mapRef.current.flyTo(center, 16, { animate: true, duration: 1.2 });
-            }
-            if (isCourseUp) {
-              setIsCourseUp(false);
-            }
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRecenter();
           }}
           style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '50%',
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
             border: '1px solid var(--accent-cyan)',
-            boxShadow: '0 0 15px rgba(0, 240, 255, 0.3)',
+            boxShadow: 'var(--glow-cyan)',
           }}
-          title="Standort zentrieren & nach Norden ausrichten"
+          title="Auf aktuellen GPS-Standort zentrieren"
+        >
+          <Crosshair size={17} />
+        </button>
+
+        {/* Layer Selector Button */}
+        <button
+          className="glass-panel"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowLayerMenu(!showLayerMenu);
+          }}
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--accent-cyan)',
+            cursor: 'pointer',
+            border: '1px solid rgba(0, 240, 255, 0.4)',
+            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : 'none',
+          }}
+          title="Karten-Ebene wechseln"
+        >
+          <Layers size={16} />
+        </button>
+
+        {/* 3D Cockpit Toggle Button */}
+        <button
+          className="glass-panel"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIs3DMode(!is3DMode);
+          }}
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'var(--accent-cyan)',
+            cursor: 'pointer',
+            border: '1px solid rgba(0, 240, 255, 0.4)',
+            boxShadow: is3DMode ? 'var(--glow-cyan)' : 'none',
+          }}
+          title="3D Cyberpunk Perspektive umschalten"
+        >
+          <Box size={16} />
+        </button>
+
+        {/* Course-Up / Dynamic Compass Button */}
+        <button
+          className="glass-panel"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsCourseUp(!isCourseUp);
+          }}
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
+            cursor: 'pointer',
+            border: `1px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
+            boxShadow: isCourseUp ? 'var(--glow-neon-green)' : '0 0 12px rgba(0, 240, 255, 0.25)',
+          }}
+          title={isCourseUp ? 'Auf Norden fixieren (North-Up)' : 'In Fahrtrichtung rotieren (Course-Up)'}
         >
           <Compass
-            size={24}
+            size={18}
             style={{
               transform: isCourseUp ? `rotate(${currentHeadingDeg}deg)` : 'none',
-              transition: 'transform 0.4s ease',
+              transition: 'transform 0.3s ease',
             }}
           />
         </button>

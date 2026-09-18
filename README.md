@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![Version](https://img.shields.io/badge/Version-1.0.1%20Patch%201-blue?style=for-the-badge)](CHANGELOG.md)
 [![Android APK Build](https://img.shields.io/badge/Android-Target%20SDK%2036-34A853?style=for-the-badge&logo=android&logoColor=white)](android/)
 [![iOS Build](https://img.shields.io/badge/iOS-15.0%2B-007AFF?style=for-the-badge&logo=apple&logoColor=white)](ios/)
 [![Capacitor](https://img.shields.io/badge/Capacitor-7.0-119EFF?style=for-the-badge&logo=capacitor&logoColor=white)](https://capacitorjs.com)
@@ -9,7 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-**Der Wegweiser** ist eine intelligente, herstellerunabhängige E-Bike-Navigations-App für **Android** und **iOS**. Sie kombiniert Bluetooth-Low-Energy (BLE) Live-Fahrradtelemetrie, vorausschauende Reichweiten-Antizipation („No Coast Heuristik“), Höhenprofilanalysen und eine interaktive E-Bike-Ladesäulenkarte.
+**Der Wegweiser** ist eine intelligente, herstellerunabhängige E-Bike-Navigations-App für **Android** und **iOS**. Sie kombiniert Bluetooth-Low-Energy (BLE) Live-Fahrradtelemetrie, vorausschauende Reichweiten-Antizipation („No Coast Heuristik“), 3D-Kartenreliefs mit aufrechten 3D-Billboards, ein fokussiertes Navigations-HUD und eine interaktive E-Bike-Ladesäulenkarte.
 
 Dieses Repository enthält **ausschließlich den reinen Quellcode der mobilen Endbenutzer-App**, mit dem sich jeder Entwickler oder Nutzer direkt eine funktionsfähige APK für Android bzw. das Xcode-Projekt für iOS bauen kann.
 

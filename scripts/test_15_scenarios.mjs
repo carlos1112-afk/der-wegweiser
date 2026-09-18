@@ -41,6 +41,16 @@ assert(netSecContent.includes('cleartextTrafficPermitted="false"'), 'Network sec
 assert(manifestContent.includes('FOREGROUND_SERVICE_LOCATION'), 'Foreground Service Location permission declared');
 assert(!manifestContent.includes('ACCESS_BACKGROUND_LOCATION'), 'Zero permanent background tracking requested');
 
+// Patch 1.0.1 Audit Assertions
+const authServiceContent = fs.readFileSync(path.resolve('src/services/authService.ts'), 'utf8');
+const indexCssContent = fs.readFileSync(path.resolve('src/index.css'), 'utf8');
+const appContent = fs.readFileSync(path.resolve('src/App.tsx'), 'utf8');
+
+assert(!authServiceContent.includes('signInWithGithub'), 'Patch 1.0.1: GitHub OAuth removed.');
+assert(authServiceContent.includes('microsoft.com') && authServiceContent.includes('facebook.com') && authServiceContent.includes('twitter.com') && authServiceContent.includes('telegram.org'), 'Patch 1.0.1: Consumer OAuth (Microsoft, Facebook, X, Telegram) configured.');
+assert(indexCssContent.includes('rotateX(-55deg) translateZ'), 'Patch 1.0.1: 3D Billboarding for popups and speech bubbles enabled.');
+assert(appContent.includes('!currentRoute') && appContent.includes('top-header-hud'), 'Patch 1.0.1: Top menu & tokens auto-hidden during active navigation.');
+
 // ----------------------------------------------------------------------------
 // SCENARIO 2: GPS Geolocation & Haversine Distance Engine
 // ----------------------------------------------------------------------------
@@ -71,32 +81,151 @@ const isAtStart = distToStart <= 25;
 assert(isAtStart === true, `Geofence arrival detected within 25m radius (${distToStart}m)`);
 
 // ----------------------------------------------------------------------------
-// SCENARIO 3: Bluetooth Low Energy (BLE) GATT Protocol Parser
+// SCENARIO 3: Bluetooth Low Energy (BLE) Multi-Manufacturer GATT Protocol Parsers
 // ----------------------------------------------------------------------------
-console.log('\n[Szenario 3/15] BLE GATT Protocol Parser (Power, Cadence, Battery)');
-// Cycling Power 0x2A63 DataView mock: Flags (uint16) + Instantaneous Power (sint16)
+console.log('\n[Szenario 3/15] BLE GATT Protocol Parsers (Bosch, Specialized, Shimano, Mahle, Bafang, SIG)');
+
+// 1. Standard SIG Battery & Power
 function parseCyclingPower(buffer) {
   const view = new DataView(buffer);
   const flags = view.getUint16(0, true);
   const instantaneousPower = view.getInt16(2, true);
   return { flags, powerWatts: instantaneousPower };
 }
-
-// 250 Watts packet mock
 const powerBuffer = new ArrayBuffer(4);
 const powerView = new DataView(powerBuffer);
 powerView.setUint16(0, 0, true); // flags
 powerView.setInt16(2, 250, true); // 250W
 const powerResult = parseCyclingPower(powerBuffer);
-assert(powerResult.powerWatts === 250, `Cycling Power GATT parsed 250 Watts correctly`);
+assert(powerResult.powerWatts === 250, `SIG Cycling Power GATT parsed 250 Watts correctly`);
 
-// Battery Level 0x2A19 DataView mock: 1 byte (uint8) 0..100%
 function parseBatteryLevel(buffer) {
   const view = new DataView(buffer);
   return view.getUint8(0);
 }
 const batteryBuffer = new Uint8Array([87]).buffer;
-assert(parseBatteryLevel(batteryBuffer) === 87, `Battery Service GATT parsed 87% correctly`);
+assert(parseBatteryLevel(batteryBuffer) === 87, `SIG Battery Service GATT parsed 87% correctly`);
+
+// 2. Bosch BES3 Diagnostic Parser
+function parseBoschTest(buffer) {
+  const view = new DataView(buffer);
+  const batteryPercent = view.getUint8(0);
+  const batteryWh = view.getUint16(1, true);
+  const healthPercent = view.getUint8(3);
+  const speed = +(view.getUint16(4, true) / 10).toFixed(1);
+  const cadence = view.getUint8(6);
+  const riderPower = view.getUint16(7, true);
+  const motorPower = view.getUint16(9, true);
+  const modeMap = { 0: 'off', 1: 'eco', 2: 'tour', 3: 'auto', 4: 'turbo' };
+  const mode = modeMap[view.getUint8(11)] || 'auto';
+  return { batteryPercent, batteryWh, healthPercent, speed, cadence, riderPower, motorPower, mode };
+}
+const boschBuf = new ArrayBuffer(12);
+const boschV = new DataView(boschBuf);
+boschV.setUint8(0, 88); // 88%
+boschV.setUint16(1, 660, true); // 660 Wh
+boschV.setUint8(3, 98); // 98% SOH
+boschV.setUint16(4, 234, true); // 23.4 km/h
+boschV.setUint8(6, 72); // 72 rpm
+boschV.setUint16(7, 145, true); // 145W rider
+boschV.setUint16(9, 210, true); // 210W motor
+boschV.setUint8(11, 3); // Auto mode
+const boschRes = parseBoschTest(boschBuf);
+assert(boschRes.batteryPercent === 88 && boschRes.batteryWh === 660 && boschRes.healthPercent === 98 && boschRes.mode === 'auto', 'Bosch BES3 GATT telemetry parsed (88%, 660Wh, SOH 98%, Auto)');
+
+// 3. Specialized Turbo MasterMind TCU Parser
+function parseSpecializedTest(buffer) {
+  const view = new DataView(buffer);
+  const batteryPercent = view.getUint8(0);
+  const speed = +(view.getUint16(1, true) / 100).toFixed(1);
+  const cadence = view.getUint8(3);
+  const riderPower = view.getUint16(4, true);
+  const modeMap = { 0: 'off', 1: 'eco', 2: 'trail', 3: 'turbo' };
+  const mode = modeMap[view.getUint8(6)] || 'auto';
+  return { batteryPercent, speed, cadence, riderPower, mode };
+}
+const specBuf = new ArrayBuffer(7);
+const specV = new DataView(specBuf);
+specV.setUint8(0, 82); // 82%
+specV.setUint16(1, 2410, true); // 24.1 km/h
+specV.setUint8(3, 76); // 76 rpm
+specV.setUint16(4, 160, true); // 160W
+specV.setUint8(6, 2); // Trail mode
+const specRes = parseSpecializedTest(specBuf);
+assert(specRes.batteryPercent === 82 && specRes.speed === 24.1 && specRes.mode === 'trail', 'Specialized Turbo TCU parsed (82%, 24.1 km/h, Trail mode)');
+
+// 4. Shimano STEPS & Di2 D-Fly Parser
+function parseShimanoTest(buffer) {
+  const view = new DataView(buffer);
+  const batteryPercent = view.getUint8(0);
+  const currentGear = view.getUint8(1);
+  const modeMap = { 0: 'off', 1: 'eco', 2: 'tour', 3: 'turbo' };
+  const mode = modeMap[view.getUint8(2)] || 'eco';
+  const cadence = Math.round(view.getUint16(3, true) / 10);
+  const speed = +(view.getUint16(5, true) / 100).toFixed(1);
+  const range = view.getUint16(9, true);
+  return { batteryPercent, currentGear, mode, cadence, speed, range };
+}
+const shimBuf = new ArrayBuffer(11);
+const shimV = new DataView(shimBuf);
+shimV.setUint8(0, 90); // 90%
+shimV.setUint8(1, 7); // Gear 7
+shimV.setUint8(2, 2); // Trail (tour)
+shimV.setUint16(3, 800, true); // 80.0 rpm
+shimV.setUint16(5, 2500, true); // 25.0 km/h
+shimV.setUint16(7, 130, true); // 130W
+shimV.setUint16(9, 68, true); // 68 km
+const shimRes = parseShimanoTest(shimBuf);
+assert(shimRes.batteryPercent === 90 && shimRes.currentGear === 7 && shimRes.range === 68, 'Shimano STEPS & Di2 D-Fly parsed (90%, Di2 Gang 7, 68km Restreichweite)');
+
+// 5. Mahle SmartBike X35/X20 Parser
+function parseMahleTest(buffer) {
+  const view = new DataView(buffer);
+  const batteryPercent = view.getUint8(0);
+  const batteryWh = view.getUint16(1, true);
+  const modeMap = { 0: 'off', 1: 'eco', 2: 'tour', 3: 'turbo' };
+  const mode = modeMap[view.getUint8(3)] || 'eco';
+  const speed = +(view.getUint16(4, true) / 10).toFixed(1);
+  const motorWatts = view.getUint16(7, true);
+  const tempC = view.getInt8(9);
+  return { batteryPercent, batteryWh, mode, speed, motorWatts, tempC };
+}
+const mahleBuf = new ArrayBuffer(10);
+const mahleV = new DataView(mahleBuf);
+mahleV.setUint8(0, 78); // 78%
+mahleV.setUint16(1, 195, true); // 195 Wh
+mahleV.setUint8(3, 1); // eco
+mahleV.setUint16(4, 228, true); // 22.8 km/h
+mahleV.setUint8(6, 70); // 70 rpm
+mahleV.setUint16(7, 150, true); // 150W motor
+mahleV.setInt8(9, 34); // 34°C
+const mahleRes = parseMahleTest(mahleBuf);
+assert(mahleRes.batteryPercent === 78 && mahleRes.batteryWh === 195 && mahleRes.tempC === 34, 'Mahle SmartBike X35/X20 parsed (78%, 195Wh, 34°C Motor)');
+
+// 6. Bafang CAN-over-BLE Parser & Command Generator
+function parseBafangTest(buffer) {
+  const view = new DataView(buffer);
+  const header = view.getUint8(0);
+  const frameId = view.getUint8(1);
+  if (header === 0x59 && frameId === 0x32) {
+    const voltageMv = view.getUint16(2, true);
+    const currentMa = view.getUint16(4, true);
+    const batteryPercent = view.getUint8(6);
+    const motorPowerWatts = Math.round((voltageMv * currentMa) / 1000000);
+    return { batteryPercent, motorPowerWatts };
+  }
+  return {};
+}
+const bafangBuf = new ArrayBuffer(7);
+const bafangV = new DataView(bafangBuf);
+bafangV.setUint8(0, 0x59);
+bafangV.setUint8(1, 0x32);
+bafangV.setUint16(2, 48000, true); // 48V
+bafangV.setUint16(4, 7500, true); // 7.5A -> 360W
+bafangV.setUint8(6, 85); // 85%
+const bafangRes = parseBafangTest(bafangBuf);
+assert(bafangRes.batteryPercent === 85 && bafangRes.motorPowerWatts === 360, 'Bafang CAN-over-BLE frame 0x32 parsed (85%, 360W Motor Power)');
+
 
 // ----------------------------------------------------------------------------
 // SCENARIO 4: Live Telemetry Aggregator & Wh Consumption

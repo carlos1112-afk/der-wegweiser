@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Battery, Zap, AlertTriangle, ShieldCheck, Cpu, Gauge, Thermometer } from 'lucide-react';
+import { Battery, Zap, AlertTriangle, ShieldCheck, Cpu, Gauge, Thermometer, Bluetooth, ChevronDown } from 'lucide-react';
 import type { Route, LiveBikeTelemetry, BikeManufacturer } from '../../types/navigation';
 import { BleManager } from '../../services/ble/bleManager';
 
@@ -8,6 +8,7 @@ interface BatteryHUDProps {
   currentRoute: Route | null;
   onConnectBLE: () => void;
   onOpenBoschModal?: () => void;
+  compact?: boolean;
 }
 
 const manufacturerColors: Record<BikeManufacturer, { bg: string; text: string; label: string }> = {
@@ -22,182 +23,204 @@ const manufacturerColors: Record<BikeManufacturer, { bg: string; text: string; l
 
 export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute, onConnectBLE, onOpenBoschModal }) => {
   const isBatterySafe = currentRoute ? currentRoute.isBatterySafe : true;
-  const [showModeSelector, setShowModeSelector] = useState(false);
+  const [showDetailsDropdown, setShowDetailsDropdown] = useState(false);
   const mBadge = manufacturerColors[telemetry.manufacturer || 'generic'];
 
   const handleModeChange = async (mode: 'off' | 'eco' | 'tour' | 'turbo') => {
     await BleManager.setAssistMode(mode);
-    setShowModeSelector(false);
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-      {/* Battery Indicator & Wh */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Battery size={22} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'} />
-        <div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }} className="glow-text-green">
-              {telemetry.batteryPercent}%
-            </span>
-            {telemetry.batteryWhRemaining && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                {telemetry.batteryWhRemaining} Wh
-              </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+    <div style={{ position: 'relative' }}>
+      {/* Compact Main Bar Pill */}
+      <div
+        className="glass-panel hud-battery-pill"
+        onClick={() => setShowDetailsDropdown(!showDetailsDropdown)}
+        style={{
+          padding: '5px 8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          cursor: 'pointer',
+          border: '1px solid rgba(0, 240, 255, 0.3)',
+        }}
+        title="Akku & E-Bike Telemetrie Details anzeigen"
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Battery size={16} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'} />
+          <span style={{ fontSize: '0.82rem', fontWeight: 'bold' }} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'}>
+            {telemetry.batteryPercent}%
+          </span>
+        </div>
+
+        <div className="mobile-hide-assist" style={{ width: '1px', height: '14px', backgroundColor: 'var(--border-glass)' }} />
+
+        <div className="mobile-hide-assist" style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+          <Zap size={13} className="glow-text-cyan" />
+          <span style={{ fontSize: '0.72rem', fontWeight: 'bold', color: 'var(--accent-cyan)', textTransform: 'uppercase' }}>
+            {telemetry.motorAssistMode}
+          </span>
+        </div>
+
+        <ChevronDown size={13} className="mobile-hide-assist" style={{ color: 'var(--text-muted)', transform: showDetailsDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+      </div>
+
+      {/* Expanded Telemetry & Assist Modal Dropdown */}
+      {showDetailsDropdown && (
+        <div
+          className="glass-panel"
+          style={{
+            position: 'absolute',
+            top: '120%',
+            right: 0,
+            zIndex: 2500,
+            padding: '14px',
+            minWidth: '280px',
+            maxWidth: '340px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            backgroundColor: 'rgba(10, 16, 28, 0.96)',
+            border: '1px solid var(--accent-cyan)',
+            boxShadow: 'var(--glow-cyan)',
+          }}
+        >
+          {/* Header & Manufacturer Badge */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Battery size={20} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'} />
+              <div>
+                <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'}>
+                  {telemetry.batteryPercent}%
+                </span>
+                {telemetry.batteryWhRemaining && (
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
+                    ({telemetry.batteryWhRemaining} Wh)
+                  </span>
+                )}
+              </div>
+            </div>
             <span
               style={{
-                fontSize: '0.65rem',
+                fontSize: '0.7rem',
                 fontWeight: 'bold',
-                padding: '1px 6px',
+                padding: '2px 8px',
                 borderRadius: '4px',
                 backgroundColor: mBadge.bg,
                 color: mBadge.text,
-                letterSpacing: '0.5px',
               }}
             >
               {mBadge.label}
             </span>
           </div>
-        </div>
-      </div>
 
-      <div style={{ width: '1px', height: '30px', backgroundColor: 'var(--border-glass)' }} />
-
-      {/* Assist Mode & Switcher */}
-      <div style={{ position: 'relative' }}>
-        <div
-          onClick={() => setShowModeSelector(!showModeSelector)}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
-          title="Klicken zum Umschalten der Unterstützungsstufe"
-        >
-          <Zap size={18} className="glow-text-cyan" />
+          {/* Motor Assist Mode Switcher */}
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--accent-cyan)' }}>
-              {telemetry.motorAssistMode}
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>
+              Unterstützungsstufe:
             </div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Stufe ▾</div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {(['off', 'eco', 'tour', 'turbo'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => handleModeChange(m)}
+                  className={`btn-cyberpunk ${telemetry.motorAssistMode.toLowerCase() === m ? 'btn-gold' : ''}`}
+                  style={{
+                    flex: 1,
+                    fontSize: '0.7rem',
+                    padding: '4px 6px',
+                    textTransform: 'uppercase',
+                    textAlign: 'center',
+                  }}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {showModeSelector && (
-          <div
-            className="glass-panel"
-            style={{
-              position: 'absolute',
-              top: '110%',
-              left: 0,
-              zIndex: 100,
-              padding: '6px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '4px',
-              minWidth: '100px',
-            }}
-          >
-            {(['off', 'eco', 'tour', 'turbo'] as const).map((m) => (
+          {/* Motor & Rider Watts */}
+          {(telemetry.motorPowerWatts !== undefined || telemetry.riderPowerWatts > 0) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 0', borderTop: '1px solid var(--border-glass)' }}>
+              <Cpu size={16} style={{ color: '#a78bfa' }} />
+              <div style={{ fontSize: '0.8rem', color: '#e2e8f0' }}>
+                <strong>{telemetry.motorPowerWatts ?? 0} W Motor</strong> · {telemetry.riderPowerWatts ?? 0} W Fahrer
+              </div>
+            </div>
+          )}
+
+          {/* Di2 Gear or Motor Temp */}
+          {(telemetry.currentGear || telemetry.motorTemperatureC !== undefined) && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              {telemetry.currentGear && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Gauge size={14} style={{ color: '#38bdf8' }} />
+                  <span>Gang {telemetry.currentGear}</span>
+                </div>
+              )}
+              {telemetry.motorTemperatureC !== undefined && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Thermometer size={14} style={{ color: telemetry.motorTemperatureC > 60 ? '#f87171' : '#34d399' }} />
+                  <span>{telemetry.motorTemperatureC}°C</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Topography & Battery Safety Status */}
+          {currentRoute && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px',
+                borderRadius: '8px',
+                backgroundColor: isBatterySafe ? 'rgba(0, 255, 102, 0.1)' : 'rgba(255, 183, 0, 0.15)',
+                border: `1px solid ${isBatterySafe ? 'var(--accent-neon-green)' : 'var(--accent-gold)'}`,
+              }}
+            >
+              {isBatterySafe ? (
+                <ShieldCheck size={18} style={{ color: 'var(--accent-neon-green)' }} />
+              ) : (
+                <AlertTriangle size={18} style={{ color: 'var(--accent-gold)' }} />
+              )}
+              <div style={{ fontSize: '0.75rem' }}>
+                <div style={{ fontWeight: 'bold', color: isBatterySafe ? 'var(--accent-neon-green)' : 'var(--accent-gold)' }}>
+                  {isBatterySafe ? 'Reichweite Ausreichend' : 'Ladestopp Empfohlen'}
+                </div>
+                <div style={{ color: 'var(--text-muted)' }}>
+                  ~{currentRoute.estimatedBatteryConsumptionWh} Wh ({currentRoute.elevationGainM}m hm)
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+            {onOpenBoschModal && (
               <button
-                key={m}
-                onClick={() => handleModeChange(m)}
-                className="btn-cyberpunk"
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '4px 8px',
-                  textTransform: 'uppercase',
-                  textAlign: 'left',
+                className="btn-cyberpunk btn-cyan"
+                onClick={() => {
+                  setShowDetailsDropdown(false);
+                  onOpenBoschModal();
                 }}
+                style={{ flex: 1, padding: '6px', fontSize: '0.75rem' }}
               >
-                {m}
+                <Bluetooth size={14} /> E-Bike Kopplung
               </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Motor & Rider Watts */}
-      {(telemetry.motorPowerWatts !== undefined || telemetry.riderPowerWatts > 0) && (
-        <>
-          <div style={{ width: '1px', height: '30px', backgroundColor: 'var(--border-glass)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Cpu size={18} style={{ color: '#a78bfa' }} />
-            <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#e2e8f0' }}>
-                {telemetry.motorPowerWatts ?? 0} W <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>({telemetry.riderPowerWatts} W Pedal)</span>
-              </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Motorleistung</div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Di2 Gear or Motor Temp */}
-      {telemetry.currentGear && (
-        <>
-          <div style={{ width: '1px', height: '30px', backgroundColor: 'var(--border-glass)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Gauge size={18} style={{ color: '#38bdf8' }} />
-            <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#38bdf8' }}>
-                Gang {telemetry.currentGear}
-              </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Di2 Shifting</div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {telemetry.motorTemperatureC !== undefined && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          <Thermometer size={14} style={{ color: telemetry.motorTemperatureC > 60 ? '#f87171' : '#34d399' }} />
-          {telemetry.motorTemperatureC}°C
-        </div>
-      )}
-
-      {/* Topography & Battery Safety Alert */}
-      {currentRoute && (
-        <>
-          <div style={{ width: '1px', height: '30px', backgroundColor: 'var(--border-glass)' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {isBatterySafe ? (
-              <ShieldCheck size={20} style={{ color: 'var(--accent-neon-green)' }} />
-            ) : (
-              <AlertTriangle size={20} style={{ color: 'var(--accent-gold)' }} />
             )}
-            <div>
-              <div style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
-                {isBatterySafe ? 'Reichweite Sicher' : 'Ladestopp Empfohlen'}
-              </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                ~{currentRoute.estimatedBatteryConsumptionWh} Wh ({currentRoute.elevationGainM}m hm)
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Connect BLE Buttons */}
-      {!telemetry.isConnected && (
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px' }}>
-          {onOpenBoschModal && (
             <button
               className="btn-cyberpunk"
-              onClick={onOpenBoschModal}
-              style={{
-                fontSize: '0.75rem',
-                padding: '6px 10px',
-                borderColor: '#00509d',
-                color: '#60a5fa',
+              onClick={() => {
+                setShowDetailsDropdown(false);
+                onConnectBLE();
               }}
-              title="Bosch Smart System BES3 Kopplungs-Assistent"
+              style={{ flex: 1, padding: '6px', fontSize: '0.75rem' }}
             >
-              Bosch BES3
+              Schnell-Scan
             </button>
-          )}
-          <button className="btn-cyberpunk" onClick={onConnectBLE} style={{ fontSize: '0.75rem', padding: '6px 12px' }}>
-            Auto-BLE
-          </button>
+          </div>
         </div>
       )}
     </div>

@@ -11,6 +11,7 @@ interface FloatingMicButtonProps {
   onOpenLounge: () => void;
   onToggleOled: () => void;
   onRegenerateTour: () => void;
+  isHidden?: boolean;
 }
 
 export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
@@ -19,9 +20,12 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
   onOpenLounge,
   onToggleOled,
   onRegenerateTour,
+  isHidden,
 }) => {
   const [isListening, setIsListening] = useState(false);
   const [lastResponse, setLastResponse] = useState<string | null>(null);
+
+  if (isHidden) return null;
 
   const startListening = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -113,19 +117,20 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
   };
 
   return (
-    <div style={{ position: 'fixed', bottom: '24px', right: '80px', zIndex: 1000 }}>
+    <div className="floating-mic-wrapper" style={{ position: 'fixed', bottom: '20px', right: '56px', zIndex: 1000 }}>
       {/* Speech Response Toast */}
       {lastResponse && (
         <div
           className="glass-panel"
           style={{
             position: 'absolute',
-            bottom: '70px',
+            bottom: '64px',
             right: '0',
-            width: '280px',
-            padding: '10px 14px',
+            width: '260px',
+            maxWidth: 'calc(100vw - 70px)',
+            padding: '10px 12px',
             borderRadius: '14px',
-            backgroundColor: 'rgba(10, 20, 35, 0.92)',
+            backgroundColor: 'rgba(10, 20, 35, 0.94)',
             border: '1px solid var(--accent-cyan)',
             boxShadow: 'var(--glow-cyan)',
             fontSize: '0.8rem',
@@ -153,8 +158,8 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
         className={`floating-mic-button ${isListening ? 'listening-pulse' : ''}`}
         title="Sprachassistent aktivieren (Hands-free Co-Pilot)"
         style={{
-          width: '56px',
-          height: '56px',
+          width: '50px',
+          height: '50px',
           borderRadius: '50%',
           backgroundColor: isListening ? 'var(--accent-pink)' : 'rgba(15, 23, 42, 0.88)',
           border: isListening ? '2px solid var(--accent-pink)' : '2px solid var(--accent-cyan)',
@@ -176,7 +181,7 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
             <span className="wave-bar" />
           </div>
         ) : (
-          <Mic size={26} className="glow-text-cyan" />
+          <Mic size={22} className="glow-text-cyan" />
         )}
       </button>
     </div>

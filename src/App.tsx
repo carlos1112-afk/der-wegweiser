@@ -11,12 +11,19 @@ import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
-import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck } from 'lucide-react';
+import { AuthService } from './services/authService';
+import { RoutingService } from './services/routingService';
+import type { User } from 'firebase/auth';
+import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck, User as UserIcon, LogIn, Play, Pause, Zap } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 import { useAppLifecycle } from './hooks/useAppLifecycle';
+import { AppLifecycleService } from './services/appLifecycleService';
 
 // Code-Splitting: Lazy load heavy modals for sub-second cold start
+const AuthModal = lazy(() =>
+  import('./components/Auth/AuthModal').then((m) => ({ default: m.AuthModal }))
+);
 const AnticipationModal = lazy(() =>
   import('./components/AiAssistant/AnticipationModal').then((m) => ({ default: m.AnticipationModal }))
 );
@@ -54,6 +61,17 @@ const ConsentModal = lazy(() =>
   import('./components/Legal/ConsentModal').then((m) => ({ default: m.ConsentModal }))
 );
 
+function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export function App() {
   // Modal States (Declared first to supply active modal context to lifecycle)
   const [showAnticipationModal, setShowAnticipationModal] = useState(true);
@@ -66,6 +84,15 @@ export function App() {
   const [showGpxImportModal, setShowGpxImportModal] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authUser, setAuthUser] = useState<User | null>(AuthService.getCurrentUser());
+
+  useEffect(() => {
+    const unsubscribe = AuthService.onAuthStateChange((user) => {
+      setAuthUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // State
   const [currentRoute, setCurrentRoute] = useState<Route | null>(null);
@@ -99,6 +126,71 @@ export function App() {
   const geo = useGeolocation(lifecycle.isHighAccuracyGps);
   const userLocation = { lat: geo.lat, lng: geo.lng };
   useScreenWakeLock(lifecycle.isWakeLockActive || isOledModeActive);
+
+  // GPS Route Simulation State (Demo-Fahrt entlang der berechneten Route)
+  const [isSimulatingRoute, setIsSimulatingRoute] = useState<boolean>(false);
+  const [simSpeedMultiplier, setSimSpeedMultiplier] = useState<number>(1);
+  const [, setSimulatedCoordIndex] = useState<number>(0);
+  const [isBottomCardOpen, setIsBottomCardOpen] = useState<boolean>(false);
+  const [simulatedLocation, setSimulatedLocation] = useState<{
+    lat: number;
+    lng: number;
+    heading: number;
+    speedKmH: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!isSimulatingRoute || !currentRoute || !currentRoute.pathCoordinates || currentRoute.pathCoordinates.length < 2) {
+      if (simulatedLocation) setSimulatedLocation(null);
+      return;
+    }
+
+    const coords = currentRoute.pathCoordinates;
+    const intervalMs = simSpeedMultiplier >= 10 ? 120 : simSpeedMultiplier >= 4 ? 250 : 600;
+    const stepIncrement = simSpeedMultiplier >= 10 ? 3 : simSpeedMultiplier >= 4 ? 2 : 1;
+
+    const interval = setInterval(() => {
+      setSimulatedCoordIndex((prevIndex) => {
+        const nextIndex = (prevIndex + stepIncrement) % coords.length;
+        const currentCoord = coords[nextIndex];
+        const lookAhead = coords[(nextIndex + 1) % coords.length];
+
+        // Calculate bearing between sequential waypoints
+        const y = Math.sin(((lookAhead[1] - currentCoord[1]) * Math.PI) / 180) * Math.cos((lookAhead[0] * Math.PI) / 180);
+        const x =
+          Math.cos((currentCoord[0] * Math.PI) / 180) * Math.sin((lookAhead[0] * Math.PI) / 180) -
+          Math.sin((currentCoord[0] * Math.PI) / 180) *
+            Math.cos((lookAhead[0] * Math.PI) / 180) *
+            Math.cos(((lookAhead[1] - currentCoord[1]) * Math.PI) / 180);
+        const bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+
+        const simulatedSpeed = simSpeedMultiplier >= 10 ? 68.0 : simSpeedMultiplier >= 4 ? 42.5 : 24.5;
+
+        setSimulatedLocation({
+          lat: currentCoord[0],
+          lng: currentCoord[1],
+          heading: Math.round(bearing),
+          speedKmH: simulatedSpeed,
+        });
+
+        // Live telemetry updates during ride simulation
+        setTelemetry((t) => ({
+          ...t,
+          speedKmH: simulatedSpeed,
+          motorPowerWatts: simSpeedMultiplier >= 10 ? 340 : 190,
+          riderPowerWatts: simSpeedMultiplier >= 10 ? 210 : 115,
+        }));
+
+        return nextIndex;
+      });
+    }, intervalMs);
+
+    return () => clearInterval(interval);
+  }, [isSimulatingRoute, currentRoute, simSpeedMultiplier]);
+
+  const activeUserLocation = simulatedLocation ? { lat: simulatedLocation.lat, lng: simulatedLocation.lng } : userLocation;
+  const activeHeading = simulatedLocation?.heading !== undefined ? simulatedLocation.heading : geo.heading;
+  const activeAccuracy = simulatedLocation ? 5 : geo.accuracy;
 
   // Legal & Consent State
   const [showConsentModal, setShowConsentModal] = useState<boolean>(() => {
@@ -214,21 +306,55 @@ export function App() {
     }
   };
 
-  const handleRerouteToStation = (station: ChargingStation) => {
-    if (!currentRoute) return;
-    const detourRoute: Route = {
-      ...currentRoute,
-      id: `detour-${station.id}`,
-      title: `Umleitung zu: ${station.name}`,
-      pathCoordinates: [
-        [userLocation.lat, userLocation.lng],
-        [station.lat, station.lng],
-      ],
-      waypoints: [
-        { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Aktuelle Position' },
-        { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
-      ],
-    };
+  const handlePlanRouteToPoint = async (targetLat: number, targetLng: number) => {
+    const prefs = await dataRepository.getUserPreferences('user-1');
+    const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
+    const newRoute = await RoutingService.generateBikeRoute(
+      {
+        startLat: userLocation.lat,
+        startLng: userLocation.lng,
+        targetDistanceKm: Math.max(2, Math.round(distKm * 1.3)),
+        batteryPercent: telemetry.batteryPercent,
+        bikeType: prefs.bikeType || 'ebike',
+        themes: ['Direktverbindung'],
+        maxElevationGainM: 120,
+        surfacePreference: 'any',
+      },
+      prefs
+    );
+    if (newRoute.pathCoordinates.length > 1) {
+      newRoute.pathCoordinates[newRoute.pathCoordinates.length - 1] = [targetLat, targetLng];
+    }
+    newRoute.title = `Route zum gewählten Ziel (${newRoute.distanceKm} km)`;
+    newRoute.aiStory = `Google Gemini 2.0 Flash: Fahrradoptimierte Verbindung zum gewählten Zielort (~${distKm.toFixed(1)} km) mit minimalem Höhenmeter-Widerstand.`;
+    setCurrentRoute(newRoute);
+  };
+
+  const handlePlanRouteToStation = async (station: ChargingStation) => {
+    const prefs = await dataRepository.getUserPreferences('user-1');
+    const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, station.lat, station.lng);
+    const detourRoute = await RoutingService.generateBikeRoute(
+      {
+        startLat: userLocation.lat,
+        startLng: userLocation.lng,
+        targetDistanceKm: Math.max(1, Math.round(distKm * 1.2)),
+        batteryPercent: telemetry.batteryPercent,
+        bikeType: prefs.bikeType || 'ebike',
+        themes: ['Ladesäulen-Anfahrt'],
+        maxElevationGainM: 60,
+        surfacePreference: 'asphalt',
+      },
+      prefs
+    );
+    if (detourRoute.pathCoordinates.length > 1) {
+      detourRoute.pathCoordinates[detourRoute.pathCoordinates.length - 1] = [station.lat, station.lng];
+    }
+    detourRoute.title = `Anfahrt: ${station.name}`;
+    detourRoute.aiStory = `Google Gemini 2.0 Flash: Direkte Anfahrt zur Ladestation ${station.name} (${station.plugType.toUpperCase()}).`;
+    detourRoute.waypoints = [
+      { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Start' },
+      { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
+    ];
     setCurrentRoute(detourRoute);
   };
 
@@ -248,44 +374,170 @@ export function App() {
         />
       )}
 
-      {/* Top Floating Glass Header HUD (Responsive Landscape Mode Support) */}
+      {/* Top Floating Glass Header HUD (Hidden during active navigation) */}
+      {!currentRoute && (
+        <div
+          className="top-header-hud"
+          style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            right: '10px',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '6px',
+          }}
+        >
+          {/* Left: Brand & OAuth Auth Pill */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+            <div className="glass-panel header-brand-pill" style={{ padding: '5px 9px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Navigation size={16} className="glow-text-cyan" />
+              <span style={{ fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '0.4px' }} className="brand-text glow-text-cyan">
+                WEGWEISER
+              </span>
+            </div>
+
+            <button
+              className={`btn-cyberpunk auth-btn-mobile ${authUser ? 'btn-cyan' : 'btn-gold'}`}
+              onClick={() => setShowAuthModal(true)}
+              style={{
+                padding: '5px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.72rem',
+                cursor: 'pointer',
+              }}
+              title="Account & OAuth-Anmeldung (Google / Apple / Microsoft / Facebook / X / Telegram)"
+            >
+              {authUser ? (
+                <>
+                  {authUser.photoURL ? (
+                    <img
+                      src={authUser.photoURL}
+                      alt={authUser.displayName || 'User'}
+                      style={{ width: '16px', height: '16px', borderRadius: '50%' }}
+                    />
+                  ) : (
+                    <UserIcon size={13} />
+                  )}
+                  <span style={{ fontWeight: 'bold' }}>{authUser.displayName ? authUser.displayName.split(' ')[0] : 'Konto'}</span>
+                </>
+              ) : (
+                <>
+                  <LogIn size={13} />
+                  <span className="auth-btn-text">Anmelden</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Right: Telemetry, Weather & Token */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
+            <BatteryHUD
+              telemetry={telemetry}
+              currentRoute={currentRoute}
+              onConnectBLE={handleConnectBLE}
+              onOpenBoschModal={() => setShowBoschModal(true)}
+            />
+            <WeatherHUD userLocation={userLocation} />
+            <div className="glass-pill glow-text-gold hud-token-pill" style={{ padding: '5px 7px', fontWeight: 'bold', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <span>🪙</span>
+              <span>{tokenBalance}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top-Right Sunlight & OLED Switches during Active Navigation */}
+      {currentRoute && (
+        <div style={{ position: 'fixed', top: 'max(10px, env(safe-area-inset-top))', right: '12px', zIndex: 2100, display: 'flex', gap: '6px' }}>
+          <button
+            className="btn-cyberpunk"
+            onClick={handleToggleSunlightMode}
+            style={{ padding: '7px 10px', fontSize: '0.75rem' }}
+            title="Sonnenlicht High-Contrast Modus"
+          >
+            {isSunlightMode ? <Moon size={14} /> : <Sun size={14} />}
+          </button>
+          <button
+            className="btn-cyberpunk"
+            onClick={handleToggleOledMode}
+            style={{ padding: '7px 10px', fontSize: '0.75rem' }}
+            title="OLED Sparmodus"
+          >
+            <EyeOff size={14} /> OLED
+          </button>
+        </div>
+      )}
+
+      {/* Repositioned Bottom-Left Ladesäulen-Foto Scanner Button during Navigation */}
+      {currentRoute && (
+        <button
+          className="btn-cyberpunk"
+          onClick={() => setShowScannerModal(true)}
+          style={{
+            position: 'fixed',
+            bottom: '85px',
+            left: '12px',
+            zIndex: 1800,
+            padding: '8px 12px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+          }}
+          title="Ladesäule scannen / Foto hochladen"
+        >
+          <Camera size={15} /> + Säule
+        </button>
+      )}
+
+      {/* Repositioned Bottom-Right Fahrt-Modus Button above Mic Button during Navigation */}
+      {currentRoute && (
+        <button
+          className="btn-cyberpunk"
+          onClick={() => {
+            const nextMode = lifecycle.currentMode === 'ride' ? 'charge' : 'ride';
+            AppLifecycleService.setMode(nextMode);
+          }}
+          style={{
+            position: 'fixed',
+            bottom: isBottomCardOpen ? '165px' : '90px',
+            right: '12px',
+            zIndex: 1800,
+            padding: '8px 12px',
+            borderRadius: '12px',
+            borderColor: 'var(--accent-cyan)',
+            color: 'var(--accent-cyan)',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+          }}
+          title="Modus umschalten"
+        >
+          ⚡ Fahrt-Modus
+        </button>
+      )}
+
+      {/* Quick Action Strip below Header */}
       <div
-        className="top-header-hud"
+        className="quick-actions-bar"
         style={{
           position: 'absolute',
-          top: '16px',
-          left: '16px',
-          right: '16px',
-          zIndex: 1000,
+          top: currentRoute ? 'max(10px, env(safe-area-inset-top))' : '52px',
+          left: '12px',
+          right: currentRoute ? '110px' : '12px',
+          zIndex: 1900,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '10px',
-          flexWrap: 'wrap',
+          gap: '6px',
+          overflowX: 'auto',
+          maxWidth: '100%',
+          paddingBottom: '2px',
+          scrollbarWidth: 'none',
         }}
       >
-        {/* App Logo Badge */}
-        <div className="glass-panel" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Navigation size={20} className="glow-text-cyan" />
-          <span style={{ fontSize: '1rem', fontWeight: 'bold', letterSpacing: '0.5px' }} className="glow-text-cyan">
-            DER WEGWEISER
-          </span>
-        </div>
-
-        {/* Battery & Telemetry HUD */}
-        <BatteryHUD
-          telemetry={telemetry}
-          currentRoute={currentRoute}
-          onConnectBLE={handleConnectBLE}
-          onOpenBoschModal={() => setShowBoschModal(true)}
-        />
-
-        {/* Weather & Wind HUD */}
-        <WeatherHUD userLocation={userLocation} />
-
-        {/* Action Buttons HUD */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {/* Lifecycle Mode Indicator Pill */}
+        {/* Lifecycle Mode Indicator Pill (Hidden in Nav mode as it is relocated bottom-right) */}
+        {!currentRoute && (
           <div
             className="glass-pill"
             style={{
@@ -316,120 +568,169 @@ export function App() {
               ? '🔋 Lade-Lounge'
               : '🗺️ Planung'}
           </div>
+        )}
 
-          {/* GPX Track Recorder Pill */}
-          <GpxRecorderHUD
-            userLocation={userLocation}
-            telemetry={telemetry}
-            onFinishRide={() => setShowRideSummaryModal(true)}
-          />
+        {/* GPX Track Recorder Pill */}
+        <GpxRecorderHUD
+          userLocation={activeUserLocation}
+          telemetry={telemetry}
+          onFinishRide={() => setShowRideSummaryModal(true)}
+        />
 
-          {/* Token Balance */}
-          <div className="glass-pill glow-text-gold" style={{ padding: '6px 14px', fontWeight: 'bold', fontSize: '0.85rem' }}>
-            🪙 {tokenBalance} Tok.
-          </div>
+        {/* GPS Demo-Fahrt Simulation Button with Multi-Speed Modes */}
+        <button
+          className={`btn-cyberpunk ${isSimulatingRoute ? (simSpeedMultiplier >= 10 ? 'btn-gold' : 'btn-neon-green') : ''}`}
+          onClick={() => {
+            if (!isSimulatingRoute) {
+              setIsSimulatingRoute(true);
+              setSimSpeedMultiplier(1);
+            } else if (simSpeedMultiplier === 1) {
+              setSimSpeedMultiplier(4);
+            } else if (simSpeedMultiplier === 4) {
+              setSimSpeedMultiplier(10);
+            } else {
+              setIsSimulatingRoute(false);
+              setSimSpeedMultiplier(1);
+            }
+          }}
+          style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}
+          title="GPS-Simulation der aktiven Route (1x -> 4x -> 10x Schnelldurchgang -> Stop)"
+        >
+          {isSimulatingRoute ? (
+            simSpeedMultiplier >= 10 ? (
+              <>
+                <Zap size={15} className="glow-text-gold" />
+                <span>Sim 10x 🚀</span>
+              </>
+            ) : simSpeedMultiplier >= 4 ? (
+              <>
+                <Zap size={15} className="glow-text-cyan" />
+                <span>Sim 4x ⚡</span>
+              </>
+            ) : (
+              <>
+                <Pause size={15} />
+                <span>Sim 1x ⏸</span>
+              </>
+            )
+          ) : (
+            <>
+              <Play size={15} />
+              <span>Demo-Fahrt</span>
+            </>
+          )}
+        </button>
 
-          {/* GPX Import Button */}
-          <button
-            className="btn-cyberpunk"
-            onClick={() => setShowGpxImportModal(true)}
-            style={{ padding: '8px 12px' }}
-            title="GPX Track von Komoot / Strava importieren"
-          >
-            <UploadCloud size={15} /> GPX
-          </button>
+        {/* Main Menu Only Buttons (Hidden during active navigation) */}
+        {!currentRoute && (
+          <>
+            {/* GPX Import Button */}
+            <button
+              className="btn-cyberpunk"
+              onClick={() => setShowGpxImportModal(true)}
+              style={{ padding: '8px 12px' }}
+              title="GPX Track von Komoot / Strava importieren"
+            >
+              <UploadCloud size={15} /> GPX
+            </button>
 
-          {/* Sunlight Mode Toggle (High-Noon High Contrast) */}
-          <button
-            className="btn-cyberpunk"
-            onClick={handleToggleSunlightMode}
-            style={{ padding: '8px 12px' }}
-            title="Sonnenlicht High-Contrast Modus umschalten"
-          >
-            {isSunlightMode ? <Moon size={15} /> : <Sun size={15} />}
-          </button>
+            {/* Sunlight Mode Toggle */}
+            <button
+              className="btn-cyberpunk"
+              onClick={handleToggleSunlightMode}
+              style={{ padding: '8px 12px' }}
+              title="Sonnenlicht High-Contrast Modus umschalten"
+            >
+              {isSunlightMode ? <Moon size={15} /> : <Sun size={15} />}
+            </button>
 
-          {/* Voice Personas & Audio Settings Button */}
-          <button
-            className="btn-cyberpunk hide-on-landscape"
-            onClick={() => setShowVoiceSettingsModal(true)}
-            style={{ padding: '8px 12px' }}
-            title="KI-Stimmen & Audio-Einstellungen"
-          >
-            <Volume2 size={15} /> Stimme
-          </button>
+            {/* Voice Personas & Audio Settings Button */}
+            <button
+              className="btn-cyberpunk hide-on-landscape"
+              onClick={() => setShowVoiceSettingsModal(true)}
+              style={{ padding: '8px 12px' }}
+              title="KI-Stimmen & Audio-Einstellungen"
+            >
+              <Volume2 size={15} /> Stimme
+            </button>
 
-          {/* OLED Battery Saver Button */}
-          <button
-            className="btn-cyberpunk hide-on-landscape"
-            onClick={handleToggleOledMode}
-            style={{ padding: '8px 12px' }}
-            title="OLED Beeline Spar-Modus"
-          >
-            <EyeOff size={15} /> OLED
-          </button>
+            {/* OLED Battery Saver Button */}
+            <button
+              className="btn-cyberpunk hide-on-landscape"
+              onClick={handleToggleOledMode}
+              style={{ padding: '8px 12px' }}
+              title="OLED Beeline Spar-Modus"
+            >
+              <EyeOff size={15} /> OLED
+            </button>
 
-          {/* Analytics Button */}
-          <button
-            className="btn-cyberpunk hide-on-landscape"
-            onClick={() => setShowAnalyticsModal(true)}
-            style={{ padding: '8px 12px' }}
-          >
-            <BarChart3 size={15} /> Touren
-          </button>
+            {/* Analytics Button */}
+            <button
+              className="btn-cyberpunk hide-on-landscape"
+              onClick={() => setShowAnalyticsModal(true)}
+              style={{ padding: '8px 12px' }}
+            >
+              <BarChart3 size={15} /> Touren
+            </button>
 
-          {/* Scanner Button */}
-          <button
-            className="btn-cyberpunk hide-on-landscape"
-            onClick={() => setShowScannerModal(true)}
-            style={{ padding: '8px 12px' }}
-          >
-            <Camera size={15} /> + Säule
-          </button>
+            {/* Scanner Button */}
+            <button
+              className="btn-cyberpunk hide-on-landscape"
+              onClick={() => setShowScannerModal(true)}
+              style={{ padding: '8px 12px' }}
+            >
+              <Camera size={15} /> + Säule
+            </button>
 
-          {/* Lounge Button */}
-          <button
-            className="btn-cyberpunk btn-gold"
-            onClick={() => setShowLoungeModal(true)}
-            style={{ padding: '8px 14px' }}
-          >
-            <Gamepad2 size={15} /> Lounge
-          </button>
+            {/* Lounge Button */}
+            <button
+              className="btn-cyberpunk btn-gold"
+              onClick={() => setShowLoungeModal(true)}
+              style={{ padding: '8px 14px' }}
+            >
+              <Gamepad2 size={15} /> Lounge
+            </button>
 
-          {/* KI Heute-Tour Button */}
-          <button
-            className="btn-cyberpunk"
-            onClick={() => setShowAnticipationModal(true)}
-            style={{ padding: '8px 12px' }}
-          >
-            <Sparkles size={15} /> Tour
-          </button>
+            {/* KI Heute-Tour Button */}
+            <button
+              className="btn-cyberpunk"
+              onClick={() => setShowAnticipationModal(true)}
+              style={{ padding: '8px 12px' }}
+            >
+              <Sparkles size={15} /> Tour
+            </button>
 
-          {/* Legal / DSGVO Button */}
-          <button
-            className="btn-cyberpunk hide-on-landscape"
-            onClick={() => {
-              setLegalTab('terms');
-              setShowLegalModal(true);
-            }}
-            style={{ padding: '8px 12px' }}
-            title="Rechtliches, AGB & Datenschutz"
-          >
-            <ShieldCheck size={15} /> Recht
-          </button>
-        </div>
+            {/* Legal / DSGVO Button */}
+            <button
+              className="btn-cyberpunk hide-on-landscape"
+              onClick={() => {
+                setLegalTab('terms');
+                setShowLegalModal(true);
+              }}
+              style={{ padding: '8px 12px' }}
+              title="Rechtliches, AGB & Datenschutz"
+            >
+              <ShieldCheck size={15} /> Recht
+            </button>
+          </>
+        )}
       </div>
 
       {/* Main Fullscreen Map */}
       <MapView
-        userLocation={userLocation}
-        accuracy={geo.accuracy}
-        heading={geo.heading}
+        userLocation={activeUserLocation}
+        accuracy={activeAccuracy}
+        heading={activeHeading}
         currentRoute={currentRoute}
         chargingStations={chargingStations}
-        onSelectStation={() => {}}
+        onSelectStation={(station) => handlePlanRouteToStation(station)}
         onAutoReroute={handleAutoReroute}
         onOpenReviewModal={(station) => setSelectedStationForReview(station)}
+        onPlanRouteToPoint={handlePlanRouteToPoint}
+        onPlanRouteToStation={handlePlanRouteToStation}
+        isSimulating={isSimulatingRoute}
+        onToggleSimulation={() => setIsSimulatingRoute(!isSimulatingRoute)}
+        onCardOpenChange={setIsBottomCardOpen}
       />
 
       {/* Floating Voice Assistant Mic */}
@@ -440,10 +741,17 @@ export function App() {
         onOpenLounge={() => setShowLoungeModal(true)}
         onToggleOled={handleToggleOledMode}
         onRegenerateTour={() => handleRegenerateRoute()}
+        isHidden={isBottomCardOpen}
       />
 
       {/* Lazy Modals with Suspense */}
       <Suspense fallback={null}>
+        {showAuthModal && (
+          <AuthModal
+            isOpen={showAuthModal}
+            onClose={() => setShowAuthModal(false)}
+          />
+        )}
         {showAnticipationModal && currentRoute && (
           <AnticipationModal
             route={currentRoute}
@@ -528,7 +836,7 @@ export function App() {
             batteryPercent={telemetry.batteryPercent}
             remainingWh={telemetry.batteryWhRemaining || 80}
             nearestStations={chargingStations}
-            onRerouteToStation={handleRerouteToStation}
+            onRerouteToStation={handlePlanRouteToStation}
             onClose={() => {
               setShowEmergencyModal(false);
               setEmergencyAlertDismissed(true);
