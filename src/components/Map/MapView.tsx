@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import type { Route, ChargingStation } from '../../types/navigation';
-import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Play, Pause } from 'lucide-react';
+import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Play, Pause, Camera } from 'lucide-react';
 import { TurnByTurnBanner } from './TurnByTurnBanner';
 import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
@@ -22,6 +22,7 @@ interface MapViewProps {
   onPlanRouteToStation?: (station: ChargingStation) => void;
   isSimulating?: boolean;
   onToggleSimulation?: () => void;
+  onOpenScanner?: () => void;
   onCardOpenChange?: (open: boolean) => void;
   telemetry?: any;
 }
@@ -285,6 +286,7 @@ export const MapView: React.FC<MapViewProps> = ({
   onPlanRouteToStation,
   isSimulating,
   onToggleSimulation,
+  onOpenScanner,
   onCardOpenChange,
   telemetry,
 }) => {
@@ -759,6 +761,29 @@ export const MapView: React.FC<MapViewProps> = ({
           </div>
         )}
 
+        {/* Scanner (+ Säule) Button at top of right stack */}
+        {onOpenScanner && currentRoute && (
+          <button
+            className="btn-cyberpunk btn-gold"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenScanner();
+            }}
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+            }}
+            title="Ladesäule scannen / Foto hochladen"
+          >
+            <Camera size={18} />
+          </button>
+        )}
+
         {/* GPS Simulation Toggle Button */}
         {onToggleSimulation && (
           <button
@@ -774,10 +799,9 @@ export const MapView: React.FC<MapViewProps> = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#090e1a',
               color: isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
               cursor: 'pointer',
-              border: `2px solid ${isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
+              border: `1.5px solid ${isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
               boxShadow: isSimulating ? 'var(--glow-green)' : 'var(--glow-cyan)',
             }}
             title={isSimulating ? 'GPS-Simulation pausieren' : 'GPS-Simulation starten (Demo-Fahrt)'}
@@ -794,8 +818,7 @@ export const MapView: React.FC<MapViewProps> = ({
             flexDirection: 'column',
             borderRadius: '10px',
             overflow: 'hidden',
-            backgroundColor: '#090e1a',
-            border: '2px solid var(--accent-cyan)',
+            border: '1.5px solid var(--accent-cyan)',
             boxShadow: 'var(--glow-cyan)',
           }}
         >
@@ -806,7 +829,7 @@ export const MapView: React.FC<MapViewProps> = ({
             }}
             style={{
               width: '38px',
-              height: '34px',
+              height: '32px',
               background: 'none',
               border: 'none',
               display: 'flex',
@@ -819,7 +842,7 @@ export const MapView: React.FC<MapViewProps> = ({
           >
             <Plus size={18} />
           </button>
-          <div style={{ height: '2px', backgroundColor: 'var(--accent-cyan)' }} />
+          <div style={{ height: '1px', backgroundColor: 'rgba(0, 240, 255, 0.3)' }} />
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -827,7 +850,7 @@ export const MapView: React.FC<MapViewProps> = ({
             }}
             style={{
               width: '38px',
-              height: '34px',
+              height: '32px',
               background: 'none',
               border: 'none',
               display: 'flex',
@@ -856,10 +879,9 @@ export const MapView: React.FC<MapViewProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#090e1a',
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: '2px solid var(--accent-cyan)',
+            border: '1.5px solid var(--accent-cyan)',
             boxShadow: 'var(--glow-cyan)',
           }}
           title="Auf aktuellen GPS-Standort zentrieren"
@@ -881,11 +903,10 @@ export const MapView: React.FC<MapViewProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#090e1a',
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: '2px solid var(--accent-cyan)',
-            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : '0 4px 18px rgba(0, 0, 0, 0.9)',
+            border: '1.5px solid var(--accent-cyan)',
+            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
           }}
           title="Karten-Ebene wechseln"
         >
@@ -906,11 +927,10 @@ export const MapView: React.FC<MapViewProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#090e1a',
             color: 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: '2px solid var(--accent-cyan)',
-            boxShadow: is3DMode ? 'var(--glow-cyan)' : '0 4px 18px rgba(0, 0, 0, 0.9)',
+            border: '1.5px solid var(--accent-cyan)',
+            boxShadow: is3DMode ? 'var(--glow-cyan)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
           }}
           title="3D Cyberpunk Perspektive umschalten"
         >
@@ -931,10 +951,9 @@ export const MapView: React.FC<MapViewProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: '#090e1a',
             color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
             cursor: 'pointer',
-            border: `2px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
+            border: `1.5px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
             boxShadow: isCourseUp ? 'var(--glow-green)' : 'var(--glow-cyan)',
           }}
           title={isCourseUp ? 'Auf Norden fixieren (North-Up)' : 'In Fahrtrichtung rotieren (Course-Up)'}

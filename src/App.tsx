@@ -501,94 +501,7 @@ export function App() {
         </div>
       )}
 
-      {/* Auto-Hiding Push to E-Bike Banner during Active Navigation (First 3 Min + Manual Close X) */}
-      {currentRoute && !isPushDismissed && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '56px',
-            left: '12px',
-            zIndex: 2100,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 8px',
-            borderRadius: '20px',
-            backgroundColor: '#090e1a',
-            border: '2px solid var(--accent-gold)',
-            boxShadow: '0 4px 18px rgba(0, 0, 0, 0.95), 0 0 14px rgba(255, 183, 0, 0.5)',
-          }}
-        >
-          {ebikePushMessage ? (
-            <span style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', fontWeight: 'bold', padding: '0 4px' }}>
-              {ebikePushMessage}
-            </span>
-          ) : (
-            <>
-              <button
-                className="btn-cyberpunk btn-gold"
-                onClick={handlePushToEBikeNav}
-                style={{
-                  padding: '5px 10px',
-                  fontSize: '0.72rem',
-                  fontWeight: '800',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  borderRadius: '14px',
-                }}
-                title="Route an verbundenes E-Bike Display senden"
-              >
-                <Send size={13} /> Push to E-Bike
-              </button>
-              <button
-                onClick={() => setIsPushDismissed(true)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--accent-gold)',
-                  cursor: 'pointer',
-                  padding: '2px 4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-                title="Ausblenden"
-              >
-                <X size={14} />
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Round Scanner (+ Säule) Button stacked directly ABOVE the Floating Microphone Button on the RIGHT */}
-      {currentRoute && (
-        <button
-          className="btn-cyberpunk btn-gold"
-          onClick={() => setShowScannerModal(true)}
-          style={{
-            position: 'fixed',
-            bottom: isBottomCardOpen ? '165px' : '88px',
-            right: '16px',
-            zIndex: 1800,
-            width: '50px',
-            height: '50px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#090e1a',
-            border: '2px solid var(--accent-gold)',
-            color: 'var(--accent-gold)',
-            boxShadow: '0 4px 18px rgba(0, 0, 0, 0.95), 0 0 16px rgba(255, 183, 0, 0.6)',
-          }}
-          title="Ladesäule scannen / Foto hochladen"
-        >
-          <Camera size={22} />
-        </button>
-      )}
-
-      {/* Relocated Fahrt-Modus Button on the LEFT side, positioned higher */}
+      {/* Relocated Fahrt-Modus Button on the LEFT side */}
       {currentRoute && (
         <button
           className="btn-cyberpunk"
@@ -598,20 +511,21 @@ export function App() {
           }}
           style={{
             position: 'fixed',
-            bottom: isBottomCardOpen ? '165px' : '105px',
+            bottom: isBottomCardOpen ? '165px' : '84px',
             left: '16px',
             zIndex: 1800,
             padding: '8px 14px',
             borderRadius: '20px',
-            backgroundColor: '#090e1a',
-            border: '2px solid var(--accent-cyan)',
+            backgroundColor: 'rgba(10, 16, 28, 0.88)',
+            backdropFilter: 'blur(12px)',
+            border: '1.5px solid var(--accent-cyan)',
             color: 'var(--accent-cyan)',
-            boxShadow: '0 4px 18px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 229, 255, 0.5)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.3)',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            fontSize: '0.82rem',
-            fontWeight: '800',
+            fontSize: '0.8rem',
+            fontWeight: 'bold',
           }}
           title="Modus umschalten"
         >
@@ -624,7 +538,7 @@ export function App() {
         className="quick-actions-bar"
         style={{
           position: 'absolute',
-          top: currentRoute ? '56px' : '52px',
+          top: currentRoute ? '52px' : '52px',
           left: '12px',
           right: currentRoute ? '110px' : '12px',
           zIndex: 1900,
@@ -637,6 +551,64 @@ export function App() {
           scrollbarWidth: 'none',
         }}
       >
+        {/* Push to E-Bike Pill inside Quick Actions Strip */}
+        {currentRoute && !isPushDismissed && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px 6px',
+              borderRadius: '16px',
+              backgroundColor: 'rgba(10, 16, 28, 0.88)',
+              backdropFilter: 'blur(12px)',
+              border: '1.5px solid var(--accent-gold)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
+              flexShrink: 0,
+            }}
+          >
+            {ebikePushMessage ? (
+              <span style={{ fontSize: '0.72rem', color: 'var(--accent-gold)', fontWeight: 'bold', padding: '0 4px' }}>
+                {ebikePushMessage}
+              </span>
+            ) : (
+              <>
+                <button
+                  className="btn-cyberpunk btn-gold"
+                  onClick={handlePushToEBikeNav}
+                  style={{
+                    padding: '4px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    borderRadius: '12px',
+                  }}
+                  title="Route an verbundenes E-Bike Display senden"
+                >
+                  <Send size={12} /> Push to E-Bike
+                </button>
+                <button
+                  onClick={() => setIsPushDismissed(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--accent-gold)',
+                    cursor: 'pointer',
+                    padding: '2px 4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  title="Ausblenden"
+                >
+                  <X size={13} />
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Lifecycle Mode Indicator Pill (Hidden in Nav mode as it is relocated bottom-right) */}
         {!currentRoute && (
           <div
@@ -831,6 +803,7 @@ export function App() {
         onPlanRouteToStation={handlePlanRouteToStation}
         isSimulating={isSimulatingRoute}
         onToggleSimulation={() => setIsSimulatingRoute(!isSimulatingRoute)}
+        onOpenScanner={() => setShowScannerModal(true)}
         onCardOpenChange={setIsBottomCardOpen}
       />
 

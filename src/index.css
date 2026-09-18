@@ -1,19 +1,19 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --bg-primary: #050811;
-  --bg-secondary: #0a0f1d;
-  --bg-card: #090e1a;
+  --bg-primary: #0a0d14;
+  --bg-secondary: #121824;
+  --bg-card: rgba(12, 18, 30, 0.85);
   --accent-cyan: #00e5ff;
   --accent-neon-green: #00ff66;
   --accent-gold: #ffb700;
   --accent-pink: #ff007f;
-  --text-primary: #ffffff;
-  --text-muted: #a0aec0;
-  --border-glass: #00e5ff;
-  --glow-cyan: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 229, 255, 0.6);
-  --glow-green: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 255, 102, 0.6);
-  --glow-gold: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(255, 183, 0, 0.6);
+  --text-primary: #f0f4f8;
+  --text-muted: #94a3b8;
+  --border-glass: rgba(0, 229, 255, 0.32);
+  --glow-cyan: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 229, 255, 0.35);
+  --glow-green: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 255, 102, 0.35);
+  --glow-gold: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 14px rgba(255, 183, 0, 0.35);
 }
 
 * {
@@ -31,44 +31,48 @@ body {
   width: 100vw;
 }
 
-/* High-Contrast Glass Panels (100% Solid Dark Background) */
+/* Glassmorphism Panels */
 .glass-panel {
-  background: #090e1a !important;
-  border: 2px solid var(--accent-cyan);
+  background: rgba(10, 16, 28, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid var(--border-glass);
   border-radius: 16px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.95), 0 0 18px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 229, 255, 0.2);
 }
 
 .glass-pill {
-  background: #090e1a !important;
-  border: 2px solid var(--accent-cyan);
+  background: rgba(10, 16, 28, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(0, 229, 255, 0.38);
   border-radius: 9999px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.95), 0 0 14px rgba(0, 229, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.25);
 }
 
 /* Glowing Neon Elements */
 .glow-text-cyan {
   color: var(--accent-cyan);
-  text-shadow: 0 0 14px rgba(0, 229, 255, 0.85);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.7);
 }
 
 .glow-text-green {
   color: var(--accent-neon-green);
-  text-shadow: 0 0 14px rgba(0, 255, 102, 0.85);
+  text-shadow: 0 0 12px rgba(0, 255, 102, 0.7);
 }
 
 .glow-text-gold {
   color: var(--accent-gold);
-  text-shadow: 0 0 14px rgba(255, 183, 0, 0.85);
+  text-shadow: 0 0 12px rgba(255, 183, 0, 0.7);
 }
 
 .btn-cyberpunk {
-  background: #090e1a;
-  border: 2px solid var(--accent-cyan);
-  color: #00e5ff;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 168, 232, 0.12));
+  border: 1.5px solid var(--accent-cyan);
+  color: var(--accent-cyan);
   padding: 10px 20px;
   border-radius: 12px;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.25s ease;
   display: inline-flex;
@@ -77,44 +81,44 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 0.85rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(0, 229, 255, 0.45);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 229, 255, 0.3);
+  backdrop-filter: blur(12px);
 }
 
 .btn-cyberpunk:hover {
-  background: #00e5ff;
-  color: #000000;
-  box-shadow: 0 0 26px rgba(0, 229, 255, 0.9);
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.4), rgba(0, 168, 232, 0.3));
+  box-shadow: 0 0 22px rgba(0, 229, 255, 0.65);
   border-color: #ffffff;
+  color: #ffffff;
   transform: translateY(-2px);
 }
 
 .btn-cyan {
-  background: #00e5ff;
-  border: 2px solid #ffffff;
-  color: #000000;
-  font-weight: 900;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.95), 0 0 22px rgba(0, 229, 255, 0.8);
+  background: linear-gradient(135deg, #00e5ff, #00a8e8);
+  border: 1.5px solid #ffffff;
+  color: #050a14;
+  font-weight: 800;
+  box-shadow: 0 4px 20px rgba(0, 229, 255, 0.5);
 }
 
 .btn-cyan:hover {
-  background: #ffffff;
-  color: #000000;
-  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.95);
+  background: linear-gradient(135deg, #33ebff, #00c6ff);
+  box-shadow: 0 6px 26px rgba(0, 229, 255, 0.75);
   transform: translateY(-2px);
 }
 
 .btn-gold {
-  background: #090e1a;
-  border: 2px solid var(--accent-gold);
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.28), rgba(255, 0, 127, 0.15));
+  border: 1.5px solid var(--accent-gold);
   color: var(--accent-gold);
-  font-weight: 800;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.95), 0 0 16px rgba(255, 183, 0, 0.5);
+  font-weight: 700;
+  backdrop-filter: blur(12px);
 }
 
 .btn-gold:hover {
-  background: var(--accent-gold);
-  color: #000000;
-  box-shadow: 0 0 26px rgba(255, 183, 0, 0.9);
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.5), rgba(255, 0, 127, 0.35));
+  box-shadow: 0 0 20px rgba(255, 183, 0, 0.6);
+  color: #ffffff;
   transform: translateY(-2px);
 }
 
@@ -136,14 +140,14 @@ body {
 
 /* Leaflet Dark Theme Overrides */
 .leaflet-container {
-  background-color: #050811 !important;
+  background-color: #0b0e17 !important;
   width: 100%;
   height: 100%;
   z-index: 0;
 }
 
 .leaflet-tile {
-  filter: brightness(0.55) invert(1) contrast(1.45) hue-rotate(200deg) saturate(0.25) !important;
+  filter: brightness(0.85) invert(1) contrast(1.2) hue-rotate(200deg) saturate(0.35) !important;
 }
 
 /* Custom Marker Pulsing Effect */
