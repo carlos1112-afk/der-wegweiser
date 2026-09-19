@@ -15,7 +15,7 @@ import { AuthService } from './services/authService';
 import { RoutingService } from './services/routingService';
 import { EBikeDisplayService } from './services/ebikeDisplayService';
 import type { User } from 'firebase/auth';
-import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck, User as UserIcon, LogIn, Play, Pause, Zap, Send, X } from 'lucide-react';
+import { Camera, Gamepad2, Sparkles, Navigation, BarChart3, EyeOff, Volume2, Sun, Moon, UploadCloud, ShieldCheck, User as UserIcon, LogIn, Play, Pause, Zap, BatteryCharging, Send, X } from 'lucide-react';
 import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 import { useAppLifecycle } from './hooks/useAppLifecycle';
@@ -310,6 +310,7 @@ export function App() {
   };
 
   const handleAutoReroute = async () => {
+    if (!currentRoute) return;
     console.log('[App] Auto-Rerouting triggered from current GPS position...');
     const prefs = await dataRepository.getUserPreferences('user-1');
     const memory = await dataRepository.getUserMemoryPattern('user-1');
@@ -419,51 +420,133 @@ export function App() {
           gap: '6px',
         }}
       >
-        {/* Left: Brand & OAuth Auth Pill */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
-          <div className="glass-panel header-brand-pill" style={{ padding: '5px 9px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Navigation size={16} className="glow-text-cyan" />
-            <span style={{ fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '0.4px' }} className="brand-text glow-text-cyan">
+        {/* Left: Brand, Beenden button during Nav, or OAuth Auth Pill during Planning */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+          <div className="glass-panel header-brand-pill" style={{ padding: '5px 7px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Navigation size={15} className="glow-text-cyan" />
+            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', letterSpacing: '0.3px' }} className="brand-text glow-text-cyan">
               WEGWEISER
             </span>
           </div>
 
-          <button
-            className={`btn-cyberpunk auth-btn-mobile ${authUser ? 'btn-cyan' : 'btn-gold'}`}
-            onClick={() => setShowAuthModal(true)}
-            style={{
-              padding: '5px 8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '0.72rem',
-              cursor: 'pointer',
-            }}
-            title="Account & OAuth-Anmeldung (Google / Apple / Microsoft / Facebook / X / Telegram)"
-          >
-            {authUser ? (
-              <>
-                {authUser.photoURL ? (
-                  <img
-                    src={authUser.photoURL}
-                    alt={authUser.displayName || 'User'}
-                    style={{ width: '16px', height: '16px', borderRadius: '50%' }}
-                  />
-                ) : (
-                  <UserIcon size={13} />
-                )}
-                <span style={{ fontWeight: 'bold' }}>{authUser.displayName ? authUser.displayName.split(' ')[0] : 'Konto'}</span>
-              </>
-            ) : (
-              <>
-                <LogIn size={13} />
-                <span className="auth-btn-text">Anmelden</span>
-              </>
-            )}
-          </button>
+          {currentRoute ? (
+            <>
+              {/* Clean Route Cancel / Beenden Button */}
+              <button
+                className="btn-cyberpunk btn-gold"
+                onClick={() => {
+                  setCurrentRoute(null);
+                  setIsSimulatingRoute(false);
+                }}
+                style={{
+                  padding: '5px 7px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  fontSize: '0.72rem',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                }}
+                title="Navigation beenden"
+              >
+                <X size={12} /> Beenden
+              </button>
+
+              {/* Auto-Hiding Push to E-Bike Badge (First 3 Min + Manual Close X) */}
+              {!isPushDismissed && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    padding: '2px 5px',
+                    borderRadius: '14px',
+                    backgroundColor: 'rgba(10, 16, 28, 0.92)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1.2px solid var(--accent-gold)',
+                    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.4)',
+                  }}
+                >
+                  {ebikePushMessage ? (
+                    <span style={{ fontSize: '0.68rem', color: 'var(--accent-gold)', fontWeight: 'bold', padding: '0 3px' }}>
+                      {ebikePushMessage}
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        className="btn-cyberpunk btn-gold"
+                        onClick={handlePushToEBikeNav}
+                        style={{
+                          padding: '2px 5px',
+                          fontSize: '0.68rem',
+                          fontWeight: 'bold',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          borderRadius: '10px',
+                        }}
+                        title="Route an verbundenes E-Bike Display senden"
+                      >
+                        <Send size={11} /> Push
+                      </button>
+                      <button
+                        onClick={() => setIsPushDismissed(true)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--accent-gold)',
+                          cursor: 'pointer',
+                          padding: '1px 2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                        }}
+                        title="Ausblenden"
+                      >
+                        <X size={11} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <button
+              className={`btn-cyberpunk auth-btn-mobile ${authUser ? 'btn-cyan' : 'btn-gold'}`}
+              onClick={() => setShowAuthModal(true)}
+              style={{
+                padding: '5px 8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.72rem',
+                cursor: 'pointer',
+              }}
+              title="Account & OAuth-Anmeldung (Google / Apple / Microsoft / Facebook / X / Telegram)"
+            >
+              {authUser ? (
+                <>
+                  {authUser.photoURL ? (
+                    <img
+                      src={authUser.photoURL}
+                      alt={authUser.displayName || 'User'}
+                      style={{ width: '16px', height: '16px', borderRadius: '50%' }}
+                    />
+                  ) : (
+                    <UserIcon size={13} />
+                  )}
+                  <span style={{ fontWeight: 'bold' }}>{authUser.displayName ? authUser.displayName.split(' ')[0] : 'Konto'}</span>
+                </>
+              ) : (
+                <>
+                  <LogIn size={13} />
+                  <span className="auth-btn-text">Anmelden</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
 
-        {/* Right: Telemetry, Weather & Token */}
+        {/* Right: Telemetry, Weather & Token (Tokens only in non-nav) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
           <BatteryHUD
             telemetry={telemetry}
@@ -472,142 +555,72 @@ export function App() {
             onOpenBoschModal={() => setShowBoschModal(true)}
           />
           <WeatherHUD userLocation={userLocation} />
-          <div className="glass-pill glow-text-gold hud-token-pill" style={{ padding: '5px 7px', fontWeight: 'bold', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
-            <span>🪙</span>
-            <span>{tokenBalance}</span>
-          </div>
+          {!currentRoute && (
+            <div className="glass-pill glow-text-gold hud-token-pill" style={{ padding: '5px 7px', fontWeight: 'bold', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <span>🪙</span>
+              <span>{tokenBalance}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Top-Right Sunlight & OLED Switches during Active Navigation */}
-      {currentRoute && (
-        <div style={{ position: 'fixed', top: '56px', right: '12px', zIndex: 2100, display: 'flex', gap: '6px' }}>
-          <button
-            className="btn-cyberpunk"
-            onClick={handleToggleSunlightMode}
-            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
-            title="Sonnenlicht High-Contrast Modus"
-          >
-            {isSunlightMode ? <Moon size={14} /> : <Sun size={14} />}
-          </button>
-          <button
-            className="btn-cyberpunk"
-            onClick={handleToggleOledMode}
-            style={{ padding: '6px 10px', fontSize: '0.75rem' }}
-            title="OLED Sparmodus"
-          >
-            <EyeOff size={14} /> OLED
-          </button>
-        </div>
-      )}
-
-      {/* Relocated Fahrt-Modus Button on the LEFT side */}
+      {/* Relocated Fahrt-Modus Icon on the LEFT side (Elevated round icon button) */}
       {currentRoute && (
         <button
-          className="btn-cyberpunk"
+          className="btn-cyberpunk btn-cyan"
           onClick={() => {
             const nextMode = lifecycle.currentMode === 'ride' ? 'charge' : 'ride';
             AppLifecycleService.setMode(nextMode);
           }}
           style={{
             position: 'fixed',
-            bottom: isBottomCardOpen ? '165px' : '84px',
+            bottom: '100px',
             left: '16px',
             zIndex: 1800,
-            padding: '8px 14px',
-            borderRadius: '20px',
-            backgroundColor: 'rgba(10, 16, 28, 0.88)',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(15, 23, 42, 0.92)',
             backdropFilter: 'blur(12px)',
-            border: '1.5px solid var(--accent-cyan)',
+            border: '2px solid var(--accent-cyan)',
             color: 'var(--accent-cyan)',
-            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 229, 255, 0.3)',
+            boxShadow: 'var(--glow-cyan)',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
-            fontSize: '0.8rem',
-            fontWeight: 'bold',
+            justifyContent: 'center',
+            padding: 0,
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
           }}
-          title="Modus umschalten"
+          title={lifecycle.currentMode === 'ride' ? 'Fahrmodus aktiv (Klicken für Lademodus)' : 'Lademodus aktiv (Klicken für Fahrmodus)'}
         >
-          <Zap size={16} /> Fahrt-Modus
+          {lifecycle.currentMode === 'ride' ? (
+            <Zap size={22} className="glow-text-cyan" />
+          ) : (
+            <BatteryCharging size={22} className="glow-text-gold" />
+          )}
         </button>
       )}
 
-      {/* Quick Action Strip below Header */}
-      <div
-        className="quick-actions-bar"
-        style={{
-          position: 'absolute',
-          top: currentRoute ? '52px' : '52px',
-          left: '12px',
-          right: currentRoute ? '110px' : '12px',
-          zIndex: 1900,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          overflowX: 'auto',
-          maxWidth: '100%',
-          paddingBottom: '2px',
-          scrollbarWidth: 'none',
-        }}
-      >
-        {/* Push to E-Bike Pill inside Quick Actions Strip */}
-        {currentRoute && !isPushDismissed && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '2px 6px',
-              borderRadius: '16px',
-              backgroundColor: 'rgba(10, 16, 28, 0.88)',
-              backdropFilter: 'blur(12px)',
-              border: '1.5px solid var(--accent-gold)',
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
-              flexShrink: 0,
-            }}
-          >
-            {ebikePushMessage ? (
-              <span style={{ fontSize: '0.72rem', color: 'var(--accent-gold)', fontWeight: 'bold', padding: '0 4px' }}>
-                {ebikePushMessage}
-              </span>
-            ) : (
-              <>
-                <button
-                  className="btn-cyberpunk btn-gold"
-                  onClick={handlePushToEBikeNav}
-                  style={{
-                    padding: '4px 8px',
-                    fontSize: '0.72rem',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    borderRadius: '12px',
-                  }}
-                  title="Route an verbundenes E-Bike Display senden"
-                >
-                  <Send size={12} /> Push to E-Bike
-                </button>
-                <button
-                  onClick={() => setIsPushDismissed(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--accent-gold)',
-                    cursor: 'pointer',
-                    padding: '2px 4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  title="Ausblenden"
-                >
-                  <X size={13} />
-                </button>
-              </>
-            )}
-          </div>
-        )}
+      {/* Quick Action Strip below Header (Planning Mode ONLY, Hidden during Active Navigation) */}
+      {!currentRoute && (
+        <div
+          className="quick-actions-bar"
+          style={{
+            position: 'absolute',
+            top: '52px',
+            left: '12px',
+            right: '12px',
+            zIndex: 1900,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            overflowX: 'auto',
+            maxWidth: '100%',
+            paddingBottom: '2px',
+            scrollbarWidth: 'none',
+          }}
+        >
 
         {/* Lifecycle Mode Indicator Pill (Hidden in Nav mode as it is relocated bottom-right) */}
         {!currentRoute && (
@@ -788,6 +801,7 @@ export function App() {
           </>
         )}
       </div>
+      )}
 
       {/* Main Fullscreen Map */}
       <MapView

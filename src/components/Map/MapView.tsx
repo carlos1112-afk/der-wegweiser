@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, Circle, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import type { Route, ChargingStation } from '../../types/navigation';
-import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Play, Pause, Camera } from 'lucide-react';
+import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Play, Pause } from 'lucide-react';
 import { TurnByTurnBanner } from './TurnByTurnBanner';
 import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
@@ -286,7 +286,6 @@ export const MapView: React.FC<MapViewProps> = ({
   onPlanRouteToStation,
   isSimulating,
   onToggleSimulation,
-  onOpenScanner,
   onCardOpenChange,
   telemetry,
 }) => {
@@ -299,7 +298,13 @@ export const MapView: React.FC<MapViewProps> = ({
   const [selectedDestination, setSelectedDestination] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedStationState, setSelectedStationState] = useState<ChargingStation | null>(null);
 
-  const isCardOpen = Boolean(selectedDestination || selectedStationState);
+  const isCardOpen = Boolean((!currentRoute && selectedDestination) || selectedStationState);
+
+  useEffect(() => {
+    if (currentRoute) {
+      setSelectedDestination(null);
+    }
+  }, [currentRoute]);
 
   useEffect(() => {
     if (onCardOpenChange) {
@@ -326,6 +331,7 @@ export const MapView: React.FC<MapViewProps> = ({
   const rotationAngle = isCourseUp ? -currentHeadingDeg : 0;
 
   const handleMapClick = (lat: number, lng: number) => {
+    if (currentRoute) return;
     setSelectedStationState(null);
     setSelectedDestination({ lat, lng });
   };
@@ -528,7 +534,7 @@ export const MapView: React.FC<MapViewProps> = ({
       )}
 
       {/* ── Interactive Destination Action Card ─────────────────────────── */}
-      {selectedDestination && (
+      {!currentRoute && selectedDestination && (
         <div
           className="glass-panel action-bottom-card"
           onClick={(e) => e.stopPropagation()}
@@ -710,23 +716,23 @@ export const MapView: React.FC<MapViewProps> = ({
 
       {/* Floating HUD Controls (Right Edge) */}
       <div
-        className={`floating-controls-right ${isCardOpen ? 'card-open' : ''}`}
+        className={`floating-controls-right ${isCardOpen ? 'card-open' : ''} ${currentRoute ? 'nav-active' : ''}`}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
         style={{
           position: 'absolute',
-          bottom: isCardOpen ? '106px' : '20px',
-          right: '12px',
+          bottom: currentRoute ? '148px' : (isCardOpen ? '106px' : '20px'),
+          right: '16px',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '5px',
+          gap: '6px',
           transition: 'bottom 0.25s ease',
         }}
       >
-        {/* Layer Selector Popup Menu */}
-        {showLayerMenu && (
+        {/* Layer Selector Popup Menu (Planning Mode ONLY) */}
+        {!currentRoute && showLayerMenu && (
           <div
             className="glass-panel"
             style={{
@@ -761,31 +767,8 @@ export const MapView: React.FC<MapViewProps> = ({
           </div>
         )}
 
-        {/* Scanner (+ Säule) Button at top of right stack */}
-        {onOpenScanner && currentRoute && (
-          <button
-            className="btn-cyberpunk btn-gold"
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenScanner();
-            }}
-            style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: 0,
-            }}
-            title="Ladesäule scannen / Foto hochladen"
-          >
-            <Camera size={18} />
-          </button>
-        )}
-
-        {/* GPS Simulation Toggle Button */}
-        {onToggleSimulation && (
+        {/* GPS Simulation Toggle Button (Planning Mode ONLY) */}
+        {!currentRoute && onToggleSimulation && (
           <button
             className="glass-panel"
             onClick={(e) => {
@@ -889,53 +872,57 @@ export const MapView: React.FC<MapViewProps> = ({
           <Crosshair size={18} />
         </button>
 
-        {/* Layer Selector Button */}
-        <button
-          className="glass-panel"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowLayerMenu(!showLayerMenu);
-          }}
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--accent-cyan)',
-            cursor: 'pointer',
-            border: '1.5px solid var(--accent-cyan)',
-            boxShadow: showLayerMenu ? 'var(--glow-cyan)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
-          }}
-          title="Karten-Ebene wechseln"
-        >
-          <Layers size={18} />
-        </button>
+        {/* Layer Selector Button (Planning Mode ONLY) */}
+        {!currentRoute && (
+          <button
+            className="glass-panel"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLayerMenu(!showLayerMenu);
+            }}
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--accent-cyan)',
+              cursor: 'pointer',
+              border: '1.5px solid var(--accent-cyan)',
+              boxShadow: showLayerMenu ? 'var(--glow-cyan)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
+            }}
+            title="Karten-Ebene wechseln"
+          >
+            <Layers size={18} />
+          </button>
+        )}
 
-        {/* 3D Cockpit Toggle Button */}
-        <button
-          className="glass-panel"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIs3DMode(!is3DMode);
-          }}
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--accent-cyan)',
-            cursor: 'pointer',
-            border: '1.5px solid var(--accent-cyan)',
-            boxShadow: is3DMode ? 'var(--glow-cyan)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
-          }}
-          title="3D Cyberpunk Perspektive umschalten"
-        >
-          <Box size={18} />
-        </button>
+        {/* 3D Cockpit Toggle Button (Planning Mode ONLY) */}
+        {!currentRoute && (
+          <button
+            className="glass-panel"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIs3DMode(!is3DMode);
+            }}
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--accent-cyan)',
+              cursor: 'pointer',
+              border: '1.5px solid var(--accent-cyan)',
+              boxShadow: is3DMode ? 'var(--glow-cyan)' : '0 4px 16px rgba(0, 0, 0, 0.5)',
+            }}
+            title="3D Cyberpunk Perspektive umschalten"
+          >
+            <Box size={18} />
+          </button>
+        )}
 
         {/* Course-Up / Dynamic Compass Button */}
         <button

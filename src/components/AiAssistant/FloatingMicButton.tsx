@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mic, Volume2 } from 'lucide-react';
+import { Mic, Volume2, Camera } from 'lucide-react';
 import { VoiceGuidanceService } from '../../services/voiceGuidanceService';
 import { AiGatewayService } from '../../services/ai/aiGatewayService';
 import type { LiveBikeTelemetry, Route } from '../../types/navigation';
@@ -16,6 +16,7 @@ interface FloatingMicButtonProps {
 
 export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
   telemetry,
+  currentRoute,
   onOpenScanner,
   onOpenLounge,
   onToggleOled,
@@ -25,7 +26,7 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [lastResponse, setLastResponse] = useState<string | null>(null);
 
-  if (isHidden) return null;
+  if (isHidden && !currentRoute) return null;
 
   const startListening = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -117,14 +118,26 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
   };
 
   return (
-    <div className="floating-mic-wrapper" style={{ position: 'fixed', bottom: '20px', right: '56px', zIndex: 1000 }}>
+    <div
+      className="floating-mic-wrapper"
+      style={{
+        position: 'fixed',
+        bottom: '24px',
+        right: '16px',
+        zIndex: 1000,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '12px',
+      }}
+    >
       {/* Speech Response Toast */}
       {lastResponse && (
         <div
           className="glass-panel"
           style={{
             position: 'absolute',
-            bottom: '64px',
+            bottom: currentRoute ? '124px' : '64px',
             right: '0',
             width: '260px',
             maxWidth: 'calc(100vw - 70px)',
@@ -152,16 +165,46 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
         </div>
       )}
 
+      {/* Round Säulen-Fotografier-Button: Exactly same size as mic, stacked above mic during navigation */}
+      {currentRoute && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenScanner();
+          }}
+          className="btn-cyberpunk btn-gold floating-scanner-btn"
+          title="Ladesäule scannen / Foto hochladen"
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(15, 23, 42, 0.92)',
+            backdropFilter: 'blur(12px)',
+            border: '2px solid var(--accent-gold)',
+            boxShadow: 'var(--glow-gold)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            padding: 0,
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <Camera size={22} className="glow-text-gold" />
+        </button>
+      )}
+
       {/* Main Glowing Floating Mic Button */}
       <button
         onClick={startListening}
         className={`floating-mic-button ${isListening ? 'listening-pulse' : ''}`}
         title="Sprachassistent aktivieren (Hands-free Co-Pilot)"
         style={{
-          width: '50px',
-          height: '50px',
+          width: '48px',
+          height: '48px',
           borderRadius: '50%',
-          backgroundColor: isListening ? 'var(--accent-pink)' : 'rgba(15, 23, 42, 0.88)',
+          backgroundColor: isListening ? 'var(--accent-pink)' : 'rgba(15, 23, 42, 0.92)',
+          backdropFilter: 'blur(12px)',
           border: isListening ? '2px solid var(--accent-pink)' : '2px solid var(--accent-cyan)',
           boxShadow: isListening ? '0 0 25px var(--accent-pink)' : 'var(--glow-cyan)',
           display: 'flex',
@@ -170,6 +213,7 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
           cursor: 'pointer',
           color: '#ffffff',
           position: 'relative',
+          padding: 0,
           transition: 'all 0.3s ease',
         }}
       >

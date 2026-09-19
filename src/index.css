@@ -520,8 +520,12 @@ body.sunlight-mode .map-tile-dark {
 
   /* Right floating controls */
   .floating-controls-right {
-    right: 8px !important;
+    right: 12px !important;
     bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
+  }
+
+  .floating-controls-right.nav-active {
+    bottom: max(142px, calc(env(safe-area-inset-bottom, 14px) + 128px)) !important;
   }
 
   .floating-controls-right.card-open {
@@ -531,7 +535,7 @@ body.sunlight-mode .map-tile-dark {
   /* Turn by Turn Banner on Mobile */
   .turn-by-turn-banner {
     position: absolute !important;
-    top: max(96px, calc(env(safe-area-inset-top, 8px) + 86px)) !important;
+    top: max(52px, calc(env(safe-area-inset-top, 8px) + 44px)) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     max-width: calc(100vw - 16px) !important;
@@ -539,13 +543,14 @@ body.sunlight-mode .map-tile-dark {
     z-index: 1500 !important;
   }
 
-  /* Mic Button */
+  /* Mic Button & Scanner Button */
   .floating-mic-wrapper {
     right: 12px !important;
     bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
   }
 
-  .floating-mic-button {
+  .floating-mic-button,
+  .floating-scanner-btn {
     width: 48px !important;
     height: 48px !important;
   }
@@ -561,7 +566,7 @@ body.sunlight-mode .map-tile-dark {
 /* Turn by Turn Banner Default */
 .turn-by-turn-banner {
   position: absolute;
-  top: 96px;
+  top: 52px;
   left: 50%;
   transform: translateX(-50%);
   max-width: calc(100vw - 20px);
