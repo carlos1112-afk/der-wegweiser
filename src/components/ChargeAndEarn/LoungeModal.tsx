@@ -30,7 +30,9 @@ import {
 import { SoundFxService } from '../../services/soundFxService';
 import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
 import { SurveyWallService, type AvailableSurvey } from '../../services/surveyWallService';
+import { UserIdentity } from '../../services/userIdentity';
 import { SPONSOR_ADS, type SponsorAd } from '../../services/adService';
+import { ConsentService } from '../../services/consentService';
 import { PartnerModal } from './PartnerModal';
 
 interface LoungeModalProps {
@@ -1226,14 +1228,19 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                     Verdiene echte Tokens während der Ladepause durch kurze Marktforschungs-Umfragen:
                   </p>
-                  <a
-                    href={SurveyWallService.getOfferwallUrl('user-1')}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-                  >
-                    BitLabs Wall <ExternalLink size={12} />
-                  </a>
+                  {/* Drittanbieter-Offerwall (BitLabs) übermittelt eine
+                      pseudonyme Kennung an einen US-Anbieter und benötigt daher
+                      die ausdrückliche Umfragen-Einwilligung. */}
+                  {ConsentService.allowsSurveys && (
+                    <a
+                      href={SurveyWallService.getOfferwallUrl(UserIdentity.getUserId())}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      BitLabs Wall <ExternalLink size={12} />
+                    </a>
+                  )}
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px' }}>

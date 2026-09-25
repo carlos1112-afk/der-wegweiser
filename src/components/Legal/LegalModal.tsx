@@ -3,6 +3,7 @@ import { ShieldCheck, Scale, FileText, X, AlertTriangle, Trash2, Download, Check
 import { SoundFxService } from '../../services/soundFxService';
 import { LEGAL_CONFIG } from '../../config/legalConfig';
 import { AccountDeletionService } from '../../services/accountDeletionService';
+import { ConsentService } from '../../services/consentService';
 import confetti from 'canvas-confetti';
 
 interface LegalModalProps {
@@ -18,22 +19,76 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'terms' | 'privacy' | 'imprint' | 'cockpit'>(initialTab);
   const [isDataDeleted, setIsDataDeleted] = useState(false);
+  const [currentConsent, setCurrentConsent] = useState(() => ConsentService.getConsent());
+  const [isConsentWithdrawn, setIsConsentWithdrawn] = useState(false);
 
   if (!isOpen) return null;
 
+  // Widerruf der Einwilligungen (Art. 7 Abs. 3 DSGVO).
+  const handleWithdrawConsent = () => {
+    ConsentService.withdraw();
+    setCurrentConsent(null);
+    setIsConsentWithdrawn(true);
+  };
+
   // 1-Click User Data Export (Art. 20 DSGVO - Local Data)
+  //
+  // Die vorherige Fassung las vier fest verdrahtete Schlüssel
+  // ('wegweiser_user_prefs', 'wegweiser_custom_stations',
+  // 'wegweiser_custom_routes', 'wegweiser_tokens'), von denen keiner in der
+  // App existiert — der Export war daher bis auf ein Datum und eine
+  // Platzhalter-Kennung leer. Stattdessen werden jetzt alle app-eigenen
+  // localStorage-Einträge über ihre Präfixe erfasst, damit der Export nicht
+  // erneut veralten kann.
+  const APP_STORAGE_PREFIXES = [
+    'der_wegweiser_',
+    'wegweiser_',
+    'pref_',
+    'memory_',
+    'tokens_',
+    'routes_',
+    'lounge_',
+    'osm_charging_stations_cache_',
+  ];
+
   const handleExportAllData = () => {
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 50, spread: 60 });
 
+    const localData: Record<string, unknown> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      if (!APP_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix))) continue;
+      const raw = localStorage.getItem(key);
+      if (raw === null) continue;
+      try {
+        localData[key] = JSON.parse(raw);
+      } catch {
+        localData[key] = raw;
+      }
+    }
+
+    const sessionData: Record<string, unknown> = {};
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (!key) continue;
+      if (!APP_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix))) continue;
+      const raw = sessionStorage.getItem(key);
+      if (raw === null) continue;
+      try {
+        sessionData[key] = JSON.parse(raw);
+      } catch {
+        sessionData[key] = raw;
+      }
+    }
+
     const exportPayload = {
       exportDate: new Date().toISOString(),
-      user: 'local-user',
-      preferences: localStorage.getItem('wegweiser_user_prefs') || '{}',
-      customStations: localStorage.getItem('wegweiser_custom_stations') || '[]',
-      customRoutes: localStorage.getItem('wegweiser_custom_routes') || '[]',
-      tokens: localStorage.getItem('wegweiser_tokens') || '60',
-      offlineRegions: localStorage.getItem('wegweiser_offline_regions') || '[]',
+      legalBasis: 'Art. 20 DSGVO — Auskunft und Datenportabilität',
+      entryCount: Object.keys(localData).length + Object.keys(sessionData).length,
+      localStorage: localData,
+      sessionStorage: sessionData,
     };
 
     const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
@@ -281,6 +336,17 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 </h4>
                 <p style={{ color: 'var(--text-muted)' }}>Die App wird neu gestartet...</p>
               </div>
+            ) : isConsentWithdrawn ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <Lock size={48} color="var(--accent-gold)" style={{ margin: '0 auto 12px' }} />
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', marginBottom: '6px' }}>
+                  Einwilligungen widerrufen
+                </h4>
+                <p style={{ color: 'var(--text-muted)' }}>
+                  Die Verarbeitung nicht notwendiger Daten ist eingestellt und die lokal gespeicherten Daten wurden
+                  entfernt. Beim nächsten Start der App wirst du erneut um deine Entscheidung gebeten.
+                </p>
+              </div>
             ) : (
               <>
                 <div style={{ padding: '12px', backgroundColor: 'rgba(0, 240, 255, 0.08)', borderRadius: '12px', border: '1px solid var(--accent-cyan)' }}>
@@ -288,7 +354,10 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                     🛡️ Deine lokale Datenhoheit auf diesem Smartphone:
                   </div>
                   <p style={{ fontSize: '0.75rem', color: '#e2e8f0' }}>
-                    Deine individuellen Touren, Telemetrie-Caches und Einstellungen liegen lokal auf deinem Endgerät. Auf unseren Servern werden keine personenbezogenen Bewegungsprofile gespeichert.
+                    Deine individuellen Touren, Telemetrie-Caches und Einstellungen liegen lokal auf deinem Endgerät.
+                    Nur wenn du der Analyse zugestimmt hast, werden zusätzlich stark vergröberte Streckenverläufe
+                    (Koordinaten auf ca. 1,1 km gerastert) ohne Kennung an die kollektive Kartengrafik übertragen.
+                    Ein mitgeführter GPS-Track wird nicht gespeichert.
                   </p>
                 </div>
 
@@ -332,6 +401,40 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                       }}
                     >
                       Gerätespeicher leeren
+                    </button>
+                  </div>
+
+                  {/* Widerruf der Einwilligungen (Art. 7 Abs. 3 DSGVO) */}
+                  <div className="glass-panel" style={{ padding: '14px', borderRadius: '14px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '8px', border: '1px solid var(--accent-gold)', gridColumn: '1 / -1' }}>
+                    <div>
+                      <div style={{ fontWeight: 'bold', color: 'var(--accent-gold)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Lock size={16} /> Einwilligungen Widerrufen
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                        Du kannst deine Einwilligungen jederzeit mit Wirkung für die Zukunft widerrufen. Die
+                        Verarbeitung nicht notwendiger Daten wird daraufhin eingestellt; die App fragt beim
+                        nächsten Start erneut nach deiner Entscheidung.
+                      </p>
+                      <div style={{ fontSize: '0.72rem', color: '#e2e8f0', marginTop: '6px' }}>
+                        Aktueller Stand:{' '}
+                        <strong>{currentConsent ? `erteilt (Analyse: ${currentConsent.analytics ? 'an' : 'aus'}, Umfragen: ${currentConsent.surveys ? 'an' : 'aus'}, Personalisierung: ${currentConsent.personalizedAds ? 'an' : 'aus'})` : 'noch nicht erteilt'}</strong>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleWithdrawConsent}
+                      style={{
+                        padding: '8px',
+                        fontSize: '0.75rem',
+                        backgroundColor: 'rgba(255, 200, 0, 0.15)',
+                        border: '1px solid var(--accent-gold)',
+                        color: 'var(--accent-gold)',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      Einwilligungen widerrufen
                     </button>
                   </div>
                 </div>

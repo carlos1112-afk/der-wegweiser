@@ -1,5 +1,5 @@
 import type { LiveBikeTelemetry, BikeManufacturer } from '../../types/navigation';
-import { parsePowerMeasurement, parseBatteryLevel, parseCscMeasurement } from './parsers/standardSigParser';
+import { parsePowerMeasurement, parseBatteryLevel, parseCscMeasurement, resetStandardSigState } from './parsers/standardSigParser';
 import { parseSpecializedTelemetry, buildSpecializedAssistCommand, SPECIALIZED_SERVICE_UUID, SPECIALIZED_TELEMETRY_CHAR, SPECIALIZED_ASSIST_CHAR } from './parsers/specializedParser';
 import { parseMahleTelemetry, buildMahleAssistCommand, MAHLE_SERVICE_UUID, MAHLE_TELEMETRY_CHAR, MAHLE_CONTROL_CHAR } from './parsers/mahleParser';
 import { parseShimanoTelemetry, SHIMANO_DFLY_SERVICE_UUID, SHIMANO_TELEMETRY_CHAR } from './parsers/shimanoParser';
@@ -43,6 +43,10 @@ export class BleManager {
    * Attaches automatic disconnect listener with exponential backoff.
    */
   public static async connectToBike(targetManufacturer?: BikeManufacturer): Promise<LiveBikeTelemetry> {
+    // Frische Referenzwerte: ein neuer Verbindungsversuch beginnt immer
+    // mit der ersten Messung als Referenz (liefert 0 statt eines Ausreißers).
+    resetStandardSigState();
+
     if (typeof navigator !== 'undefined' && 'bluetooth' in navigator) {
       try {
         const filters: any[] = [];
@@ -339,6 +343,11 @@ export class BleManager {
   private static onDisconnected() {
     console.warn('[BleManager] Bluetooth connection lost! Initiating auto-reconnect backoff...');
     this.activeGattServer = null;
+    // Referenzwerte der Standard-SIG-Parser verwerfen: die Rad-/Kurbel-
+    // Zähler des Sensors laufen während der Trennung weiter, sodass die
+    // Differenz über die Verbindungszeit sonst zu unrealistischen
+    // Geschwindigkeits- und Trittfrequenzwerten führt.
+    resetStandardSigState();
     this.updateState({ isConnected: false });
 
     if (!this.activeBluetoothDevice) return;

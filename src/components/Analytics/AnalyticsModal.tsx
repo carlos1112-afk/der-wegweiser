@@ -22,6 +22,7 @@ import {
   type DownloadedRegionInfo,
 } from '../../services/offlineMapService';
 import { dataRepository } from '../../services/dataRepository';
+import { UserIdentity } from '../../services/userIdentity';
 import { CURATED_ROUTES } from '../../services/curatedDatabase';
 
 
@@ -68,7 +69,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
     const loadData = async () => {
       // Load saved routes
       try {
-        let routes = await dataRepository.getSavedRoutes('user-1');
+        let routes = await dataRepository.getSavedRoutes(UserIdentity.getUserId());
         if (!routes || routes.length === 0) {
           routes = defaultSampleRoutes;
           // Save active current route if present

@@ -32,14 +32,15 @@ export const FloatingMicButton: React.FC<FloatingMicButtonProps> = ({
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      // Fallback simulation if browser doesn't have Web Speech Recognition API
-      setIsListening(true);
-      setTimeout(() => {
-        setIsListening(false);
-        const reply = `Dein Akku liegt bei ${telemetry.batteryPercent} Prozent. Die nächste Ladesäule ist 1,4 km entfernt.`;
-        setLastResponse(reply);
-        VoiceGuidanceService.speak(reply);
-      }, 1500);
+      // Web Speech Recognition ist im Android-WebView und in WKWebView nicht
+      // verfügbar — dieser Zweig ist auf den Zielplattformen der einzige, der
+      // ausgeführt wird. Früher wurde hier eine frei erfundene Antwort
+      // ausgegeben ("nächste Ladesäule 1,4 km"), die keine Datengrundlage hat
+      // und in einer Navigationsapp zu Fehlentscheidungen führen kann.
+      // Stattdessen werden ausschließlich tatsächlich gemessene Werte genannt.
+      console.warn('[VoiceAssistant] Web Speech Recognition nicht verfügbar — Sprachsteuerung deaktiviert.');
+      setIsListening(false);
+      setLastResponse('Sprachsteuerung ist auf diesem Gerät nicht verfügbar. Nutze die Antworten der Lade-Lounge.');
       return;
     }
 

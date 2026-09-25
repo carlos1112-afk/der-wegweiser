@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, AlertTriangle, Scale, CheckCircle2, Sliders, MapPin, BarChart2, Coins } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
+import { ConsentService, type ConsentFlags } from '../../services/consentService';
 import confetti from 'canvas-confetti';
 
 interface ConsentModalProps {
@@ -9,13 +10,7 @@ interface ConsentModalProps {
   onOpenDetails: (tab: 'privacy' | 'terms' | 'imprint' | 'cockpit') => void;
 }
 
-export interface UserPrivacyConsent {
-  essential: boolean;
-  analytics: boolean;
-  surveys: boolean;
-  personalizedAds: boolean;
-  acceptedAt: string;
-}
+export type UserPrivacyConsent = ConsentFlags;
 
 export const ConsentModal: React.FC<ConsentModalProps> = ({
   isOpen,
@@ -23,16 +18,19 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
   onOpenDetails,
 }) => {
   const [showGranularSettings, setShowGranularSettings] = useState(false);
-  const [analyticsConsent, setAnalyticsConsent] = useState(true);
-  const [surveysConsent, setSurveysConsent] = useState(true);
+  // § 25 Abs. 2 TDDDG / Art. 7 Abs. 4 DSGVO: Nicht notwendige Einwilligungen
+  // dürfen nicht vorangekreuzt sein. Bislang standen "Analyse" und "Umfragen"
+  // standardmäßig auf aktiv.
+  const [analyticsConsent, setAnalyticsConsent] = useState(false);
+  const [surveysConsent, setSurveysConsent] = useState(false);
   const [adsConsent, setAdsConsent] = useState(false);
 
   if (!isOpen) return null;
 
-  const saveConsentAndProceed = (consent: UserPrivacyConsent) => {
+  const saveConsentAndProceed = (consent: Omit<UserPrivacyConsent, 'acceptedAt' | 'version'>) => {
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 70, spread: 70 });
-    localStorage.setItem('der_wegweiser_legal_consent', JSON.stringify(consent));
+    ConsentService.save(consent);
     onAccept();
   };
 
@@ -42,7 +40,6 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
       analytics: true,
       surveys: true,
       personalizedAds: true,
-      acceptedAt: new Date().toISOString(),
     });
   };
 
@@ -52,7 +49,6 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
       analytics: false,
       surveys: false,
       personalizedAds: false,
-      acceptedAt: new Date().toISOString(),
     });
   };
 
@@ -62,7 +58,6 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
       analytics: analyticsConsent,
       surveys: surveysConsent,
       personalizedAds: adsConsent,
-      acceptedAt: new Date().toISOString(),
     });
   };
 
@@ -295,8 +290,8 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Scale size={18} color="var(--accent-cyan)" />
                 <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>4. Lokale Partner-Empfehlungen (Kein Tracking)</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Relevante E-Bike Angebote & Zubehör (ohne externe Tracker)</div>
+                  <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>4. Personalisierte Partner-Empfehlungen</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Relevante E-Bike Angebote & Zubehör, auf Basis deines Nutzungsverhaltens</div>
                 </div>
               </div>
               <input

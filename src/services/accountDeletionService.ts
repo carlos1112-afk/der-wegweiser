@@ -37,24 +37,38 @@ export class AccountDeletionService {
         await deleteDoc(doc(db, 'user_preferences', uid)).catch(() => {});
         await deleteDoc(doc(db, 'user_memory_patterns', uid)).catch(() => {});
 
-        // Query-based documents created by this user
+        // Query-based documents created by this user.
+        //
+        // Hinweis: Je nach Schreibpfad setzt die App unterschiedliche
+        // Eigentümerfelder — `userId` (dataRepository.saveRoute) bzw.
+        // `createdByUserId` (ScannerModal). Die vorherige Fassung löschte
+        // jeweils nur nach `createdByUserId` und ließ daher gespeicherte
+        // Routen sowie Bewertungen des Nutzers dauerhaft zurück.
         const deleteByQuery = async (collName: string, fieldName: string) => {
           try {
             const q = query(collection(db, collName), where(fieldName, '==', uid));
             const snapshot = await getDocs(q);
-            const deletePromises = snapshot.docs.map((d) => deleteDoc(d.ref));
-            await Promise.all(deletePromises);
+            await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
           } catch (e) {
-            console.warn(`[AccountDeletionService] Query deletion warning on ${collName}:`, e);
+            // Fehlender Index oder nicht existente Collection ist kein Fehler.
+            console.warn(`[AccountDeletionService] Query deletion warning on ${collName}.${fieldName}:`, e);
           }
         };
 
-        await Promise.all([
-          deleteByQuery('routes', 'createdByUserId'),
-          deleteByQuery('charging_stations', 'createdByUserId'),
-          deleteByQuery('charging_stations_v2', 'createdByUserId'),
-          deleteByQuery('scout_reports', 'userId'),
-        ]);
+        const collections = [
+          'routes',
+          'charging_stations',
+          'charging_stations_v2',
+          'scout_reports',
+          'station_reviews',
+        ];
+
+        await Promise.all(
+          collections.flatMap((coll) => [
+            deleteByQuery(coll, 'createdByUserId'),
+            deleteByQuery(coll, 'userId'),
+          ])
+        );
 
         // ── 2. Delete Cloud Storage uploads ──
         try {
@@ -96,12 +110,38 @@ export class AccountDeletionService {
     try {
       localStorage.clear();
       sessionStorage.clear();
+
+      // CacheStorage: Die Kartenkacheln des Routen-Korridors (Cache-Name
+      // 'der-wegweiser-map-tiles') werden automatisch aus dem aktuellen
+      // Routenverlauf befüllt und geben den gefahrenen Weg preis. Sie waren
+      // von der Kontolöschung bislang nicht erfasst.
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(
+          cacheNames.map((name) => caches.delete(name))
+        );
+      }
+
       if ('indexedDB' in window) {
         const dbs = await window.indexedDB.databases?.();
         if (dbs) {
-          for (const dbInfo of dbs) {
-            if (dbInfo.name) window.indexedDB.deleteDatabase(dbInfo.name);
-          }
+          // Bislang fire-and-forget: `localDataDeleted` wurde gesetzt, bevor
+          // die Löschung abgeschlossen (oder blockiert) war.
+          await Promise.all(
+            dbs
+              .filter((dbInfo) => !!dbInfo.name)
+              .map(
+                (dbInfo) =>
+                  new Promise<void>((resolve) => {
+                    const req = window.indexedDB.deleteDatabase(dbInfo.name!);
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => resolve();
+                    // Blockierte Verbindung (offene Tabs) darf die Meldung
+                    // "erfolgreich gelöscht" nicht blockieren.
+                    req.onblocked = () => resolve();
+                  })
+              )
+          );
         }
       }
       localDataDeleted = true;
