@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import { Camera, Zap, Sparkles, Award } from 'lucide-react';
 import type { PlugType, ChargingStation } from '../../types/navigation';
 import { AiAssistantService } from '../../services/aiAssistantService';
+import { UserIdentity } from '../../services/userIdentity';
 
 interface ScannerModalProps {
   userLocation: { lat: number; lng: number };
@@ -77,7 +78,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
       nearbyAmenities: ['Fahrradständer', 'WC'],
       photoUrl: photoCaptured || undefined,
       verifiedByCount: 1,
-      createdByUserId: 'user-1',
+      createdByUserId: UserIdentity.getUserId(),
       isVerifiedBikeInfrastructure: true,
     });
 

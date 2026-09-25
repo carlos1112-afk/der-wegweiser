@@ -39,6 +39,11 @@
 	<!-- Location Permissions (Turn-by-Turn Navigation) -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Der Wegweiser benötigt deinen Standort während der Fahrt, um Echtzeit-Abbiegehinweise, Steigungsprofile und Ladesäulen entlang deiner Route anzuzeigen.</string>
+	<!-- Erforderlich, weil UIBackgroundModes den Modus "location" deklariert.
+	     Ohne diesen Schlüssel kann die App die Always-Autorisierung nicht
+	     anfordern und wird beim Wechsel in den Hintergrund beendet. -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Der Wegweiser nutzt deinen Standort auch bei gesperrtem Bildschirm weiter, damit Navigation, Steigungsprofil und Akku-Reichweitenwarnung während der gesamten Fahrt aktiv bleiben.</string>
 
 	<!-- Bluetooth Permissions (Universal E-Bike & BLE Sensors) -->
 	<key>NSBluetoothAlwaysUsageDescription</key>
@@ -85,7 +90,9 @@
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<!-- arm64 statt des veralteten armv7 (32-Bit-Altlast aus dem
+		     Template vor iOS 11; das Deployment-Target ist iOS 15). -->
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

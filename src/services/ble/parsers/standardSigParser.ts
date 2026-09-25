@@ -7,42 +7,70 @@ import type { LiveBikeTelemetry } from '../../../types/navigation';
  */
 
 // --- Cadence State ---
-let lastCrankRevs = 0;
-let lastCrankTime = 0;
+let lastCrankRevs: number | null = null;
+let lastCrankTime: number | null = null;
 
 // --- Speed State ---
-let lastWheelRevs = 0;
-let lastWheelTime = 0;
+let lastWheelRevs: number | null = null;
+let lastWheelTime: number | null = null;
 
 const WHEEL_CIRCUMFERENCE_M = 2.136; // 700x35c Standard E-Bike Reifen
 
+/**
+ * Physikalisch plausible Grenzwerte für ein E-Bike.
+ * Ein verworfenes oder teilweise empfangenes BLE-Paket erzeugt sonst
+ * Sprünge in die Tausender, die unmittelbar in Reichweitenberechnung,
+ * Notfall-Akkuwarnung und Sprachausgabe einfließen.
+ */
+const MAX_PLAUSIBLE_SPEED_KMH = 90; // 25 m/s – deutlich über S-Pedelec-Höchstgeschwindigkeit
+const MAX_PLAUSIBLE_CADENCE_RPM = 220; // Profiradler mit Last
+const MAX_DELTA_SECONDS = 4; // älter = veralteter Sensorwert, neu referenzieren
+
+/**
+ * Setzt die Referenzwerte zurück. Muss beim Verbinden/Trennen aufgerufen werden,
+ * damit nach einem Reconnect keine Differenz über den Verbindungszeitraum
+ * entsteht (sonst 0 km/h über Stunden oder ein extremer Ausreißerwert).
+ */
+export function resetStandardSigState(): void {
+  lastCrankRevs = null;
+  lastCrankTime = null;
+  lastWheelRevs = null;
+  lastWheelTime = null;
+}
+
 function calculateCadence(revs: number, time: number): number {
-  if (lastCrankTime === 0) {
+  if (lastCrankTime === null) {
     lastCrankRevs = revs;
     lastCrankTime = time;
     return 0;
   }
-  const deltaRevs = (revs - lastCrankRevs) & 0xFFFF;
+  const deltaRevs = (revs - lastCrankRevs!) & 0xFFFF;
   const deltaTime = ((time - lastCrankTime) & 0xFFFF) / 1024;
   lastCrankRevs = revs;
   lastCrankTime = time;
   if (deltaTime <= 0) return 0;
-  return Math.round((deltaRevs / deltaTime) * 60);
+  // Veraltete Werte: neu referenzieren statt 0 zu melden, was wie Stillstand wirkt.
+  if (deltaTime > MAX_DELTA_SECONDS) return 0;
+  const rpm = Math.round((deltaRevs / deltaTime) * 60);
+  return rpm > MAX_PLAUSIBLE_CADENCE_RPM ? 0 : rpm;
 }
 
 function calculateSpeed(revs: number, time: number): number {
-  if (lastWheelTime === 0) {
+  if (lastWheelTime === null) {
     lastWheelRevs = revs;
     lastWheelTime = time;
     return 0;
   }
-  const deltaRevs = (revs - lastWheelRevs) & 0xFFFFFFFF;
+  const deltaRevs = (revs - lastWheelRevs!) & 0xFFFFFFFF;
   const deltaTime = ((time - lastWheelTime) & 0xFFFF) / 1024;
   lastWheelRevs = revs;
   lastWheelTime = time;
   if (deltaTime <= 0) return 0;
+  if (deltaTime > MAX_DELTA_SECONDS) return 0;
   const speedMs = (deltaRevs * WHEEL_CIRCUMFERENCE_M) / deltaTime;
-  return +(speedMs * 3.6).toFixed(1);
+  const speedKmH = speedMs * 3.6;
+  if (speedKmH > MAX_PLAUSIBLE_SPEED_KMH) return 0;
+  return +speedKmH.toFixed(1);
 }
 
 export function parsePowerMeasurement(value: DataView): Partial<LiveBikeTelemetry> {

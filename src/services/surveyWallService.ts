@@ -4,6 +4,8 @@
  * for high-payout market research surveys during e-bike charging stops.
  */
 
+import { UserIdentity } from './userIdentity';
+
 export interface AvailableSurvey {
   id: string;
   title: string;
@@ -65,14 +67,14 @@ export class SurveyWallService {
   /**
    * Builds the direct web Offerwall URL for BitLabs
    */
-  public static getOfferwallUrl(userId: string = 'user-1'): string {
+  public static getOfferwallUrl(userId: string = UserIdentity.getUserId()): string {
     return `https://web.bitlabs.ai/?token=${this.bitlabsToken}&uid=${encodeURIComponent(userId)}`;
   }
 
   /**
    * Builds the direct web Offerwall URL for CPX Research
    */
-  public static getCpxOfferwallUrl(userId: string = 'user-1'): string {
+  public static getCpxOfferwallUrl(userId: string = UserIdentity.getUserId()): string {
     return `https://offers.cpx-research.com/index.php?app_id=${this.cpxAppId}&ext_user_id=${encodeURIComponent(userId)}`;
   }
 }

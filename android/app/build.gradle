@@ -43,6 +43,19 @@ android {
     }
     buildTypes {
         release {
+            // signingConfigs.release ist nur dann befüllt, wenn eine
+            // Properties-Datei oder ANDROID_KEYSTORE_PASSWORD vorliegt.
+            // Ohne diese Prüfung erzeugte ein Release-Build auf einem
+            // Rechner ohne Zugangsdaten stillschweigend ein nicht
+            // signiertes Artefakt und scheiterte erst spät beim Upload.
+            if (signingConfigs.release.storeFile == null) {
+                throw new GradleException(
+                    "Release-Signierung nicht konfiguriert. Erwartet wird entweder " +
+                    "android/keystore.properties (storeFile, storePassword, keyAlias, keyPassword) " +
+                    "oder die Umgebungsvariablen ANDROID_KEYSTORE_PASSWORD / ANDROID_KEYSTORE_FILE. " +
+                    "Siehe docs/RELEASE_KEYSTORE_GUIDE.md."
+                )
+            }
             signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

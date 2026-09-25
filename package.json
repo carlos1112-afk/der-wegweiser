@@ -11,6 +11,7 @@
     "build:ios": "npm run build && npx cap sync ios",
     "sync": "npx cap sync",
     "test:scenarios": "node scripts/test_15_scenarios.mjs",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-wegweiser \"node --test tests/firestore.rules.test.mjs\"",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.0",
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@types/canvas-confetti": "^1.9.0",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^24.13.3",

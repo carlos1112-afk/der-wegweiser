@@ -11,3 +11,7 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# Firebase-Konfiguration (enthält API-Key, project_id, app_id, GCM-Sender
+# sowie den SHA-1 des Signaturzertifikats) — niemals einchecken
+App/App/GoogleService-Info.plist

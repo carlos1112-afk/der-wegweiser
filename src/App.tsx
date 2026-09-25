@@ -20,6 +20,8 @@ import { useGeolocation } from './hooks/useGeolocation';
 import { useScreenWakeLock } from './hooks/useScreenWakeLock';
 import { useAppLifecycle } from './hooks/useAppLifecycle';
 import { AppLifecycleService } from './services/appLifecycleService';
+import { ConsentService } from './services/consentService';
+import { UserIdentity } from './services/userIdentity';
 
 // Code-Splitting: Lazy load heavy modals for sub-second cold start
 const AuthModal = lazy(() =>
@@ -91,6 +93,9 @@ export function App() {
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChange((user) => {
       setAuthUser(user);
+      // Bei An-/Abmeldung muss die anonyme Kennung verworfen werden,
+      // damit die echte Firebase-UID für Cloud-Pfade verwendet wird.
+      UserIdentity.clearCache();
     });
     return () => unsubscribe();
   }, []);
@@ -112,6 +117,15 @@ export function App() {
     motorAssistMode: 'auto',
   });
 
+  // Legal & Consent State
+  // Die Einwilligung wird zentral über den ConsentService ausgewertet und
+  // gate-t sämtliche Datenverarbeitung (Art. 6/7 DSGVO). Bislang steuerte der
+  // Wert ausschließlich die Sichtbarkeit des Modals — GPS-Tracking, Firestore-
+  // Zugriffe, Wetter-, KI- und Telemetrie-Aufrufe liefen unabhängig davon.
+  const [consent, setConsent] = useState<boolean>(() => ConsentService.hasValidConsent());
+  const [showConsentModal, setShowConsentModal] = useState<boolean>(() => !ConsentService.hasValidConsent());
+  const hasConsent = consent;
+
   // App Lifecycle Controller
   const activeModalName = showLoungeModal
     ? 'lounge'
@@ -124,7 +138,9 @@ export function App() {
   const lifecycle = useAppLifecycle(activeModalName, isNavigating, telemetry.speedKmH);
 
   // Hardware & Sensor Bindings throttled by Lifecycle Mode
-  const geo = useGeolocation(lifecycle.isHighAccuracyGps);
+  // Ohne gültige Einwilligung wird kein Standortwatch gestartet und keine
+  // OS-Berechtigungsabfrage ausgelöst.
+  const geo = useGeolocation(lifecycle.isHighAccuracyGps, hasConsent);
   const userLocation = { lat: geo.lat, lng: geo.lng };
   useScreenWakeLock(lifecycle.isWakeLockActive || isOledModeActive);
 
@@ -222,26 +238,25 @@ export function App() {
   const activeHeading = simulatedLocation?.heading !== undefined ? simulatedLocation.heading : geo.heading;
   const activeAccuracy = simulatedLocation ? 5 : geo.accuracy;
 
-  // Legal & Consent State
-  const [showConsentModal, setShowConsentModal] = useState<boolean>(() => {
-    return !localStorage.getItem('der_wegweiser_legal_consent');
-  });
   const [showLegalModal, setShowLegalModal] = useState(false);
   const [legalTab, setLegalTab] = useState<'privacy' | 'terms' | 'imprint' | 'cockpit'>('terms');
 
   // Initialize Data & Pre-generate "Heute-Tour"
+  // Startet erst, sobald eine gültige Einwilligung vorliegt.
   useEffect(() => {
+    if (!hasConsent) return;
+
     const initData = async () => {
       // 1. Fetch Charging Stations
       const stations = await dataRepository.getChargingStations();
       setChargingStations(stations);
 
       // 2. Fetch User Prefs & Memory
-      const prefs: UserPreferences = await dataRepository.getUserPreferences('user-1');
-      const memory: UserMemoryPattern = await dataRepository.getUserMemoryPattern('user-1');
+      const prefs: UserPreferences = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+      const memory: UserMemoryPattern = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
 
       // 3. Fetch Token Account Balance from Firestore/Cache
-      const tokenAcc = await dataRepository.getTokenAccount('user-1');
+      const tokenAcc = await dataRepository.getTokenAccount(UserIdentity.getUserId());
       setTokenBalance(tokenAcc.balance);
 
       // 4. Pre-generate Zero-Click "Heute-Tour"
@@ -255,7 +270,7 @@ export function App() {
     };
 
     initData();
-  }, [userLocation.lat, userLocation.lng]);
+  }, [hasConsent, userLocation.lat, userLocation.lng]);
 
   // Background Corridor Offline Cache
   useEffect(() => {
@@ -287,18 +302,18 @@ export function App() {
     setChargingStations((prev) => [...prev, newStation]);
 
     // Add +20 Tokens
-    const newBal = await dataRepository.addTokens('user-1', 20, 'Ladesäulen-Scan');
+    const newBal = await dataRepository.addTokens(UserIdentity.getUserId(), 20, 'Ladesäulen-Scan');
     setTokenBalance(newBal);
   };
 
   const handleAddTokens = async (amount: number) => {
-    const newBal = await dataRepository.addTokens('user-1', amount, 'Lade-Lounge Game');
+    const newBal = await dataRepository.addTokens(UserIdentity.getUserId(), amount, 'Lade-Lounge Game');
     setTokenBalance(newBal);
   };
 
   const handleRegenerateRoute = async (modelId: ModelId = DEFAULT_MODEL) => {
-    const prefs = await dataRepository.getUserPreferences('user-1');
-    const memory = await dataRepository.getUserMemoryPattern('user-1');
+    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+    const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
     const newRoute = await AiAssistantService.generateAnticipatedRoute(
       userLocation.lat,
       userLocation.lng,
@@ -312,8 +327,8 @@ export function App() {
   const handleAutoReroute = async () => {
     if (!currentRoute) return;
     console.log('[App] Auto-Rerouting triggered from current GPS position...');
-    const prefs = await dataRepository.getUserPreferences('user-1');
-    const memory = await dataRepository.getUserMemoryPattern('user-1');
+    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+    const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
     const recalculated = await AiAssistantService.generateAnticipatedRoute(
       userLocation.lat,
       userLocation.lng,
@@ -338,7 +353,7 @@ export function App() {
   };
 
   const handlePlanRouteToPoint = async (targetLat: number, targetLng: number) => {
-    const prefs = await dataRepository.getUserPreferences('user-1');
+    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
     const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
     const newRoute = await RoutingService.generateBikeRoute(
       {
@@ -362,7 +377,7 @@ export function App() {
   };
 
   const handlePlanRouteToStation = async (station: ChargingStation) => {
-    const prefs = await dataRepository.getUserPreferences('user-1');
+    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
     const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, station.lat, station.lng);
     const detourRoute = await RoutingService.generateBikeRoute(
       {
@@ -554,7 +569,9 @@ export function App() {
             onConnectBLE={handleConnectBLE}
             onOpenBoschModal={() => setShowBoschModal(true)}
           />
-          <WeatherHUD userLocation={userLocation} />
+          {/* Wetter-Abfrage übermittelt den exakten Standort an Open-Meteo
+              und benötigt daher die Analytics-Einwilligung. */}
+          {hasConsent && ConsentService.allowsAnalytics && <WeatherHUD userLocation={userLocation} />}
           {!currentRoute && (
             <div className="glass-pill glow-text-gold hud-token-pill" style={{ padding: '5px 7px', fontWeight: 'bold', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
               <span>🪙</span>
@@ -946,7 +963,13 @@ export function App() {
         {showConsentModal && (
           <ConsentModal
             isOpen={showConsentModal}
-            onAccept={() => setShowConsentModal(false)}
+            onAccept={() => {
+              // Einwilligung im Service verifizieren, bevor die Verarbeitung
+              // freigeschaltet wird — der State folgt der persistierten
+              // Entscheidung, nicht dem Klick.
+              setConsent(ConsentService.hasValidConsent());
+              setShowConsentModal(false);
+            }}
             onOpenDetails={(tab) => {
               setLegalTab(tab);
               setShowLegalModal(true);
