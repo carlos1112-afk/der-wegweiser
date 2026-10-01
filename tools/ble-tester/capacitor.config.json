@@ -1,8 +1,0 @@
-{
-  "appId": "app.derwegweiser.bletester",
-  "appName": "Wegweiser BLE-Tester",
-  "webDir": "dist",
-  "server": {
-    "androidScheme": "https"
-  }
-}

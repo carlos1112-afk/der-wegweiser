@@ -52,5 +52,3 @@ firebase_data/*
 *.njsproj
 *.sln
 *.sw?
-tools/ble-tester/tsconfig.tsbuildinfo
-*.tsbuildinfo
