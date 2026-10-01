@@ -86,6 +86,14 @@ export interface Route {
     gravelPercent: number;
     unpavedPercent: number;
   };
+  /**
+   * Herkunft von surfaceBreakdown & energyBenchmark: 'community' bedeutet echte,
+   * anonymisierte Fahrdaten aus spatial_road_intelligence entlang dieser Strecke;
+   * 'estimated_no_data' bedeutet, dass für diesen Korridor keine Community-Daten
+   * vorliegen und die Werte eine grobe, klar gekennzeichnete Schätzung sind.
+   */
+  surfaceDataSource: 'community' | 'estimated_no_data';
+  communityDataSegmentsUsed: number;
   waypoints: Waypoint[];
   pathCoordinates: [number, number][]; // [lat, lng] array
   chargingStopsOnRoute: ChargingStation[];
@@ -94,6 +102,8 @@ export interface Route {
   isRoadSnapped?: boolean; // False if generated as raw offline corridor
   isOfflineFallbackCorridor?: boolean;
   routingEngineStatus?: 'online_brouter' | 'offline_cached' | 'offline_corridor_unverified';
+  /** Namen echter, öffentlich beliebter Strava-Segmente in der Umgebung — nur Inspiration, keine Kopie. */
+  inspirationReferences?: string[];
 }
 
 export type BikeManufacturer = 'bosch' | 'shimano' | 'specialized' | 'mahle' | 'fazua' | 'bafang' | 'generic';

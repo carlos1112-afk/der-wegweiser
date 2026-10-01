@@ -70,6 +70,7 @@ export class AiAssistantService {
       const response = await AiGatewayService.dispatch({
         systemPrompt: systemInstruction,
         userPrompt: prompt,
+        modelId: agent?.model,
       });
       if (response.provider === 'heuristic_offline') {
         // Lokale Heuristik darf nicht als echtes Gemini-Modellergebnis ausgegeben werden

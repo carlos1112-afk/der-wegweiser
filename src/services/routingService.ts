@@ -1,5 +1,8 @@
-import type { Route, Waypoint, UserPreferences } from '../types/navigation';
+import type { Route, Waypoint, UserPreferences, ChargingStation } from '../types/navigation';
 import { ElevationService } from './elevationService';
+import { CollectiveIntelligenceService } from './collectiveIntelligenceService';
+import { StravaReferenceService } from './stravaReferenceService';
+import { dataRepository } from './dataRepository';
 
 export interface RouteGenerationParams {
   startLat: number;
@@ -37,6 +40,12 @@ export class RoutingService {
     let isRoadSnapped = false;
     let routingEngineStatus: 'online_brouter' | 'offline_cached' | 'offline_corridor_unverified' = 'offline_corridor_unverified';
 
+    // Referenz-Segmente zu Beginn der Generierung anfragen (parallel zum Routing-Call,
+    // damit sie nicht die Routenerzeugung verzögern). Reine Inspiration für die
+    // KI-Erzählung — die Geometrie wird NICHT von Strava übernommen, sondern bleibt
+    // vollständig BRouter-generiert.
+    const inspirationPromise = StravaReferenceService.exploreSegmentsNear(params.startLat, params.startLng);
+
     try {
       // BRouter API call: start -> via -> start
       const brouterUrl = `https://brouter.de/brouter?lonlats=${params.startLng},${params.startLat}|${viaLng},${viaLat}|${params.startLng},${params.startLat}&profile=trekking-pedelec&alternativeidx=0&format=geojson`;
@@ -64,6 +73,14 @@ export class RoutingService {
       throw new Error('[RoutingService] Live BRouter integration unavailable; no geometric fallback is permitted.');
     }
 
+    const inspirationSegments = await inspirationPromise;
+    const inspirationNames = inspirationSegments.slice(0, 3).map((s) => s.name);
+
+    // Echte, anonymisierte Community-Fahrdaten entlang dieser konkreten Strecke
+    // auswerten (kein Platzhalter — null, falls für diesen Korridor nichts vorliegt).
+    const communitySegments = await CollectiveIntelligenceService.getSegmentsAlongPath(pathCoordinates);
+    const communityAggregate = CollectiveIntelligenceService.aggregateSegments(communitySegments);
+
     // Calculate elevation profiles if we have coordinates
     if (pathCoordinates.length > 0) {
       const sampleCoords = pathCoordinates.filter((_, idx) => idx % Math.ceil(pathCoordinates.length / 20) === 0);
@@ -78,17 +95,49 @@ export class RoutingService {
       }
     }
 
-    // 5 waypoints along the route
+    // Echte Ladestationen entlang der Strecke abfragen (kein erfundener "Lademöglichkeit
+    // Region"-Platzhalter mehr — entweder eine echte Station aus der Datenbank, oder
+    // ehrlich gar kein Lade-Waypoint, statt einen vorzutäuschen).
+    const pathLats = pathCoordinates.map((c) => c[0]);
+    const pathLngs = pathCoordinates.map((c) => c[1]);
+    const padding = 0.015; // ~1.6km
+    let chargingStopsOnRoute: ChargingStation[] = [];
+    try {
+      const candidates = await dataRepository.getChargingStations({
+        minLat: Math.min(...pathLats) - padding,
+        maxLat: Math.max(...pathLats) + padding,
+        minLng: Math.min(...pathLngs) - padding,
+        maxLng: Math.max(...pathLngs) + padding,
+      });
+      const NEAR_THRESHOLD_DEG = 0.011; // ~1.2km
+      chargingStopsOnRoute = candidates.filter((station) =>
+        pathCoordinates.some(
+          ([lat, lng]) =>
+            Math.abs(lat - station.lat) < NEAR_THRESHOLD_DEG &&
+            Math.abs(lng - station.lng) < NEAR_THRESHOLD_DEG
+        )
+      );
+    } catch (e) {
+      console.warn('[RoutingService] Ladestations-Abfrage entlang der Strecke fehlgeschlagen:', e);
+    }
+
+    // Wegpunkte: Start/Ziel sind real, der Zwischenpunkt ist strukturell (geometrische
+    // Mitte der Schleife). Ohne echte POI-Datenbank für Aussichtspunkte/Seen etc.
+    // (separates Vorhaben) bleibt dessen Name bewusst neutral statt erfunden.
+    const nearestChargingStop = chargingStopsOnRoute[0];
     const waypoints: Waypoint[] = [
       { id: 'wp-1', lat: params.startLat, lng: params.startLng, name: 'Startpunkt', category: 'start' },
-      { id: 'wp-2', lat: viaLat, lng: viaLng, name: isScout ? '🔍 Scout-Sektor: Kiefernkamm' : (isRoadSnapped ? 'Badesee Promenade' : 'Zwischenziel (Peilung)'), category: 'scenic' },
-      { id: 'wp-3', lat: params.startLat + radius * 1.2, lng: params.startLng - radius * 0.4, name: 'Lademöglichkeit Region', category: 'charging' },
-      { id: 'wp-4', lat: params.startLat + radius * 0.3, lng: params.startLng - radius * 1.1, name: 'Aussichtspunkt Korridor', category: 'scenic' },
+      { id: 'wp-2', lat: viaLat, lng: viaLng, name: isScout ? '🔍 Scout-Sektor' : 'Routenpunkt (Wendepunkt)', category: 'scenic' },
+      ...(nearestChargingStop
+        ? [{ id: 'wp-3', lat: nearestChargingStop.lat, lng: nearestChargingStop.lng, name: nearestChargingStop.name, category: 'charging' as const }]
+        : []),
       { id: 'wp-5', lat: params.startLat, lng: params.startLng, name: 'Ziel & Rückkehr', category: 'end' },
     ];
 
-    // Wh calculation: ~8.5Wh per km + 0.12Wh per meter elevation gain (plus reserve if offline)
-    const WhPerKm = params.bikeType === 'cargo' ? 12 : 8.5;
+    // Wh calculation: echter Community-Benchmark entlang der Strecke, falls vorhanden,
+    // sonst generischer Schätzwert (~8.5Wh/km) als klar gekennzeichneter Fallback.
+    const genericWhPerKm = params.bikeType === 'cargo' ? 12 : 8.5;
+    const WhPerKm = communityAggregate?.avgEnergyBenchmarkWhPerKm ?? genericWhPerKm;
     const safetyFactor = isRoadSnapped ? 1.0 : 1.15; // 15% safety penalty for unverified corridor detours
     const totalWhNeeded = Math.round((realDistanceKm * WhPerKm + elevationGainM * 0.12) * safetyFactor);
 
@@ -101,21 +150,37 @@ export class RoutingService {
     let summary: string;
     let aiStory: string;
 
+    const inspirationClause = inspirationNames.length > 0
+      ? ` In der Umgebung beliebte Strecken (z.B. "${inspirationNames[0]}") dienten als Inspiration — die eigentliche Route ist eine eigenständige Neukomposition.`
+      : '';
+    const communityClause = communityAggregate
+      ? ` Belag- und Energiewerte basieren auf ${communityAggregate.segmentCount} echten, anonymisierten Community-Fahrten entlang dieses Korridors.`
+      : '';
+
     if (isRoadSnapped) {
       title = isScout
         ? `🗺️ Karten-Scout: ${params.themes?.[0] || 'Topographie'} Aktualisierung (+35 Tokens)`
-        : `KI-Runde: ${params.themes?.[0] || 'Badesee'} & Panoramatour`;
+        : `KI-Runde: ${params.themes?.[0] || 'Panoramatour'}`;
 
-      summary = `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie (+35 Tok.)' : 'Asphalt & Uferwege'}`;
+      summary = `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie (+35 Tok.)' : (communityAggregate ? 'Community-verifizierter Belag' : 'Asphalt & Uferwege (Schätzung)')}`;
 
       aiStory = isScout
         ? `Karten-Scout Mission: Diese Route führt dich über einen Sektor mit veralteten Topographie-Daten (> 180 Tage). Deine anonymen Sensordaten aktualisieren Steigung & Belag für alle E-Biker. Bonus bei Tour-Abschluss: +35 Tokens!`
-        : `Diese Route wurde straßengenau zusammengestellt: Sie führt über verifizierte Radwege, vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}% und beinhaltet eine Lademöglichkeit bei KM 18.`;
+        : `Diese Route wurde straßengenau zusammengestellt: Sie führt über verifizierte Radwege und vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}%.${communityClause}${inspirationClause}`;
     } else {
       title = `⚠️ Ungeprüfter Offline-Korridor (${realDistanceKm} km)`;
       summary = `${realDistanceKm} km • ~${elevationGainM}m Hm • ⚠️ Keine Straßenbindung (Offline-Peilung)`;
       aiStory = `⚠️ Achtung: Der Routing-Server ist offline. Die angezeigte Linie ist ein mathematischer Orientierungskorridor ohne Straßen- oder Wegenetzprüfung. Bitte achte eigenständig auf Flüsse, Bahnlinien, Privatwege und Verkehrsregeln.`;
     }
+
+    // Belag-Breakdown: echte Community-Daten, wenn vorhanden — sonst ein klar als
+    // Schätzung markierter generischer Wert (kein Fake-Datensatz, der echte
+    // Messung vortäuscht).
+    const surfaceBreakdown = communityAggregate
+      ? communityAggregate.surfaceBreakdown
+      : (isRoadSnapped
+          ? { asphaltPercent: 70, gravelPercent: 30, unpavedPercent: 0 }
+          : { asphaltPercent: 50, gravelPercent: 30, unpavedPercent: 20 });
 
     return {
       id: `route-${Date.now()}`,
@@ -127,9 +192,10 @@ export class RoutingService {
       estimatedTimeMin: Math.round((realDistanceKm / 19) * 60),
       estimatedBatteryConsumptionWh: totalWhNeeded,
       isBatterySafe,
-      surfaceBreakdown: isRoadSnapped 
-        ? { asphaltPercent: 82, gravelPercent: 15, unpavedPercent: 3 }
-        : { asphaltPercent: 50, gravelPercent: 30, unpavedPercent: 20 },
+      surfaceBreakdown,
+      surfaceDataSource: communityAggregate ? 'community' : 'estimated_no_data',
+      communityDataSegmentsUsed: communityAggregate?.segmentCount ?? 0,
+      inspirationReferences: inspirationNames,
       waypoints,
       pathCoordinates,
       isScoutMission: isScout,
@@ -137,7 +203,7 @@ export class RoutingService {
       isRoadSnapped,
       isOfflineFallbackCorridor: !isRoadSnapped,
       routingEngineStatus,
-      chargingStopsOnRoute: [],
+      chargingStopsOnRoute,
     };
   }
 }

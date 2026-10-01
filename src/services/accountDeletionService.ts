@@ -24,7 +24,7 @@ export class AccountDeletionService {
     let cloudDataDeleted = false;
     let localDataDeleted = false;
 
-    const currentUser = auth.currentUser;
+    const currentUser = auth?.currentUser ?? null;
 
     if (currentUser) {
       const uid = currentUser.uid;
@@ -71,12 +71,16 @@ export class AccountDeletionService {
         );
 
         // ── 2. Delete Cloud Storage uploads ──
-        try {
-          const userStorageRef = ref(storage, `users/${uid}`);
-          const listRes = await listAll(userStorageRef);
-          await Promise.all(listRes.items.map((itemRef) => deleteObject(itemRef)));
-        } catch (e) {
-          // Ignore if directory doesn't exist
+        if (storage) {
+          try {
+            const userStorageRef = ref(storage, `users/${uid}`);
+            const listRes = await listAll(userStorageRef);
+            await Promise.all(listRes.items.map((itemRef) => deleteObject(itemRef)));
+          } catch (e) {
+            // Ignore if directory doesn't exist
+          }
+        } else {
+          console.warn('[AccountDeletionService] Storage nicht initialisiert — Cloud-Storage-Löschung übersprungen.');
         }
 
         cloudDataDeleted = true;

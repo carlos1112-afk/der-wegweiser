@@ -11,28 +11,39 @@
  *   ↓
  * Canonical Request/Response Model (CanonicalAiRequest / CanonicalAiResponse)
  *   ↓
- * Provider Adapters (BackendProxyAdapter, OpenAiAdapter, AnthropicAdapter, LocalOllamaAdapter, HeuristicOfflineAdapter)
- * 
+ * Provider Adapters (FirebaseAiLogicAdapter [Standard], BackendProxyAdapter, OpenAiAdapter,
+ *                     AnthropicAdapter, LocalOllamaAdapter, HeuristicOfflineAdapter)
+ *
  * Garantien:
- * 1. Zero Client Keys: Private Tokens verbleiben auf dem Server.
- * 2. Keine Bindung an ein proprietäres Modell.
- * 3. 100% Offline-Heuristik-Fallback für Kern- und Sicherheitsfunktionen.
+ * 1. Zero Client Keys: Firebase AI Logic nutzt das Firebase-Projekt (App-Check/Billing),
+ *    kein roher API-Key im Client-Bundle. Für Nicht-Standard-Adapter (OpenAI/Anthropic/Ollama)
+ *    bleiben Keys serverseitig, falls ein BackendProxy dafür konfiguriert wird.
+ * 2. Keine Bindung an ein proprietäres Modell — austauschbare Adapter.
+ * 3. Deterministischer, klar gekennzeichneter Offline-Fallback für Kern- und
+ *    Sicherheitsfunktionen, falls kein Provider erreichbar ist (kein KI-generierter Text
+ *    wird als solcher ausgegeben, wenn er keiner ist — siehe AiAssistantService.callModel).
  */
+
+import { ai } from '../../firebase';
+import { getGenerativeModel } from 'firebase/ai';
 
 export type AiCapability = 'planRoute' | 'voiceDialogue' | 'summarizeRide' | 'analyzeRange' | 'interpretWeather';
 
-export type AiProviderType = 
-  | 'backend_proxy'       // Standard: Eigener sicherer Backend-Proxy (Server-to-Server Auth)
+export type AiProviderType =
+  | 'firebase_ai_logic'   // Standard: Firebase AI Logic (Gemini Developer API, kein Client-Key, kein eigener Backend-Proxy)
+  | 'backend_proxy'       // Eigener sicherer Backend-Proxy (Server-to-Server Auth) — nur falls explizit konfiguriert
   | 'openai'              // Beliebiger OpenAI-kompatibler Endpunkt (vLLM, OpenRouter, Mistral)
   | 'anthropic'           // Anthropic Messages API Format
   | 'ollama'              // Lokale Ollama-Instanz auf Host
-  | 'heuristic_offline';  // Deterministiche mathematisch-physikalische Offline-Engine
+  | 'heuristic_offline';  // Statischer, klar als "nicht KI-generiert" markierter Offline-Fallback
 
 export interface CanonicalAiRequest {
   systemPrompt: string;
   userPrompt: string;
   temperature?: number;
   maxTokens?: number;
+  /** Gemini-Modell-ID für den firebase_ai_logic-Adapter, z.B. 'gemini-2.0-flash'. */
+  modelId?: string;
 }
 
 export interface CanonicalAiResponse {
@@ -46,7 +57,31 @@ export interface AiProviderAdapter {
   execute(request: CanonicalAiRequest, endpointUrl: string, timeoutMs: number): Promise<CanonicalAiResponse>;
 }
 
-// ── 1. Backend Proxy Adapter (Standard) ───────────────────────────────────────
+// ── 0. Firebase AI Logic Adapter (Standard — echter Gemini-Call, kein Backend nötig) ──
+export class FirebaseAiLogicAdapter implements AiProviderAdapter {
+  public type: AiProviderType = 'firebase_ai_logic';
+
+  public async execute(request: CanonicalAiRequest, _endpointUrl: string, timeoutMs: number): Promise<CanonicalAiResponse> {
+    if (!ai) {
+      throw new Error('Firebase AI Logic ist nicht initialisiert (fehlender apiKey oder Init-Fehler, siehe Konsole).');
+    }
+    const modelId = request.modelId || 'gemini-2.0-flash';
+    const model = getGenerativeModel(ai, {
+      model: modelId,
+      systemInstruction: request.systemPrompt,
+      generationConfig: {
+        temperature: request.temperature ?? 0.4,
+        maxOutputTokens: request.maxTokens ?? 150,
+      },
+    }, { timeout: timeoutMs });
+
+    const result = await model.generateContent(request.userPrompt);
+    const text = result.response.text().trim();
+    return { text, provider: this.type, modelUsed: modelId };
+  }
+}
+
+// ── 1. Backend Proxy Adapter (nur falls explizit konfiguriert) ───────────────
 export class BackendProxyAdapter implements AiProviderAdapter {
   public type: AiProviderType = 'backend_proxy';
 
@@ -195,15 +230,19 @@ export class LocalOllamaAdapter implements AiProviderAdapter {
 }
 
 // ── 5. Heuristic Offline Adapter (Zero Network & Zero Cost) ────────────────────
+// Liefert bewusst KEINEN KI-generierten Text — nur einen neutralen Platzhalter-Marker.
+// Die eigentlichen, pro Capability sinnvollen Fallback-Texte stehen direkt in den
+// planRoute/voiceDialogue/summarizeRide-Methoden unten (deterministisch aus echten
+// Eingabedaten berechnet, nicht hier). AiAssistantService.callModel() gibt diesen
+// Provider-Typ niemals als "echtes Modellergebnis" an den Nutzer weiter.
 export class HeuristicOfflineAdapter implements AiProviderAdapter {
   public type: AiProviderType = 'heuristic_offline';
 
   public async execute(_request: CanonicalAiRequest): Promise<CanonicalAiResponse> {
-    // Generates deterministic heuristic text from user prompt context
     return {
-      text: 'Erfolgreich navigiert. Tourdaten lokal verifiziert.',
+      text: '',
       provider: this.type,
-      modelUsed: 'offline-physics-engine',
+      modelUsed: 'none',
     };
   }
 }
@@ -248,11 +287,12 @@ export interface InterpretWeatherParams {
 }
 
 export class AiGatewayService {
-  private static activeProvider: AiProviderType = 'backend_proxy';
+  private static activeProvider: AiProviderType = 'firebase_ai_logic';
   private static backendUrl: string = typeof window !== 'undefined' ? `${window.location.origin}/api/ai` : 'http://127.0.0.1:8000/v1';
   private static timeoutMs: number = 8000;
 
   private static adapters: Record<AiProviderType, AiProviderAdapter> = {
+    firebase_ai_logic: new FirebaseAiLogicAdapter(),
     backend_proxy: new BackendProxyAdapter(),
     openai: new OpenAiAdapter(),
     anthropic: new AnthropicAdapter(),

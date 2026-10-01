@@ -121,6 +121,8 @@ export class GpxImportService {
         gravelPercent: 20,
         unpavedPercent: 10,
       },
+      surfaceDataSource: 'estimated_no_data',
+      communityDataSegmentsUsed: 0,
       waypoints,
       pathCoordinates,
       chargingStopsOnRoute: [],
