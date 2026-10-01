@@ -125,15 +125,29 @@ export class AiAssistantService {
       userPrefs
     );
 
-    // Route through vendor-neutral AI Gateway
+    // Route through vendor-neutral AI Gateway — mit den ECHTEN Daten aus der
+    // gerade generierten Route (Community-Fahrdaten, reale Ladestation,
+    // Sicherheitsgrenzen, Strava-Inspiration), priorisiert nach dem Schema in
+    // AiGatewayService.buildPlanRouteSystemPrompt().
     const storyText = await AiGatewayService.planRoute({
       start: { lat: userLat, lng: userLng },
-      distanceKm: targetDistanceKm,
-      elevationGainM: route.elevationGainM || 120,
+      distanceKm: route.distanceKm,
+      elevationGainM: route.elevationGainM,
       surfaceType: userPrefs.preferredSurface === 'asphalt' ? 'Asphalt' : 'Mischbelag',
       isScoutMission: route.isScoutMission,
+      maxElevationSlopePercent: userPrefs.maxElevationSlopePercent,
+      isBatterySafe: route.isBatterySafe,
+      surfaceDataSource: route.surfaceDataSource,
+      communityDataSegmentsUsed: route.communityDataSegmentsUsed,
+      chargingStopName: route.chargingStopsOnRoute?.[0]?.name,
+      inspirationNames: route.inspirationReferences,
     });
-    if (storyText?.trim()) route.aiStory = storyText.trim();
+    // Die deterministisch berechnete Fakten-Zusammenfassung bleibt erhalten —
+    // der KI-Text wird nur als zusätzlicher Erzähl-Absatz angehängt, damit die
+    // Datenherkunfts-Angabe nie von einer LLM-Antwort verschluckt werden kann.
+    if (storyText?.trim()) {
+      route.aiStory = `${route.aiStory} ${storyText.trim()}`;
+    }
 
     return route;
   }

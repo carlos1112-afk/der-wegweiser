@@ -254,6 +254,19 @@ export interface PlanRouteParams {
   elevationGainM: number;
   surfaceType?: string;
   isScoutMission?: boolean;
+  /** Harte Sicherheitsgrenze aus den Nutzereinstellungen — niemals überschreiten/relativieren. */
+  maxElevationSlopePercent?: number;
+  isBatterySafe?: boolean;
+  /**
+   * Herkunft von surfaceBreakdown/Energiewert: 'community' = echte anonymisierte
+   * Fahrdaten entlang dieser Strecke, 'estimated_no_data' = keine Daten vorhanden.
+   */
+  surfaceDataSource?: 'community' | 'estimated_no_data';
+  communityDataSegmentsUsed?: number;
+  /** Name der echten Ladestation auf der Route, falls eine gefunden wurde. */
+  chargingStopName?: string;
+  /** Echte, öffentlich beliebte Strava-Segmentnamen in der Umgebung — NUR Stimmung, keine Fakten über diese Route. */
+  inspirationNames?: string[];
 }
 
 export interface VoiceDialogueParams {
@@ -329,13 +342,98 @@ export class AiGatewayService {
   // ===========================================================================
   // FÄHIGKEIT 1: Tourenplanung & Antizipation (planRoute)
   // ===========================================================================
+  /**
+   * Priorisierter System-Prompt für die Streckenerzählung. Die Reihenfolge ist
+   * bewusst strikt und wird im Prompt selbst explizit erzwungen, weil ein LLM
+   * sonst dazu neigt, die interessanteste statt die wichtigste Information zuerst
+   * zu gewichten:
+   *
+   *   STUFE 1 — Sicherheitsgrenzen (bindend, nie relativieren/umgehen)
+   *   STUFE 2 — Echte Streckenfakten (Community-Daten, Ladestation, Distanz/Hm —
+   *             nichts davon darf erfunden oder abgeändert werden)
+   *   STUFE 3 — Inspirationsreferenzen (nur Stimmung/Namedropping, NIE als Teil
+   *             der tatsächlichen Wegführung dieser Route ausgeben)
+   *   STUFE 4 — Kreative Erzählung, die ausschließlich auf Stufe 1-3 aufbaut
+   *
+   * Hinweis zur Grenze dieses Ansatzes: Ein System-Prompt ist eine starke, aber
+   * keine harte Garantie gegen Halluzination. Deshalb überschreibt das Ergebnis
+   * dieser Methode NIE die deterministisch berechnete Fakten-Zusammenfassung in
+   * RoutingService — es wird dort nur als zusätzlicher, klar getrennter
+   * Erzähl-Absatz angehängt (siehe aiAssistantService.generateAnticipatedRoute).
+   */
+  private static buildPlanRouteSystemPrompt(): string {
+    return [
+      'Du bist der Wegweiser-CoPilot, ein KI-Erzähler für E-Bike-Touren. Du bekommst',
+      'Fakten in vier klar getrennten Prioritätsstufen. Höhere Stufen sind bindend',
+      'für niedrigere — eine niedrigere Stufe darf einer höheren NIE widersprechen.',
+      '',
+      'STUFE 1 (SICHERHEIT, bindend): Angegebene Steigungs- und Akkugrenzen sind',
+      'harte Grenzen. Erwähne niemals eine Route als "noch machbar" oder',
+      'beschönige, wenn die Daten eine Grenzüberschreitung oder ein Sicherheitsrisiko',
+      'zeigen — das ist nicht deine Entscheidung, die App zeigt Warnungen separat an.',
+      '',
+      'STUFE 2 (FAKTEN, unveränderlich): Alle unter "ECHTE DATEN" gelisteten Werte',
+      '(Distanz, Höhenmeter, Community-Belagdaten, Ladestation) sind exakt und',
+      'dürfen nicht verändert, gerundet-beschönigt oder durch andere Zahlen ersetzt',
+      'werden. Erfinde NIEMALS zusätzliche Orte, Sehenswürdigkeiten, Läden, Seen',
+      'oder Wegabschnitte, die nicht explizit genannt sind.',
+      '',
+      'STUFE 3 (INSPIRATION, nur Stimmung): Unter "INSPIRATION" genannte Namen sind',
+      'öffentlich beliebte Strecken in der Umgebung — sie sind NICHT Teil dieser',
+      'Route. Nutze sie höchstens als vage Stimmungsreferenz ("ähnlich beliebte',
+      'Ecken wie..."), behaupte NIE, dass die Route über sie verläuft.',
+      '',
+      'STUFE 4 (ERZÄHLUNG): Schreibe darauf aufbauend maximal 2 kurze, motivierende',
+      'Sätze auf Deutsch, die die Tour spannend und individuell wirken lassen —',
+      'aber ausschließlich mit den Fakten aus Stufe 1-3, ohne neue zu erfinden.',
+    ].join('\n');
+  }
+
+  private static buildPlanRouteUserPrompt(params: PlanRouteParams): string {
+    const lines: string[] = [];
+
+    lines.push('SICHERHEITSGRENZEN:');
+    if (params.maxElevationSlopePercent !== undefined) {
+      lines.push(`- Maximale Steigung laut Nutzereinstellung: ${params.maxElevationSlopePercent}%`);
+    }
+    if (params.isBatterySafe !== undefined) {
+      lines.push(`- Akku-Sicherheitsstatus: ${params.isBatterySafe ? 'ausreichend' : 'KNAPP/NICHT ausreichend — das muss in der Erzählung neutral bleiben, nicht beschönigt werden'}`);
+    }
+
+    lines.push('');
+    lines.push('ECHTE DATEN:');
+    lines.push(`- Distanz: ${params.distanceKm} km, Höhenmeter: ${params.elevationGainM} m`);
+    lines.push(`- Untergrund: ${params.surfaceType || 'Asphalt & Schotter'}`);
+    if (params.surfaceDataSource === 'community' && params.communityDataSegmentsUsed) {
+      lines.push(`- Belag-/Energiewerte basieren auf ${params.communityDataSegmentsUsed} echten anonymisierten Community-Fahrten entlang dieser Strecke.`);
+    } else {
+      lines.push('- Keine Community-Fahrdaten für diesen Korridor vorhanden — Belagangabe ist eine grobe Schätzung, das darf in der Erzählung nicht als gesicherte Messung dargestellt werden.');
+    }
+    if (params.chargingStopName) {
+      lines.push(`- Echte Lademöglichkeit auf der Route: ${params.chargingStopName}`);
+    }
+    if (params.isScoutMission) {
+      lines.push('- Dies ist eine Karten-Scout-Mission zur Aktualisierung veralteter Kartendaten.');
+    }
+
+    if (params.inspirationNames && params.inspirationNames.length > 0) {
+      lines.push('');
+      lines.push('INSPIRATION (nur Stimmung, kein Teil dieser Route):');
+      lines.push(`- ${params.inspirationNames.join(', ')}`);
+    }
+
+    lines.push('');
+    lines.push('Schreibe jetzt die Tourenbeschreibung gemäß den vier Prioritätsstufen.');
+    return lines.join('\n');
+  }
+
   public static async planRoute(params: PlanRouteParams): Promise<string> {
-    const prompt = `Erstelle eine kurze, motivierende E-Bike Tourenbeschreibung auf Deutsch (maximal 2 Sätze) für eine Tour von ${params.distanceKm} km mit ${params.elevationGainM} Höhenmetern. Untergrund: ${params.surfaceType || 'Asphalt & Schotter'}.${params.isScoutMission ? ' Dies ist eine Karten-Scout Tour zur Aktualisierung von Kartendaten.' : ''}`;
+    const prompt = this.buildPlanRouteUserPrompt(params);
 
     try {
       if (this.activeProvider !== 'heuristic_offline') {
         const res = await this.dispatch({
-          systemPrompt: 'Du bist der Wegweiser-CoPilot.',
+          systemPrompt: this.buildPlanRouteSystemPrompt(),
           userPrompt: prompt,
         });
         if (res.text) return res.text;
