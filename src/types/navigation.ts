@@ -102,8 +102,9 @@ export interface LiveBikeTelemetry {
   isConnected: boolean;
   deviceName?: string;
   manufacturer?: BikeManufacturer;
-  batteryPercent: number;
-  batteryWhRemaining?: number;
+  batteryPercent: number | null;
+  batteryWhRemaining?: number | null;
+  batteryKnown?: boolean;
   batteryHealthPercent?: number; // SOH
   speedKmH: number;
   cadenceRpm: number;

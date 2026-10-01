@@ -219,7 +219,7 @@ export interface PlanRouteParams {
 
 export interface VoiceDialogueParams {
   userQuery: string;
-  batteryPercent: number;
+  batteryPercent: number | null;
   speedKmH: number;
   currentStreet?: string;
 }
@@ -313,7 +313,8 @@ export class AiGatewayService {
   // FÄHIGKEIT 2: Sprachdialog & Co-Pilot (voiceDialogue)
   // ===========================================================================
   public static async voiceDialogue(params: VoiceDialogueParams): Promise<string> {
-    const prompt = `Nutzer fragt: "${params.userQuery}". Status: E-Bike Akku ${params.batteryPercent}%, Tempo ${params.speedKmH} km/h, Ort: ${params.currentStreet || 'Unterwegs'}. Antworte kurz, prägnant und fahrradtauglich in maximal 1 Satz.`;
+    const batteryText = params.batteryPercent !== null ? `${params.batteryPercent}%` : 'unbekannt (kein BLE Akkustand)';
+    const prompt = `Nutzer fragt: "${params.userQuery}". Status: E-Bike Akku ${batteryText}, Tempo ${params.speedKmH} km/h, Ort: ${params.currentStreet || 'Unterwegs'}. Antworte kurz, prägnant und fahrradtauglich in maximal 1 Satz.`;
 
     try {
       if (this.activeProvider !== 'heuristic_offline') {
@@ -329,7 +330,9 @@ export class AiGatewayService {
 
     const q = params.userQuery.toLowerCase();
     if (q.includes('akku') || q.includes('batterie')) {
-      return `Dein Akku liegt bei ${params.batteryPercent} Prozent. Alles im grünen Bereich.`;
+      return params.batteryPercent !== null
+        ? `Dein Akku liegt bei ${params.batteryPercent} Prozent. Alles im grünen Bereich.`
+        : `Dein aktueller Akkustand ist leider nicht über Bluetooth bekannt.`;
     }
     if (q.includes('schnell') || q.includes('tempo') || q.includes('geschwindigkeit')) {
       return `Du fährst aktuell ${params.speedKmH} km/h.`;

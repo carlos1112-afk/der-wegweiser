@@ -126,5 +126,8 @@ export function parseCscMeasurement(value: DataView): Partial<LiveBikeTelemetry>
 }
 
 export function parseBatteryLevel(value: DataView): Partial<LiveBikeTelemetry> {
-  return { batteryPercent: value.getUint8(0) };
+  return {
+    batteryPercent: value.getUint8(0),
+    batteryKnown: true,
+  };
 }

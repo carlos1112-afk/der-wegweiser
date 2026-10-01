@@ -1,5 +1,4 @@
 export class ElevationService {
-  private static cache: Map<string, number> = new Map();
 
   /**
    * Fetches real elevation (meters above sea level) for a batch of lat/lng coordinates.
@@ -33,16 +32,9 @@ export class ElevationService {
         }
       }
     } catch (err) {
-      console.warn('[ElevationService] Elevation fetch failed, using estimation fallback:', err);
+      console.warn('[ElevationService] Elevation fetch failed:', err);
     }
 
-    // Elevation estimation fallback
-    return coords.map(([lat, lng], idx) => {
-      const key = `${lat.toFixed(3)},${lng.toFixed(3)}`;
-      if (this.cache.has(key)) return this.cache.get(key)!;
-      const estimated = Math.round(35 + Math.sin(idx * 0.3) * 15 + Math.cos(lat * 10) * 10);
-      this.cache.set(key, estimated);
-      return estimated;
-    });
+    throw new Error('[ElevationService] Live elevation integration unavailable; no fallback is permitted.');
   }
 }

@@ -32,6 +32,7 @@ export function parseBafangPacket(value: DataView): Partial<LiveBikeTelemetry> {
       const motorPowerWatts = Math.round((voltageMv * currentMa) / 1000000);
 
       result.batteryPercent = batteryPercent;
+      result.batteryKnown = true;
       result.motorPowerWatts = motorPowerWatts;
     }
 
@@ -56,6 +57,7 @@ export function parseBafangPacket(value: DataView): Partial<LiveBikeTelemetry> {
     const batteryPercent = value.getUint8(0);
     const speedRaw = value.getUint16(1, true);
     result.batteryPercent = batteryPercent;
+    result.batteryKnown = true;
     result.speedKmH = +(speedRaw / 100).toFixed(1);
   }
 

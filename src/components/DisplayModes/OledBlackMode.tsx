@@ -52,8 +52,8 @@ export function OledBlackMode({ telemetry, onExitOledMode }: OledBlackModeProps)
       {/* Top minimal status */}
       <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', color: '#888' }}>
-          <Battery size={18} color={telemetry.batteryPercent < 20 ? '#ff4444' : '#00ffcc'} />
-          <span style={{ fontWeight: 'bold', color: '#fff' }}>{telemetry.batteryPercent}%</span>
+          <Battery size={18} color={telemetry.batteryPercent !== null && telemetry.batteryPercent < 20 ? '#ff4444' : '#00ffcc'} />
+          <span style={{ fontWeight: 'bold', color: '#fff' }}>{telemetry.batteryPercent !== null ? `${telemetry.batteryPercent}%` : '--'}</span>
         </div>
 
         <div style={{ fontSize: '0.8rem', color: '#666', letterSpacing: '1px' }}>

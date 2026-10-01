@@ -71,18 +71,10 @@ export class WeatherService {
         }
       }
     } catch (e) {
-      console.warn('[WeatherService] Weather fetch failed, activating conservative safety fallback:', e);
+      console.warn('[WeatherService] Weather fetch failed:', e);
     }
 
-    // Conservative Safety Fallback: Transparently declare unavailable data and add reserve buffer
-    return {
-      isHeadwindRisk: false,
-      weatherCondition: 'unknown',
-      weatherDescription: '⚠️ Wetterdaten offline (+10% Sicherheitsreserve eingerechnet)',
-      batteryPenaltyPercent: 10, // +10% conservative uncertainty reserve
-      weatherStatus: 'unavailable',
-      rangeConfidence: 'reduced_conservative',
-    };
+    throw new Error('[WeatherService] Live weather integration unavailable; no fallback is permitted.');
   }
 
   private static degreesToCompass(deg: number): string {

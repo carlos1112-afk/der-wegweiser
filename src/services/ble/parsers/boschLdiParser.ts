@@ -33,6 +33,7 @@ export function parseBoschLdiTelemetry(value: DataView): Partial<LiveBikeTelemet
     manufacturer: 'bosch',
     batteryPercent,
     batteryWhRemaining,
+    batteryKnown: true,
     batteryHealthPercent: batteryHealthPercent > 0 && batteryHealthPercent <= 100 ? batteryHealthPercent : undefined,
   };
 

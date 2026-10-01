@@ -109,12 +109,13 @@ export function App() {
   const [selectedStationForReview, setSelectedStationForReview] = useState<ChargingStation | null>(null);
   const [telemetry, setTelemetry] = useState<LiveBikeTelemetry>({
     isConnected: false,
-    batteryPercent: 85,
-    batteryWhRemaining: 550,
+    batteryPercent: null,
+    batteryWhRemaining: null,
+    batteryKnown: false,
     speedKmH: 0,
     cadenceRpm: 0,
     riderPowerWatts: 0,
-    motorAssistMode: 'auto',
+    motorAssistMode: 'off',
   });
 
   // Legal & Consent State
@@ -247,26 +248,35 @@ export function App() {
     if (!hasConsent) return;
 
     const initData = async () => {
-      // 1. Fetch Charging Stations
-      const stations = await dataRepository.getChargingStations();
-      setChargingStations(stations);
+      try {
+        // 1. Fetch Charging Stations
+        const stations = await dataRepository.getChargingStations().catch(() => []);
+        setChargingStations(stations);
 
-      // 2. Fetch User Prefs & Memory
-      const prefs: UserPreferences = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const memory: UserMemoryPattern = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
+        // 2. Fetch User Prefs & Memory
+        const prefs: UserPreferences = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+        const memory: UserMemoryPattern = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
 
-      // 3. Fetch Token Account Balance from Firestore/Cache
-      const tokenAcc = await dataRepository.getTokenAccount(UserIdentity.getUserId());
-      setTokenBalance(tokenAcc.balance);
+        // 3. Fetch Token Account Balance from Firestore/Cache
+        const tokenAcc = await dataRepository.getTokenAccount(UserIdentity.getUserId());
+        setTokenBalance(tokenAcc.balance);
 
-      // 4. Pre-generate Zero-Click "Heute-Tour"
-      const anticipatedRoute = await AiAssistantService.generateAnticipatedRoute(
-        userLocation.lat,
-        userLocation.lng,
-        prefs,
-        memory
-      );
-      setCurrentRoute(anticipatedRoute);
+        // 4. Pre-generate Zero-Click "Heute-Tour"
+        const anticipatedRoute = await AiAssistantService.generateAnticipatedRoute(
+          userLocation.lat,
+          userLocation.lng,
+          prefs,
+          memory
+        ).catch((err) => {
+          console.warn('[App] Heute-Tour konnte nicht generiert werden (Routing/Netzwerk offline):', err);
+          return null;
+        });
+        if (anticipatedRoute) {
+          setCurrentRoute(anticipatedRoute);
+        }
+      } catch (err) {
+        console.warn('[App] Initialer Datenabruf fehlgeschlagen (Offline-Modus):', err);
+      }
     };
 
     initData();
@@ -281,7 +291,7 @@ export function App() {
 
   // Battery Emergency Range Detection (Threshold <= 15%)
   useEffect(() => {
-    if (telemetry.batteryPercent <= 15 && !emergencyAlertDismissed && !showEmergencyModal) {
+    if (telemetry.batteryPercent !== null && telemetry.batteryPercent <= 15 && !emergencyAlertDismissed && !showEmergencyModal) {
       setShowEmergencyModal(true);
     }
   }, [telemetry.batteryPercent, emergencyAlertDismissed, showEmergencyModal]);
@@ -312,30 +322,39 @@ export function App() {
   };
 
   const handleRegenerateRoute = async (modelId: ModelId = DEFAULT_MODEL) => {
-    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-    const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-    const newRoute = await AiAssistantService.generateAnticipatedRoute(
-      userLocation.lat,
-      userLocation.lng,
-      prefs,
-      memory,
-      modelId
-    );
-    setCurrentRoute(newRoute);
+    try {
+      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+      const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
+      const newRoute = await AiAssistantService.generateAnticipatedRoute(
+        userLocation.lat,
+        userLocation.lng,
+        prefs,
+        memory,
+        modelId
+      );
+      setCurrentRoute(newRoute);
+    } catch (err: any) {
+      console.warn('[App] Route konnte nicht neu generiert werden:', err);
+      alert('Routing-Dienst derzeit nicht erreichbar. Bitte Internetverbindung prüfen.');
+    }
   };
 
   const handleAutoReroute = async () => {
     if (!currentRoute) return;
     console.log('[App] Auto-Rerouting triggered from current GPS position...');
-    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-    const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-    const recalculated = await AiAssistantService.generateAnticipatedRoute(
-      userLocation.lat,
-      userLocation.lng,
-      prefs,
-      memory
-    );
-    setCurrentRoute(recalculated);
+    try {
+      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+      const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
+      const recalculated = await AiAssistantService.generateAnticipatedRoute(
+        userLocation.lat,
+        userLocation.lng,
+        prefs,
+        memory
+      );
+      setCurrentRoute(recalculated);
+    } catch (err: any) {
+      console.warn('[App] Auto-Reroute fehlgeschlagen:', err);
+    }
   };
 
   const handleToggleOledMode = () => {
@@ -353,55 +372,65 @@ export function App() {
   };
 
   const handlePlanRouteToPoint = async (targetLat: number, targetLng: number) => {
-    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-    const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
-    const newRoute = await RoutingService.generateBikeRoute(
-      {
-        startLat: userLocation.lat,
-        startLng: userLocation.lng,
-        targetDistanceKm: Math.max(2, Math.round(distKm * 1.3)),
-        batteryPercent: telemetry.batteryPercent,
-        bikeType: prefs.bikeType || 'ebike',
-        themes: ['Direktverbindung'],
-        maxElevationGainM: 120,
-        surfacePreference: 'any',
-      },
-      prefs
-    );
-    if (newRoute.pathCoordinates.length > 1) {
-      newRoute.pathCoordinates[newRoute.pathCoordinates.length - 1] = [targetLat, targetLng];
+    try {
+      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+      const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
+      const newRoute = await RoutingService.generateBikeRoute(
+        {
+          startLat: userLocation.lat,
+          startLng: userLocation.lng,
+          targetDistanceKm: Math.max(2, Math.round(distKm * 1.3)),
+          batteryPercent: telemetry.batteryPercent,
+          bikeType: prefs.bikeType || 'ebike',
+          themes: ['Direktverbindung'],
+          maxElevationGainM: 120,
+          surfacePreference: 'any',
+        },
+        prefs
+      );
+      if (newRoute.pathCoordinates.length > 1) {
+        newRoute.pathCoordinates[newRoute.pathCoordinates.length - 1] = [targetLat, targetLng];
+      }
+      newRoute.title = `Route zum gewählten Ziel (${newRoute.distanceKm} km)`;
+      newRoute.aiStory = `Fahrradoptimierte Verbindung zum gewählten Zielort (~${distKm.toFixed(1)} km) mit minimalem Höhenmeter-Widerstand (Heuristische Routenführung).`;
+      setCurrentRoute(newRoute);
+    } catch (err: any) {
+      console.warn('[App] Navigation zum Zielpunkt fehlgeschlagen:', err);
+      alert('Routenberechnung fehlgeschlagen. Der Routing-Dienst (BRouter) ist nicht erreichbar.');
     }
-    newRoute.title = `Route zum gewählten Ziel (${newRoute.distanceKm} km)`;
-    newRoute.aiStory = `Google Gemini 2.0 Flash: Fahrradoptimierte Verbindung zum gewählten Zielort (~${distKm.toFixed(1)} km) mit minimalem Höhenmeter-Widerstand.`;
-    setCurrentRoute(newRoute);
   };
 
   const handlePlanRouteToStation = async (station: ChargingStation) => {
-    const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-    const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, station.lat, station.lng);
-    const detourRoute = await RoutingService.generateBikeRoute(
-      {
-        startLat: userLocation.lat,
-        startLng: userLocation.lng,
-        targetDistanceKm: Math.max(1, Math.round(distKm * 1.2)),
-        batteryPercent: telemetry.batteryPercent,
-        bikeType: prefs.bikeType || 'ebike',
-        themes: ['Ladesäulen-Anfahrt'],
-        maxElevationGainM: 60,
-        surfacePreference: 'asphalt',
-      },
-      prefs
-    );
-    if (detourRoute.pathCoordinates.length > 1) {
-      detourRoute.pathCoordinates[detourRoute.pathCoordinates.length - 1] = [station.lat, station.lng];
+    try {
+      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
+      const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, station.lat, station.lng);
+      const detourRoute = await RoutingService.generateBikeRoute(
+        {
+          startLat: userLocation.lat,
+          startLng: userLocation.lng,
+          targetDistanceKm: Math.max(1, Math.round(distKm * 1.2)),
+          batteryPercent: telemetry.batteryPercent,
+          bikeType: prefs.bikeType || 'ebike',
+          themes: ['Ladesäulen-Anfahrt'],
+          maxElevationGainM: 60,
+          surfacePreference: 'asphalt',
+        },
+        prefs
+      );
+      if (detourRoute.pathCoordinates.length > 1) {
+        detourRoute.pathCoordinates[detourRoute.pathCoordinates.length - 1] = [station.lat, station.lng];
+      }
+      detourRoute.title = `Anfahrt: ${station.name}`;
+      detourRoute.aiStory = `Direkte Anfahrt zur Ladestation ${station.name} (${station.plugType.toUpperCase()}) (Heuristische Routenführung).`;
+      detourRoute.waypoints = [
+        { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Start' },
+        { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
+      ];
+      setCurrentRoute(detourRoute);
+    } catch (err: any) {
+      console.warn('[App] Anfahrt zur Ladestation fehlgeschlagen:', err);
+      alert('Routenberechnung zur Ladestation fehlgeschlagen. Der Routing-Dienst ist nicht erreichbar.');
     }
-    detourRoute.title = `Anfahrt: ${station.name}`;
-    detourRoute.aiStory = `Google Gemini 2.0 Flash: Direkte Anfahrt zur Ladestation ${station.name} (${station.plugType.toUpperCase()}).`;
-    detourRoute.waypoints = [
-      { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Start' },
-      { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
-    ];
-    setCurrentRoute(detourRoute);
   };
 
   const handleAddStationReview = async (review: { rating: number; comment: string; tags: string[] }) => {

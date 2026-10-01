@@ -36,6 +36,7 @@ export function parseMahleTelemetry(value: DataView): Partial<LiveBikeTelemetry>
     manufacturer: 'mahle',
     batteryPercent,
     batteryWhRemaining,
+    batteryKnown: true,
     motorAssistMode,
   };
 

@@ -2,7 +2,6 @@ import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount, Route } from '../types/navigation';
 import { ChargingStationImportService } from './chargingStationImportService';
-import { CURATED_CHARGING_STATIONS, CURATED_ROUTES } from './curatedDatabase';
 
 // Haversine distance utility
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -57,7 +56,7 @@ export interface IDataRepository {
 
 // In-Memory & LocalStorage Fallback Cache with Live Firebase Firestore integration
 class LocalAndFirestoreRepository implements IDataRepository {
-  private memoryStations: ChargingStation[] = [...CURATED_CHARGING_STATIONS];
+  private memoryStations: ChargingStation[] = [];
 
   async getChargingStations(bounds?: { minLat: number; maxLat: number; minLng: number; maxLng: number }): Promise<ChargingStation[]> {
     let firestoreStations: ChargingStation[] = [];
@@ -379,7 +378,7 @@ class LocalAndFirestoreRepository implements IDataRepository {
       // Fallback
     }
 
-    return [...CURATED_ROUTES];
+    return [];
   }
 
   async addPartnerLead(lead: { businessName: string; email: string; plan: string; type: string }): Promise<void> {

@@ -8,7 +8,7 @@ export interface RouteGenerationParams {
   maxElevationGainM?: number;
   surfacePreference?: 'asphalt' | 'gravel' | 'any';
   themes?: string[];
-  batteryPercent: number;
+  batteryPercent: number | null;
   bikeType: string;
   isMapScoutMode?: boolean; // Karten-Scout Modus: Bevorzugt veraltete Sektoren für Bonus-Tokens
 }
@@ -57,21 +57,11 @@ export class RoutingService {
         }
       }
     } catch (err) {
-      console.warn('[RoutingService] BRouter API unavailable, using unverified offline corridor:', err);
+      console.warn('[RoutingService] BRouter API unavailable:', err);
     }
 
-    // Fallback mathematical corridor generation if BRouter API fails
     if (pathCoordinates.length === 0) {
-      const pointsCount = 40;
-      for (let i = 0; i <= pointsCount; i++) {
-        const angle = (i / pointsCount) * 2 * Math.PI;
-        const rNoise = radius * (1 + 0.15 * Math.sin(angle * 4));
-        const lat = params.startLat + rNoise * Math.sin(angle);
-        const lng = params.startLng + rNoise * Math.cos(angle);
-        pathCoordinates.push([lat, lng]);
-      }
-      isRoadSnapped = false;
-      routingEngineStatus = 'offline_corridor_unverified';
+      throw new Error('[RoutingService] Live BRouter integration unavailable; no geometric fallback is permitted.');
     }
 
     // Calculate elevation profiles if we have coordinates
@@ -102,8 +92,10 @@ export class RoutingService {
     const safetyFactor = isRoadSnapped ? 1.0 : 1.15; // 15% safety penalty for unverified corridor detours
     const totalWhNeeded = Math.round((realDistanceKm * WhPerKm + elevationGainM * 0.12) * safetyFactor);
 
-    const availableWh = (userPrefs.batteryCapacityWh * params.batteryPercent) / 100;
-    const isBatterySafe = availableWh >= totalWhNeeded * 1.15;
+    const availableWh = params.batteryPercent !== null
+      ? (userPrefs.batteryCapacityWh * params.batteryPercent) / 100
+      : null;
+    const isBatterySafe = availableWh !== null ? availableWh >= totalWhNeeded * 1.15 : false;
 
     let title: string;
     let summary: string;
@@ -145,23 +137,7 @@ export class RoutingService {
       isRoadSnapped,
       isOfflineFallbackCorridor: !isRoadSnapped,
       routingEngineStatus,
-      chargingStopsOnRoute: [
-        {
-          id: 'cs-route-1',
-          name: 'Café Waldidyll Ladestation',
-          lat: waypoints[2].lat,
-          lng: waypoints[2].lng,
-          plugType: 'bosch',
-          isWeatherproof: true,
-          isFree: true,
-          openingHours: '10:00 - 19:00',
-          nearbyAmenities: ['Café', 'Sitzbänke', 'WLAN'],
-          verifiedByCount: 19,
-          createdAt: new Date().toISOString(),
-          createdByUserId: 'community',
-          isVerifiedBikeInfrastructure: true,
-        },
-      ],
+      chargingStopsOnRoute: [],
     };
   }
 }

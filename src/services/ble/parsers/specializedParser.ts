@@ -38,6 +38,7 @@ export function parseSpecializedTelemetry(value: DataView): Partial<LiveBikeTele
 
   return {
     batteryPercent,
+    batteryKnown: true,
     speedKmH,
     cadenceRpm,
     riderPowerWatts,
