@@ -71,6 +71,10 @@ export class AiAssistantService {
         systemPrompt: systemInstruction,
         userPrompt: prompt,
       });
+      if (response.provider === 'heuristic_offline') {
+        // Lokale Heuristik darf nicht als echtes Gemini-Modellergebnis ausgegeben werden
+        return null;
+      }
       return response.text || null;
     } catch (e) {
       console.warn(`[AiAssistantService] AI Gateway call failed for ${modelId}:`, e);
@@ -141,7 +145,7 @@ export class AiAssistantService {
     _base64Image: string,
     _modelId: ModelId = DEFAULT_MODEL
   ): Promise<{ plugType: PlugType; isVerified: boolean; confidenceScore: number }> {
-    return { plugType: 'schuko_230v', isVerified: true, confidenceScore: 0.92 };
+    throw new Error('[AiAssistantService] Echte Multimodal Vision API ist nicht konfiguriert. Keine simulierten Foto-Analysen erlaubt.');
   }
 
   /**

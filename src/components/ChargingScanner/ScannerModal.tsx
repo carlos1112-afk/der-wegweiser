@@ -176,7 +176,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
               {/* Photo Capture & Gemini Vision Analysis */}
               <div>
                 <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-                  2. Foto machen & Stecker scannen (Gemini AI Vision)
+                  2. Foto der Ladesäule aufnehmen (Foto-Dokumentation)
                 </label>
                 <div
                   style={{

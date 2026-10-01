@@ -7,7 +7,6 @@ import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, 
 import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR } from './parsers/boschLdiParser';
 
 export class BleManager {
-  private static telemetryInterval: number | null = null;
   private static activeGattServer: any = null;
   private static activeBluetoothDevice: any = null;
   private static activeManufacturer: BikeManufacturer = 'generic';
@@ -16,11 +15,13 @@ export class BleManager {
   private static telemetryCallback: ((telemetry: LiveBikeTelemetry) => void) | null = null;
   private static lastKnownTelemetry: LiveBikeTelemetry = {
     isConnected: false,
-    batteryPercent: 85,
+    batteryPercent: null,
+    batteryWhRemaining: null,
+    batteryKnown: false,
     speedKmH: 0,
     cadenceRpm: 0,
     riderPowerWatts: 0,
-    motorAssistMode: 'auto',
+    motorAssistMode: 'off',
   };
 
   /**
@@ -93,117 +94,12 @@ export class BleManager {
 
         return await this.setupGattConnection(device);
       } catch (err) {
-        console.warn('[BleManager] Web-Bluetooth pairing cancelled or unavailable, activating simulation mode', err);
+        console.warn('[BleManager] Web-Bluetooth pairing cancelled or unavailable:', err);
+        throw new Error('[BleManager] Echte Bluetooth-Verbindung nicht verfügbar oder abgebrochen; keine Simulation erlaubt.');
       }
     }
 
-    const m = targetManufacturer || 'bosch';
-    this.activeManufacturer = m;
-
-    if (m === 'shimano') {
-      this.lastKnownTelemetry = {
-        isConnected: true,
-        deviceName: 'Shimano STEPS EP8 (Di2 D-Fly)',
-        manufacturer: 'shimano',
-        batteryPercent: 90,
-        batteryWhRemaining: 567,
-        currentGear: 7,
-        motorAssistMode: 'tour',
-        cadenceRpm: 80,
-        speedKmH: 25.0,
-        riderPowerWatts: 130,
-        motorPowerWatts: 220,
-        rangeRemainingKm: 68,
-      };
-    } else if (m === 'specialized') {
-      this.lastKnownTelemetry = {
-        isConnected: true,
-        deviceName: 'Specialized Turbo Levo (TCU)',
-        manufacturer: 'specialized',
-        batteryPercent: 82,
-        batteryWhRemaining: 574,
-        speedKmH: 24.1,
-        cadenceRpm: 76,
-        riderPowerWatts: 160,
-        motorPowerWatts: 250,
-        motorAssistMode: 'tour',
-        rangeRemainingKm: 58,
-      };
-    } else if (m === 'mahle') {
-      this.lastKnownTelemetry = {
-        isConnected: true,
-        deviceName: 'Mahle SmartBike X35+ (iWoc)',
-        manufacturer: 'mahle',
-        batteryPercent: 78,
-        batteryWhRemaining: 195,
-        motorAssistMode: 'eco',
-        speedKmH: 22.8,
-        cadenceRpm: 70,
-        riderPowerWatts: 120,
-        motorPowerWatts: 150,
-        motorTemperatureC: 34,
-        rangeRemainingKm: 45,
-      };
-    } else if (m === 'bafang') {
-      this.lastKnownTelemetry = {
-        isConnected: true,
-        deviceName: 'Bafang M500 (CAN-Bus)',
-        manufacturer: 'bafang',
-        batteryPercent: 85,
-        speedKmH: 26.2,
-        cadenceRpm: 82,
-        riderPowerWatts: 140,
-        motorPowerWatts: 350,
-        motorTemperatureC: 42,
-        motorAssistMode: 'turbo',
-        rangeRemainingKm: 52,
-      };
-    } else if (m === 'fazua') {
-      this.lastKnownTelemetry = {
-        isConnected: true,
-        deviceName: 'Fazua Ride 60 (Ring Control)',
-        manufacturer: 'fazua',
-        batteryPercent: 92,
-        batteryWhRemaining: 395,
-        speedKmH: 24.5,
-        cadenceRpm: 75,
-        riderPowerWatts: 155,
-        motorPowerWatts: 190,
-        motorAssistMode: 'tour',
-        rangeRemainingKm: 62,
-      };
-    } else if (m === 'generic') {
-      this.lastKnownTelemetry = {
-        isConnected: true,
-        deviceName: 'Standard BLE Cycling Sensor Suite',
-        manufacturer: 'generic',
-        batteryPercent: 95,
-        speedKmH: 22.0,
-        cadenceRpm: 74,
-        riderPowerWatts: 150,
-        motorAssistMode: 'off',
-        rangeRemainingKm: 80,
-      };
-    } else {
-      // Bosch fallback
-      this.lastKnownTelemetry = {
-        isConnected: true,
-        deviceName: 'Bosch Smart System (BES3)',
-        manufacturer: 'bosch',
-        batteryPercent: 88,
-        batteryWhRemaining: 660,
-        batteryHealthPercent: 98,
-        speedKmH: 23.4,
-        cadenceRpm: 72,
-        riderPowerWatts: 145,
-        motorPowerWatts: 210,
-        motorTemperatureC: 38,
-        motorAssistMode: 'auto',
-        rangeRemainingKm: 64,
-      };
-    }
-
-    return this.lastKnownTelemetry;
+    throw new Error('[BleManager] Web-Bluetooth wird in dieser Umgebung nicht unterstützt; echte Hardware erforderlich.');
   }
 
   private static async setupGattConnection(device: any): Promise<LiveBikeTelemetry> {
@@ -219,8 +115,9 @@ export class BleManager {
       isConnected: true,
       deviceName: device.name || 'Smart E-Bike',
       manufacturer,
-      batteryPercent: 85,
-      batteryWhRemaining: 540,
+      batteryPercent: null,
+      batteryWhRemaining: null,
+      batteryKnown: false,
       speedKmH: 0,
       cadenceRpm: 0,
       riderPowerWatts: 0,
@@ -375,8 +272,8 @@ export class BleManager {
    */
   public static async setAssistMode(mode: 'off' | 'eco' | 'tour' | 'turbo'): Promise<boolean> {
     if (!this.activeGattServer) {
-      console.log(`[BleManager Simulation] Assist Mode set to: ${mode}`);
-      return true;
+      console.warn(`[BleManager] Kann Unterstützungsstufe nicht ändern: Keine echte BLE-Hardware verbunden.`);
+      return false;
     }
 
     try {
@@ -416,37 +313,7 @@ export class BleManager {
     this.telemetryCallback = onUpdate;
     this.lastKnownTelemetry = initialState;
 
-    if (this.telemetryInterval) {
-      clearInterval(this.telemetryInterval);
-    }
-
-    let currentBattery = initialState.batteryPercent;
-
-    this.telemetryInterval = window.setInterval(() => {
-      // Natural riding fluctuation
-      const speedKmH = +(22 + Math.sin(Date.now() / 3000) * 3.5).toFixed(1);
-      const cadenceRpm = Math.floor(70 + Math.cos(Date.now() / 2500) * 8);
-      const riderPowerWatts = Math.floor(140 + Math.sin(Date.now() / 2000) * 30);
-      const motorPowerWatts = Math.floor(180 + Math.sin(Date.now() / 2200) * 45);
-
-      if (Math.random() < 0.05) {
-        currentBattery = Math.max(1, currentBattery - 1);
-      }
-
-      this.updateState({
-        speedKmH,
-        cadenceRpm,
-        riderPowerWatts,
-        motorPowerWatts,
-        batteryPercent: currentBattery,
-      });
-    }, 2000);
-
     return () => {
-      if (this.telemetryInterval) {
-        clearInterval(this.telemetryInterval);
-        this.telemetryInterval = null;
-      }
       this.telemetryCallback = null;
     };
   }

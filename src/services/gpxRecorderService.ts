@@ -8,7 +8,7 @@ export interface GpxTrackPoint {
   cadenceRpm: number;
   riderPowerWatts: number;
   motorPowerWatts: number;
-  batterySoC: number;
+  batterySoC: number | null;
   timestamp: string; // ISO 8601
 }
 
@@ -45,7 +45,7 @@ export class GpxRecorderService {
   private static initialBatterySoC: number | null = null;
   private static idleSecondsCount = 0;
 
-  public static startRecording(initialBatteryPercent: number = 85): void {
+  public static startRecording(initialBatteryPercent: number | null = null): void {
     this.isRecording = true;
     this.isPaused = false;
     this.elapsedSeconds = 0;
@@ -158,9 +158,11 @@ export class GpxRecorderService {
     const tokensEarned = Math.max(1, Math.floor(distanceKm)); // 1 Token per km
 
     // Energy calculation
-    const lastSoC = this.recordedPoints.length > 0 ? this.recordedPoints[this.recordedPoints.length - 1].batterySoC : 85;
-    const socDiff = Math.max(0, (this.initialBatterySoC || 85) - lastSoC);
-    const energyWhUsed = Math.round((socDiff / 100) * 625);
+    const lastPoint = this.recordedPoints.length > 0 ? this.recordedPoints[this.recordedPoints.length - 1] : null;
+    const lastSoC = lastPoint ? lastPoint.batterySoC : null;
+    const energyWhUsed = (this.initialBatterySoC !== null && lastSoC !== null)
+      ? Math.round((Math.max(0, this.initialBatterySoC - lastSoC) / 100) * 625)
+      : 0;
 
     const gpxXmlString = this.generateGpxXml();
     const coordinates: [number, number][] = this.recordedPoints.map((p) => [p.lat, p.lng]);

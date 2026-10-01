@@ -175,7 +175,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 {currentUser ? 'Dein Wegweiser Account' : 'OAuth-Anmeldung'}
               </h2>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
-                {currentUser ? 'Gemini KI-Funktionen aktiviert' : 'Keine API-Keys nötig — Reines OAuth'}
+                {currentUser ? 'Eingeloggt' : 'Keine API-Keys nötig — Reines OAuth'}
               </p>
             </div>
           </div>
@@ -281,7 +281,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <div
               style={{
                 fontSize: '0.8rem',
-                color: 'var(--text-primary)',
+                color: 'var(--text-muted)',
                 backgroundColor: 'rgba(0, 0, 0, 0.3)',
                 padding: '10px 12px',
                 borderRadius: '8px',
@@ -291,7 +291,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               }}
             >
               <Sparkles size={16} className="glow-text-cyan" />
-              <span>Google Gemini 2.0 Flash Co-Pilot & Touren-Cloud-Sync sind bereit.</span>
+              <span>Lokales Profil aktiv. Cloud-Sync & Online-KI-Dienste erfordern Server-Verbindung.</span>
             </div>
 
             <button
@@ -315,7 +315,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: '1.5', margin: 0 }}>
-              Melde dich mit einem Klick an, um individuelle Touren zu speichern, Community-Tokens zu sammeln und die <strong>Google Gemini 2.0 KI-Routenplanung</strong> ohne manuelle API-Keys zu nutzen.
+              Melde dich mit einem Klick an, um individuelle Touren zu speichern und Community-Tokens zu sammeln (Online-KI-Dienste erfordern Server-Anbindung).
             </p>
 
             {/* Google OAuth Button */}

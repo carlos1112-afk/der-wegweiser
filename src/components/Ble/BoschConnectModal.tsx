@@ -146,6 +146,8 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
   const [discoveredDevices, setDiscoveredDevices] = useState<{ id: string; name: string; rssi: number }[]>([]);
   const [connectedTelemetry, setConnectedTelemetry] = useState<LiveBikeTelemetry | null>(null);
 
+  const [scanError, setScanError] = useState<string | null>(null);
+
   if (!isOpen) return null;
 
   const activeMeta = MANUFACTURERS[selectedBrand];
@@ -154,6 +156,7 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
     SoundFxService.playClick();
     setStep('scanning');
     setDiscoveredDevices([]);
+    setScanError(null);
 
     try {
       const liveTelemetry = await BleManager.connectToBike(selectedBrand);
@@ -161,21 +164,21 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
         handleDeviceConnected(liveTelemetry);
         return;
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn('[BleConnectModal] Scan exception:', e);
+      setScanError(e?.message || 'Bluetooth-Kopplung fehlgeschlagen. Keine Hardware gefunden.');
     }
-
-    // Simulated scan discovery fallback matching selected brand
-    setTimeout(() => {
-      setDiscoveredDevices(activeMeta.mockDevices);
-    }, 1500);
   };
 
   const handleSelectDiscovered = async (dev: { id: string; name: string; rssi: number }) => {
     console.log('[BleConnectModal] Device selected:', dev.name);
-    const liveTelemetry = await BleManager.connectToBike(selectedBrand);
-    liveTelemetry.deviceName = dev.name;
-    handleDeviceConnected(liveTelemetry);
+    try {
+      const liveTelemetry = await BleManager.connectToBike(selectedBrand);
+      liveTelemetry.deviceName = dev.name;
+      handleDeviceConnected(liveTelemetry);
+    } catch (e: any) {
+      setScanError(e?.message || 'Verbindung fehlgeschlagen.');
+    }
   };
 
   const handleDeviceConnected = (telemetry: LiveBikeTelemetry) => {
@@ -346,7 +349,12 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
               </span>
             </div>
 
-            {discoveredDevices.length === 0 ? (
+            {scanError ? (
+              <div style={{ padding: '16px', borderRadius: '10px', backgroundColor: 'rgba(255, 50, 50, 0.15)', border: '1px solid #ff4444', color: '#ff8888', fontSize: '0.85rem' }}>
+                <p style={{ fontWeight: 'bold', marginBottom: '6px' }}>Kopplungsfehler / Keine Hardware</p>
+                <p>{scanError}</p>
+              </div>
+            ) : discoveredDevices.length === 0 ? (
               <div style={{ padding: '24px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                 Halte dein Smartphone nah an das Display oder die Funk-Einheit.
               </div>

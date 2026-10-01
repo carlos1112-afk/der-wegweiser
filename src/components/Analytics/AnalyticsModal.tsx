@@ -23,7 +23,6 @@ import {
 } from '../../services/offlineMapService';
 import { dataRepository } from '../../services/dataRepository';
 import { UserIdentity } from '../../services/userIdentity';
-import { CURATED_ROUTES } from '../../services/curatedDatabase';
 
 
 interface AnalyticsModalProps {
@@ -50,17 +49,11 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [selectedRegionName, setSelectedRegionName] = useState('Berlin & Brandenburg Badesee-Zone');
 
-  // Token History Mock / Local Data
-  const [tokenHistory] = useState<TokenHistoryItem[]>([
-    { id: '1', reason: 'Ladesäulen-Scan am Café Badesee verifiziert', amount: 20, date: 'Heute, 14:22', type: 'earn' },
-    { id: '2', reason: 'Müggelsee Panorama KI-Heute-Tour absolviert', amount: 15, date: 'Gestern, 18:05', type: 'earn' },
-    { id: '3', reason: 'Gewinnspiel in Charge \'n\' Earn Lade-Lounge', amount: 10, date: '28.07.2026', type: 'earn' },
-    { id: '4', reason: 'Täglicher KI-Login Bonus', amount: 5, date: '27.07.2026', type: 'earn' },
-    { id: '5', reason: 'Ladesäulen-Foto-Scan beigesteuert', amount: 20, date: '25.07.2026', type: 'earn' },
-  ]);
+  // No fabricated token history: only real repository data may be displayed.
+  const [tokenHistory] = useState<TokenHistoryItem[]>([]);
 
-  // Default sample routes to present if repository returns empty
-  const defaultSampleRoutes: Route[] = CURATED_ROUTES;
+  // No fabricated routes to present if the real repository is empty.
+  const defaultSampleRoutes: Route[] = [];
 
   // Load saved routes and downloaded map regions on mount
   useEffect(() => {

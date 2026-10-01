@@ -24,11 +24,18 @@ const manufacturerColors: Record<BikeManufacturer, { bg: string; text: string; l
 export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute, onConnectBLE, onOpenBoschModal }) => {
   const isBatterySafe = currentRoute ? currentRoute.isBatterySafe : true;
   const [showDetailsDropdown, setShowDetailsDropdown] = useState(false);
+  const [assistError, setAssistError] = useState<string | null>(null);
   const mBadge = manufacturerColors[telemetry.manufacturer || 'generic'];
 
   const handleModeChange = async (mode: 'off' | 'eco' | 'tour' | 'turbo') => {
-    await BleManager.setAssistMode(mode);
+    setAssistError(null);
+    const success = await BleManager.setAssistMode(mode);
+    if (!success) {
+      setAssistError('Keine Hardware verbunden: Stufe kann nicht umgeschaltet werden.');
+    }
   };
+
+  const hasBattery = typeof telemetry.batteryPercent === 'number' && telemetry.batteryPercent !== null;
 
   return (
     <div style={{ position: 'relative' }}>
@@ -47,9 +54,9 @@ export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute,
         title="Akku & E-Bike Telemetrie Details anzeigen"
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <Battery size={16} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'} />
-          <span style={{ fontSize: '0.82rem', fontWeight: 'bold' }} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'}>
-            {telemetry.batteryPercent}%
+          <Battery size={16} className={hasBattery && (telemetry.batteryPercent as number) < 25 ? 'glow-text-gold' : 'glow-text-green'} />
+          <span style={{ fontSize: '0.82rem', fontWeight: 'bold' }} className={hasBattery && (telemetry.batteryPercent as number) < 25 ? 'glow-text-gold' : 'glow-text-green'}>
+            {hasBattery ? `${telemetry.batteryPercent}%` : '--'}
           </span>
         </div>
 
@@ -88,10 +95,10 @@ export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute,
           {/* Header & Manufacturer Badge */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Battery size={20} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'} />
+              <Battery size={20} className={hasBattery && (telemetry.batteryPercent as number) < 25 ? 'glow-text-gold' : 'glow-text-green'} />
               <div>
-                <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }} className={telemetry.batteryPercent < 25 ? 'glow-text-gold' : 'glow-text-green'}>
-                  {telemetry.batteryPercent}%
+                <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }} className={hasBattery && (telemetry.batteryPercent as number) < 25 ? 'glow-text-gold' : 'glow-text-green'}>
+                  {hasBattery ? `${telemetry.batteryPercent}%` : '--'}
                 </span>
                 {telemetry.batteryWhRemaining && (
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '6px' }}>
@@ -137,6 +144,11 @@ export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute,
                 </button>
               ))}
             </div>
+            {assistError && (
+              <div style={{ fontSize: '0.7rem', color: '#ff6666', marginTop: '6px' }}>
+                {assistError}
+              </div>
+            )}
           </div>
 
           {/* Motor & Rider Watts */}

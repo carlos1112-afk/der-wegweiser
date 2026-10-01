@@ -34,28 +34,33 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, 
         sampledCoords.push(coords[coords.length - 1]);
       }
 
-      const rawElevations: number[] = await ElevationService.getElevations(sampledCoords);
-      const totalDist = currentRoute.distanceKm;
-      const stepDist = totalDist / Math.max(1, rawElevations.length - 1);
+      try {
+        const rawElevations: number[] = await ElevationService.getElevations(sampledCoords);
+        const totalDist = currentRoute.distanceKm;
+        const stepDist = totalDist / Math.max(1, rawElevations.length - 1);
 
-      let maxElev = 0;
-      const profile = rawElevations.map((elev: number, idx: number) => {
-        if (elev > maxElev) maxElev = elev;
-        const prevElev = idx > 0 ? rawElevations[idx - 1] : elev;
-        const distDeltaM = stepDist * 1000;
-        const slope = distDeltaM > 0 ? +(((elev - prevElev) / distDeltaM) * 100).toFixed(1) : 0;
-        return {
-          distanceKm: +(idx * stepDist).toFixed(1),
-          elevationM: Math.round(elev),
-          slopePercent: slope,
-        };
-      });
+        let maxElev = 0;
+        const profile = rawElevations.map((elev: number, idx: number) => {
+          if (elev > maxElev) maxElev = elev;
+          const prevElev = idx > 0 ? rawElevations[idx - 1] : elev;
+          const distDeltaM = stepDist * 1000;
+          const slope = distDeltaM > 0 ? +(((elev - prevElev) / distDeltaM) * 100).toFixed(1) : 0;
+          return {
+            distanceKm: +(idx * stepDist).toFixed(1),
+            elevationM: Math.round(elev),
+            slopePercent: slope,
+          };
+        });
 
-      setElevationProfile(profile);
-      setMaxElevation(Math.round(maxElev));
-      if (profile.length > 0) {
-        setCurrentElevation(profile[0].elevationM);
-        setCurrentSlope(profile[0].slopePercent);
+        setElevationProfile(profile);
+        setMaxElevation(Math.round(maxElev));
+        if (profile.length > 0) {
+          setCurrentElevation(profile[0].elevationM);
+          setCurrentSlope(profile[0].slopePercent);
+        }
+      } catch (err) {
+        console.warn('[ElevationRibbon] Elevation data unavailable:', err);
+        setElevationProfile([]);
       }
     };
 

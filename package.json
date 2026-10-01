@@ -11,7 +11,7 @@
     "build:ios": "npm run build && npx cap sync ios",
     "sync": "npx cap sync",
     "test:scenarios": "node scripts/test_15_scenarios.mjs",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-wegweiser \"node --test tests/firestore.rules.test.mjs\"",
+    "test:rules": "npx --yes firebase-tools emulators:exec --only firestore --project demo-wegweiser \"node --test tests/firestore.rules.test.mjs\"",
     "lint": "oxlint",
     "preview": "vite preview"
   },

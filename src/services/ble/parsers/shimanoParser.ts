@@ -34,6 +34,7 @@ export function parseShimanoTelemetry(value: DataView): Partial<LiveBikeTelemetr
   const result: Partial<LiveBikeTelemetry> = {
     manufacturer: 'shimano',
     batteryPercent,
+    batteryKnown: true,
     currentGear: currentGear > 0 ? currentGear : undefined,
     motorAssistMode,
   };

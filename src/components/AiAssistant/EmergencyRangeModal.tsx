@@ -6,7 +6,7 @@ import { VoiceGuidanceService } from '../../services/voiceGuidanceService';
 
 interface EmergencyRangeModalProps {
   isOpen: boolean;
-  batteryPercent: number;
+  batteryPercent: number | null;
   remainingWh: number;
   nearestStations: ChargingStation[];
   onRerouteToStation: (station: ChargingStation) => void;
@@ -82,7 +82,7 @@ export const EmergencyRangeModal: React.FC<EmergencyRangeModalProps> = ({
                 NO-COAST REICHWEITEN-ALARM!
               </h3>
               <p style={{ fontSize: '0.75rem', color: '#fff' }}>
-                Akku kritisch: <strong>{batteryPercent}% ({remainingWh} Wh)</strong>
+                Akku kritisch: <strong>{batteryPercent !== null ? `${batteryPercent}%` : '--'} ({remainingWh} Wh)</strong>
               </p>
             </div>
           </div>

@@ -12,8 +12,13 @@ export const WeatherHUD: React.FC<WeatherHUDProps> = ({ userLocation }) => {
 
   useEffect(() => {
     const fetchWeather = async () => {
-      const data = await WeatherService.getWeatherForLocation(userLocation.lat, userLocation.lng);
-      setWeather(data);
+      try {
+        const data = await WeatherService.getWeatherForLocation(userLocation.lat, userLocation.lng);
+        setWeather(data);
+      } catch (err) {
+        console.warn('[WeatherHUD] Live weather unavailable:', err);
+        setWeather(null);
+      }
     };
 
     fetchWeather();

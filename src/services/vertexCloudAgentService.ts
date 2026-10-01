@@ -59,34 +59,7 @@ export class VertexCloudAgentService {
       console.info('[VertexCloudAgent] Offline / fallback calculation:', e);
     }
 
-    // Heuristic client fallback
-    const totalElev = route.elevationGainM || 120;
-    const baseWh = route.distanceKm * 5.8 + (totalElev * 0.25);
-    const availableWh = 625 * (batteryPercent / 100);
-    const remainingWh = Math.max(0, availableWh - baseWh);
-    const remainingPct = Math.round((remainingWh / 625) * 100);
-
-    return {
-      totalDistanceKm: route.distanceKm,
-      totalElevationGainM: totalElev,
-      estimatedWhConsumption: Math.round(baseWh),
-      remainingBatteryPercent: remainingPct,
-      isBatterySafe: remainingPct >= 15,
-      criticalSegments: [
-        {
-          fromWaypoint: 'Abschnitt 2',
-          toWaypoint: 'Aussichtspunkt',
-          slopePercent: 5.8,
-          elevationGainM: 45,
-          warning: 'Mäßiger Anstieg (~6%) – Mittlere Motorstufe wählen',
-        },
-      ],
-      recommendations: [
-        remainingPct >= 15
-          ? 'Reichweite gesichert. Ausreichend Akkupuffer für die gesamte Route.'
-          : 'Achtung: Geringer Akkupuffer. Eco-Modus oder Zwischenladen empfohlen.',
-      ],
-    };
+    throw new Error('[VertexCloudAgent] Live topography integration unavailable; no fallback is permitted.');
   }
 
   /**
