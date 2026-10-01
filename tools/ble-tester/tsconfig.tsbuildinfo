@@ -1,0 +1,1 @@
+{"root":["./src/main.ts","../../src/services/ble/parsers/boschLdiParser.ts","../../src/services/ble/parsers/bafangParser.ts","../../src/types/navigation.ts"],"version":"6.0.3"}

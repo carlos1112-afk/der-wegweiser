@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ShieldCheck, AlertTriangle, Scale, CheckCircle2, Sliders, MapPin, BarChart2, Coins } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
 import { ConsentService, type ConsentFlags } from '../../services/consentService';
-import confetti from 'canvas-confetti';
 
 interface ConsentModalProps {
   isOpen: boolean;
@@ -29,7 +28,6 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
 
   const saveConsentAndProceed = (consent: Omit<UserPrivacyConsent, 'acceptedAt' | 'version'>) => {
     SoundFxService.playSuccessChime();
-    confetti({ particleCount: 70, spread: 70 });
     ConsentService.save(consent);
     onAccept();
   };
@@ -207,7 +205,19 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '8px',
+              position: 'sticky',
+              bottom: '-26px', // offset the 26px padding of the parent
+              backgroundColor: 'rgba(5, 10, 20, 0.98)',
+              padding: '16px 26px 26px 26px',
+              margin: '16px -26px -26px -26px',
+              borderTop: '1px solid rgba(0, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              zIndex: 10
+            }}>
               <button
                 onClick={handleAcceptAll}
                 className="btn-cyberpunk btn-gold"
@@ -303,7 +313,18 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
             </div>
 
             {/* Buttons */}
-            <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: '8px', 
+              position: 'sticky',
+              bottom: '-26px', // offset the 26px padding of the parent
+              backgroundColor: 'rgba(5, 10, 20, 0.98)',
+              padding: '16px 26px 26px 26px',
+              margin: '16px -26px -26px -26px',
+              borderTop: '1px solid rgba(0, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              zIndex: 10
+            }}>
               <button
                 className="btn-cyberpunk"
                 onClick={() => setShowGranularSettings(false)}

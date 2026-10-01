@@ -4,6 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import './index.css';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { UILayoutProvider } from './contexts/UILayoutContext';
 
 // Register Service Worker only for browser PWA mode, NEVER in native Capacitor mobile apps!
 // In native Android/iOS, Capacitor serves local assets directly from the APK/IPA container.
@@ -29,7 +30,9 @@ if ('serviceWorker' in navigator) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-      <App />
+      <UILayoutProvider>
+        <App />
+      </UILayoutProvider>
     </ErrorBoundary>
   </StrictMode>,
 );
