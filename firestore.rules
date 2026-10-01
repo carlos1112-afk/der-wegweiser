@@ -74,7 +74,19 @@ service cloud.firestore {
       allow delete: if isCreator();
     }
 
-    // --- 3. Gespeicherte Routen ---
+    // --- 3. Points of Interest (kuratierte Radfahrer-Orte) ---
+    // Öffentlich lesbar (kein PII, community-nützlich).
+    // Anlegen: nur angemeldete Nutzer (Seed-Daten kommen über Admin-SDK).
+    // Ändern/Löschen: nur der Ersteller, da createdByUserId null sein kann
+    // (Admin-Seed), schützt Community-Einträge vor fremder Überschreibung.
+    match /points_of_interest/{poiId} {
+      allow read: if true;
+      allow create: if isActiveUser();
+      allow update: if isCreator();
+      allow delete: if isCreator();
+    }
+
+    // --- 4. Gespeicherte Routen ---
     // Datenschutz: private Nutzerdaten. Nur der Ersteller darf lesen/schreiben.
     // (`docs/APPLE_UGC_COMPLIANCE.md` weist eigene Routen ausdrücklich als privat aus.)
     match /routes/{routeId} {
