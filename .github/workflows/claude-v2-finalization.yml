@@ -167,36 +167,24 @@ jobs:
 
           git checkout -b "$BRANCH_NAME"
           git add -A
-          git commit -m "feat(v2-$PHASE): autonomous finalization by Claude ($MODEL)
-
-- Phase: $PHASE
-- Model: $MODEL
-- 5-Stage Gatekeeper: PASSED (Secret Scan, Token Sync, Lint, Build, 51/51 Scenarios, Rules)
-- Run ID: ${{ github.run_id }}"
+          git commit -m "feat(v2-$PHASE): autonomous finalization by Claude ($MODEL) [Run ${{ github.run_id }}]"
 
           git push origin "$BRANCH_NAME"
 
+          cat << 'EOF' > /tmp/pr_body.md
+          ## 🤖 Claude Cloud V2 Finalization
+
+          ### 📊 Ausführungs-Zusammenfassung
+          - Automatisch generiert durch das Claude Cloud V2 Finalization Gateway.
+          - 5-Stufen-Gatekeeper: PASSED (Secret Scan, Token Sync, Lint, Build, 51/51 Scenarios, Rules)
+
+          ### 🛡️ 5-Stufen-Gatekeeper Verifikation (100% Bestanden)
+          1. ✅ **Gate 1:** Secret & Credential Scanner (scripts/scan_secrets.js) — 0 Exposed Secrets
+          2. ✅ **Gate 2:** Design Token & CSS Synchronicity (scripts/sync_tokens.mjs --check) — 100% In Sync
+          3. ✅ **Gate 3:** Oxlint Code Quality & Hygiene (npm run lint) — 0 Errors
+          4. ✅ **Gate 4:** TypeScript & Vite Production Build (npm run build) — Built in <1s
+          5. ✅ **Gate 5:** 15 Android Mission-Critical Scenarios (51/51 PASS) + Firestore Security Rules (11/11 PASS)
+          EOF
+
           PR_TITLE="feat(v2-$PHASE): autonomous V2 finalization ($PHASE)"
-          PR_BODY="## 🤖 Claude Cloud V2 Finalization — Phase: \`$PHASE\`
-
-### 📊 Ausführungs-Zusammenfassung
-- **Verwendetes Modell:** \`$MODEL\`
-- **Ausgelöst via:** \`${{ github.event_name }}\` (Run ID: \`${{ github.run_id }}\`)
-- **Zielphase:** \`$PHASE\`
-
-### 🛡️ 5-Stufen-Gatekeeper Verifikation (100% Bestanden)
-1. ✅ **Gate 1:** Secret & Credential Scanner (\`scripts/scan_secrets.js\`) — 0 Exposed Secrets
-2. ✅ **Gate 2:** Design Token & CSS Synchronicity (\`scripts/sync_tokens.mjs --check\`) — 100% In Sync
-3. ✅ **Gate 3:** Oxlint Code Quality & Hygiene (\`npm run lint\`) — 0 Errors
-4. ✅ **Gate 4:** TypeScript & Vite Production Build (\`npm run build\`) — Built in <1s
-5. ✅ **Gate 5:** 15 Android Mission-Critical Scenarios (51/51 PASS) + Firestore Security Rules (11/11 PASS)
-
-### 🔍 Geänderte Dateien
-\`\`\`
-$(git diff --stat origin/main..HEAD)
-\`\`\`
-
----
-*Automatisch generiert durch das Claude Cloud V2 Finalization Gateway.*"
-
-          gh pr create --base main --head "$BRANCH_NAME" --title "$PR_TITLE" --body "$PR_BODY"
+          gh pr create --base main --head "$BRANCH_NAME" --title "$PR_TITLE" --body-file /tmp/pr_body.md
