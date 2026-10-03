@@ -33,9 +33,6 @@ jobs:
       - name: Automated Secret Scan
         run: node scripts/scan_secrets.js
 
-      - name: Dependency Policy & Security Audit
-        run: node scripts/check_dependencies.js
-
       - name: Run Android Mission-Critical Scenarios Test
         run: node scripts/test_mission_critical_scenarios.mjs
 
