@@ -188,28 +188,12 @@ def check_secure_org_policies_enforced(
   return org_policy_results
 
 
-def _update_enabled_audit_logs(
-    audit_configs: Collection[Mapping[str, Any]],
-    enabled_logs: MutableMapping[str, bool],
-) -> None:
-  """Updates enabled_logs dict in place based on auditConfigs list."""
-  for config in audit_configs:
-    service = config.get("service", "")
-    if service not in (_STORAGE_API, _ALL_SERVICES):
-      continue
-    for audit_log_config in config.get("auditLogConfigs") or []:
-      audit_log_type = audit_log_config.get("logType")
-      if audit_log_type in enabled_logs:
-        enabled_logs[audit_log_type] = True
-
-
+# TODO: Check org-level API as well for inherited policies.
 def check_project_data_access_audit_logs_enabled(
     project_id: str,
     authorized_session: Any,
 ) -> Mapping[str, bool | str]:
   """Checks if DATA_ACCESS audit logs are enabled for the project.
-
-  Checks both project-level and organization-level inherited policies.
 
   Args:
       project_id: GCP project ID
@@ -237,28 +221,19 @@ def check_project_data_access_audit_logs_enabled(
   }
 
   audit_configs = iam_response_json.get("auditConfigs") or []
-  _update_enabled_audit_logs(audit_configs, enabled_logs)
+  for config in audit_configs:
+    service = config.get("service", "")
+    if service not in (_STORAGE_API, _ALL_SERVICES):
+      continue
+    for audit_log_config in config.get("auditLogConfigs") or []:
+      audit_log_type = audit_log_config.get("logType")
+      if audit_log_type in enabled_logs:
+        enabled_logs[audit_log_type] = True
 
-  if all(enabled_logs.values()):
-    return enabled_logs
-
-  # Check org-level API as well for inherited policies.
-  org_res = _get_project_number_and_org_id(project_id, authorized_session)
-  if isinstance(org_res, tuple):
-    _, org_id_path = org_res
-    try:
-      with authorized_session.request(
-          method="POST",
-          url=f"{_CLOUD_RESOURCE_MANAGER_API}/{org_id_path}:getIamPolicy",
-          timeout=_TIMEOUT_SECONDS,
-      ) as org_iam_response:
-        org_iam_response.raise_for_status()
-        org_iam_json = org_iam_response.json()
-        org_audit_configs = org_iam_json.get("auditConfigs") or []
-        _update_enabled_audit_logs(org_audit_configs, enabled_logs)
-    except cloud_rest_helpers_nodeps.CloudRestError:
-      pass
-
+      # Terminate early if all logs are enabled. Rules may be split across
+      # storage and allServices.
+      if all(enabled_logs.values()):
+        return enabled_logs
   return enabled_logs
 
 
