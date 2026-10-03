@@ -37,6 +37,9 @@ function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number)
 }
 
 export class GpxRecorderService {
+  private static readonly AUTO_PAUSE_SPEED_THRESHOLD_KMH = 1.5;
+  private static readonly AUTO_PAUSE_IDLE_SECONDS_THRESHOLD = 5;
+
   private static isRecording = false;
   private static isPaused = false;
   private static elapsedSeconds = 0;
@@ -91,10 +94,10 @@ export class GpxRecorderService {
       ? +(location.speed * 3.6).toFixed(1)
       : telemetry.speedKmH || 0;
 
-    // Auto-Pause check: If standing still (< 1.5 km/h) for > 5 seconds
-    if (speedKmH < 1.5) {
+    const isStandingStill = speedKmH < GpxRecorderService.AUTO_PAUSE_SPEED_THRESHOLD_KMH;
+    if (isStandingStill) {
       this.idleSecondsCount += 1;
-      if (this.idleSecondsCount >= 5 && !this.isPaused) {
+      if (this.idleSecondsCount >= GpxRecorderService.AUTO_PAUSE_IDLE_SECONDS_THRESHOLD && !this.isPaused) {
         this.isPaused = true;
       }
     } else {
