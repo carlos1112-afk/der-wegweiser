@@ -110,12 +110,67 @@ class LocalAndFirestoreRepository implements IDataRepository {
           east: bounds.maxLng
         });
 
+        // Spatial grid optimization to avoid O(N*M) distance checks
+        const CELL_SIZE = 0.001; // ~111m lat
+        const grid = new Map<string, ChargingStation[]>();
+
+        const getCellKey = (lat: number, lng: number) => {
+          const x = Math.floor(lat / CELL_SIZE);
+          const y = Math.floor(lng / CELL_SIZE);
+          return `${x},${y}`;
+        };
+
+        const addToGrid = (station: ChargingStation) => {
+          const key = getCellKey(station.lat, station.lng);
+          let cell = grid.get(key);
+          if (!cell) {
+            cell = [];
+            grid.set(key, cell);
+          }
+          cell.push(station);
+        };
+
+        for (const st of filtered) {
+          addToGrid(st);
+        }
+
+        const MAX_LAT_DELTA = 0.00045; // ~50m in latitude
+
         for (const osm of osmStations) {
-          const isDuplicate = filtered.some(existing => 
-            getDistanceFromLatLonInM(existing.lat, existing.lng, osm.lat, osm.lng) < 50
-          );
+          const x = Math.floor(osm.lat / CELL_SIZE);
+          const y = Math.floor(osm.lng / CELL_SIZE);
+
+          const cosLat = Math.cos((osm.lat * Math.PI) / 180);
+          const maxLngDelta = cosLat > 0.01 ? MAX_LAT_DELTA / cosLat : 0.05;
+
+          const cellRadiusLat = Math.ceil(MAX_LAT_DELTA / CELL_SIZE);
+          const cellRadiusLng = Math.ceil(maxLngDelta / CELL_SIZE);
+
+          let isDuplicate = false;
+
+          gridLoop:
+          for (let dx = -cellRadiusLat; dx <= cellRadiusLat; dx++) {
+            for (let dy = -cellRadiusLng; dy <= cellRadiusLng; dy++) {
+              const cell = grid.get(`${x + dx},${y + dy}`);
+              if (!cell) continue;
+
+              for (const existing of cell) {
+                if (
+                  Math.abs(existing.lat - osm.lat) <= MAX_LAT_DELTA &&
+                  Math.abs(existing.lng - osm.lng) <= maxLngDelta
+                ) {
+                  if (getDistanceFromLatLonInM(existing.lat, existing.lng, osm.lat, osm.lng) < 50) {
+                    isDuplicate = true;
+                    break gridLoop;
+                  }
+                }
+              }
+            }
+          }
+
           if (!isDuplicate) {
             filtered.push(osm);
+            addToGrid(osm);
           }
         }
       } catch (err) {
