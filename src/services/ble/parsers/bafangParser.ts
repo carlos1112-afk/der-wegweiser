@@ -20,10 +20,13 @@ export function parseBafangPacket(value: DataView): Partial<LiveBikeTelemetry> {
 
   // Header check: 0x59 is Bafang CAN Frame start
   const header = value.getUint8(0);
-  if (header === 0x59 || header === 0x3A) {
-    const frameId = value.getUint8(1);
+  if (header !== 0x59 && header !== 0x3A) {
+    return {};
+  }
 
-    // Frame 0x32: Battery Status & Power
+  const frameId = value.getUint8(1);
+
+  // Frame 0x32: Battery Status & Power
     if (frameId === 0x32 && value.byteLength >= 7) {
       const voltageMv = value.getUint16(2, true);
       const currentMa = value.getUint16(4, true);
@@ -47,18 +50,10 @@ export function parseBafangPacket(value: DataView): Partial<LiveBikeTelemetry> {
       result.cadenceRpm = cadenceRpm;
       if (tempC !== undefined) result.motorTemperatureC = tempC;
 
-      if (assistLevel === 0) result.motorAssistMode = 'off';
-      else if (assistLevel <= 2) result.motorAssistMode = 'eco';
-      else if (assistLevel <= 4) result.motorAssistMode = 'tour';
-      else result.motorAssistMode = 'turbo';
-    }
-  } else {
-    // Direct raw packet fallback
-    const batteryPercent = value.getUint8(0);
-    const speedRaw = value.getUint16(1, true);
-    result.batteryPercent = batteryPercent;
-    result.batteryKnown = true;
-    result.speedKmH = +(speedRaw / 100).toFixed(1);
+    if (assistLevel === 0) result.motorAssistMode = 'off';
+    else if (assistLevel <= 2) result.motorAssistMode = 'eco';
+    else if (assistLevel <= 4) result.motorAssistMode = 'tour';
+    else result.motorAssistMode = 'turbo';
   }
 
   return result;

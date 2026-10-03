@@ -61,7 +61,10 @@ export function parseBoschLdiTelemetry(value: DataView): Partial<LiveBikeTelemet
   // Byte 11: Assist Mode
   if (value.byteLength >= 12) {
     const rawMode = value.getUint8(11);
-    result.motorAssistMode = BOSCH_MODE_MAP[rawMode] || 'auto';
+    const mappedMode = BOSCH_MODE_MAP[rawMode];
+    if (mappedMode) {
+      result.motorAssistMode = mappedMode;
+    }
   }
 
   return result;

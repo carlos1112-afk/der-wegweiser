@@ -30,15 +30,18 @@ export function parseMahleTelemetry(value: DataView): Partial<LiveBikeTelemetry>
 
   // Byte 3: Active Assist Level (0-3)
   const rawMode = value.getUint8(3);
-  const motorAssistMode = MAHLE_MODE_MAP[rawMode] || 'eco';
+  const motorAssistMode = MAHLE_MODE_MAP[rawMode];
 
   const result: Partial<LiveBikeTelemetry> = {
     manufacturer: 'mahle',
     batteryPercent,
     batteryWhRemaining,
     batteryKnown: true,
-    motorAssistMode,
   };
+
+  if (motorAssistMode) {
+    result.motorAssistMode = motorAssistMode;
+  }
 
   // Byte 4-5: Speed in 0.1 km/h
   if (value.byteLength >= 6) {

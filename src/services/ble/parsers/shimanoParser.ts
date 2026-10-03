@@ -29,15 +29,18 @@ export function parseShimanoTelemetry(value: DataView): Partial<LiveBikeTelemetr
 
   // Byte 2: Assist Mode
   const rawMode = value.getUint8(2);
-  const motorAssistMode = SHIMANO_MODE_MAP[rawMode] || 'eco';
+  const motorAssistMode = SHIMANO_MODE_MAP[rawMode];
 
   const result: Partial<LiveBikeTelemetry> = {
     manufacturer: 'shimano',
     batteryPercent,
     batteryKnown: true,
     currentGear: currentGear > 0 ? currentGear : undefined,
-    motorAssistMode,
   };
+
+  if (motorAssistMode) {
+    result.motorAssistMode = motorAssistMode;
+  }
 
   // Byte 3-4: Cadence in 0.1 RPM
   if (value.byteLength >= 5) {
