@@ -1,3 +1,4 @@
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import type { LiveBikeTelemetry, BikeManufacturer } from '../../types/navigation';
 import { parsePowerMeasurement, parseBatteryLevel, parseCscMeasurement, resetStandardSigState } from './parsers/standardSigParser';
 import { parseSpecializedTelemetry, buildSpecializedAssistCommand, SPECIALIZED_SERVICE_UUID, SPECIALIZED_TELEMETRY_CHAR, SPECIALIZED_ASSIST_CHAR } from './parsers/specializedParser';
@@ -228,7 +229,20 @@ export class BleManager {
       bafangChar.addEventListener('characteristicvaluechanged', (e: Event) => {
         const target = e.target as BluetoothRemoteGATTCharacteristic;
         if (target.value) {
-          this.updateState({ ...parseBafangPacket(target.value), manufacturer: 'bafang' });
+          const parsed = parseBafangPacket(target.value);
+          this.updateState({ ...parsed, manufacturer: 'bafang' });
+          
+          // Capacitor File Logger for Test Drive
+          try {
+            const rawStr = Array.from(new Uint8Array(target.value.buffer)).map(b => b.toString(16).padStart(2,"0")).join(" ");
+            const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}\n`;
+            Filesystem.appendFile({
+              path: 'bafang_testfahrt.txt',
+              data: logLine,
+              directory: Directory.Documents,
+              encoding: Encoding.UTF8
+            }).catch(() => {});
+          } catch(e) {}
         }
       });
     } catch {
