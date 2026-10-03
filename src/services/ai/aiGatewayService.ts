@@ -199,12 +199,7 @@ export class HeuristicOfflineAdapter implements AiProviderAdapter {
   public type: AiProviderType = 'heuristic_offline';
 
   public async execute(_request: CanonicalAiRequest): Promise<CanonicalAiResponse> {
-    // Generates deterministic heuristic text from user prompt context
-    return {
-      text: 'Erfolgreich navigiert. Tourdaten lokal verifiziert.',
-      provider: this.type,
-      modelUsed: 'offline-physics-engine',
-    };
+    throw new Error('Offline-Heuristik kann keine dynamischen Prompts verarbeiten. Fallback auf lokale Logik erforderlich.');
   }
 }
 
