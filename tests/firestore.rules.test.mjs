@@ -2,7 +2,7 @@
  * Security-Rules-Tests für firestore.rules.
  *
  * Diese Tests prüfen die tatsächlich deployten Regeln gegen den
- * Firestore-Emulator. Sie ergänzen scripts/test_15_scenarios.mjs, das
+ * Firestore-Emulator. Sie ergänzen scripts/test_mission_critical_scenarios.mjs, das
  * bislang lediglich eine MockLocalStorage nachgebildet und nie den
  * AccountDeletionService ausgeführt hat — ein "grünes" CI bedeutete dort
  * nichts über die Sicherheit der installierten Regeln.
