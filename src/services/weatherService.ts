@@ -18,7 +18,7 @@ export class WeatherService {
    * Client calls backend proxy (/api/weather) or direct standard/custom endpoint.
    */
   public static async getWeatherForLocation(lat: number, lng: number): Promise<WeatherData> {
-    const customEndpoint = import.meta.env.VITE_WEATHER_PROVIDER_URL;
+    const customEndpoint = import.meta.env?.VITE_WEATHER_PROVIDER_URL || (globalThis as any).process?.env?.VITE_WEATHER_PROVIDER_URL;
     
     // Priority: Custom Endpoint -> Backend Weather Proxy -> Standard Direct Fallback
     const proxyUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/weather?latitude=${lat}&longitude=${lng}` : '';
