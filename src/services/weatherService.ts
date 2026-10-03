@@ -17,8 +17,12 @@ export class WeatherService {
    * ZERO CLIENT SECRETS: Commercial API keys reside exclusively on the server backend.
    * Client calls backend proxy (/api/weather) or direct standard/custom endpoint.
    */
-  public static async getWeatherForLocation(lat: number, lng: number): Promise<WeatherData> {
-    const customEndpoint = import.meta.env.VITE_WEATHER_PROVIDER_URL;
+  public static async getWeatherForLocation(
+    lat: number,
+    lng: number,
+    fetchFn: typeof fetch = globalThis.fetch
+  ): Promise<WeatherData> {
+    const customEndpoint = import.meta.env?.VITE_WEATHER_PROVIDER_URL;
     
     // Priority: Custom Endpoint -> Backend Weather Proxy -> Standard Direct Fallback
     const proxyUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/weather?latitude=${lat}&longitude=${lng}` : '';
@@ -27,11 +31,11 @@ export class WeatherService {
     const urlToTry = customEndpoint ? `${customEndpoint}?latitude=${lat}&longitude=${lng}` : (proxyUrl || directUrl);
 
     try {
-      let res = await fetch(urlToTry).catch(() => null);
+      let res = await fetchFn(urlToTry).catch(() => null);
       
       // If backend proxy is not deployed locally, gracefully fallback to direct public endpoint
       if (!res || !res.ok) {
-        res = await fetch(directUrl);
+        res = await fetchFn(directUrl);
       }
 
       if (res && res.ok) {
