@@ -137,15 +137,39 @@ test('Fremde Konten sind strikt isoliert', async () => {
   const alice = ctx({ uid: 'alice' });
   const mallory = ctx({ uid: 'mallory' });
 
+  // user_preferences
   await assertSucceeds(setDoc(doc(alice, 'user_preferences', 'alice'), { bikeType: 'ebike' }));
   await assertFails(getDoc(doc(mallory, 'user_preferences', 'alice')));
   await assertFails(updateDoc(doc(mallory, 'user_preferences', 'alice'), { bikeType: 'cargo' }));
+
+  // users collection isolation
+  await assertSucceeds(setDoc(doc(alice, 'users', 'alice'), { name: 'Alice' }));
+  await assertSucceeds(getDoc(doc(alice, 'users', 'alice')));
+  await assertSucceeds(updateDoc(doc(alice, 'users', 'alice'), { name: 'Alice 2' }));
+
+  await assertFails(setDoc(doc(mallory, 'users', 'alice'), { name: 'Mallory' }));
+  await assertFails(getDoc(doc(mallory, 'users', 'alice')));
+  await assertFails(updateDoc(doc(mallory, 'users', 'alice'), { name: 'Mallory 2' }));
+  await assertFails(deleteDoc(doc(mallory, 'users', 'alice')));
+  await assertSucceeds(deleteDoc(doc(alice, 'users', 'alice')));
+
+  // user_tokens collection isolation
+  await assertSucceeds(setDoc(doc(alice, 'user_tokens', 'alice'), { token: 'abc' }));
+  await assertSucceeds(getDoc(doc(alice, 'user_tokens', 'alice')));
+  await assertSucceeds(updateDoc(doc(alice, 'user_tokens', 'alice'), { token: 'def' }));
+
+  await assertFails(setDoc(doc(mallory, 'user_tokens', 'alice'), { token: 'xyz' }));
+  await assertFails(getDoc(doc(mallory, 'user_tokens', 'alice')));
+  await assertFails(updateDoc(doc(mallory, 'user_tokens', 'alice'), { token: 'xyz' }));
   await assertFails(deleteDoc(doc(mallory, 'user_tokens', 'alice')));
+  await assertSucceeds(deleteDoc(doc(alice, 'user_tokens', 'alice')));
 });
 
 test('Ladesäulen bleiben öffentlich lesbar (gemeinnützige Infrastruktur)', async () => {
   const db = ctx();
   const owner = ctx({ uid: 'owner-2' });
+  const attacker = ctx({ uid: 'attacker-2' });
+
   await assertSucceeds(
     setDoc(doc(owner, 'charging_stations_v2', 'st-3'), {
       name: 'Öffentlich',
@@ -153,6 +177,42 @@ test('Ladesäulen bleiben öffentlich lesbar (gemeinnützige Infrastruktur)', as
     })
   );
   await assertSucceeds(getDocs(collection(db, 'charging_stations_v2')));
+
+  // Update / Delete checks for charging_stations_v2
+  await assertFails(
+    updateDoc(doc(attacker, 'charging_stations_v2', 'st-3'), { name: 'Gehackt' })
+  );
+  await assertFails(deleteDoc(doc(attacker, 'charging_stations_v2', 'st-3')));
+
+  await assertSucceeds(updateDoc(doc(owner, 'charging_stations_v2', 'st-3'), { name: 'Aktualisiert' }));
+  await assertSucceeds(deleteDoc(doc(owner, 'charging_stations_v2', 'st-3')));
+});
+
+test('Scout Reports (Community-Ladeinfrastruktur) sind öffentlich lesbar, aber nur vom Ersteller änderbar', async () => {
+  const db = ctx();
+  const owner = ctx({ uid: 'scout-1' });
+  const attacker = ctx({ uid: 'attacker-3' });
+
+  // Create
+  await assertSucceeds(
+    setDoc(doc(owner, 'scout_reports', 'rep-1'), {
+      status: 'working',
+      createdByUserId: 'scout-1',
+    })
+  );
+  // Read
+  await assertSucceeds(getDoc(doc(db, 'scout_reports', 'rep-1')));
+  await assertSucceeds(getDocs(collection(db, 'scout_reports')));
+
+  // Update/Delete by non-creator
+  await assertFails(
+    updateDoc(doc(attacker, 'scout_reports', 'rep-1'), { status: 'broken' })
+  );
+  await assertFails(deleteDoc(doc(attacker, 'scout_reports', 'rep-1')));
+
+  // Update/Delete by creator
+  await assertSucceeds(updateDoc(doc(owner, 'scout_reports', 'rep-1'), { status: 'maintenance' }));
+  await assertSucceeds(deleteDoc(doc(owner, 'scout_reports', 'rep-1')));
 });
 
 test('Content-Reports können gemeldet, aber nicht gelesen oder gelöscht werden', async () => {
@@ -166,8 +226,30 @@ test('Content-Reports können gemeldet, aber nicht gelesen oder gelöscht werden
 
 test('Partner-Leads sind nur eingehend beschreibbar', async () => {
   const user = ctx({ uid: 'biz-1' });
-  await assertSucceeds(addDoc(collection(user, 'partner_leads'), { businessName: 'B' }));
+  const leadRef = doc(user, 'partner_leads', 'lead-1');
+
+  await assertSucceeds(setDoc(leadRef, { businessName: 'B' }));
+  await assertFails(getDoc(leadRef));
   await assertFails(getDocs(collection(user, 'partner_leads')));
+  await assertFails(updateDoc(leadRef, { businessName: 'C' }));
+  await assertFails(deleteDoc(leadRef));
+});
+
+test('Fehlende oder interne Collections (b2b_sponsors, crowd_segments, app_config) sind standardmäßig gesperrt', async () => {
+  const db = ctx();
+  const user = ctx({ uid: 'u-admin' });
+
+  for (const collectionName of ['b2b_sponsors', 'crowd_segments', 'app_config']) {
+    const docRefAnon = doc(db, collectionName, 'doc-1');
+    await assertFails(getDoc(docRefAnon));
+    await assertFails(setDoc(docRefAnon, { test: 1 }));
+
+    const docRefUser = doc(user, collectionName, 'doc-1');
+    await assertFails(getDoc(docRefUser));
+    await assertFails(setDoc(docRefUser, { test: 1 }));
+    await assertFails(updateDoc(docRefUser, { test: 2 }));
+    await assertFails(deleteDoc(docRefUser));
+  }
 });
 
 test('Unbehandelte Pfade bleiben gesperrt', async () => {
