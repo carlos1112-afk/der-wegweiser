@@ -7,10 +7,10 @@ import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, 
 import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR } from './parsers/boschLdiParser';
 
 export class BleManager {
-  private static activeGattServer: any = null;
-  private static activeBluetoothDevice: any = null;
+  private static activeGattServer: BluetoothRemoteGATTServer | null = null;
+  private static activeBluetoothDevice: BluetoothDevice | null = null;
   private static activeManufacturer: BikeManufacturer = 'generic';
-  private static reconnectTimer: any = null;
+  private static reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private static reconnectAttempts = 0;
   private static telemetryCallback: ((telemetry: LiveBikeTelemetry) => void) | null = null;
   private static lastKnownTelemetry: LiveBikeTelemetry = {
@@ -50,7 +50,7 @@ export class BleManager {
 
     if (typeof navigator !== 'undefined' && 'bluetooth' in navigator) {
       try {
-        const filters: any[] = [];
+        const filters: BluetoothLEScanFilter[] = [];
         if (!targetManufacturer || targetManufacturer === 'bosch') {
           filters.push({ services: [BOSCH_DIAGNOSTIC_SERVICE_UUID] }, { namePrefix: 'Bosch' }, { namePrefix: 'Kiox' }, { namePrefix: 'SmartphoneGrip' });
         }
@@ -73,7 +73,7 @@ export class BleManager {
           filters.push({ services: ['battery_service'] }, { services: ['cycling_power'] }, { services: ['cycling_speed_and_cadence'] });
         }
 
-        const device = await (navigator as any).bluetooth.requestDevice({
+        const device = await navigator.bluetooth.requestDevice({
           filters,
           optionalServices: [
             'cycling_power',
@@ -102,7 +102,10 @@ export class BleManager {
     throw new Error('[BleManager] Web-Bluetooth wird in dieser Umgebung nicht unterstützt; echte Hardware erforderlich.');
   }
 
-  private static async setupGattConnection(device: any): Promise<LiveBikeTelemetry> {
+  private static async setupGattConnection(device: BluetoothDevice): Promise<LiveBikeTelemetry> {
+    if (!device.gatt) {
+      throw new Error('[BleManager] Device does not support GATT.');
+    }
     const server = await device.gatt.connect();
     this.activeGattServer = server;
     const manufacturer = this.detectManufacturer(device.name);
@@ -132,8 +135,11 @@ export class BleManager {
       const val = await batteryChar.readValue();
       liveState = { ...liveState, ...parseBatteryLevel(val) };
       await batteryChar.startNotifications();
-      batteryChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parseBatteryLevel(e.target.value) });
+      batteryChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parseBatteryLevel(target.value) });
+        }
       });
     } catch {
       // Optional
@@ -144,8 +150,11 @@ export class BleManager {
       const powerService = await server.getPrimaryService('cycling_power');
       const powerChar = await powerService.getCharacteristic('cycling_power_measurement');
       await powerChar.startNotifications();
-      powerChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parsePowerMeasurement(e.target.value) });
+      powerChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parsePowerMeasurement(target.value) });
+        }
       });
     } catch {
       // Optional
@@ -156,8 +165,11 @@ export class BleManager {
       const cscService = await server.getPrimaryService('cycling_speed_and_cadence');
       const cscChar = await cscService.getCharacteristic('csc_measurement');
       await cscChar.startNotifications();
-      cscChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parseCscMeasurement(e.target.value) });
+      cscChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parseCscMeasurement(target.value) });
+        }
       });
     } catch {
       // Optional
@@ -168,8 +180,11 @@ export class BleManager {
       const specService = await server.getPrimaryService(SPECIALIZED_SERVICE_UUID);
       const specChar = await specService.getCharacteristic(SPECIALIZED_TELEMETRY_CHAR);
       await specChar.startNotifications();
-      specChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parseSpecializedTelemetry(e.target.value), manufacturer: 'specialized' });
+      specChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parseSpecializedTelemetry(target.value), manufacturer: 'specialized' });
+        }
       });
     } catch {
       // Optional
@@ -180,8 +195,11 @@ export class BleManager {
       const mahleService = await server.getPrimaryService(MAHLE_SERVICE_UUID);
       const mahleChar = await mahleService.getCharacteristic(MAHLE_TELEMETRY_CHAR);
       await mahleChar.startNotifications();
-      mahleChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parseMahleTelemetry(e.target.value), manufacturer: 'mahle' });
+      mahleChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parseMahleTelemetry(target.value), manufacturer: 'mahle' });
+        }
       });
     } catch {
       // Optional
@@ -192,8 +210,11 @@ export class BleManager {
       const shimanoService = await server.getPrimaryService(SHIMANO_DFLY_SERVICE_UUID);
       const shimanoChar = await shimanoService.getCharacteristic(SHIMANO_TELEMETRY_CHAR);
       await shimanoChar.startNotifications();
-      shimanoChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parseShimanoTelemetry(e.target.value), manufacturer: 'shimano' });
+      shimanoChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parseShimanoTelemetry(target.value), manufacturer: 'shimano' });
+        }
       });
     } catch {
       // Optional
@@ -204,8 +225,11 @@ export class BleManager {
       const bafangService = await server.getPrimaryService(BAFANG_UART_SERVICE_UUID);
       const bafangChar = await bafangService.getCharacteristic(BAFANG_TX_CHAR);
       await bafangChar.startNotifications();
-      bafangChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parseBafangPacket(e.target.value), manufacturer: 'bafang' });
+      bafangChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parseBafangPacket(target.value), manufacturer: 'bafang' });
+        }
       });
     } catch {
       // Optional
@@ -216,8 +240,11 @@ export class BleManager {
       const boschService = await server.getPrimaryService(BOSCH_DIAGNOSTIC_SERVICE_UUID);
       const boschChar = await boschService.getCharacteristic(BOSCH_LDI_TELEMETRY_CHAR);
       await boschChar.startNotifications();
-      boschChar.addEventListener('characteristicvaluechanged', (e: any) => {
-        this.updateState({ ...parseBoschLdiTelemetry(e.target.value), manufacturer: 'bosch' });
+      boschChar.addEventListener('characteristicvaluechanged', (e: Event) => {
+        const target = e.target as BluetoothRemoteGATTCharacteristic;
+        if (target.value) {
+          this.updateState({ ...parseBoschLdiTelemetry(target.value), manufacturer: 'bosch' });
+        }
       });
     } catch {
       // Optional
@@ -252,7 +279,9 @@ export class BleManager {
     const delay = Math.min(30000, Math.pow(1.8, this.reconnectAttempts) * 1500);
     this.reconnectAttempts += 1;
 
-    clearTimeout(this.reconnectTimer);
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer);
+    }
     this.reconnectTimer = setTimeout(async () => {
       if (this.activeBluetoothDevice && !this.activeGattServer) {
         console.log(`[BleManager] Auto-reconnect attempt #${this.reconnectAttempts}...`);
