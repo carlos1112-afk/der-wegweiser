@@ -3,16 +3,123 @@ import { db } from '../firebase';
 import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount, Route } from '../types/navigation';
 import { ChargingStationImportService } from './chargingStationImportService';
 
+// Encryption helper utilities for securing sensitive personal data in localStorage
+const ENCRYPTION_PREFIX = 'enc:v1:';
+
+async function deriveKey(userId: string, salt: Uint8Array): Promise<CryptoKey | null> {
+  if (typeof crypto === 'undefined' || !crypto.subtle) {
+    return null;
+  }
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(`der_wegweiser_secure_salt_${userId}`),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: salt as unknown as Uint8Array<ArrayBuffer>,
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+export async function encryptData(userId: string, data: unknown): Promise<string> {
+  const jsonStr = JSON.stringify(data);
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    try {
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await deriveKey(userId, salt);
+      if (key) {
+        const encodedData = new TextEncoder().encode(jsonStr);
+        const encryptedContent = await crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv },
+          key,
+          encodedData
+        );
+        const saltStr = bytesToBase64(salt);
+        const ivStr = bytesToBase64(iv);
+        const ciphertextStr = bytesToBase64(new Uint8Array(encryptedContent));
+        return `${ENCRYPTION_PREFIX}${saltStr}:${ivStr}:${ciphertextStr}`;
+      }
+    } catch (err) {
+      console.warn('Web Crypto encryption failed, falling back:', err);
+    }
+  }
+  return jsonStr;
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  const chunkSize = 0x8000; // 32KB chunks to prevent stack overflow
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunkSize)));
+  }
+  return btoa(binary);
+}
+
+export async function decryptData<T>(userId: string, storedValue: string): Promise<T | null> {
+  if (!storedValue || !storedValue.trim()) {
+    return null;
+  }
+
+  // Check if value is encrypted
+  if (storedValue.startsWith(ENCRYPTION_PREFIX)) {
+    if (typeof crypto !== 'undefined' && crypto.subtle) {
+      try {
+        const payload = storedValue.substring(ENCRYPTION_PREFIX.length);
+        const [saltStr, ivStr, ciphertextStr] = payload.split(':');
+        if (saltStr && ivStr && ciphertextStr) {
+          const salt = Uint8Array.from(atob(saltStr), (c) => c.charCodeAt(0));
+          const iv = Uint8Array.from(atob(ivStr), (c) => c.charCodeAt(0));
+          const ciphertext = Uint8Array.from(atob(ciphertextStr), (c) => c.charCodeAt(0));
+          const key = await deriveKey(userId, salt);
+          if (key) {
+            const decryptedBuffer = await crypto.subtle.decrypt(
+              { name: 'AES-GCM', iv },
+              key,
+              ciphertext
+            );
+            const decodedJson = new TextDecoder().decode(decryptedBuffer);
+            return JSON.parse(decodedJson) as T;
+          }
+        }
+      } catch (err) {
+        console.warn('Web Crypto decryption failed:', err);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  // Fallback / legacy migration: value is raw unencrypted JSON
+  try {
+    return JSON.parse(storedValue) as T;
+  } catch (err) {
+    console.warn('Failed to parse unencrypted data:', err);
+    return null;
+  }
+}
+
 // Haversine distance utility
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3; // Radius of the earth in m
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
+  const a =
     Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c; // Distance in m
 }
 
@@ -34,7 +141,7 @@ export interface IDataRepository {
   // Charging Stations
   getChargingStations(bounds?: { minLat: number; maxLat: number; minLng: number; maxLng: number }): Promise<ChargingStation[]>;
   addChargingStation(station: Omit<ChargingStation, 'id' | 'createdAt'>): Promise<ChargingStation>;
-  
+
   // User Preferences & Memory Graph
   getUserPreferences(userId: string): Promise<UserPreferences>;
   saveUserPreferences(preferences: UserPreferences): Promise<void>;
@@ -95,10 +202,10 @@ class LocalAndFirestoreRepository implements IDataRepository {
 
     // Filter by bounds if specified
     if (bounds) {
-      const filtered = allStations.filter(s => 
-        s.lat >= bounds.minLat && 
-        s.lat <= bounds.maxLat && 
-        s.lng >= bounds.minLng && 
+      const filtered = allStations.filter(s =>
+        s.lat >= bounds.minLat &&
+        s.lat <= bounds.maxLat &&
+        s.lng >= bounds.minLng &&
         s.lng <= bounds.maxLng
       );
 
@@ -111,7 +218,7 @@ class LocalAndFirestoreRepository implements IDataRepository {
         });
 
         for (const osm of osmStations) {
-          const isDuplicate = filtered.some(existing => 
+          const isDuplicate = filtered.some(existing =>
             getDistanceFromLatLonInM(existing.lat, existing.lng, osm.lat, osm.lng) < 50
           );
           if (!isDuplicate) {
@@ -333,13 +440,15 @@ class LocalAndFirestoreRepository implements IDataRepository {
   }
 
   async saveRoute(userId: string, route: Route): Promise<string> {
-    // 1. Save locally for instant offline retrieval
+    // 1. Save locally with encryption for instant offline retrieval
     try {
-      const saved = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      const raw = localStorage.getItem(`routes_${userId}`) || '';
+      const saved: Route[] = (await decryptData<Route[]>(userId, raw)) || [];
       if (!saved.some((r: Route) => r.id === route.id)) {
         saved.push(route);
       }
-      localStorage.setItem(`routes_${userId}`, JSON.stringify(saved));
+      const encrypted = await encryptData(userId, saved);
+      localStorage.setItem(`routes_${userId}`, encrypted);
     } catch (e) {
       console.warn('Could not save route to localStorage:', e);
     }
@@ -362,7 +471,8 @@ class LocalAndFirestoreRepository implements IDataRepository {
       const querySnapshot = await getDocs(collection(db, 'routes'));
       firestoreRoutes = querySnapshot.docs.map((d) => d.data() as Route);
       if (firestoreRoutes.length > 0) {
-        localStorage.setItem(`routes_${userId}`, JSON.stringify(firestoreRoutes));
+        const encrypted = await encryptData(userId, firestoreRoutes);
+        localStorage.setItem(`routes_${userId}`, encrypted);
         return firestoreRoutes;
       }
     } catch (error) {
@@ -370,7 +480,8 @@ class LocalAndFirestoreRepository implements IDataRepository {
     }
 
     try {
-      const local = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      const raw = localStorage.getItem(`routes_${userId}`) || '';
+      const local = await decryptData<Route[]>(userId, raw);
       if (local && local.length > 0) {
         return local;
       }

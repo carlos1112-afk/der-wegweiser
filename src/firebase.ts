@@ -5,14 +5,16 @@ import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
 
 // Firebase configuration for project der-wegweiser
+const env = (typeof import.meta !== 'undefined' && (import.meta as Record<string, any>).env) || {};
+
 const firebaseConfig = {
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'der-wegweiser',
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'der-wegweiser.firebaseapp.com',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'der-wegweiser.firebasestorage.app',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
+  projectId: env.VITE_FIREBASE_PROJECT_ID || 'der-wegweiser',
+  apiKey: env.VITE_FIREBASE_API_KEY || '',
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || 'der-wegweiser.firebaseapp.com',
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || 'der-wegweiser.firebasestorage.app',
+  appId: env.VITE_FIREBASE_APP_ID || '',
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || '',
 };
 
 export const app = initializeApp(firebaseConfig);
