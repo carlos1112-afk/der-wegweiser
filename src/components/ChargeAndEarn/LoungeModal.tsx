@@ -369,7 +369,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   const [catcherActive, setCatcherActive] = useState(false);
   const [catcherScore, setCatcherScore] = useState(0);
   const [catcherTimeLeft, setCatcherTimeLeft] = useState(20);
-  const [catcherOrbs, setCatcherOrbs] = useState<{ id: number; x: number; y: number; type: 'energy' | 'super' | 'glitch' }[]>([]);
+  const [catcherOrbs, setCatcherOrbs] = useState<{ id: string; x: number; y: number; type: 'energy' | 'super' | 'glitch' }[]>([]);
 
   // Shop state
   const [redeemedCodes, setRedeemedCodes] = useState<Record<string, string>>({});
@@ -494,7 +494,10 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     }, 1000);
 
     const spawner = setInterval(() => {
-      const id = Date.now() + Math.random();
+      const id =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `orb-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
       const x = Math.floor(Math.random() * 80) + 10;
       const y = Math.floor(Math.random() * 70) + 15;
       const rand = Math.random();
@@ -528,7 +531,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     }
   };
 
-  const handleCatchOrb = (id: number, type: 'energy' | 'super' | 'glitch') => {
+  const handleCatchOrb = (id: string, type: 'energy' | 'super' | 'glitch') => {
     setCatcherOrbs((prev) => prev.filter((o) => o.id !== id));
     if (type === 'energy') {
       setCatcherScore((s) => s + 2);
