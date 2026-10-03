@@ -22,7 +22,7 @@ import { useAppLifecycle } from './hooks/useAppLifecycle';
 import { AppLifecycleService } from './services/appLifecycleService';
 import { ConsentService } from './services/consentService';
 import { UserIdentity } from './services/userIdentity';
-import { PushNotificationService } from './services/pushNotificationService';
+import { EmergencyNotificationService } from './services/emergencyNotificationService';
 import { useRef } from 'react';
 
 // Code-Splitting: Lazy load heavy modals for sub-second cold start
@@ -100,8 +100,8 @@ export function App() {
       UserIdentity.clearCache();
     });
 
-    // Initialize FCM Push Notifications pipeline
-    PushNotificationService.initialize();
+    // Initialize Local Notifications pipeline
+    EmergencyNotificationService.initialize();
 
     return () => unsubscribe();
   }, []);
@@ -295,7 +295,7 @@ export function App() {
     }
   }, [currentRoute]);
 
-  // Rapid Battery Drop Detection (FCM Trigger)
+  // Rapid Battery Drop Detection (Local Trigger)
   const prevBatteryRef = useRef<{ percent: number, time: number } | null>(null);
 
   useEffect(() => {
@@ -323,7 +323,7 @@ export function App() {
 
       // Detect rapid drop: >= 5% drop in <= 5 minutes (300,000 ms)
       if (dropAmount >= 5) {
-        PushNotificationService.sendEmergencyBatteryWarning(
+        EmergencyNotificationService.sendEmergencyBatteryWarning(
           currentPercent,
           `Verlust von ${dropAmount}% in ${Math.max(1, Math.round(timeDiffMs / 60000))} Minuten erkannt.`
         );
