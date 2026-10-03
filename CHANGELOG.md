@@ -4,6 +4,18 @@ All notable changes to **Der Wegweiser** will be documented in this file.
 
 ---
 
+## [1.0.2] - 2026-10-01 — Patch 2: Real Telemetry, ErrorBoundary & API Verification
+
+### 🔌 Real Telemetry & API Verification
+* **Removed Fake Telemetry**: Removed fabricated 540Wh/85% battery fallback values.
+* **Real Charging Stations**: Removed the fake curated charging station mock database in favor of real Overpass/Firestore queries.
+* **Explicit Hardware Failures**: Made Bosch display mirroring fail explicitly instead of faking success.
+* **Vision Photo Recognition**: Made Vision photo recognition fail explicitly instead of faking success.
+
+### 🛡️ Core Stability
+* **Added ErrorBoundary**: Introduced an `ErrorBoundary` component to catch and gracefully handle rendering errors.
+
+
 ## [1.0.1] - 2026-09-18 — Patch 1: Map 3D Billboarding, HUD Streamlining & Consumer OAuth
 
 ### 🗺️ Map & 3D Perspective Enhancements
