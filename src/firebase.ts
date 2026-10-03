@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
 
 // Firebase configuration for project der-wegweiser
 const firebaseConfig = {
@@ -36,3 +37,11 @@ try {
   console.warn('[Firebase] Safe fallback: Storage initialization deferred:', e);
 }
 export const storage = safeStorage;
+// Resilient Functions initialization
+let safeFunctions: any = null;
+try {
+  safeFunctions = getFunctions(app, 'europe-west3');
+} catch (e) {
+  console.warn('[Firebase] Safe fallback: Functions initialization deferred:', e);
+}
+export const functions = safeFunctions;
