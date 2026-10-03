@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "description": "Adds points_of_interest collection for cycling-relevant POIs (bike shops, viewpoints, lakes with cycling paths, ice cream shops, rest areas, shelters)",
+  "appliedAt": null,
+  "collections": {
+    "points_of_interest": {
+      "fields": {
+        "id": "string",
+        "name": "string",
+        "lat": "number",
+        "lng": "number",
+        "category": "string",
+        "description": "string",
+        "address": "string|null",
+        "website": "string|null",
+        "sourceUrl": "string",
+        "sourceName": "string",
+        "confidence": "string",
+        "verifiedAt": "timestamp|null",
+        "createdByUserId": "string|null",
+        "createdAt": "timestamp",
+        "schemaVersion": "number"
+      },
+      "pii": false,
+      "anonymizationFieldOnDelete": "createdByUserId",
+      "categoryEnum": [
+        "Werkstatt",
+        "Aussichtspunkt",
+        "See",
+        "Eisladen",
+        "Rastplatz",
+        "Schutzhütte",
+        "Picknickplatz",
+        "Sonstiges"
+      ],
+      "confidenceEnum": ["high", "medium", "low"],
+      "notes": "Seed data from research agent, batch 001. Only entries with a real sourceUrl are valid. confidence=low entries are flagged as unverified."
+    }
+  }
+}
