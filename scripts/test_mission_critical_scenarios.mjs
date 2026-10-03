@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 console.log('🚲 ========================================================');
-console.log('🚲 DER WEGWEISER — 15 MISSION-CRITICAL ANDROID SCENARIOS');
+console.log('🚲 DER WEGWEISER — 52 MISSION-CRITICAL ANDROID SCENARIO TESTS');
 console.log('🚲 ========================================================');
 
 let passedTests = 0;
@@ -603,12 +603,12 @@ assert(mockStorage.getItem('third_party_cookie') === 'allowed', 'Unrelated items
 // SUMMARY
 // ----------------------------------------------------------------------------
 console.log('\n========================================================');
-console.log(`🏁 15 SCENARIOS EXECUTION SUMMARY: ${passedTests} PASSED, ${failedTests} FAILED`);
+console.log(`🏁 52 SCENARIO TESTS EXECUTION SUMMARY: ${passedTests} PASSED, ${failedTests} FAILED`);
 console.log('========================================================\n');
 
 if (failedTests > 0) {
   process.exit(1);
 } else {
-  console.log('🎉 ALL 15 ANDROID MISSION-CRITICAL SCENARIOS VERIFIED 100% SUCCESFUL!');
+  console.log('🎉 ALL 52 ANDROID MISSION-CRITICAL SCENARIO TESTS VERIFIED 100% SUCCESFUL!');
   process.exit(0);
 }

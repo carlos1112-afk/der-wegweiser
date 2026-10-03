@@ -94,7 +94,7 @@ gedrosselt.
 **Nötig:** nativer FGS inkl. `foregroundServiceType="location"`, oder
 Entfernung der FGS-Deklarationen samt Korrektur der Play-Antworten und der
 Aussage „im Hintergrund (auch gesperrtem Bildschirm)" in Datenschutzerklärung
-und Consent-Screen. `scripts/test_15_scenarios.mjs` prüft heute nur, ob der
+und Consent-Screen. `scripts/test_mission_critical_scenarios.mjs` prüft heute nur, ob der
 String `FOREGROUND_SERVICE_LOCATION` im Manifest steht — nicht, ob ein Service
 existiert.
 
@@ -170,5 +170,5 @@ Moderation sind eine Produktentscheidung.
    Audit-Aussagen korrigieren, damit die eingereichten Dokumente nicht
    widerlegt werden.
 3. **Moderationsweg bauen** (#5), bevor UGC in den Stores eröffnet wird.
-4. `scripts/test_15_scenarios.mjs` durch echte Tests des ausgelieferten Codes
+4. `scripts/test_mission_critical_scenarios.mjs` durch echte Tests des ausgelieferten Codes
    ersetzen — der jetzige Satz prüft Mocks und Quelltext-Substrings.
