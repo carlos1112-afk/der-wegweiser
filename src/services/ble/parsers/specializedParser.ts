@@ -27,23 +27,23 @@ export function parseSpecializedTelemetry(value: DataView): Partial<LiveBikeTele
   const cadenceRpm = value.getUint8(3);
   const riderPowerWatts = value.getUint16(4, true);
 
-  let motorAssistMode: LiveBikeTelemetry['motorAssistMode'] = 'auto';
-  if (value.byteLength > 6) {
-    const rawMode = value.getUint8(6);
-    const mapped = ASSIST_MODE_MAP[rawMode];
-    if (mapped) {
-      motorAssistMode = mapped === 'trail' ? 'tour' : mapped;
-    }
-  }
-
-  return {
+  const result: Partial<LiveBikeTelemetry> = {
     batteryPercent,
     batteryKnown: true,
     speedKmH,
     cadenceRpm,
     riderPowerWatts,
-    motorAssistMode,
   };
+
+  if (value.byteLength > 6) {
+    const rawMode = value.getUint8(6);
+    const mapped = ASSIST_MODE_MAP[rawMode];
+    if (mapped) {
+      result.motorAssistMode = mapped === 'trail' ? 'tour' : mapped;
+    }
+  }
+
+  return result;
 }
 
 /**
