@@ -21,7 +21,8 @@ export class RoutingService {
    */
   public static async generateBikeRoute(
     params: RouteGenerationParams,
-    userPrefs: UserPreferences
+    userPrefs: UserPreferences,
+    fetchFn: typeof fetch = typeof globalThis !== 'undefined' ? globalThis.fetch : fetch
   ): Promise<Route> {
     const distance = params.targetDistanceKm || 28;
     const isScout = !!params.isMapScoutMode;
@@ -40,7 +41,7 @@ export class RoutingService {
     try {
       // BRouter API call: start -> via -> start
       const brouterUrl = `https://brouter.de/brouter?lonlats=${params.startLng},${params.startLat}|${viaLng},${viaLat}|${params.startLng},${params.startLat}&profile=trekking-pedelec&alternativeidx=0&format=geojson`;
-      const res = await fetch(brouterUrl);
+      const res = await fetchFn(brouterUrl);
 
       if (res.ok) {
         const geojson = await res.json();
