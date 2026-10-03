@@ -6,11 +6,17 @@ import { parseShimanoTelemetry, SHIMANO_DFLY_SERVICE_UUID, SHIMANO_TELEMETRY_CHA
 import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR } from './parsers/bafangParser';
 import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR } from './parsers/boschLdiParser';
 
+interface BleCharacteristicEvent extends Event {
+  target: EventTarget & {
+    value: DataView;
+  };
+}
+
 export class BleManager {
   private static activeGattServer: any = null;
   private static activeBluetoothDevice: any = null;
   private static activeManufacturer: BikeManufacturer = 'generic';
-  private static reconnectTimer: any = null;
+  private static reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private static reconnectAttempts = 0;
   private static telemetryCallback: ((telemetry: LiveBikeTelemetry) => void) | null = null;
   private static lastKnownTelemetry: LiveBikeTelemetry = {
@@ -132,7 +138,7 @@ export class BleManager {
       const val = await batteryChar.readValue();
       liveState = { ...liveState, ...parseBatteryLevel(val) };
       await batteryChar.startNotifications();
-      batteryChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      batteryChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parseBatteryLevel(e.target.value) });
       });
     } catch {
@@ -144,7 +150,7 @@ export class BleManager {
       const powerService = await server.getPrimaryService('cycling_power');
       const powerChar = await powerService.getCharacteristic('cycling_power_measurement');
       await powerChar.startNotifications();
-      powerChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      powerChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parsePowerMeasurement(e.target.value) });
       });
     } catch {
@@ -156,7 +162,7 @@ export class BleManager {
       const cscService = await server.getPrimaryService('cycling_speed_and_cadence');
       const cscChar = await cscService.getCharacteristic('csc_measurement');
       await cscChar.startNotifications();
-      cscChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      cscChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parseCscMeasurement(e.target.value) });
       });
     } catch {
@@ -168,7 +174,7 @@ export class BleManager {
       const specService = await server.getPrimaryService(SPECIALIZED_SERVICE_UUID);
       const specChar = await specService.getCharacteristic(SPECIALIZED_TELEMETRY_CHAR);
       await specChar.startNotifications();
-      specChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      specChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parseSpecializedTelemetry(e.target.value), manufacturer: 'specialized' });
       });
     } catch {
@@ -180,7 +186,7 @@ export class BleManager {
       const mahleService = await server.getPrimaryService(MAHLE_SERVICE_UUID);
       const mahleChar = await mahleService.getCharacteristic(MAHLE_TELEMETRY_CHAR);
       await mahleChar.startNotifications();
-      mahleChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      mahleChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parseMahleTelemetry(e.target.value), manufacturer: 'mahle' });
       });
     } catch {
@@ -192,7 +198,7 @@ export class BleManager {
       const shimanoService = await server.getPrimaryService(SHIMANO_DFLY_SERVICE_UUID);
       const shimanoChar = await shimanoService.getCharacteristic(SHIMANO_TELEMETRY_CHAR);
       await shimanoChar.startNotifications();
-      shimanoChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      shimanoChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parseShimanoTelemetry(e.target.value), manufacturer: 'shimano' });
       });
     } catch {
@@ -204,7 +210,7 @@ export class BleManager {
       const bafangService = await server.getPrimaryService(BAFANG_UART_SERVICE_UUID);
       const bafangChar = await bafangService.getCharacteristic(BAFANG_TX_CHAR);
       await bafangChar.startNotifications();
-      bafangChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      bafangChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parseBafangPacket(e.target.value), manufacturer: 'bafang' });
       });
     } catch {
@@ -216,7 +222,7 @@ export class BleManager {
       const boschService = await server.getPrimaryService(BOSCH_DIAGNOSTIC_SERVICE_UUID);
       const boschChar = await boschService.getCharacteristic(BOSCH_LDI_TELEMETRY_CHAR);
       await boschChar.startNotifications();
-      boschChar.addEventListener('characteristicvaluechanged', (e: any) => {
+      boschChar.addEventListener('characteristicvaluechanged', (e: BleCharacteristicEvent) => {
         this.updateState({ ...parseBoschLdiTelemetry(e.target.value), manufacturer: 'bosch' });
       });
     } catch {
@@ -252,7 +258,9 @@ export class BleManager {
     const delay = Math.min(30000, Math.pow(1.8, this.reconnectAttempts) * 1500);
     this.reconnectAttempts += 1;
 
-    clearTimeout(this.reconnectTimer);
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer);
+    }
     this.reconnectTimer = setTimeout(async () => {
       if (this.activeBluetoothDevice && !this.activeGattServer) {
         console.log(`[BleManager] Auto-reconnect attempt #${this.reconnectAttempts}...`);
