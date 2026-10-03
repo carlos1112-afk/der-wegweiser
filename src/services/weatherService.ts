@@ -22,8 +22,8 @@ export class WeatherService {
     lng: number,
     fetchFn: typeof fetch = typeof globalThis !== 'undefined' ? globalThis.fetch : fetch
   ): Promise<WeatherData> {
-    const customEndpoint = typeof process !== 'undefined' && process.env
-      ? process.env.VITE_WEATHER_PROVIDER_URL
+    const customEndpoint = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process.env
+      ? (globalThis as any).process.env.VITE_WEATHER_PROVIDER_URL
       : (import.meta as any).env?.VITE_WEATHER_PROVIDER_URL;
     
     // Priority: Custom Endpoint -> Backend Weather Proxy -> Standard Direct Fallback
