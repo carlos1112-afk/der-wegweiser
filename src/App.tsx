@@ -341,7 +341,7 @@ export function App() {
         modelId
       );
       setCurrentRoute(newRoute);
-    } catch (err: any) {
+    } catch (err) {
       console.warn('[App] Route konnte nicht neu generiert werden:', err);
       alert('Routing-Dienst derzeit nicht erreichbar. Bitte Internetverbindung prüfen.');
     }
@@ -360,7 +360,7 @@ export function App() {
         memory
       );
       setCurrentRoute(recalculated);
-    } catch (err: any) {
+    } catch (err) {
       console.warn('[App] Auto-Reroute fehlgeschlagen:', err);
     }
   };
@@ -402,7 +402,7 @@ export function App() {
       newRoute.title = `Route zum gewählten Ziel (${newRoute.distanceKm} km)`;
       newRoute.aiStory = `Fahrradoptimierte Verbindung zum gewählten Zielort (~${distKm.toFixed(1)} km) mit minimalem Höhenmeter-Widerstand (Heuristische Routenführung).`;
       setCurrentRoute(newRoute);
-    } catch (err: any) {
+    } catch (err) {
       console.warn('[App] Navigation zum Zielpunkt fehlgeschlagen:', err);
       alert('Routenberechnung fehlgeschlagen. Der Routing-Dienst (BRouter) ist nicht erreichbar.');
     }
@@ -435,7 +435,7 @@ export function App() {
         { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
       ];
       setCurrentRoute(detourRoute);
-    } catch (err: any) {
+    } catch (err) {
       console.warn('[App] Anfahrt zur Ladestation fehlgeschlagen:', err);
       alert('Routenberechnung zur Ladestation fehlgeschlagen. Der Routing-Dienst ist nicht erreichbar.');
     }
