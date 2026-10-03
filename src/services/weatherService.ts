@@ -77,9 +77,9 @@ export class WeatherService {
     throw new Error('[WeatherService] Live weather integration unavailable; no fallback is permitted.');
   }
 
-  private static degreesToCompass(deg: number): string {
+  public static degreesToCompass(deg: number): string {
     const val = Math.floor((deg / 22.5) + 0.5);
     const arr = ["N", "NNO", "NO", "ONO", "O", "OSO", "SO", "SSO", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-    return arr[val % 16];
+    return arr[((val % 16) + 16) % 16];
   }
 }
