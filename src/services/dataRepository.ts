@@ -4,7 +4,7 @@ import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount,
 import { ChargingStationImportService } from './chargingStationImportService';
 
 // Haversine distance utility
-function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
+export function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371e3; // Radius of the earth in m
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -14,6 +14,98 @@ function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2
     Math.sin(dLon/2) * Math.sin(dLon/2); 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
   return R * c; // Distance in m
+}
+
+// Normalize longitude into [-180, 180)
+export function normalizeLng(lng: number): number {
+  let normalized = (lng + 180) % 360;
+  if (normalized < 0) normalized += 360;
+  return normalized - 180;
+}
+
+// Merge OSM stations into existing stations list with spatial grid indexing
+export function mergeOsmStations(existingStations: ChargingStation[], osmStations: ChargingStation[]): ChargingStation[] {
+  const filtered = [...existingStations];
+
+  const CELL_SIZE = 0.001; // ~111m lat
+  const NUM_CELLS_Y = Math.round(360 / CELL_SIZE); // 360,000
+  const MIN_Y = Math.floor(-180 / CELL_SIZE); // -180,000
+  const MAX_Y = MIN_Y + NUM_CELLS_Y; // 180,000
+
+  const grid = new Map<string, ChargingStation[]>();
+
+  const getCellKey = (lat: number, lng: number) => {
+    const normLng = normalizeLng(lng);
+    const x = Math.floor(lat / CELL_SIZE);
+    const y = Math.floor(normLng / CELL_SIZE);
+    return `${x},${y}`;
+  };
+
+  const addToGrid = (station: ChargingStation) => {
+    const key = getCellKey(station.lat, station.lng);
+    let cell = grid.get(key);
+    if (!cell) {
+      cell = [];
+      grid.set(key, cell);
+    }
+    cell.push(station);
+  };
+
+  for (const st of filtered) {
+    addToGrid(st);
+  }
+
+  const MAX_LAT_DELTA = 0.00045; // ~50m in latitude
+
+  for (const osm of osmStations) {
+    const normOsmLng = normalizeLng(osm.lng);
+    const x = Math.floor(osm.lat / CELL_SIZE);
+    const y = Math.floor(normOsmLng / CELL_SIZE);
+
+    const cosLat = Math.cos((osm.lat * Math.PI) / 180);
+    const maxLngDelta = cosLat > 1e-6 ? Math.min(360, MAX_LAT_DELTA / cosLat) : 360;
+
+    const cellRadiusLat = Math.ceil(MAX_LAT_DELTA / CELL_SIZE);
+    const cellRadiusLng = maxLngDelta >= 180
+      ? Math.floor(NUM_CELLS_Y / 2)
+      : Math.ceil(maxLngDelta / CELL_SIZE);
+
+    let isDuplicate = false;
+
+    gridLoop:
+    for (let dx = -cellRadiusLat; dx <= cellRadiusLat; dx++) {
+      for (let dy = -cellRadiusLng; dy <= cellRadiusLng; dy++) {
+        let targetY = y + dy;
+        while (targetY < MIN_Y) targetY += NUM_CELLS_Y;
+        while (targetY >= MAX_Y) targetY -= NUM_CELLS_Y;
+
+        const cell = grid.get(`${x + dx},${targetY}`);
+        if (!cell) continue;
+
+        for (const existing of cell) {
+          let lngDiff = Math.abs(normalizeLng(existing.lng) - normOsmLng);
+          if (lngDiff > 180) lngDiff = 360 - lngDiff;
+
+          if (
+            Math.abs(existing.lat - osm.lat) <= MAX_LAT_DELTA &&
+            lngDiff <= maxLngDelta
+          ) {
+            if (getDistanceFromLatLonInM(existing.lat, existing.lng, osm.lat, osm.lng) < 50) {
+              isDuplicate = true;
+              break gridLoop;
+            }
+          }
+        }
+      }
+    }
+
+    if (!isDuplicate) {
+      filtered.push(osm);
+      addToGrid(osm);
+    }
+  }
+
+  return filtered;
 }
 
 // UGC Profanity & Spam Filter (Apple Guideline 1.2 Compliance)
@@ -110,69 +202,7 @@ class LocalAndFirestoreRepository implements IDataRepository {
           east: bounds.maxLng
         });
 
-        // Spatial grid optimization to avoid O(N*M) distance checks
-        const CELL_SIZE = 0.001; // ~111m lat
-        const grid = new Map<string, ChargingStation[]>();
-
-        const getCellKey = (lat: number, lng: number) => {
-          const x = Math.floor(lat / CELL_SIZE);
-          const y = Math.floor(lng / CELL_SIZE);
-          return `${x},${y}`;
-        };
-
-        const addToGrid = (station: ChargingStation) => {
-          const key = getCellKey(station.lat, station.lng);
-          let cell = grid.get(key);
-          if (!cell) {
-            cell = [];
-            grid.set(key, cell);
-          }
-          cell.push(station);
-        };
-
-        for (const st of filtered) {
-          addToGrid(st);
-        }
-
-        const MAX_LAT_DELTA = 0.00045; // ~50m in latitude
-
-        for (const osm of osmStations) {
-          const x = Math.floor(osm.lat / CELL_SIZE);
-          const y = Math.floor(osm.lng / CELL_SIZE);
-
-          const cosLat = Math.cos((osm.lat * Math.PI) / 180);
-          const maxLngDelta = cosLat > 0.01 ? MAX_LAT_DELTA / cosLat : 0.05;
-
-          const cellRadiusLat = Math.ceil(MAX_LAT_DELTA / CELL_SIZE);
-          const cellRadiusLng = Math.ceil(maxLngDelta / CELL_SIZE);
-
-          let isDuplicate = false;
-
-          gridLoop:
-          for (let dx = -cellRadiusLat; dx <= cellRadiusLat; dx++) {
-            for (let dy = -cellRadiusLng; dy <= cellRadiusLng; dy++) {
-              const cell = grid.get(`${x + dx},${y + dy}`);
-              if (!cell) continue;
-
-              for (const existing of cell) {
-                if (
-                  Math.abs(existing.lat - osm.lat) <= MAX_LAT_DELTA &&
-                  Math.abs(existing.lng - osm.lng) <= maxLngDelta
-                ) {
-                  if (getDistanceFromLatLonInM(existing.lat, existing.lng, osm.lat, osm.lng) < 50) {
-                    isDuplicate = true;
-                    break gridLoop;
-                  }
-                }
-              }
-            }
-          }
-
-          if (!isDuplicate) {
-            filtered.push(osm);
-            addToGrid(osm);
-          }
-        }
+        return mergeOsmStations(filtered, osmStations);
       } catch (err) {
         console.error('Error merging OSM stations:', err);
       }
