@@ -27,9 +27,35 @@ _SKILL = "gcs-security-assessment"
 _SCRIPT = "fetch-bucket-telemetry"
 
 
-# TODO: Update scoring logic to be more robust.
+def _is_versioning_enabled(val: Any) -> bool:
+  """Checks whether object versioning is enabled."""
+  if isinstance(val, bool):
+    return val
+  if isinstance(val, str):
+    return val.strip().lower() in ("enabled", "true", "1")
+  if isinstance(val, dict):
+    return bool(val.get("enabled"))
+  return bool(val)
+
+
+def _is_soft_delete_enabled(val: Any) -> bool:
+  """Checks whether soft delete policy is enabled with retention."""
+  if val is None:
+    return False
+  try:
+    return float(val) > 0
+  except (ValueError, TypeError):
+    return False
+
+
 def _calculate_risk_score(telemetry: Sequence[Mapping[str, Any]]) -> str:
-  """Calculates the risk score for a list of telemetry data.
+  """Calculates the weighted risk score for a list of telemetry data.
+
+  Evaluates key GCS bucket security controls for each bucket:
+  - Uniform Bucket-Level Access (UBLA): 30 risk points if disabled
+  - Enforced Encryption Types: 25 risk points if missing/unconfigured
+  - Object Versioning: 25 risk points if disabled
+  - Soft Delete Retention: 20 risk points if disabled/unconfigured
 
   Args:
     telemetry: List of telemetry data to calculate the risk score.
@@ -37,27 +63,24 @@ def _calculate_risk_score(telemetry: Sequence[Mapping[str, Any]]) -> str:
   Returns:
     The risk score as a string in the format "X/100".
   """
-  risky_missing_fields = [
-      "ubla_enabled",
-      "soft_delete_retention_seconds",
-      "enforced_encryption_types",
-      "versioning",
-  ]
+  if not telemetry:
+    return "0/100"
 
-  bucket_risk_score_total = 0
+  total_score = 0.0
   for bucket in telemetry:
-    for risky_missing_field in risky_missing_fields:
-      if not bucket[risky_missing_field]:
-        bucket_risk_score_total += 1
+    bucket_risk = 0
+    if not bool(bucket.get("ubla_enabled")):
+      bucket_risk += 30
+    if not list(bucket.get("enforced_encryption_types") or []):
+      bucket_risk += 25
+    if not _is_versioning_enabled(bucket.get("versioning")):
+      bucket_risk += 25
+    if not _is_soft_delete_enabled(bucket.get("soft_delete_retention_seconds")):
+      bucket_risk += 20
+    total_score += bucket_risk
 
-  bucket_risk_score_average = int(
-      (
-          bucket_risk_score_total
-          / (len(risky_missing_fields) * (len(telemetry) or 1))
-      )
-      * 100
-  )
-  return f"{bucket_risk_score_average}/100"
+  average_score = round(total_score / len(telemetry))
+  return f"{average_score}/100"
 
 
 def fetch_bucket_telemetry(
