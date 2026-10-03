@@ -24,4 +24,4 @@ All notable changes to **Der Wegweiser** will be documented in this file.
 * **Added Social OAuth Providers**: Integrated Google (default), Apple, Microsoft, Facebook, X (Twitter), and Telegram authentication options.
 
 ### 🧪 Test Suite & Verification
-* **15 Mission-Critical Scenarios Updated**: Added automated assertions in `scripts/test_15_scenarios.mjs` verifying 3D CSS billboarding rules, Navigation HUD auto-hiding logic, and consumer OAuth options (50/50 assertions passed).
+* **15 Mission-Critical Scenarios Updated**: Added automated assertions in `scripts/test_mission_critical_scenarios.mjs` verifying 3D CSS billboarding rules, Navigation HUD auto-hiding logic, and consumer OAuth options (50/50 assertions passed).
