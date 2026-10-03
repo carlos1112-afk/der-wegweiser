@@ -40,8 +40,12 @@ jobs:
   claude-finalization:
     name: Claude V2 Cloud Worker
     if: |
-      github.event_name == 'workflow_dispatch' || 
-      (github.event.issue.pull_request && startsWith(github.event.comment.body, '/claude finalize'))
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.issue.pull_request &&
+        startsWith(github.event.comment.body, '/claude finalize') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      )
     runs-on: ubuntu-latest
 
     steps:
