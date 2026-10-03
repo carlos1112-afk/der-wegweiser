@@ -2,6 +2,7 @@ import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount, Route } from '../types/navigation';
 import { ChargingStationImportService } from './chargingStationImportService';
+import { UserIdentity } from './userIdentity';
 
 // Haversine distance utility
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -130,10 +131,12 @@ class LocalAndFirestoreRepository implements IDataRepository {
   async addChargingStation(station: Omit<ChargingStation, 'id' | 'createdAt'>): Promise<ChargingStation> {
     const id = `cs-${Date.now()}`;
     const createdAt = new Date().toISOString();
+    const createdByUserId = station.createdByUserId || UserIdentity.getUserId();
     const newStation: ChargingStation = {
       ...station,
       id,
       createdAt,
+      createdByUserId,
     };
 
     // Update LocalStorage cache immediately to ensure offline access
