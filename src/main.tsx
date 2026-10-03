@@ -6,26 +6,36 @@ import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { UILayoutProvider } from './contexts/UILayoutContext';
 
-// Register Service Worker only for browser PWA mode, NEVER in native Capacitor mobile apps!
-// In native Android/iOS, Capacitor serves local assets directly from the APK/IPA container.
-if ('serviceWorker' in navigator) {
+function unregisterLegacyServiceWorkers(): void {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
+
+function registerServiceWorker(): void {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => console.log('[PWA] Service Worker registered:', reg.scope))
+      .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
+  });
+}
+
+function initializeServiceWorker(): void {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
   if (Capacitor.isNativePlatform()) {
-    // In native WebView: Unregister any legacy service workers to prevent stale asset cache locks
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (const registration of registrations) {
-        registration.unregister();
-      }
-    });
+    unregisterLegacyServiceWorkers();
   } else {
-    // In standard web browser: Register SW for offline PWA capabilities
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((reg) => console.log('[PWA] Service Worker registered:', reg.scope))
-        .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
-    });
+    registerServiceWorker();
   }
 }
+
+initializeServiceWorker();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
