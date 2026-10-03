@@ -42,6 +42,9 @@ npm run build
 
 # 3. Automatischen Secret- & Security-Scan ausführen
 node scripts/scan_secrets.js
+
+# 4. Manuellen Dependency & Security Audit ausführen (optional, nicht im CI)
+node scripts/check_dependencies.js
 ```
 
 ### Commit-Konventionen (Conventional Commits)
