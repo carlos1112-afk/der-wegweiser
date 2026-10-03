@@ -28,6 +28,8 @@ import {
   X,
 } from 'lucide-react';
 import { SoundFxService } from '../../services/soundFxService';
+import { functions } from '../../firebase';
+import { httpsCallable } from 'firebase/functions';
 import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
 import { SurveyWallService, type AvailableSurvey } from '../../services/surveyWallService';
 import { UserIdentity } from '../../services/userIdentity';
@@ -591,16 +593,34 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     }
   };
 
-  const handleRedeemItem = (item: ShopItem) => {
+  const handleRedeemItem = async (item: ShopItem) => {
     if (tokenBalance < item.cost) {
       SoundFxService.playWarningTone();
       return;
     }
 
-    onAddTokens(-item.cost);
-    SoundFxService.playSuccessChime();
-    confetti({ particleCount: 70, spread: 70 });
-    setRedeemedCodes((prev) => ({ ...prev, [item.id]: item.code || 'REDEEMED-2026' }));
+    try {
+      let returnedCode = item.code || 'REDEEMED-2026';
+
+      if (functions) {
+        const redeemVoucher = httpsCallable(functions, 'redeemVoucher');
+        const response = await redeemVoucher({ itemId: item.id });
+        const data = response.data as any;
+        if (data.success && data.code) {
+          returnedCode = data.code;
+        }
+      }
+
+      // Optimistically update client token UI state
+      onAddTokens(-item.cost);
+      SoundFxService.playSuccessChime();
+      confetti({ particleCount: 70, spread: 70 });
+      setRedeemedCodes((prev) => ({ ...prev, [item.id]: returnedCode }));
+    } catch (err: any) {
+      console.error('Error redeeming item:', err);
+      SoundFxService.playWarningTone();
+      alert('Fehler beim Einlösen: ' + (err.message || 'Bitte versuchen Sie es später noch einmal.'));
+    }
   };
 
   const handleInitiateBuyTokenPack = (amount: number, priceEur: string) => {
