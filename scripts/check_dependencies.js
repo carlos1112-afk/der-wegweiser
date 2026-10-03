@@ -2,6 +2,10 @@
 /**
  * Der Wegweiser — Automated Dependency Policy & Security Auditor
  * Checks npm lockfile integrity, high-severity CVE advisories, and pinned engine requirements.
+ *
+ * Note: This is a manual, one-off tool and is not meant for CI.
+ * `npm audit` frequently flags vulnerabilities in deep, third-party dependencies
+ * that are difficult to fix and can cause the CI pipeline to fail persistently.
  */
 
 import { execSync } from 'node:child_process';
