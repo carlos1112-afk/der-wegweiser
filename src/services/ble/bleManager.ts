@@ -109,8 +109,6 @@ export class BleManager {
     this.activeManufacturer = manufacturer;
     this.reconnectAttempts = 0;
 
-    console.log(`[BleManager] GATT Connected to ${manufacturer.toUpperCase()} Bike:`, device.name);
-
     let liveState: LiveBikeTelemetry = {
       isConnected: true,
       deviceName: device.name || 'Smart E-Bike',
