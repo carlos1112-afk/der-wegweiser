@@ -22,6 +22,8 @@ import { useAppLifecycle } from './hooks/useAppLifecycle';
 import { AppLifecycleService } from './services/appLifecycleService';
 import { ConsentService } from './services/consentService';
 import { UserIdentity } from './services/userIdentity';
+import { PushNotificationService } from './services/pushNotificationService';
+import { useRef } from 'react';
 
 // Code-Splitting: Lazy load heavy modals for sub-second cold start
 const AuthModal = lazy(() =>
@@ -97,6 +99,10 @@ export function App() {
       // damit die echte Firebase-UID für Cloud-Pfade verwendet wird.
       UserIdentity.clearCache();
     });
+
+    // Initialize FCM Push Notifications pipeline
+    PushNotificationService.initialize();
+
     return () => unsubscribe();
   }, []);
 
@@ -288,6 +294,49 @@ export function App() {
       OfflineMapService.prefetchRouteCorridor(currentRoute.pathCoordinates);
     }
   }, [currentRoute]);
+
+  // Rapid Battery Drop Detection (FCM Trigger)
+  const prevBatteryRef = useRef<{ percent: number, time: number } | null>(null);
+
+  useEffect(() => {
+    if (telemetry.batteryPercent === null) return;
+
+    const now = Date.now();
+    const currentPercent = telemetry.batteryPercent;
+
+    if (prevBatteryRef.current) {
+      const { percent: prevPercent, time: prevTime } = prevBatteryRef.current;
+      const timeDiffMs = now - prevTime;
+      const dropAmount = prevPercent - currentPercent;
+
+      if (currentPercent > prevPercent) {
+        // Battery charged/increased, reset the tracking point
+        prevBatteryRef.current = { percent: currentPercent, time: now };
+        return;
+      }
+
+      if (timeDiffMs > 300000) {
+        // Time window exceeded, reset baseline to now to restart measurement window
+        prevBatteryRef.current = { percent: currentPercent, time: now };
+        return;
+      }
+
+      // Detect rapid drop: >= 5% drop in <= 5 minutes (300,000 ms)
+      if (dropAmount >= 5) {
+        PushNotificationService.sendEmergencyBatteryWarning(
+          currentPercent,
+          `Verlust von ${dropAmount}% in ${Math.max(1, Math.round(timeDiffMs / 60000))} Minuten erkannt.`
+        );
+        // Reset ref so we don't repeatedly trigger for the same drop
+        prevBatteryRef.current = { percent: currentPercent, time: now };
+      }
+      // Note: If dropAmount is < 5 and time is within window, we do NOT reset the ref!
+      // This allows gradual drops to accumulate and be evaluated over the 5-minute window.
+    } else {
+      // First data point
+      prevBatteryRef.current = { percent: currentPercent, time: now };
+    }
+  }, [telemetry.batteryPercent]);
 
   // Battery Emergency Range Detection (Threshold <= 15%)
   useEffect(() => {
