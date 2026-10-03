@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -26,5 +27,12 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 600,
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/setupTests.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['tests/firestore.rules.test.mjs', 'node_modules', 'dist'],
   },
 })
