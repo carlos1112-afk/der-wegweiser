@@ -10,7 +10,7 @@ export class ElevationService {
   ): Promise<number[]> {
     if (!coords || coords.length === 0) return [];
 
-    const customEndpoint = import.meta.env.VITE_ELEVATION_PROVIDER_URL;
+    const customEndpoint = import.meta.env?.VITE_ELEVATION_PROVIDER_URL || (globalThis as any).process?.env?.VITE_ELEVATION_PROVIDER_URL;
     const lats = coords.map((c) => c[0]).join(',');
     const lngs = coords.map((c) => c[1]).join(',');
 
