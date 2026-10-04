@@ -1,15 +1,31 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Capacitor } from '@capacitor/core';
+import { BleClient } from '@capacitor-community/bluetooth-le';
 import type { LiveBikeTelemetry, BikeManufacturer } from '../../types/navigation';
 import { parsePowerMeasurement, parseBatteryLevel, parseCscMeasurement, resetStandardSigState } from './parsers/standardSigParser';
 import { parseSpecializedTelemetry, buildSpecializedAssistCommand, SPECIALIZED_SERVICE_UUID, SPECIALIZED_TELEMETRY_CHAR, SPECIALIZED_ASSIST_CHAR } from './parsers/specializedParser';
 import { parseMahleTelemetry, buildMahleAssistCommand, MAHLE_SERVICE_UUID, MAHLE_TELEMETRY_CHAR, MAHLE_CONTROL_CHAR } from './parsers/mahleParser';
 import { parseShimanoTelemetry, SHIMANO_DFLY_SERVICE_UUID, SHIMANO_TELEMETRY_CHAR } from './parsers/shimanoParser';
 import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, BAFANG_RX_CHAR } from './parsers/bafangParser';
+import type { BafangAssistLevel } from './parsers/bafangParser';
+import type { MahleAssistLevel } from './parsers/mahleParser';
 import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR } from './parsers/boschLdiParser';
+
+const ALL_SERVICE_UUIDS = [
+  BOSCH_DIAGNOSTIC_SERVICE_UUID,
+  SPECIALIZED_SERVICE_UUID,
+  SHIMANO_DFLY_SERVICE_UUID,
+  MAHLE_SERVICE_UUID,
+  BAFANG_UART_SERVICE_UUID,
+  'battery_service',
+  'cycling_power',
+  'cycling_speed_and_cadence',
+];
 
 export class BleManager {
   private static activeGattServer: BluetoothRemoteGATTServer | null = null;
   private static activeBluetoothDevice: BluetoothDevice | null = null;
+  private static activeDeviceId: string | null = null;
   private static activeManufacturer: BikeManufacturer = 'generic';
   private static reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private static reconnectAttempts = 0;
@@ -41,14 +57,196 @@ export class BleManager {
   }
 
   /**
-   * Scans for and connects to a physical E-Bike or BLE sensor via Web Bluetooth API.
-   * Attaches automatic disconnect listener with exponential backoff.
+   * Connects to a physical E-Bike or BLE sensor.
+   * Uses @capacitor-community/bluetooth-le on native platforms (Android/iOS),
+   * falls back to Web Bluetooth API in the browser.
    */
   public static async connectToBike(targetManufacturer?: BikeManufacturer): Promise<LiveBikeTelemetry> {
-    // Frische Referenzwerte: ein neuer Verbindungsversuch beginnt immer
-    // mit der ersten Messung als Referenz (liefert 0 statt eines Ausreißers).
     resetStandardSigState();
 
+    if (Capacitor.isNativePlatform()) {
+      return BleManager.connectNative(targetManufacturer);
+    }
+    return BleManager.connectWeb(targetManufacturer);
+  }
+
+  // ─── Native path (Android / iOS via @capacitor-community/bluetooth-le) ───
+
+  private static primaryServiceForManufacturer(manufacturer: BikeManufacturer): string {
+    switch (manufacturer) {
+      case 'bosch': return BOSCH_DIAGNOSTIC_SERVICE_UUID;
+      case 'specialized': return SPECIALIZED_SERVICE_UUID;
+      case 'shimano': return SHIMANO_DFLY_SERVICE_UUID;
+      case 'mahle': return MAHLE_SERVICE_UUID;
+      case 'bafang': return BAFANG_UART_SERVICE_UUID;
+      default: return 'battery_service';
+    }
+  }
+
+  private static async connectNative(targetManufacturer?: BikeManufacturer): Promise<LiveBikeTelemetry> {
+    await BleClient.initialize();
+
+    const filterServices = targetManufacturer && targetManufacturer !== 'generic'
+      ? [BleManager.primaryServiceForManufacturer(targetManufacturer)]
+      : ALL_SERVICE_UUIDS;
+
+    try {
+      const device = await BleClient.requestDevice({
+        services: filterServices,
+        optionalServices: ALL_SERVICE_UUIDS,
+      });
+
+      this.activeDeviceId = device.deviceId;
+      return await this.setupNativeConnection(device.deviceId, device.name);
+    } catch (err) {
+      console.warn('[BleManager] BleClient pairing cancelled or unavailable:', err);
+      throw new Error('[BleManager] Echte Bluetooth-Verbindung nicht verfügbar oder abgebrochen; keine Simulation erlaubt.');
+    }
+  }
+
+  private static async setupNativeConnection(deviceId: string, deviceName?: string): Promise<LiveBikeTelemetry> {
+    await BleClient.connect(deviceId, (id) => {
+      BleManager.onNativeDisconnected(id);
+    });
+
+    const manufacturer = this.detectManufacturer(deviceName);
+    this.activeManufacturer = manufacturer;
+    this.reconnectAttempts = 0;
+
+    console.log(`[BleManager] BleClient Connected to ${manufacturer.toUpperCase()} Bike:`, deviceName);
+
+    let liveState: LiveBikeTelemetry = {
+      isConnected: true,
+      deviceName: deviceName || 'Smart E-Bike',
+      manufacturer,
+      batteryPercent: null,
+      batteryWhRemaining: null,
+      batteryKnown: false,
+      speedKmH: 0,
+      cadenceRpm: 0,
+      riderPowerWatts: 0,
+      motorPowerWatts: 0,
+      motorAssistMode: 'auto',
+    };
+
+    // 1. Standard Battery Service (0x180F)
+    try {
+      const val = await BleClient.read(deviceId, 'battery_service', 'battery_level');
+      liveState = { ...liveState, ...parseBatteryLevel(val) };
+      await BleClient.startNotifications(deviceId, 'battery_service', 'battery_level', (value) => {
+        this.updateState({ ...parseBatteryLevel(value) });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 2. Standard Cycling Power Service (0x1818)
+    try {
+      await BleClient.startNotifications(deviceId, 'cycling_power', 'cycling_power_measurement', (value) => {
+        this.updateState({ ...parsePowerMeasurement(value) });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 3. Standard Cycling Speed & Cadence (0x1816)
+    try {
+      await BleClient.startNotifications(deviceId, 'cycling_speed_and_cadence', 'csc_measurement', (value) => {
+        this.updateState({ ...parseCscMeasurement(value) });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 4. Specialized Turbo Service
+    try {
+      await BleClient.startNotifications(deviceId, SPECIALIZED_SERVICE_UUID, SPECIALIZED_TELEMETRY_CHAR, (value) => {
+        this.updateState({ ...parseSpecializedTelemetry(value), manufacturer: 'specialized' });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 5. Mahle SmartBike Service
+    try {
+      await BleClient.startNotifications(deviceId, MAHLE_SERVICE_UUID, MAHLE_TELEMETRY_CHAR, (value) => {
+        this.updateState({ ...parseMahleTelemetry(value), manufacturer: 'mahle' });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 6. Shimano D-Fly Service
+    try {
+      await BleClient.startNotifications(deviceId, SHIMANO_DFLY_SERVICE_UUID, SHIMANO_TELEMETRY_CHAR, (value) => {
+        this.updateState({ ...parseShimanoTelemetry(value), manufacturer: 'shimano' });
+      });
+    } catch {
+      // Optional
+    }
+
+    // 7. Bafang CAN-over-BLE Service
+    try {
+      await BleClient.startNotifications(deviceId, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, (value) => {
+        const parsed = parseBafangPacket(value);
+        this.updateState({ ...parsed, manufacturer: 'bafang' });
+
+        // Capacitor File Logger for Test Drive
+        try {
+          const rawStr = Array.from(new Uint8Array(value.buffer, value.byteOffset, value.byteLength))
+            .map(b => b.toString(16).padStart(2, '0')).join(' ');
+          const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}\n`;
+          Filesystem.appendFile({
+            path: 'bafang_testfahrt.txt',
+            data: logLine,
+            directory: Directory.Documents,
+            encoding: Encoding.UTF8
+          }).catch(() => {});
+        } catch (e) {}
+      });
+    } catch {
+      // Optional
+    }
+
+    // 8. Bosch Diagnostic Service
+    try {
+      await BleClient.startNotifications(deviceId, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR, (value) => {
+        this.updateState({ ...parseBoschLdiTelemetry(value), manufacturer: 'bosch' });
+      });
+    } catch {
+      // Optional
+    }
+
+    this.lastKnownTelemetry = liveState;
+    return liveState;
+  }
+
+  private static onNativeDisconnected(deviceId: string) {
+    console.warn('[BleManager] BleClient connection lost! Initiating auto-reconnect backoff...');
+    resetStandardSigState();
+    this.updateState({ isConnected: false });
+
+    const delay = Math.min(30000, Math.pow(1.8, this.reconnectAttempts) * 1500);
+    this.reconnectAttempts += 1;
+
+    if (this.reconnectTimer !== null) clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = setTimeout(async () => {
+      if (this.activeDeviceId && !this.lastKnownTelemetry.isConnected) {
+        console.log(`[BleManager] BleClient auto-reconnect attempt #${this.reconnectAttempts}...`);
+        try {
+          await this.setupNativeConnection(deviceId, this.lastKnownTelemetry.deviceName);
+          console.log('[BleManager] BleClient successfully reconnected to E-Bike!');
+        } catch (e) {
+          console.warn('[BleManager] BleClient reconnection failed, scheduling next retry:', e);
+          this.onNativeDisconnected(deviceId);
+        }
+      }
+    }, delay);
+  }
+
+  // ─── Web path (browser via Web Bluetooth API) ────────────────────────────
+
+  private static async connectWeb(targetManufacturer?: BikeManufacturer): Promise<LiveBikeTelemetry> {
     if (typeof navigator !== 'undefined' && 'bluetooth' in navigator) {
       try {
         const filters: BluetoothLEScanFilter[] = [];
@@ -231,12 +429,11 @@ export class BleManager {
         if (target.value) {
           const parsed = parseBafangPacket(target.value);
           this.updateState({ ...parsed, manufacturer: 'bafang' });
-          
+
           // Capacitor File Logger for Test Drive
           try {
-            const rawStr = Array.from(new Uint8Array(target.value.buffer)).map(b => b.toString(16).padStart(2,"0")).join(" ");
-            const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}
-`;
+            const rawStr = Array.from(new Uint8Array(target.value.buffer)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+            const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}\n`;
             Filesystem.appendFile({
               path: 'bafang_testfahrt.txt',
               data: logLine,
@@ -269,15 +466,8 @@ export class BleManager {
     return liveState;
   }
 
-  private static updateState(partial: Partial<LiveBikeTelemetry>) {
-    this.lastKnownTelemetry = { ...this.lastKnownTelemetry, ...partial };
-    if (this.telemetryCallback) {
-      this.telemetryCallback(this.lastKnownTelemetry);
-    }
-  }
-
   /**
-   * Automatic background reconnection with exponential backoff on signal loss
+   * Automatic background reconnection with exponential backoff on signal loss (Web Bluetooth)
    */
   private static onDisconnected() {
     console.warn('[BleManager] Bluetooth connection lost! Initiating auto-reconnect backoff...');
@@ -311,10 +501,49 @@ export class BleManager {
     }, delay);
   }
 
+  // ─── Shared methods ───────────────────────────────────────────────────────
+
+  private static updateState(partial: Partial<LiveBikeTelemetry>) {
+    this.lastKnownTelemetry = { ...this.lastKnownTelemetry, ...partial };
+    if (this.telemetryCallback) {
+      this.telemetryCallback(this.lastKnownTelemetry);
+    }
+  }
+
   /**
    * Changes the motor assist mode on connected hardware
    */
   public static async setAssistMode(mode: 'off' | 'eco' | 'tour' | 'turbo'): Promise<boolean> {
+    if (Capacitor.isNativePlatform()) {
+      if (!this.activeDeviceId) {
+        console.warn('[BleManager] Kann Unterstützungsstufe nicht ändern: Keine echte BLE-Hardware verbunden.');
+        return false;
+      }
+      try {
+        if (this.activeManufacturer === 'specialized') {
+          const payload = buildSpecializedAssistCommand(mode === 'tour' ? 'trail' : mode as 'off' | 'eco' | 'turbo');
+          await BleClient.write(this.activeDeviceId, SPECIALIZED_SERVICE_UUID, SPECIALIZED_ASSIST_CHAR, new DataView(payload));
+          return true;
+        } else if (this.activeManufacturer === 'mahle') {
+          const payload = buildMahleAssistCommand(mode as MahleAssistLevel);
+          await BleClient.write(this.activeDeviceId, MAHLE_SERVICE_UUID, MAHLE_CONTROL_CHAR, new DataView(payload));
+          return true;
+        } else if (this.activeManufacturer === 'bafang') {
+          // SICHERHEIT: Bafang Schreibzugriffe sind riskant (z.B. M560/C245 Settings Wipe).
+          // TODO: In Zukunft striktes Read-Only fuer unbekannte Modelle erzwingen.
+          console.warn('BAFANG WRITE: Sende Command an BAFANG_RX_CHAR. Vorsicht bei M560/M820!');
+          const bafangLevel = (mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5) as BafangAssistLevel;
+          const payload = buildBafangAssistCommand(bafangLevel);
+          await BleClient.write(this.activeDeviceId, BAFANG_UART_SERVICE_UUID, BAFANG_RX_CHAR, new DataView(payload));
+          return true;
+        }
+      } catch (e) {
+        console.error('[BleManager] Failed to write assist mode to BLE hardware:', e);
+      }
+      return false;
+    }
+
+    // Web Bluetooth path
     if (!this.activeGattServer) {
       console.warn(`[BleManager] Kann Unterstützungsstufe nicht ändern: Keine echte BLE-Hardware verbunden.`);
       return false;
@@ -324,23 +553,23 @@ export class BleManager {
       if (this.activeManufacturer === 'specialized') {
         const service = await this.activeGattServer.getPrimaryService(SPECIALIZED_SERVICE_UUID);
         const char = await service.getCharacteristic(SPECIALIZED_ASSIST_CHAR);
-        const payload = buildSpecializedAssistCommand(mode === 'tour' ? 'trail' : mode);
+        const payload = buildSpecializedAssistCommand(mode === 'tour' ? 'trail' : mode as 'off' | 'eco' | 'turbo');
         await char.writeValue(payload);
         return true;
       } else if (this.activeManufacturer === 'mahle') {
         const service = await this.activeGattServer.getPrimaryService(MAHLE_SERVICE_UUID);
         const char = await service.getCharacteristic(MAHLE_CONTROL_CHAR);
-        const payload = buildMahleAssistCommand(mode);
+        const payload = buildMahleAssistCommand(mode as MahleAssistLevel);
         await char.writeValue(payload);
         return true;
       } else if (this.activeManufacturer === 'bafang') {
         // SICHERHEIT: Bafang Schreibzugriffe sind riskant (z.B. M560/C245 Settings Wipe).
         // TODO: In Zukunft striktes Read-Only fuer unbekannte Modelle erzwingen.
-        console.warn("BAFANG WRITE: Sende Command an BAFANG_RX_CHAR. Vorsicht bei M560/M820!");
+        console.warn('BAFANG WRITE: Sende Command an BAFANG_RX_CHAR. Vorsicht bei M560/M820!');
         const service = await this.activeGattServer.getPrimaryService(BAFANG_UART_SERVICE_UUID);
         const char = await service.getCharacteristic(BAFANG_RX_CHAR);
-        const bafangLevel = mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5;
-        const payload = buildBafangAssistCommand(bafangLevel as any);
+        const bafangLevel = (mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5) as BafangAssistLevel;
+        const payload = buildBafangAssistCommand(bafangLevel);
         await char.writeValue(payload);
         return true;
       }
