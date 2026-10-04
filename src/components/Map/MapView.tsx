@@ -142,6 +142,30 @@ const SATELLITE_NIGHT_STYLE = [
   { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
 ];
 
+// ── Google Maps topo-premium style (fallback when no Map ID configured) ──────
+const TOPO_PREMIUM_STYLE = [
+  { elementType: 'geometry',           stylers: [{ color: '#f5ede0' }] },
+  { elementType: 'labels.text.fill',   stylers: [{ color: '#4a3728' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5ede0' }] },
+  { featureType: 'landscape.natural',  elementType: 'geometry',           stylers: [{ color: '#d4e8c2' }] },
+  { featureType: 'poi.park',           elementType: 'geometry',           stylers: [{ color: '#b8dba0' }] },
+  { featureType: 'poi.park',           elementType: 'labels.text.fill',   stylers: [{ color: '#2d6a1f' }] },
+  { featureType: 'water',              elementType: 'geometry',           stylers: [{ color: '#7ab8d4' }] },
+  { featureType: 'water',              elementType: 'labels.text.fill',   stylers: [{ color: '#1a5c80' }] },
+  { featureType: 'water',              elementType: 'labels.text.stroke', stylers: [{ color: '#7ab8d4' }] },
+  { featureType: 'road',               elementType: 'geometry',           stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road',               elementType: 'geometry.stroke',    stylers: [{ color: '#c8b89a' }] },
+  { featureType: 'road',               elementType: 'labels.text.fill',   stylers: [{ color: '#6b4f3a' }] },
+  { featureType: 'road.highway',       elementType: 'geometry',           stylers: [{ color: '#f5c05a' }] },
+  { featureType: 'road.highway',       elementType: 'geometry.stroke',    stylers: [{ color: '#e0a030' }] },
+  { featureType: 'road.local',         elementType: 'geometry',           stylers: [{ color: '#ede8df' }] },
+  { featureType: 'landscape.man_made', elementType: 'geometry',           stylers: [{ color: '#e8ddd0' }] },
+  { featureType: 'administrative',     elementType: 'geometry.stroke',    stylers: [{ color: '#9c8070' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#4a3728' }] },
+  { featureType: 'transit',            stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi.business',       stylers: [{ visibility: 'off' }] },
+];
+
 // ── Google Maps cycle-premium style (fallback when no Map ID configured) ─────
 const CYCLE_PREMIUM_STYLE = [
   { elementType: 'geometry', stylers: [{ color: '#f5f0e8' }] },
@@ -509,6 +533,7 @@ export const MapView: React.FC<MapViewProps> = ({
           mapOptions.tilt = 45;
           const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID_TOPO as string | undefined;
           if (mapId) mapOptions.mapId = mapId;
+          else mapOptions.styles = TOPO_PREMIUM_STYLE;
         } else if (tileTheme === 'cycle-premium') {
           mapOptions.zoom = 14;
           mapOptions.mapTypeId = 'roadmap';
