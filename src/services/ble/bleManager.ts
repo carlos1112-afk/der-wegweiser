@@ -4,7 +4,7 @@ import { parsePowerMeasurement, parseBatteryLevel, parseCscMeasurement, resetSta
 import { parseSpecializedTelemetry, buildSpecializedAssistCommand, SPECIALIZED_SERVICE_UUID, SPECIALIZED_TELEMETRY_CHAR, SPECIALIZED_ASSIST_CHAR } from './parsers/specializedParser';
 import { parseMahleTelemetry, buildMahleAssistCommand, MAHLE_SERVICE_UUID, MAHLE_TELEMETRY_CHAR, MAHLE_CONTROL_CHAR } from './parsers/mahleParser';
 import { parseShimanoTelemetry, SHIMANO_DFLY_SERVICE_UUID, SHIMANO_TELEMETRY_CHAR } from './parsers/shimanoParser';
-import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR } from './parsers/bafangParser';
+import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, BAFANG_RX_CHAR } from './parsers/bafangParser';
 import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR } from './parsers/boschLdiParser';
 
 export class BleManager {
@@ -235,7 +235,8 @@ export class BleManager {
           // Capacitor File Logger for Test Drive
           try {
             const rawStr = Array.from(new Uint8Array(target.value.buffer)).map(b => b.toString(16).padStart(2,"0")).join(" ");
-            const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}\n`;
+            const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}
+`;
             Filesystem.appendFile({
               path: 'bafang_testfahrt.txt',
               data: logLine,
@@ -333,8 +334,11 @@ export class BleManager {
         await char.writeValue(payload);
         return true;
       } else if (this.activeManufacturer === 'bafang') {
+        // SICHERHEIT: Bafang Schreibzugriffe sind riskant (z.B. M560/C245 Settings Wipe).
+        // TODO: In Zukunft striktes Read-Only fuer unbekannte Modelle erzwingen.
+        console.warn("BAFANG WRITE: Sende Command an BAFANG_RX_CHAR. Vorsicht bei M560/M820!");
         const service = await this.activeGattServer.getPrimaryService(BAFANG_UART_SERVICE_UUID);
-        const char = await service.getCharacteristic(BAFANG_TX_CHAR);
+        const char = await service.getCharacteristic(BAFANG_RX_CHAR);
         const bafangLevel = mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5;
         const payload = buildBafangAssistCommand(bafangLevel as any);
         await char.writeValue(payload);
