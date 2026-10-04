@@ -9,7 +9,7 @@ import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
 import { getGoogleMapsKey } from '../../services/PremiumKeyService';
 
-export type MapTileTheme = 'topo' | 'cycle' | 'satellite' | 'dark' | 'satellite-3d' | 'topo-premium';
+export type MapTileTheme = 'topo' | 'cycle' | 'satellite' | 'dark' | 'satellite-3d' | 'topo-premium' | 'cycle-premium';
 
 interface MapViewProps {
   userLocation: { lat: number; lng: number };
@@ -30,12 +30,13 @@ interface MapViewProps {
 }
 
 const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
-  topo:           { name: 'OpenTopoMap',    premium: false },
-  cycle:          { name: 'Cycle + Terrain', premium: false },
-  satellite:      { name: 'Satellit (ESRI)', premium: false },
-  dark:           { name: 'Dark Vector',     premium: true },
-  'satellite-3d': { name: 'Satellit 3D',     premium: true },
-  'topo-premium': { name: 'Terrain Premium', premium: true },
+  topo:            { name: 'OpenTopoMap',      premium: false },
+  cycle:           { name: 'Cycle + Terrain',  premium: false },
+  satellite:       { name: 'Satellit (ESRI)',  premium: false },
+  dark:            { name: 'Dark Vector',      premium: true  },
+  'satellite-3d':  { name: 'Satellit Premium', premium: true  },
+  'topo-premium':  { name: 'Topo Premium',     premium: true  },
+  'cycle-premium': { name: 'Bike Premium',     premium: true  },
 };
 
 const MAPLIBRE_THEMES = new Set<MapTileTheme>(['topo', 'cycle', 'satellite']);
@@ -118,6 +119,69 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
       };
   }
 }
+
+// ── Google Maps satellite hybrid — night style (from Google Styled Maps) ─────
+const SATELLITE_NIGHT_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#263c3f' }] },
+  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#6b9a76' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#38414e' }] },
+  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212a37' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#746855' }] },
+  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#1f2835' }] },
+  { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2f3948' }] },
+  { featureType: 'transit.station', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
+  { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
+];
+
+// ── Google Maps topo-premium style (fallback when no Map ID configured) ──────
+const TOPO_PREMIUM_STYLE = [
+  { elementType: 'geometry',           stylers: [{ color: '#f5ede0' }] },
+  { elementType: 'labels.text.fill',   stylers: [{ color: '#4a3728' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5ede0' }] },
+  { featureType: 'landscape.natural',  elementType: 'geometry',           stylers: [{ color: '#d4e8c2' }] },
+  { featureType: 'poi.park',           elementType: 'geometry',           stylers: [{ color: '#b8dba0' }] },
+  { featureType: 'poi.park',           elementType: 'labels.text.fill',   stylers: [{ color: '#2d6a1f' }] },
+  { featureType: 'water',              elementType: 'geometry',           stylers: [{ color: '#7ab8d4' }] },
+  { featureType: 'water',              elementType: 'labels.text.fill',   stylers: [{ color: '#1a5c80' }] },
+  { featureType: 'water',              elementType: 'labels.text.stroke', stylers: [{ color: '#7ab8d4' }] },
+  { featureType: 'road',               elementType: 'geometry',           stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road',               elementType: 'geometry.stroke',    stylers: [{ color: '#c8b89a' }] },
+  { featureType: 'road',               elementType: 'labels.text.fill',   stylers: [{ color: '#6b4f3a' }] },
+  { featureType: 'road.highway',       elementType: 'geometry',           stylers: [{ color: '#f5c05a' }] },
+  { featureType: 'road.highway',       elementType: 'geometry.stroke',    stylers: [{ color: '#e0a030' }] },
+  { featureType: 'road.local',         elementType: 'geometry',           stylers: [{ color: '#ede8df' }] },
+  { featureType: 'landscape.man_made', elementType: 'geometry',           stylers: [{ color: '#e8ddd0' }] },
+  { featureType: 'administrative',     elementType: 'geometry.stroke',    stylers: [{ color: '#9c8070' }] },
+  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#4a3728' }] },
+  { featureType: 'transit',            stylers: [{ visibility: 'off' }] },
+  { featureType: 'poi.business',       stylers: [{ visibility: 'off' }] },
+];
+
+// ── Google Maps cycle-premium style (fallback when no Map ID configured) ─────
+const CYCLE_PREMIUM_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#f5f0e8' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#3d3522' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f0e8' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#f5c842' }] },
+  { featureType: 'road.local', elementType: 'geometry', stylers: [{ color: '#e8e0d0' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#c8e6c9' }] },
+  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#2e7d32' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#a0c4e8' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#1a6fa8' }] },
+  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#dcedc8' }] },
+  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#b0a090' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+];
 
 // ── Slope-colored GeoJSON builder ────────────────────────────────────────────
 
@@ -227,7 +291,6 @@ export const MapView: React.FC<MapViewProps> = ({
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const stationMarkersRef = useRef<Map<string, maplibregl.Marker>>(new Map());
   const googleMapRef = useRef<unknown>(null); // Google Maps instance (typed loosely)
-  const googleMap3dRef = useRef<HTMLElement | null>(null); // Map3DElement
 
   // ── State
   const [is3DMode, setIs3DMode] = useState(false);
@@ -241,7 +304,7 @@ export const MapView: React.FC<MapViewProps> = ({
   const [googleError, setGoogleError] = useState<string | null>(null);
 
   const isMaplibreActive = MAPLIBRE_THEMES.has(tileTheme);
-  const isGoogleActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium';
+  const isGoogleActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium' || tileTheme === 'cycle-premium';
   const isDarkActive = tileTheme === 'dark';
 
   const isCardOpen = Boolean((!currentRoute && selectedDestination) || selectedStationState);
@@ -450,47 +513,38 @@ export const MapView: React.FC<MapViewProps> = ({
         const apiKey = await getGoogleMapsKey();
         if (cancelled) return;
 
+        const loader = new Loader({ apiKey, version: 'weekly' });
+        const { Map } = await (loader as any).importLibrary('maps') as any;
+        if (cancelled) return;
+
+        const mapOptions: Record<string, unknown> = {
+          center: { lat: userLocation.lat, lng: userLocation.lng },
+          disableDefaultUI: true,
+        };
+
         if (tileTheme === 'satellite-3d') {
-          const loader = new Loader({ apiKey, version: 'alpha' });
-          const maps3d = await (loader as any).importLibrary('maps3d') as any;
-          if (cancelled) return;
-
-          const map3d: HTMLElement = new maps3d.Map3DElement();
-          (map3d as any).center = { lat: userLocation.lat, lng: userLocation.lng, altitude: 50 };
-          (map3d as any).tilt = 67.5;
-          (map3d as any).range = 800;
-          (map3d as any).heading = isCourseUp ? -currentHeadingDeg : 0;
-          map3d.style.width = '100%';
-          map3d.style.height = '100%';
-
-          googleContainerRef.current!.innerHTML = '';
-          googleContainerRef.current!.appendChild(map3d);
-          googleMap3dRef.current = map3d;
-          googleMapRef.current = map3d;
-
-          if (routePolyline.length > 1) {
-            const poly = new maps3d.Polyline3DElement();
-            poly.coordinates = routePolyline.map(([lat, lng]: [number, number]) => ({ lat, lng, altitude: 5 }));
-            (poly as any).strokeColor = '#00f0ff';
-            (poly as any).strokeWidth = 8;
-            (poly as any).altitudeMode = 'RELATIVE_TO_GROUND';
-            map3d.appendChild(poly);
-          }
-        } else {
-          // topo-premium: standard Google Maps terrain
-          const loader = new Loader({ apiKey, version: 'weekly' });
-          const { Map } = await (loader as any).importLibrary('maps') as any;
-          if (cancelled) return;
-
-          const gMap = new Map(googleContainerRef.current!, {
-            center: { lat: userLocation.lat, lng: userLocation.lng },
-            zoom: 13,
-            mapTypeId: 'terrain',
-            tilt: 45,
-            disableDefaultUI: true,
-          });
-          googleMapRef.current = gMap;
+          mapOptions.zoom = 14;
+          mapOptions.mapTypeId = 'hybrid';
+          mapOptions.tilt = 0;
+          mapOptions.styles = SATELLITE_NIGHT_STYLE;
+        } else if (tileTheme === 'topo-premium') {
+          mapOptions.zoom = 13;
+          mapOptions.mapTypeId = 'terrain';
+          mapOptions.tilt = 45;
+          const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID_TOPO as string | undefined;
+          if (mapId) mapOptions.mapId = mapId;
+          else mapOptions.styles = TOPO_PREMIUM_STYLE;
+        } else if (tileTheme === 'cycle-premium') {
+          mapOptions.zoom = 14;
+          mapOptions.mapTypeId = 'roadmap';
+          mapOptions.tilt = 0;
+          const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID_CYCLE as string | undefined;
+          if (mapId) mapOptions.mapId = mapId;
+          else mapOptions.styles = CYCLE_PREMIUM_STYLE;
         }
+
+        const gMap = new Map(googleContainerRef.current!, mapOptions);
+        googleMapRef.current = gMap;
       } catch (err) {
         if (!cancelled) {
           setGoogleError(err instanceof Error ? err.message : 'Google Maps Fehler');
@@ -501,14 +555,16 @@ export const MapView: React.FC<MapViewProps> = ({
     return () => { cancelled = true; };
   }, [tileTheme, isGoogleActive]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Update Google Maps 3D position/heading ────────────────────────────────────
+  // ── Update Google Maps position/heading ──────────────────────────────────────
 
   useEffect(() => {
-    if (tileTheme !== 'satellite-3d' || !googleMap3dRef.current) return;
-    const m = googleMap3dRef.current as any;
-    m.center = { lat: userLocation.lat, lng: userLocation.lng, altitude: 50 };
-    if (isCourseUp) m.heading = -currentHeadingDeg;
-  }, [userLocation, isCourseUp, currentHeadingDeg, tileTheme]);
+    if (!isGoogleActive || !googleMapRef.current) return;
+    const m = googleMapRef.current as any;
+    m.setCenter({ lat: userLocation.lat, lng: userLocation.lng });
+    if (tileTheme === 'satellite-3d' && isCourseUp) {
+      m.setHeading(-currentHeadingDeg);
+    }
+  }, [userLocation, isCourseUp, currentHeadingDeg, tileTheme, isGoogleActive]);
 
   // ── Map control handlers ───────────────────────────────────────────────────────
 
@@ -519,10 +575,10 @@ export const MapView: React.FC<MapViewProps> = ({
     setIsAutoFollow(true);
     setIsCourseUp(false);
     mapRef.current?.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 16, speed: 1.5 });
-    if (tileTheme === 'satellite-3d' && googleMap3dRef.current) {
-      const m = googleMap3dRef.current as any;
-      m.center = { lat: userLocation.lat, lng: userLocation.lng, altitude: 50 };
-      m.heading = 0;
+    if (isGoogleActive && googleMapRef.current) {
+      const m = googleMapRef.current as any;
+      m.setCenter({ lat: userLocation.lat, lng: userLocation.lng });
+      if (tileTheme === 'satellite-3d') m.setHeading(0);
     }
   }, [userLocation, tileTheme]);
 
