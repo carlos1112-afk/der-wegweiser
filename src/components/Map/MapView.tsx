@@ -9,7 +9,7 @@ import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
 import { getGoogleMapsKey } from '../../services/PremiumKeyService';
 
-export type MapTileTheme = 'topo' | 'cycle' | 'satellite' | 'dark' | 'satellite-3d' | 'topo-premium';
+export type MapTileTheme = 'topo' | 'cycle' | 'satellite' | 'dark' | 'satellite-3d' | 'topo-premium' | 'cycle-premium';
 
 interface MapViewProps {
   userLocation: { lat: number; lng: number };
@@ -30,12 +30,13 @@ interface MapViewProps {
 }
 
 const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
-  topo:           { name: 'OpenTopoMap',    premium: false },
-  cycle:          { name: 'Cycle + Terrain', premium: false },
-  satellite:      { name: 'Satellit (ESRI)', premium: false },
-  dark:           { name: 'Dark Vector',     premium: true },
-  'satellite-3d': { name: 'Satellit 3D',     premium: true },
-  'topo-premium': { name: 'Terrain Premium', premium: true },
+  topo:            { name: 'OpenTopoMap',      premium: false },
+  cycle:           { name: 'Cycle + Terrain',  premium: false },
+  satellite:       { name: 'Satellit (ESRI)',  premium: false },
+  dark:            { name: 'Dark Vector',      premium: true  },
+  'satellite-3d':  { name: 'Satellit Premium', premium: true  },
+  'topo-premium':  { name: 'Topo Premium',     premium: true  },
+  'cycle-premium': { name: 'Bike Premium',     premium: true  },
 };
 
 const MAPLIBRE_THEMES = new Set<MapTileTheme>(['topo', 'cycle', 'satellite']);
@@ -139,6 +140,23 @@ const SATELLITE_NIGHT_STYLE = [
   { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
   { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
   { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
+];
+
+// ── Google Maps cycle-premium style (fallback when no Map ID configured) ─────
+const CYCLE_PREMIUM_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#f5f0e8' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#3d3522' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f0e8' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#f5c842' }] },
+  { featureType: 'road.local', elementType: 'geometry', stylers: [{ color: '#e8e0d0' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#c8e6c9' }] },
+  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#2e7d32' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#a0c4e8' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#1a6fa8' }] },
+  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#dcedc8' }] },
+  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#b0a090' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
 ];
 
 // ── Slope-colored GeoJSON builder ────────────────────────────────────────────
@@ -262,7 +280,7 @@ export const MapView: React.FC<MapViewProps> = ({
   const [googleError, setGoogleError] = useState<string | null>(null);
 
   const isMaplibreActive = MAPLIBRE_THEMES.has(tileTheme);
-  const isGoogleActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium';
+  const isGoogleActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium' || tileTheme === 'cycle-premium';
   const isDarkActive = tileTheme === 'dark';
 
   const isCardOpen = Boolean((!currentRoute && selectedDestination) || selectedStationState);
@@ -471,20 +489,36 @@ export const MapView: React.FC<MapViewProps> = ({
         const apiKey = await getGoogleMapsKey();
         if (cancelled) return;
 
-        // Both satellite-3d and topo-premium use standard Google Maps JS API
         const loader = new Loader({ apiKey, version: 'weekly' });
         const { Map } = await (loader as any).importLibrary('maps') as any;
         if (cancelled) return;
 
-        const isSatPremium = tileTheme === 'satellite-3d';
-        const gMap = new Map(googleContainerRef.current!, {
+        const mapOptions: Record<string, unknown> = {
           center: { lat: userLocation.lat, lng: userLocation.lng },
-          zoom: isSatPremium ? 14 : 13,
-          mapTypeId: isSatPremium ? 'hybrid' : 'terrain',
-          tilt: isSatPremium ? 0 : 45,
           disableDefaultUI: true,
-          styles: isSatPremium ? SATELLITE_NIGHT_STYLE : [],
-        });
+        };
+
+        if (tileTheme === 'satellite-3d') {
+          mapOptions.zoom = 14;
+          mapOptions.mapTypeId = 'hybrid';
+          mapOptions.tilt = 0;
+          mapOptions.styles = SATELLITE_NIGHT_STYLE;
+        } else if (tileTheme === 'topo-premium') {
+          mapOptions.zoom = 13;
+          mapOptions.mapTypeId = 'terrain';
+          mapOptions.tilt = 45;
+          const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID_TOPO as string | undefined;
+          if (mapId) mapOptions.mapId = mapId;
+        } else if (tileTheme === 'cycle-premium') {
+          mapOptions.zoom = 14;
+          mapOptions.mapTypeId = 'roadmap';
+          mapOptions.tilt = 0;
+          const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID_CYCLE as string | undefined;
+          if (mapId) mapOptions.mapId = mapId;
+          else mapOptions.styles = CYCLE_PREMIUM_STYLE;
+        }
+
+        const gMap = new Map(googleContainerRef.current!, mapOptions);
         googleMapRef.current = gMap;
       } catch (err) {
         if (!cancelled) {
