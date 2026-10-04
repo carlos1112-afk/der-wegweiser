@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { Feature, FeatureCollection, LineString, Polygon } from 'geojson';
 import { Loader } from '@googlemaps/js-api-loader';
 import type { Route, ChargingStation } from '../../types/navigation';
 import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Play, Pause, Lock } from 'lucide-react';
@@ -69,15 +70,15 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
         },
         terrain: { source: 'terrain-dem', exaggeration: 1.0 },
         layers: [
-          { id: 'bg', type: 'background', paint: { 'background-color': '#111' } },
-          { id: 'cyclosm', type: 'raster', source: 'cyclosm' },
-          { id: 'topo-overlay', type: 'raster', source: 'topo', paint: { 'raster-opacity': 0.35 } },
+          { id: 'bg', type: 'background', paint: { 'background-color': '#111' } } as maplibregl.BackgroundLayerSpecification,
+          { id: 'cyclosm', type: 'raster', source: 'cyclosm' } as maplibregl.RasterLayerSpecification,
+          { id: 'topo-overlay', type: 'raster', source: 'topo', paint: { 'raster-opacity': 0.35 } } as maplibregl.RasterLayerSpecification,
           {
             id: 'hillshade',
             type: 'hillshade',
             source: 'terrain-dem',
             paint: { 'hillshade-intensity': 0.4, 'hillshade-shadow-color': '#004040' },
-          },
+          } as maplibregl.HillshadeLayerSpecification,
         ],
       };
     case 'topo':
@@ -96,7 +97,7 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
             maxzoom: 17,
           },
         },
-        layers: [{ id: 'topo', type: 'raster', source: 'topo' }],
+        layers: [{ id: 'topo', type: 'raster', source: 'topo' } as maplibregl.RasterLayerSpecification],
       };
     case 'satellite':
     default:
@@ -113,14 +114,14 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
             maxzoom: 19,
           },
         },
-        layers: [{ id: 'esri-satellite', type: 'raster', source: 'esri' }],
+        layers: [{ id: 'esri-satellite', type: 'raster', source: 'esri' } as maplibregl.RasterLayerSpecification],
       };
   }
 }
 
 // ── Slope-colored GeoJSON builder ────────────────────────────────────────────
 
-type RouteGeoJSON = GeoJSON.FeatureCollection<GeoJSON.LineString, { layer: string; color?: string; weight?: number }>;
+type RouteGeoJSON = FeatureCollection<LineString, { layer: string; color?: string; weight?: number }>;
 
 function buildRouteGeoJSON(polyline: [number, number][], route: Route | null): RouteGeoJSON {
   const features: RouteGeoJSON['features'] = [];
@@ -423,7 +424,7 @@ export const MapView: React.FC<MapViewProps> = ({
       el.className = 'cyberpunk-marker-pin marker-charging';
       el.textContent = '⚡';
       el.style.cursor = 'pointer';
-      el.addEventListener('click', (e) => {
+      el.addEventListener('click', (e: Event) => {
         e.stopPropagation();
         setSelectedDestination(null);
         setSelectedStationState(station);
@@ -451,7 +452,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
         if (tileTheme === 'satellite-3d') {
           const loader = new Loader({ apiKey, version: 'alpha' });
-          const maps3d = await loader.importLibrary('maps3d') as any;
+          const maps3d = await (loader as any).importLibrary('maps3d') as any;
           if (cancelled) return;
 
           const map3d: HTMLElement = new maps3d.Map3DElement();
@@ -478,7 +479,7 @@ export const MapView: React.FC<MapViewProps> = ({
         } else {
           // topo-premium: standard Google Maps terrain
           const loader = new Loader({ apiKey, version: 'weekly' });
-          const { Map } = await loader.importLibrary('maps') as any;
+          const { Map } = await (loader as any).importLibrary('maps') as any;
           if (cancelled) return;
 
           const gMap = new Map(googleContainerRef.current!, {
@@ -803,7 +804,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
 // ── Accuracy circle GeoJSON helper ────────────────────────────────────────────
 
-function buildAccuracyGeoJSON(center: { lat: number; lng: number }, radiusM: number): GeoJSON.Feature<GeoJSON.Polygon> {
+function buildAccuracyGeoJSON(center: { lat: number; lng: number }, radiusM: number): Feature<Polygon> {
   if (radiusM <= 0) return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [[]] } };
   const pts = 64;
   const coords: [number, number][] = [];
