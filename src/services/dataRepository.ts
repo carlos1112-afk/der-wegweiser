@@ -8,11 +8,11 @@ function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2
   const R = 6371e3; // Radius of the earth in m
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
+  const a =
     Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c; // Distance in m
 }
 
@@ -34,7 +34,7 @@ export interface IDataRepository {
   // Charging Stations
   getChargingStations(bounds?: { minLat: number; maxLat: number; minLng: number; maxLng: number }): Promise<ChargingStation[]>;
   addChargingStation(station: Omit<ChargingStation, 'id' | 'createdAt'>): Promise<ChargingStation>;
-  
+
   // User Preferences & Memory Graph
   getUserPreferences(userId: string): Promise<UserPreferences>;
   saveUserPreferences(preferences: UserPreferences): Promise<void>;
@@ -57,6 +57,7 @@ export interface IDataRepository {
 // In-Memory & LocalStorage Fallback Cache with Live Firebase Firestore integration
 class LocalAndFirestoreRepository implements IDataRepository {
   private memoryStations: ChargingStation[] = [];
+  private tokenAccountsCache: Map<string, TokenAccount> = new Map();
 
   async getChargingStations(bounds?: { minLat: number; maxLat: number; minLng: number; maxLng: number }): Promise<ChargingStation[]> {
     let firestoreStations: ChargingStation[] = [];
@@ -95,10 +96,10 @@ class LocalAndFirestoreRepository implements IDataRepository {
 
     // Filter by bounds if specified
     if (bounds) {
-      const filtered = allStations.filter(s => 
-        s.lat >= bounds.minLat && 
-        s.lat <= bounds.maxLat && 
-        s.lng >= bounds.minLng && 
+      const filtered = allStations.filter(s =>
+        s.lat >= bounds.minLat &&
+        s.lat <= bounds.maxLat &&
+        s.lng >= bounds.minLng &&
         s.lng <= bounds.maxLng
       );
 
@@ -111,7 +112,7 @@ class LocalAndFirestoreRepository implements IDataRepository {
         });
 
         for (const osm of osmStations) {
-          const isDuplicate = filtered.some(existing => 
+          const isDuplicate = filtered.some(existing =>
             getDistanceFromLatLonInM(existing.lat, existing.lng, osm.lat, osm.lng) < 50
           );
           if (!isDuplicate) {
@@ -261,70 +262,86 @@ class LocalAndFirestoreRepository implements IDataRepository {
   }
 
   async getTokenAccount(userId: string): Promise<TokenAccount> {
+    // Ensure any sensitive token data is purged from LocalStorage if previously cached
+    try {
+      localStorage.removeItem(`tokens_${userId}`);
+    } catch {
+      // Ignore errors in environments where localStorage is unavailable
+    }
+
     try {
       const docRef = doc(db, 'user_tokens', userId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data() as TokenAccount;
-        localStorage.setItem(`tokens_${userId}`, JSON.stringify(data));
-        return data;
+        this.tokenAccountsCache.set(userId, { ...data });
+        return { ...data };
       }
     } catch (error) {
-      console.warn(`Firestore getTokenAccount failed for user ${userId}, falling back to LocalStorage:`, error);
+      console.warn(`Firestore getTokenAccount failed for user ${userId}, falling back to in-memory cache:`, error);
     }
 
-    // Fallback: Check LocalStorage cache
-    const saved = localStorage.getItem(`tokens_${userId}`);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.warn(`Could not parse local token account cache for user ${userId}`, e);
-      }
+    // Fallback: Check In-Memory cache
+    if (this.tokenAccountsCache.has(userId)) {
+      return { ...this.tokenAccountsCache.get(userId)! };
     }
 
     // Default configuration
-    return {
+    const defaultAccount: TokenAccount = {
       userId,
       balance: 60,
       lifetimeEarned: 100,
       unlimitedOnDemand: true,
     };
+    this.tokenAccountsCache.set(userId, defaultAccount);
+    return { ...defaultAccount };
   }
 
   async addTokens(userId: string, amount: number, reason: string): Promise<number> {
+    try {
+      localStorage.removeItem(`tokens_${userId}`);
+    } catch {
+      // Ignore
+    }
+
     const account = await this.getTokenAccount(userId);
     account.balance += amount;
     account.lifetimeEarned += amount;
 
-    // Update LocalStorage cache
-    localStorage.setItem(`tokens_${userId}`, JSON.stringify(account));
+    // Update in-memory cache
+    this.tokenAccountsCache.set(userId, { ...account });
 
     // Persist in Firestore
     try {
       const docRef = doc(db, 'user_tokens', userId);
       await setDoc(docRef, account);
     } catch (error) {
-      console.warn(`Firestore addTokens failed for user ${userId} (${reason}), updated locally:`, error);
+      console.warn(`Firestore addTokens failed for user ${userId} (${reason}), updated in memory:`, error);
     }
 
     return account.balance;
   }
 
   async deductToken(userId: string, amount: number): Promise<boolean> {
+    try {
+      localStorage.removeItem(`tokens_${userId}`);
+    } catch {
+      // Ignore
+    }
+
     const account = await this.getTokenAccount(userId);
     if (account.unlimitedOnDemand || account.balance >= amount) {
       account.balance = Math.max(0, account.balance - amount);
 
-      // Update LocalStorage cache
-      localStorage.setItem(`tokens_${userId}`, JSON.stringify(account));
+      // Update in-memory cache
+      this.tokenAccountsCache.set(userId, { ...account });
 
       // Persist in Firestore
       try {
         const docRef = doc(db, 'user_tokens', userId);
         await setDoc(docRef, account);
       } catch (error) {
-        console.warn(`Firestore deductToken failed for user ${userId}, updated locally:`, error);
+        console.warn(`Firestore deductToken failed for user ${userId}, updated in memory:`, error);
       }
 
       return true;
