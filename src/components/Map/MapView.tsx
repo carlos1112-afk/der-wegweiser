@@ -86,6 +86,12 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
       return {
         version: 8,
         sources: {
+          'terrain-dem': {
+            type: 'raster-dem',
+            tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+            encoding: 'terrarium',
+            tileSize: 256,
+          },
           topo: {
             type: 'raster',
             tiles: [
@@ -98,13 +104,28 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
             maxzoom: 17,
           },
         },
-        layers: [{ id: 'topo', type: 'raster', source: 'topo' } as maplibregl.RasterLayerSpecification],
+        terrain: { source: 'terrain-dem', exaggeration: 1.2 },
+        layers: [
+          { id: 'topo', type: 'raster', source: 'topo' } as maplibregl.RasterLayerSpecification,
+          {
+            id: 'hillshade',
+            type: 'hillshade',
+            source: 'terrain-dem',
+            paint: { 'hillshade-intensity': 0.5, 'hillshade-shadow-color': '#2a1a08' },
+          } as maplibregl.HillshadeLayerSpecification,
+        ],
       };
     case 'satellite':
     default:
       return {
         version: 8,
         sources: {
+          'terrain-dem': {
+            type: 'raster-dem',
+            tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+            encoding: 'terrarium',
+            tileSize: 256,
+          },
           esri: {
             type: 'raster',
             tiles: [
@@ -115,7 +136,16 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
             maxzoom: 19,
           },
         },
-        layers: [{ id: 'esri-satellite', type: 'raster', source: 'esri' } as maplibregl.RasterLayerSpecification],
+        terrain: { source: 'terrain-dem', exaggeration: 1.0 },
+        layers: [
+          { id: 'esri-satellite', type: 'raster', source: 'esri' } as maplibregl.RasterLayerSpecification,
+          {
+            id: 'hillshade',
+            type: 'hillshade',
+            source: 'terrain-dem',
+            paint: { 'hillshade-intensity': 0.25, 'hillshade-shadow-color': '#000020' },
+          } as maplibregl.HillshadeLayerSpecification,
+        ],
       };
   }
 }
@@ -444,7 +474,7 @@ export const MapView: React.FC<MapViewProps> = ({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !isMaplibreActive) return;
-    const targetPitch = (is3DMode || tileTheme === 'cycle') ? 45 : 0;
+    const targetPitch = is3DMode ? 45 : 0;
     map.easeTo({ pitch: targetPitch, duration: 500 });
   }, [is3DMode, tileTheme, isMaplibreActive]);
 
