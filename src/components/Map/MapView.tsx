@@ -132,7 +132,7 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
             id: 'hillshade',
             type: 'hillshade',
             source: 'terrain-dem',
-            paint: { 'hillshade-intensity': 0.4, 'hillshade-shadow-color': '#004040' },
+            paint: { 'hillshade-exaggeration': 0.4, 'hillshade-shadow-color': '#004040' },
           } as maplibregl.HillshadeLayerSpecification,
         ],
       };
@@ -165,7 +165,7 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
             id: 'hillshade',
             type: 'hillshade',
             source: 'terrain-dem',
-            paint: { 'hillshade-intensity': 0.5, 'hillshade-shadow-color': '#2a1a08' },
+            paint: { 'hillshade-exaggeration': 0.5, 'hillshade-shadow-color': '#2a1a08' },
           } as maplibregl.HillshadeLayerSpecification,
         ],
       };
@@ -197,7 +197,7 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
             id: 'hillshade',
             type: 'hillshade',
             source: 'terrain-dem',
-            paint: { 'hillshade-intensity': 0.25, 'hillshade-shadow-color': '#000020' },
+            paint: { 'hillshade-exaggeration': 0.25, 'hillshade-shadow-color': '#000020' },
           } as maplibregl.HillshadeLayerSpecification,
         ],
       };
