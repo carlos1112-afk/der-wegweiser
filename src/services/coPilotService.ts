@@ -82,11 +82,14 @@ export const CoPilotService = {
     const pct = telemetry.batteryPercent;
     if (pct === null) return;
 
-    if (pct <= 10 && canWarn('battery_10')) {
-      markWarned('battery_10');
-      const advice = await buildRangeAdvice(telemetry);
-      speak(`Warnung! Akku kritisch bei ${pct} Prozent. ${advice}`);
-      return;
+    if (pct <= 10) {
+      if (canWarn('battery_10')) {
+        markWarned('battery_10');
+        markWarned('battery_20'); // battery_10 supersedes battery_20
+        const advice = await buildRangeAdvice(telemetry);
+        speak(`Warnung! Akku kritisch bei ${pct} Prozent. ${advice}`);
+      }
+      return; // always skip battery_20 check when pct ≤ 10
     }
 
     if (pct <= 20 && canWarn('battery_20')) {
