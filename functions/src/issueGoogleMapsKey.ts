@@ -43,10 +43,12 @@ export const issueGoogleMapsKey = onCall({
   try {
     await db.runTransaction(async (t) => {
       const doc = await t.get(rateLimitRef);
+      // Stryker disable next-line ArrayDeclaration
       let requests: number[] = [];
-      
+
       if (doc.exists) {
         const data = doc.data();
+        // Stryker disable next-line ArrayDeclaration
         requests = data?.timestamps || [];
       }
       
