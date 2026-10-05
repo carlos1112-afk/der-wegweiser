@@ -21,7 +21,7 @@ beforeEach(() => {
     ok: true,
     json: async () => ({ key: 'MAPS_KEY_OK' }),
   });
-  global.fetch = mockFetch;
+  globalThis.fetch = mockFetch as typeof fetch;
 });
 
 afterEach(() => {
