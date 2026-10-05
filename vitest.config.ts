@@ -10,6 +10,8 @@ export default defineConfig({
     include: [
       'src/services/coPilotService.test.ts',
       'src/services/PremiumKeyService.test.ts',
+      'src/services/PremiumKeyService.mutation.test.ts',
+      'src/services/consentService.test.ts',
     ],
     exclude: ['node_modules', 'dist'],
   },
