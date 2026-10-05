@@ -9,7 +9,9 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "stryker": "NODE_OPTIONS=--experimental-vm-modules stryker run"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +24,13 @@
     "firebase-functions": "^7.4.0"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/jest-runner": "^10.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^26.6.3",
-    "typescript": "^7.0.2"
+    "firebase-functions-test": "^3.5.0",
+    "jest": "^30.5.2",
+    "ts-jest": "^29.4.14",
+    "typescript": "^5.4.5"
   }
 }
