@@ -21,8 +21,10 @@
 
 export type AiCapability = 'planRoute' | 'voiceDialogue' | 'summarizeRide' | 'analyzeRange' | 'interpretWeather';
 
-export type AiProviderType = 
-  | 'backend_proxy'       // Standard: Eigener sicherer Backend-Proxy (Server-to-Server Auth)
+export type AiProviderType =
+  | 'firebase_ai'         // Standard: Firebase AI Logic (Gemini direkt aus dem Client, kein eigener Key)
+  | 'vertex_callable'     // Alternative: Cloud Function aiProxy (Vertex AI, europe-west3)
+  | 'backend_proxy'       // Eigener sicherer Backend-Proxy (Server-to-Server Auth)
   | 'openai'              // Beliebiger OpenAI-kompatibler Endpunkt (vLLM, OpenRouter, Mistral)
   | 'anthropic'           // Anthropic Messages API Format
   | 'ollama'              // Lokale Ollama-Instanz auf Host
@@ -46,7 +48,89 @@ export interface AiProviderAdapter {
   execute(request: CanonicalAiRequest, endpointUrl: string, timeoutMs: number): Promise<CanonicalAiResponse>;
 }
 
-// ── 1. Backend Proxy Adapter (Standard) ───────────────────────────────────────
+const PROVIDER_TYPES: AiProviderType[] = [
+  'firebase_ai', 'vertex_callable', 'backend_proxy', 'openai', 'anthropic', 'ollama', 'heuristic_offline',
+];
+const DEFAULT_PROVIDER: AiProviderType = 'firebase_ai';
+const DEFAULT_FIREBASE_AI_MODEL = 'gemini-2.0-flash';
+const DEFAULT_VERTEX_LOCATION = 'europe-west3';
+
+function aiEnv(): Record<string, string | undefined> {
+  return (import.meta.env ?? {}) as Record<string, string | undefined>;
+}
+
+function resolveDefaultProvider(): AiProviderType {
+  const configured = aiEnv().VITE_AI_PROVIDER as AiProviderType | undefined;
+  return configured && PROVIDER_TYPES.includes(configured) ? configured : DEFAULT_PROVIDER;
+}
+
+// ── 0a. Firebase AI Logic Adapter (Standard) ──────────────────────────────────
+export class FirebaseAiLogicAdapter implements AiProviderAdapter {
+  public type: AiProviderType = 'firebase_ai';
+
+  public async execute(request: CanonicalAiRequest, _endpointUrl: string, timeoutMs: number): Promise<CanonicalAiResponse> {
+    const { app } = await import('../../firebase');
+    if (!app?.options?.apiKey) {
+      throw new Error('[FirebaseAI] Firebase ist nicht konfiguriert (VITE_FIREBASE_API_KEY fehlt).');
+    }
+
+    const { getAI, getGenerativeModel, GoogleAIBackend, VertexAIBackend } = await import('firebase/ai');
+    const env = aiEnv();
+    const modelName = env.VITE_AI_MODEL || DEFAULT_FIREBASE_AI_MODEL;
+    const backend = env.VITE_AI_BACKEND === 'vertex'
+      ? new VertexAIBackend(env.VITE_AI_VERTEX_LOCATION || DEFAULT_VERTEX_LOCATION)
+      : new GoogleAIBackend();
+
+    const model = getGenerativeModel(
+      getAI(app, { backend }),
+      {
+        model: modelName,
+        systemInstruction: request.systemPrompt || undefined,
+        generationConfig: {
+          temperature: request.temperature ?? 0.4,
+          maxOutputTokens: request.maxTokens ?? 150,
+        },
+      },
+      { timeout: timeoutMs },
+    );
+
+    const result = await model.generateContent(request.userPrompt);
+    const text = result.response.text().trim();
+    if (!text) throw new Error('[FirebaseAI] Leere Antwort vom Modell.');
+    return { text, provider: this.type, modelUsed: modelName };
+  }
+}
+
+// ── 0b. Vertex Callable Adapter (Cloud Function aiProxy) ──────────────────────
+export class VertexCallableAdapter implements AiProviderAdapter {
+  public type: AiProviderType = 'vertex_callable';
+
+  public async execute(request: CanonicalAiRequest, _endpointUrl: string, timeoutMs: number): Promise<CanonicalAiResponse> {
+    const { app, functions } = await import('../../firebase');
+    if (!app?.options?.apiKey || !functions) {
+      throw new Error('[VertexCallable] Firebase ist nicht konfiguriert (VITE_FIREBASE_API_KEY fehlt).');
+    }
+
+    const { httpsCallable } = await import('firebase/functions');
+    const call = httpsCallable<
+      { systemPrompt: string; userPrompt: string; temperature: number; maxTokens: number },
+      { text?: string; modelUsed?: string }
+    >(functions, 'aiProxy', { timeout: timeoutMs });
+
+    const res = await call({
+      systemPrompt: request.systemPrompt,
+      userPrompt: request.userPrompt,
+      temperature: request.temperature ?? 0.4,
+      maxTokens: request.maxTokens ?? 150,
+    });
+
+    const text = res.data?.text?.trim();
+    if (!text) throw new Error('[VertexCallable] Leere Antwort vom Dienst.');
+    return { text, provider: this.type, modelUsed: res.data.modelUsed };
+  }
+}
+
+// ── 1. Backend Proxy Adapter ──────────────────────────────────────────────────
 export class BackendProxyAdapter implements AiProviderAdapter {
   public type: AiProviderType = 'backend_proxy';
 
@@ -243,11 +327,13 @@ export interface InterpretWeatherParams {
 }
 
 export class AiGatewayService {
-  private static activeProvider: AiProviderType = 'backend_proxy';
+  private static activeProvider: AiProviderType = resolveDefaultProvider();
   private static backendUrl: string = typeof window !== 'undefined' ? `${window.location.origin}/api/ai` : 'http://127.0.0.1:8000/v1';
   private static timeoutMs: number = 8000;
 
   private static adapters: Record<AiProviderType, AiProviderAdapter> = {
+    firebase_ai: new FirebaseAiLogicAdapter(),
+    vertex_callable: new VertexCallableAdapter(),
     backend_proxy: new BackendProxyAdapter(),
     openai: new OpenAiAdapter(),
     anthropic: new AnthropicAdapter(),
