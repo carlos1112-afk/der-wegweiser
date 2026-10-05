@@ -27,6 +27,7 @@ interface MapViewProps {
   onOpenScanner?: () => void;
   onCardOpenChange?: (open: boolean) => void;
   telemetry?: any;
+  selectedDestination?: { lat: number; lng: number; label?: string } | null;
 }
 
 const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
@@ -313,6 +314,7 @@ export const MapView: React.FC<MapViewProps> = ({
   onToggleSimulation,
   onCardOpenChange,
   telemetry,
+  selectedDestination: externalSelectedDestination,
 }) => {
   // ── Map engine refs
   const mlContainerRef = useRef<HTMLDivElement>(null);    // MapLibre canvas
@@ -351,6 +353,17 @@ export const MapView: React.FC<MapViewProps> = ({
   useEffect(() => {
     if (currentRoute) setSelectedDestination(null);
   }, [currentRoute]);
+
+  // Sync external selectedDestination prop (from SearchInput) into internal state
+  useEffect(() => {
+    if (externalSelectedDestination) {
+      setSelectedStationState(null);
+      setSelectedDestination({ lat: externalSelectedDestination.lat, lng: externalSelectedDestination.lng });
+      if (mapRef.current && isMaplibreActive) {
+        mapRef.current.flyTo({ center: [externalSelectedDestination.lng, externalSelectedDestination.lat], zoom: 15, speed: 1.5 });
+      }
+    }
+  }, [externalSelectedDestination, isMaplibreActive]);
 
   useEffect(() => {
     if (onCardOpenChange) onCardOpenChange(isCardOpen);
