@@ -9,8 +9,8 @@
 //   - Instance binding: include Capacitor/Web installation ID in signed response
 //   - Short TTL: key valid for 6 hours, app fetches fresh key on startup
 
-import { app } from '../firebase';
-import { getAppCheck, getToken } from 'firebase/app-check';
+import type { AppCheck } from 'firebase/app-check';
+import { getToken } from 'firebase/app-check';
 
 /** Error surfaced directly to the user (localised message, no stack trace). */
 export class UserFacingError extends Error {
@@ -22,6 +22,16 @@ export class UserFacingError extends Error {
   }
 }
 
+/**
+ * Register the Firebase App Check instance so this service can attach an
+ * instance-bound Bearer token to each key request.
+ * Call this once during app initialisation after `initializeAppCheck()`.
+ */
+let _appCheckInstance: AppCheck | null = null;
+export function setAppCheckInstance(instance: AppCheck): void {
+  _appCheckInstance = instance;
+}
+
 // --- Client-side rate limiter (max 5 requests per minute per app instance) ---
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
@@ -29,8 +39,11 @@ const rateLimitTimestamps: number[] = [];
 
 function checkRateLimit(): void {
   const now = Date.now();
-  // Remove timestamps older than 1 minute
-  while (rateLimitTimestamps.length > 0 && now - rateLimitTimestamps[0] > RATE_LIMIT_WINDOW_MS) {
+  // Remove timestamps older than the window
+  while (
+    rateLimitTimestamps.length > 0 &&
+    now - rateLimitTimestamps[0] > RATE_LIMIT_WINDOW_MS
+  ) {
     rateLimitTimestamps.shift();
   }
   if (rateLimitTimestamps.length >= RATE_LIMIT_MAX) {
@@ -48,7 +61,9 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 min local cache before re-fetching
 
 /** Calls the Firebase Function to obtain a short-lived Google Maps API key. */
 async function issueGoogleMapsKey(): Promise<string> {
-  const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL as string | undefined;
+  const functionsUrl = import.meta.env.VITE_FIREBASE_FUNCTIONS_URL as
+    | string
+    | undefined;
   if (!functionsUrl) {
     throw new UserFacingError(
       'Firebase Functions URL ist nicht konfiguriert (VITE_FIREBASE_FUNCTIONS_URL fehlt).',
@@ -59,15 +74,16 @@ async function issueGoogleMapsKey(): Promise<string> {
   // Client-side rate limit check
   checkRateLimit();
 
-  // Get Firebase App Check token for instance binding (Bearer schema)
+  // Obtain Firebase App Check token for instance binding (Bearer schema)
   let appCheckToken: string | null = null;
-  try {
-    const appCheck = getAppCheck(app);
-    const tokenResult = await getToken(appCheck, /* forceRefresh */ false);
-    appCheckToken = tokenResult.token;
-  } catch (e) {
-    // Non-fatal in dev/emulator environments where App Check is not initialised.
-    console.warn('[PremiumKeyService] App Check token nicht verfügbar:', e);
+  if (_appCheckInstance) {
+    try {
+      const tokenResult = await getToken(_appCheckInstance, /* forceRefresh */ false);
+      appCheckToken = tokenResult.token;
+    } catch (e) {
+      // Non-fatal: proceed without token; server enforces App Check if configured.
+      console.warn('[PremiumKeyService] App Check token nicht verfügbar:', e);
+    }
   }
 
   const headers: Record<string, string> = {
