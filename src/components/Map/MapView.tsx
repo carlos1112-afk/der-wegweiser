@@ -34,18 +34,71 @@ const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
   topo:            { name: 'OpenTopoMap',      premium: false },
   cycle:           { name: 'Cycle + Terrain',  premium: false },
   satellite:       { name: 'Satellit (ESRI)',  premium: false },
-  dark:            { name: 'Dark Vector',      premium: true  },
+  dark:            { name: 'Dark Vector',      premium: false },
   'satellite-3d':  { name: 'Satellit Premium', premium: true  },
   'topo-premium':  { name: 'Topo Premium',     premium: true  },
   'cycle-premium': { name: 'Bike Premium',     premium: true  },
 };
 
-const MAPLIBRE_THEMES = new Set<MapTileTheme>(['topo', 'cycle', 'satellite']);
+const MAPLIBRE_THEMES = new Set<MapTileTheme>(['topo', 'cycle', 'satellite', 'dark']);
 
 // ── MapLibre style definitions ────────────────────────────────────────────────
 
-function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification {
+function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | string {
   switch (theme) {
+    case 'dark':
+      return {
+        version: 8,
+        glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
+        sprite: 'https://tiles.openfreemap.org/sprites/liberty/sprite',
+        sources: {
+          openmaptiles: {
+            type: 'vector',
+            url: 'https://tiles.openfreemap.org/planet',
+          },
+        },
+        layers: [
+          { id: 'background', type: 'background', paint: { 'background-color': '#060a12' } } as maplibregl.BackgroundLayerSpecification,
+          { id: 'water', type: 'fill', source: 'openmaptiles', 'source-layer': 'water',
+            paint: { 'fill-color': '#0d2137' } } as maplibregl.FillLayerSpecification,
+          { id: 'landuse-park', type: 'fill', source: 'openmaptiles', 'source-layer': 'landuse',
+            filter: ['==', 'class', 'park'],
+            paint: { 'fill-color': '#0a1f0a' } } as maplibregl.FillLayerSpecification,
+          { id: 'landuse-grass', type: 'fill', source: 'openmaptiles', 'source-layer': 'landuse',
+            filter: ['in', 'class', 'grass', 'meadow', 'wood', 'forest'],
+            paint: { 'fill-color': '#0c1a0c' } } as maplibregl.FillLayerSpecification,
+          { id: 'building', type: 'fill', source: 'openmaptiles', 'source-layer': 'building',
+            paint: { 'fill-color': '#0d1520', 'fill-outline-color': '#1e3a5f' } } as maplibregl.FillLayerSpecification,
+          { id: 'road-minor', type: 'line', source: 'openmaptiles', 'source-layer': 'transportation',
+            filter: ['in', 'class', 'minor', 'service', 'track', 'path'],
+            paint: { 'line-color': '#1a2a3a', 'line-width': 1 },
+            layout: { 'line-cap': 'round', 'line-join': 'round' } } as maplibregl.LineLayerSpecification,
+          { id: 'road-secondary', type: 'line', source: 'openmaptiles', 'source-layer': 'transportation',
+            filter: ['in', 'class', 'secondary', 'tertiary'],
+            paint: { 'line-color': '#1e3550', 'line-width': 2 },
+            layout: { 'line-cap': 'round', 'line-join': 'round' } } as maplibregl.LineLayerSpecification,
+          { id: 'road-primary', type: 'line', source: 'openmaptiles', 'source-layer': 'transportation',
+            filter: ['==', 'class', 'primary'],
+            paint: { 'line-color': '#00c8d4', 'line-width': 3, 'line-blur': 0.5 },
+            layout: { 'line-cap': 'round', 'line-join': 'round' } } as maplibregl.LineLayerSpecification,
+          { id: 'road-motorway-glow', type: 'line', source: 'openmaptiles', 'source-layer': 'transportation',
+            filter: ['in', 'class', 'motorway', 'trunk'],
+            paint: { 'line-color': '#ffb700', 'line-width': 8, 'line-opacity': 0.25, 'line-blur': 4 },
+            layout: { 'line-cap': 'round', 'line-join': 'round' } } as maplibregl.LineLayerSpecification,
+          { id: 'road-motorway', type: 'line', source: 'openmaptiles', 'source-layer': 'transportation',
+            filter: ['in', 'class', 'motorway', 'trunk'],
+            paint: { 'line-color': '#ffb700', 'line-width': 4 },
+            layout: { 'line-cap': 'round', 'line-join': 'round' } } as maplibregl.LineLayerSpecification,
+          { id: 'road-cyan-glow', type: 'line', source: 'openmaptiles', 'source-layer': 'transportation',
+            filter: ['in', 'class', 'secondary', 'tertiary', 'primary'],
+            paint: { 'line-color': '#00f0ff', 'line-width': 6, 'line-opacity': 0.08, 'line-blur': 3 },
+            layout: { 'line-cap': 'round', 'line-join': 'round' } } as maplibregl.LineLayerSpecification,
+          { id: 'place-label', type: 'symbol', source: 'openmaptiles', 'source-layer': 'place',
+            filter: ['in', 'class', 'city', 'town', 'village'],
+            layout: { 'text-field': ['get', 'name'], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-max-width': 8 },
+            paint: { 'text-color': '#7ecfff', 'text-halo-color': '#060a12', 'text-halo-width': 1.5 } } as maplibregl.SymbolLayerSpecification,
+        ],
+      };
     case 'cycle':
       return {
         version: 8,
@@ -337,8 +390,6 @@ export const MapView: React.FC<MapViewProps> = ({
 
   const isMaplibreActive = MAPLIBRE_THEMES.has(tileTheme);
   const isGoogleActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium' || tileTheme === 'cycle-premium';
-  const isDarkActive = tileTheme === 'dark';
-
   const isCardOpen = Boolean((!currentRoute && selectedDestination) || selectedStationState);
   const routePolyline = currentRoute?.pathCoordinates || [];
   const routeWaypoints = getRouteWaypoints(currentRoute);
@@ -675,23 +726,6 @@ export const MapView: React.FC<MapViewProps> = ({
           </div>
         )}
       </div>
-
-      {/* Dark Vector stub — Grok engine mounts here */}
-      {isDarkActive && (
-        <div style={{
-          width: '100%', height: '100%', position: 'absolute', top: 0, left: 0,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: '#060a12', gap: '16px',
-        }}
-          data-theme="dark"
-          id="grok-vector-mount"
-        >
-          {/* TODO: Grok vector engine mounts here */}
-          <div style={{ color: 'var(--accent-cyan)', fontSize: '2rem' }}>🌃</div>
-          <div style={{ color: '#fff', fontWeight: 'bold', fontSize: '1rem' }}>Dark Vector Engine</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Powered by Grok — Coming Soon</div>
-        </div>
-      )}
 
       {/* Elevation ribbon */}
       {!selectedDestination && !selectedStationState && (
