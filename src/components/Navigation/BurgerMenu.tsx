@@ -1,7 +1,7 @@
 import React from 'react';
-import { 
-  X, Route, UploadCloud, Play, Sun, Moon, Volume2, 
-  BarChart3, Camera, Gamepad2, Sparkles, ShieldCheck 
+import {
+  X, Route, UploadCloud, Play, Sun, Moon, Volume2,
+  BarChart3, Camera, Gamepad2, Sparkles, ShieldCheck, Bluetooth
 } from 'lucide-react';
 
 interface BurgerMenuProps {
@@ -17,6 +17,8 @@ interface BurgerMenuProps {
   onOpenAnticipation: () => void;
   onOpenLegal: () => void;
   onStartDemo: () => void;
+  onOpenBle?: () => void;
+  isBleConnected?: boolean;
 }
 
 export const BurgerMenu: React.FC<BurgerMenuProps> = ({
@@ -31,7 +33,9 @@ export const BurgerMenu: React.FC<BurgerMenuProps> = ({
   onOpenLounge,
   onOpenAnticipation,
   onOpenLegal,
-  onStartDemo
+  onStartDemo,
+  onOpenBle,
+  isBleConnected = false,
 }) => {
   if (!isOpen) return null;
 
@@ -84,6 +88,20 @@ export const BurgerMenu: React.FC<BurgerMenuProps> = ({
           <button className="btn-cyberpunk" style={{ justifyContent: 'flex-start' }} onClick={() => { onClose(); onOpenAnticipation(); }}>
             <Sparkles size={18} /> KI Heute-Tour
           </button>
+
+          {/* E-Bike */}
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '16px', marginBottom: '4px' }}>E-Bike</div>
+
+          {onOpenBle && (
+            <button
+              className={`btn-cyberpunk ${isBleConnected ? 'btn-cyan' : ''}`}
+              style={{ justifyContent: 'flex-start' }}
+              onClick={() => { onClose(); onOpenBle(); }}
+            >
+              <Bluetooth size={18} />
+              {isBleConnected ? 'E-Bike verbunden ✓' : 'E-Bike verbinden'}
+            </button>
+          )}
 
           {/* Settings & Tools */}
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '16px', marginBottom: '4px' }}>Einstellungen & Tools</div>
