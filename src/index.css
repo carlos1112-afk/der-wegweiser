@@ -573,6 +573,17 @@ body.sunlight-mode .map-tile-dark {
 }
 
 
+/* MapLibre 3D Billboarding — counter-rotation for HTML markers & popups in pitch mode.
+   Keeps DOM overlays perpendicular to the viewer when map.pitch > 0 (cycle/topo-3d modes). */
+.map-3d-billboard,
+.maplibregl-popup.map-3d-popup,
+.user-location-marker.map-3d-mode,
+.charging-marker.map-3d-mode {
+  transform: rotateX(-55deg) translateZ(0px);
+  transform-origin: bottom center;
+  backface-visibility: hidden;
+}
+
 /* Ultra-Compact Screens (< 360px) */
 @media (max-width: 360px) {
   .brand-text {
