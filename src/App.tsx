@@ -31,6 +31,7 @@ import { AppLifecycleService } from './services/appLifecycleService';
 import { ConsentService } from './services/consentService';
 import { UserIdentity } from './services/userIdentity';
 import { PushNotificationService } from './services/pushNotificationService';
+import { CoPilotService } from './services/coPilotService';
 import { useRef } from 'react';
 
 // Code-Splitting: Lazy load heavy modals for sub-second cold start
@@ -360,10 +361,11 @@ export function App() {
   const handleConnectBLE = async () => {
     const liveData = await BleService.connectToBike();
     setTelemetry(liveData);
+    CoPilotService.start();
 
-    // Subscribe to live continuous telemetry streaming while riding
     BleService.subscribeTelemetry(liveData, (updatedData) => {
       setTelemetry(updatedData);
+      CoPilotService.onTelemetryUpdate(updatedData);
     });
   };
 
@@ -599,6 +601,8 @@ export function App() {
             setSimSpeedMultiplier(simSpeedMultiplier >= 10 ? 1 : simSpeedMultiplier === 1 ? 4 : 10);
           }
         }}
+        onOpenBle={() => setShowBoschModal(true)}
+        isBleConnected={telemetry.isConnected}
       />
 
       <BottomActionBar 
