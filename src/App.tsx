@@ -6,7 +6,6 @@ import { BatteryHUD } from './components/BatteryHUD/BatteryHUD';
 import { WeatherHUD } from './components/WeatherHUD/WeatherHUD';
 import { GpxRecorderHUD } from './components/Recording/GpxRecorderHUD';
 import { OledBlackMode } from './components/DisplayModes/OledBlackMode';
-import { FloatingMicButton } from './components/AiAssistant/FloatingMicButton';
 import type { Route, ChargingStation, LiveBikeTelemetry, UserPreferences, UserMemoryPattern } from './types/navigation';
 import { dataRepository } from './services/dataRepository';
 import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService';
@@ -661,16 +660,6 @@ export function App() {
         selectedDestination={searchDestination}
       />
 
-      {/* Floating Voice Assistant Mic */}
-      <FloatingMicButton
-        telemetry={telemetry}
-        currentRoute={currentRoute}
-        onOpenScanner={() => setShowScannerModal(true)}
-        onOpenLounge={() => setShowLoungeModal(true)}
-        onToggleOled={handleToggleOledMode}
-        onRegenerateTour={() => handleRegenerateRoute()}
-        isHidden={isBottomCardOpen}
-      />
 
       {/* Lazy Modals with Suspense */}
       <Suspense fallback={null}>
