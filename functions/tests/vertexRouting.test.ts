@@ -1,14 +1,24 @@
 import { HttpsError } from 'firebase-functions/v2/https';
 
-jest.mock('firebase-functions/v2/https', () => ({
-  onCall: jest.fn((config, handler) => {
-    const wrapped = async (req: any) => handler(req);
-    wrapped.run = wrapped;
-    wrapped.__config = config;
-    return wrapped;
-  }),
-  HttpsError: jest.requireActual('firebase-functions/v2/https').HttpsError
-}));
+jest.mock('firebase-functions/v2/https', () => {
+  class HttpsError extends Error {
+    code: string;
+    constructor(code: string, message: string) {
+      super(message);
+      this.code = code;
+      this.name = 'HttpsError';
+    }
+  }
+  return {
+    onCall: jest.fn((config: any, handler: any) => {
+      const wrapped = async (req: any) => handler(req);
+      (wrapped as any).run = wrapped;
+      (wrapped as any).__config = config;
+      return wrapped;
+    }),
+    HttpsError,
+  };
+});
 
 import { computeRoute } from '../src/vertexRouting';
 
@@ -78,10 +88,11 @@ describe('vertexRouting', () => {
   it('should throw internal if Vertex AI throws', async () => {
     const req: any = { data: { startLat: 1, startLng: 2, destLat: 3, destLng: 4, batteryPercent: 80, rangeKm: 50 } };
     mockGenerateContent.mockRejectedValueOnce(new Error('Vertex quota exceeded'));
-    
-    await expect(computeRoute.run(req)).rejects.toThrow(
-      new HttpsError('internal', 'Vertex AI Error: Vertex quota exceeded')
-    );
+
+    const err: any = await computeRoute.run(req).catch(e => e);
+    expect(err).toBeInstanceOf(HttpsError);
+    expect(err.code).toBe('internal');
+    expect(err.message).toBe('Vertex AI Error: Vertex quota exceeded');
   });
   it('should be configured with europe-west3', () => {
     expect((computeRoute as any).__config).toEqual({
