@@ -42,6 +42,10 @@ firebase_data/
 firebase_data/*
 *.dump.json
 
+# Mutation testing artifacts
+.stryker-tmp/
+reports/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

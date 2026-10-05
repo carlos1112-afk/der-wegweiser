@@ -32,6 +32,9 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.redeemVoucher = void 0;
 const https_1 = require("firebase-functions/v2/https");
@@ -118,4 +121,6 @@ exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (r
         throw new https_1.HttpsError("internal", `Error redeeming item: ${error.message}`);
     }
 });
+__exportStar(require("./issueGoogleMapsKey"), exports);
+__exportStar(require("./vertexRouting"), exports);
 //# sourceMappingURL=index.js.map

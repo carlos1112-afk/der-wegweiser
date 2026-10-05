@@ -153,3 +153,10 @@ export function clearKeyCache(): void {
   cachedKey = null;
   cachedAt = 0;
 }
+
+/** Test-only: resets both key cache and rate limiter state. */
+export function _resetForTesting(): void {
+  cachedKey = null;
+  cachedAt = 0;
+  rateLimitTimestamps.length = 0;
+}
