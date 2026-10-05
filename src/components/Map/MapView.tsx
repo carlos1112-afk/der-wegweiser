@@ -607,7 +607,7 @@ export const MapView: React.FC<MapViewProps> = ({
         const apiKey = await getGoogleMapsKey();
         if (cancelled) return;
 
-        gMapsSetOptions({ apiKey, version: 'weekly' });
+        gMapsSetOptions({ key: apiKey, v: 'weekly' });
         const { Map } = await gMapsImportLibrary('maps') as any;
         if (cancelled) return;
 
