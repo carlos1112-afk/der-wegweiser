@@ -15,6 +15,7 @@ export default defineConfig({
       'tests/scenarios/**/*.test.ts',
       'src/services/ai/**/*.test.ts',
       'src/*.test.ts',
+      'tests/scripts/**/*.test.ts',
     ],
     exclude: ['node_modules', 'dist'],
   },
