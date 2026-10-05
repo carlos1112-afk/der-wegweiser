@@ -40,7 +40,7 @@ export class RoutingService {
 
     try {
       // BRouter API call: start -> via -> start
-      const brouterUrl = `https://brouter.de/brouter?lonlats=${params.startLng},${params.startLat}|${viaLng},${viaLat}|${params.startLng},${params.startLat}&profile=trekking-pedelec&alternativeidx=0&format=geojson`;
+      const brouterUrl = `https://brouter.de/brouter?lonlats=${params.startLng},${params.startLat}|${viaLng},${viaLat}|${params.startLng},${params.startLat}&profile=trekking&alternativeidx=0&format=geojson`;
       const res = await fetchFn(brouterUrl);
 
       if (res.ok) {
