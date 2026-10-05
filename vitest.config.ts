@@ -12,6 +12,7 @@ export default defineConfig({
       'src/services/PremiumKeyService.test.ts',
       'src/services/PremiumKeyService.mutation.test.ts',
       'src/services/consentService.test.ts',
+      'tests/scenarios/**/*.test.ts',
     ],
     exclude: ['node_modules', 'dist'],
   },

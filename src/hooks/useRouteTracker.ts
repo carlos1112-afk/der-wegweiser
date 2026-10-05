@@ -10,7 +10,7 @@ export interface TurnManeuver {
   isImminent: boolean; // < 50m
 }
 
-function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371000; // meters
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -21,7 +21,7 @@ function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number)
   return R * c;
 }
 
-function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const y = Math.sin(((lon2 - lon1) * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180);
   const x =
     Math.cos((lat1 * Math.PI) / 180) * Math.sin((lat2 * Math.PI) / 180) -
