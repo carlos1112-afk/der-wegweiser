@@ -1,4 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { SearchInput } from './components/Search/SearchInput';
+import type { SearchResult } from './components/Search/SearchInput';
 import { MapView } from './components/Map/MapView';
 import { BatteryHUD } from './components/BatteryHUD/BatteryHUD';
 import { WeatherHUD } from './components/WeatherHUD/WeatherHUD';
@@ -164,6 +166,7 @@ export function App() {
   const [simSpeedMultiplier, setSimSpeedMultiplier] = useState<number>(1);
   const [, setSimulatedCoordIndex] = useState<number>(0);
   const [isBottomCardOpen, setIsBottomCardOpen] = useState<boolean>(false);
+  const [searchDestination, setSearchDestination] = useState<SearchResult | null>(null);
   const [simulatedLocation, setSimulatedLocation] = useState<{
     lat: number;
     lng: number;
@@ -533,23 +536,36 @@ export function App() {
           </button>
         </div>
 
-        {/* Search Bar Placeholder for Phase 1 - Just visual representation based on design */}
-        <div 
-          className="glass-panel"
-          style={{ 
-            flex: 1, 
-            display: 'flex', 
-            alignItems: 'center', 
-            padding: '8px 12px',
-            backgroundColor: isSearchActive ? 'rgba(5, 10, 20, 0.95)' : 'rgba(5, 10, 20, 0.4)',
-            transition: 'all 0.3s ease',
-            cursor: 'pointer'
-          }}
-          onClick={() => setSearchActive(!isSearchActive)}
+        {/* Search Input — Nominatim geocoding */}
+        <div
+          style={{ flex: 1 }}
+          onClick={() => setSearchActive(true)}
+          onFocus={() => setSearchActive(true)}
         >
-          <span style={{ fontSize: '0.85rem', color: isSearchActive ? '#fff' : 'rgba(255,255,255,0.6)' }}>
-            {currentRoute ? '▼' : (isSearchActive ? 'Ziel eingeben...' : 'Suchen...')}
-          </span>
+          {!currentRoute ? (
+            <SearchInput
+              placeholder="Ziel eingeben..."
+              onSelect={(result) => {
+                setSearchDestination(result);
+                setSearchActive(false);
+              }}
+            />
+          ) : (
+            <div
+              className="glass-panel"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '8px 12px',
+                backgroundColor: 'rgba(5, 10, 20, 0.6)',
+                cursor: 'default',
+              }}
+            >
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
+                ▼ Navigation aktiv
+              </span>
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
@@ -629,12 +645,16 @@ export function App() {
         onSelectStation={(station) => handlePlanRouteToStation(station)}
         onAutoReroute={handleAutoReroute}
         onOpenReviewModal={(station) => setSelectedStationForReview(station)}
-        onPlanRouteToPoint={handlePlanRouteToPoint}
+        onPlanRouteToPoint={(lat, lng) => {
+          handlePlanRouteToPoint(lat, lng);
+          setSearchDestination(null);
+        }}
         onPlanRouteToStation={handlePlanRouteToStation}
         isSimulating={isSimulatingRoute}
         onToggleSimulation={() => setIsSimulatingRoute(!isSimulatingRoute)}
         onOpenScanner={() => setShowScannerModal(true)}
         onCardOpenChange={setIsBottomCardOpen}
+        selectedDestination={searchDestination}
       />
 
       {/* Floating Voice Assistant Mic */}
