@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
+import { initAppCheck } from './appCheck';
 
 // Firebase configuration for project der-wegweiser
 const env = (import.meta as any).env || {};
@@ -18,6 +19,7 @@ const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
+export const appCheck = initAppCheck(app, env, import.meta.env?.DEV === true);
 export const db = getFirestore(app);
 
 // Resilient Auth initialization (prevents startup crash if apiKey is missing in offline/local mode)
