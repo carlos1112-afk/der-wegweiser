@@ -1,0 +1,156 @@
+/* SearchInput — Cyberpunk theme */
+
+:root {
+  --si-bg: #060a12;
+  --si-cyan: #00f0ff;
+  --si-text: #7ecfff;
+  --si-border: rgba(0, 240, 255, 0.35);
+  --si-hover-bg: rgba(0, 240, 255, 0.08);
+  --si-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+  --si-error: #ff4d6a;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  z-index: 2100;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  background-color: rgba(6, 10, 18, 0.92);
+  border: 1.5px solid var(--si-border);
+  border-radius: 10px;
+  padding: 0 10px;
+  gap: 6px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--si-cyan);
+  box-shadow: var(--si-shadow);
+}
+
+.searchIcon {
+  color: var(--si-cyan);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+  user-select: none;
+}
+
+.input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--si-text);
+  font-size: 0.875rem;
+  padding: 8px 0;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.input::placeholder {
+  color: rgba(126, 207, 255, 0.4);
+}
+
+/* Spinner — pure CSS ring */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0, 240, 255, 0.25);
+  border-top-color: var(--si-cyan);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: rgba(126, 207, 255, 0.5);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.clearBtn:hover {
+  color: var(--si-cyan);
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background-color: rgba(6, 10, 18, 0.97);
+  border: 1.5px solid var(--si-border);
+  border-radius: 10px;
+  padding: 4px 0;
+  margin: 0;
+  list-style: none;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), var(--si-shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.resultItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.resultItem:hover,
+.resultItem:focus {
+  background-color: var(--si-hover-bg);
+}
+
+.resultItem + .resultItem {
+  border-top: 1px solid rgba(0, 240, 255, 0.08);
+}
+
+.resultPin {
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+  opacity: 0.7;
+}
+
+.resultLabel {
+  color: var(--si-text);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.errorItem {
+  padding: 10px 14px;
+  color: var(--si-error);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* Mobile — prevent overflow under map controls */
+@media (max-width: 480px) {
+  .dropdown {
+    max-height: 55vh;
+    overflow-y: auto;
+  }
+}
