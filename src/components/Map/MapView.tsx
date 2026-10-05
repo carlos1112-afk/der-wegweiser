@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { Feature, FeatureCollection, LineString, Polygon } from 'geojson';
-import { Loader } from '@googlemaps/js-api-loader';
+import { setOptions as gMapsSetOptions, importLibrary as gMapsImportLibrary } from '@googlemaps/js-api-loader';
 import type { Route, ChargingStation } from '../../types/navigation';
-import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Play, Pause, Lock } from 'lucide-react';
+import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Lock } from 'lucide-react';
 import { TurnByTurnBanner } from './TurnByTurnBanner';
 import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
@@ -607,8 +607,8 @@ export const MapView: React.FC<MapViewProps> = ({
         const apiKey = await getGoogleMapsKey();
         if (cancelled) return;
 
-        const loader = new Loader({ apiKey, version: 'weekly' });
-        const { Map } = await (loader as any).importLibrary('maps') as any;
+        gMapsSetOptions({ apiKey, version: 'weekly' });
+        const { Map } = await gMapsImportLibrary('maps') as any;
         if (cancelled) return;
 
         const mapOptions: Record<string, unknown> = {
@@ -849,20 +849,6 @@ export const MapView: React.FC<MapViewProps> = ({
               </button>
             ))}
           </div>
-        )}
-
-        {/* GPS Simulation Toggle */}
-        {!currentRoute && onToggleSimulation && (
-          <button className="glass-panel"
-            onClick={(e) => { e.stopPropagation(); onToggleSimulation(); }}
-            style={{ width: '38px', height: '38px', borderRadius: '10px', display: 'flex',
-              alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-              color: isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
-              border: `1.5px solid ${isSimulating ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
-              boxShadow: isSimulating ? 'var(--glow-green)' : 'var(--glow-cyan)' }}
-            title={isSimulating ? 'GPS-Simulation pausieren' : 'GPS-Simulation starten (Demo-Fahrt)'}>
-            {isSimulating ? <Pause size={18} className="glow-text-green" /> : <Play size={18} />}
-          </button>
         )}
 
         {/* Zoom pill */}
