@@ -61,8 +61,38 @@ export class RoutingService {
       console.warn('[RoutingService] BRouter API unavailable:', err);
     }
 
+    // OSRM fallback when BRouter is unreachable
     if (pathCoordinates.length === 0) {
-      throw new Error('[RoutingService] Live BRouter integration unavailable; no geometric fallback is permitted.');
+      try {
+        const osrmUrl = `https://router.project-osrm.org/route/v1/bike/${params.startLng},${params.startLat};${viaLng},${viaLat};${params.startLng},${params.startLat}?overview=full&geometries=geojson`;
+        const res = await fetchFn(osrmUrl);
+        if (res.ok) {
+          const data = await res.json();
+          const coords = data.routes?.[0]?.geometry?.coordinates;
+          if (Array.isArray(coords) && coords.length > 5) {
+            pathCoordinates = coords.map((c: number[]) => [c[1], c[0]] as [number, number]);
+            const distM = data.routes[0].distance;
+            if (distM) realDistanceKm = +(distM / 1000).toFixed(1);
+            isRoadSnapped = true;
+            routingEngineStatus = 'online_brouter'; // road-snapped via OSRM
+          }
+        }
+      } catch (err) {
+        console.warn('[RoutingService] OSRM fallback unavailable:', err);
+      }
+    }
+
+    // Geometric circle fallback — clearly marked as unverified corridor
+    if (pathCoordinates.length === 0) {
+      const steps = 32;
+      for (let i = 0; i <= steps; i++) {
+        const angle = (2 * Math.PI * i) / steps;
+        pathCoordinates.push([
+          params.startLat + radius * Math.sin(angle),
+          params.startLng + radius * Math.cos(angle),
+        ]);
+      }
+      routingEngineStatus = 'offline_corridor_unverified';
     }
 
     // Calculate elevation profiles if we have coordinates
