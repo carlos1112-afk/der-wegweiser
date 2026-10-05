@@ -5,6 +5,7 @@ import { parseSpecializedTelemetry, buildSpecializedAssistCommand, SPECIALIZED_S
 import { parseMahleTelemetry, buildMahleAssistCommand, MAHLE_SERVICE_UUID, MAHLE_TELEMETRY_CHAR, MAHLE_CONTROL_CHAR } from './parsers/mahleParser';
 import { parseShimanoTelemetry, SHIMANO_DFLY_SERVICE_UUID, SHIMANO_TELEMETRY_CHAR } from './parsers/shimanoParser';
 import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, BAFANG_RX_CHAR } from './parsers/bafangParser';
+import type { BafangAssistLevel } from './parsers/bafangParser';
 import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR } from './parsers/boschLdiParser';
 
 export class BleManager {
@@ -339,8 +340,8 @@ export class BleManager {
         console.warn("BAFANG WRITE: Sende Command an BAFANG_RX_CHAR. Vorsicht bei M560/M820!");
         const service = await this.activeGattServer.getPrimaryService(BAFANG_UART_SERVICE_UUID);
         const char = await service.getCharacteristic(BAFANG_RX_CHAR);
-        const bafangLevel = mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5;
-        const payload = buildBafangAssistCommand(bafangLevel as any);
+        const bafangLevel = (mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5) as BafangAssistLevel;
+        const payload = buildBafangAssistCommand(bafangLevel);
         await char.writeValue(payload);
         return true;
       }
