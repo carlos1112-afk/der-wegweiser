@@ -18,10 +18,11 @@ jobs:
       ANTHROPIC_ORGANIZATION_ID: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
       ANTHROPIC_SERVICE_ACCOUNT_ID: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
       ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
-      ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Fetch GitHub OIDC token
+        env:
+          ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
         run: |
           set -euo pipefail
           umask 077
@@ -30,4 +31,6 @@ jobs:
           echo "::add-mask::$jwt"
           printf '%s' "$jwt" > "$ANTHROPIC_IDENTITY_TOKEN_FILE"
       - name: Exchange for Anthropic token
+        env:
+          ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
         run: bash scripts/anthropic_federation_exchange.sh
