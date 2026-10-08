@@ -1,0 +1,33 @@
+name: Anthropic Federation Check
+
+# Prüft ohne Modellaufruf und ohne Kosten, ob GitHub-OIDC gegen Anthropic getauscht werden kann.
+# Voraussetzung: Repository-Variablen ANTHROPIC_FEDERATION_RULE_ID, ANTHROPIC_ORGANIZATION_ID,
+# ANTHROPIC_SERVICE_ACCOUNT_ID (und ANTHROPIC_WORKSPACE_ID, falls die Regel mehrere Workspaces abdeckt).
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_FEDERATION_RULE_ID: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+      ANTHROPIC_ORGANIZATION_ID: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+      ANTHROPIC_SERVICE_ACCOUNT_ID: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
+      ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+      ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Fetch GitHub OIDC token
+        run: |
+          set -euo pipefail
+          umask 077
+          jwt=$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.anthropic.com" | jq -r .value)
+          echo "::add-mask::$jwt"
+          printf '%s' "$jwt" > "$ANTHROPIC_IDENTITY_TOKEN_FILE"
+      - name: Exchange for Anthropic token
+        run: bash scripts/anthropic_federation_exchange.sh

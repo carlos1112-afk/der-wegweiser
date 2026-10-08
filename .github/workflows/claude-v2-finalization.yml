@@ -111,9 +111,27 @@ jobs:
       - name: Setup Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
+      # Identitätsföderation: kurzlebiges Token statt statischem API-Key (nur wenn die Variablen gesetzt sind)
+      - name: Fetch GitHub OIDC token for Anthropic
+        if: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID != '' }}
+        env:
+          ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
+        run: |
+          set -euo pipefail
+          umask 077
+          jwt=$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://api.anthropic.com" | jq -r .value)
+          echo "::add-mask::$jwt"
+          printf '%s' "$jwt" > "$ANTHROPIC_IDENTITY_TOKEN_FILE"
+
       - name: Execute Phase Tasks with Claude
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_FEDERATION_RULE_ID: ${{ vars.ANTHROPIC_FEDERATION_RULE_ID }}
+          ANTHROPIC_ORGANIZATION_ID: ${{ vars.ANTHROPIC_ORGANIZATION_ID }}
+          ANTHROPIC_SERVICE_ACCOUNT_ID: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
+          ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
+          ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
           OIDC_ISSUER_IDENTIFIER: ${{ vars.OIDC_ISSUER_IDENTIFIER }}
           PHASE: ${{ steps.resolve-params.outputs.phase }}
           MODEL: ${{ steps.resolve-params.outputs.model }}
@@ -123,7 +141,7 @@ jobs:
           # Define prompt based on selected phase
           case "$PHASE" in
             bundle-optimization)
-              TASK_PROMPT="Optimize frontend bundles in vite.config.ts using manualChunks vendor-splitting and React.lazy for heavy modals to ensure all chunks remain <500kB. Maintain 100% build [...]
+              TASK_PROMPT="Optimize frontend bundles in vite.config.ts using manualChunks vendor-splitting and React.lazy for heavy modals to ensure all chunks remain <500kB. Maintain 100% build compatibility."
               ;;
             lint-and-tokens)
               TASK_PROMPT="Clean all remaining Oxlint and TypeScript warnings across the project. Ensure strict adherence to src/design-tokens.ts with zero hardcoded hex colors."
@@ -139,10 +157,10 @@ jobs:
               ;;
           esac
 
-          if [ -n "$ANTHROPIC_API_KEY" ]; then
+          if [ -n "$ANTHROPIC_API_KEY" ] || [ -n "$ANTHROPIC_FEDERATION_RULE_ID" ]; then
             claude --model "$MODEL" --non-interactive -p "$TASK_PROMPT" || echo "⚠️ Claude execution returned non-zero, validating gates..."
           else
-            echo "ℹ️ ANTHROPIC_API_KEY secret not found; proceeding with existing branch state for gate validation."
+            echo "ℹ️ Weder ANTHROPIC_API_KEY noch ANTHROPIC_FEDERATION_RULE_ID gesetzt; proceeding with existing branch state for gate validation."
           fi
 
       - name: Execute 5-Stage Verification Gate
