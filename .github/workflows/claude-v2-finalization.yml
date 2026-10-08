@@ -35,6 +35,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  id-token: write
 
 jobs:
   claude-finalization:
@@ -113,6 +114,7 @@ jobs:
       - name: Execute Phase Tasks with Claude
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OIDC_ISSUER_IDENTIFIER: ${{ vars.OIDC_ISSUER_IDENTIFIER }}
           PHASE: ${{ steps.resolve-params.outputs.phase }}
           MODEL: ${{ steps.resolve-params.outputs.model }}
         run: |
@@ -121,7 +123,7 @@ jobs:
           # Define prompt based on selected phase
           case "$PHASE" in
             bundle-optimization)
-              TASK_PROMPT="Optimize frontend bundles in vite.config.ts using manualChunks vendor-splitting and React.lazy for heavy modals to ensure all chunks remain <500kB. Maintain 100% build compatibility."
+              TASK_PROMPT="Optimize frontend bundles in vite.config.ts using manualChunks vendor-splitting and React.lazy for heavy modals to ensure all chunks remain <500kB. Maintain 100% build [...]
               ;;
             lint-and-tokens)
               TASK_PROMPT="Clean all remaining Oxlint and TypeScript warnings across the project. Ensure strict adherence to src/design-tokens.ts with zero hardcoded hex colors."
