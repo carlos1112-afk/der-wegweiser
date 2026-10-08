@@ -20,12 +20,19 @@ export function copyMapLibreWorker(srcDir = 'node_modules/maplibre-gl/dist', des
 }
 
 import { fileURLToPath } from 'node:url';
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+
+/** Kommandozeilen-Logik: gibt den Exit-Code zurück (0 = ok, 1 = Datei fehlt). */
+export function runCli(srcDir, destDir, log = console.log, logError = console.error) {
   try {
-    const written = copyMapLibreWorker();
-    console.log(`copy_maplibre_worker: ${written.length} Dateien nach public/maplibre/ kopiert.`);
+    const written = copyMapLibreWorker(srcDir, destDir);
+    log(`copy_maplibre_worker: ${written.length} Dateien nach public/maplibre/ kopiert.`);
+    return 0;
   } catch (e) {
-    console.error(`copy_maplibre_worker: ${e.message}`);
-    process.exit(1);
+    logError(`copy_maplibre_worker: ${e.message}`);
+    return 1;
   }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  process.exit(runCli());
 }
