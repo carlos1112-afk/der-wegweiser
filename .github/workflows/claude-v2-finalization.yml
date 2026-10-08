@@ -132,6 +132,7 @@ jobs:
           ANTHROPIC_SERVICE_ACCOUNT_ID: ${{ vars.ANTHROPIC_SERVICE_ACCOUNT_ID }}
           ANTHROPIC_WORKSPACE_ID: ${{ vars.ANTHROPIC_WORKSPACE_ID }}
           ANTHROPIC_IDENTITY_TOKEN_FILE: ${{ runner.temp }}/gha-jwt
+          OIDC_ISSUER_IDENTIFIER: ${{ vars.OIDC_ISSUER_IDENTIFIER }}
           PHASE: ${{ steps.resolve-params.outputs.phase }}
           MODEL: ${{ steps.resolve-params.outputs.model }}
         run: |
