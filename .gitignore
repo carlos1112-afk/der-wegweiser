@@ -33,6 +33,7 @@ release/**/*.apk
 release/**/*.zip
 
 # Private Admin Scripts, Local Dashboards & Database Backups (Strictly Local for Carlos)
+.backup*
 scripts/admin*
 admin*
 admin_*/**

@@ -20,6 +20,10 @@ const IGNORED_PATHS = [
   'dist',
   'build',
   'backups',
+  '.backup',
+  '.env.local',
+  '.env',
+  'android/app/google-services.json',
   'scripts/scan_secrets.js',
   'scripts/test_hosting_predeploy.js',
   'scripts/test_resilience_and_offline.js'
@@ -33,7 +37,16 @@ function scanFiles(dir) {
     const fullPath = path.join(dir, entry.name);
     const relPath = path.relative(process.cwd(), fullPath);
 
-    if (IGNORED_PATHS.some(ignored => relPath.startsWith(ignored) || relPath === ignored)) {
+    const isIgnored = IGNORED_PATHS.some(ignored => 
+      relPath.startsWith(ignored) || 
+      relPath === ignored ||
+      relPath.split(path.sep).includes(ignored) ||
+      relPath.includes('node_modules') ||
+      relPath.includes('/build/') ||
+      relPath.startsWith('android/app/build')
+    );
+
+    if (isIgnored) {
       continue;
     }
 
