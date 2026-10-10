@@ -16,6 +16,7 @@ export default defineConfig({
       'src/services/ai/**/*.test.ts',
       'src/*.test.ts',
       'tests/scripts/**/*.test.ts',
+      'tests/services/**/*.test.ts',
     ],
     exclude: ['node_modules', 'dist'],
   },

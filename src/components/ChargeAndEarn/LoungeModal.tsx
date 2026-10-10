@@ -359,6 +359,10 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   // Survey State
   const [surveys] = useState<AvailableSurvey[]>(SurveyWallService.getAvailableSurveys());
   const [activeSurvey, setActiveSurvey] = useState<AvailableSurvey | null>(null);
+  const [offerwallUrl, setOfferwallUrl] = useState<string>('');
+  useEffect(() => {
+    SurveyWallService.getOfferwallUrl(UserIdentity.getUserId()).then(setOfferwallUrl).catch(() => {});
+  }, []);
   const [surveyStep, setSurveyStep] = useState(1);
   const [completedSurveys, setCompletedSurveys] = useState<string[]>([]);
 
@@ -1253,7 +1257,8 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                       die ausdrückliche Umfragen-Einwilligung. */}
                   {ConsentService.allowsSurveys && (
                     <a
-                      href={SurveyWallService.getOfferwallUrl(UserIdentity.getUserId())}
+                      href={offerwallUrl || '#'}
+                      onClick={(e) => !offerwallUrl && e.preventDefault()}
                       target="_blank"
                       rel="noreferrer"
                       style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
