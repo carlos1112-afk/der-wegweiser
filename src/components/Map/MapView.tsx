@@ -41,10 +41,14 @@ const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
 };
 
 const MAPLIBRE_THEMES = new Set<MapTileTheme>(['topo', 'cycle', 'satellite', 'dark']);
+const MAPLIBRE_PREMIUM_THEMES = new Set<MapTileTheme>(['topo-premium', 'cycle-premium', 'satellite-3d']);
 
 // ── MapLibre style definitions ────────────────────────────────────────────────
 
 function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | string {
+  const thunderforestKey = import.meta.env.VITE_THUNDERFOREST_API_KEY as string | undefined;
+  const maptilerKey = import.meta.env.VITE_MAPTILER_API_KEY as string | undefined;
+
   switch (theme) {
     case 'dark':
       return {
@@ -99,31 +103,47 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
             paint: { 'text-color': '#7ecfff', 'text-halo-color': '#060a12', 'text-halo-width': 1.5 } } as maplibregl.SymbolLayerSpecification,
         ],
       };
-    case 'cycle':
+    case 'cycle-premium':
+    case 'cycle': {
+      const cycleTiles = thunderforestKey
+        ? [`https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=${thunderforestKey}`]
+        : ['https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'];
+      const cycleAttr = thunderforestKey
+        ? '© Thunderforest, © OpenStreetMap contributors'
+        : '© OpenStreetMap contributors, CyclOSM';
+
+      const topoTiles = maptilerKey
+        ? [`https://api.maptiler.com/maps/topo-v2/256/{z}/{x}/{y}.png?key=${maptilerKey}`]
+        : ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png'];
+
+      const isPremium = theme === 'cycle-premium' && !!maptilerKey;
+
       return {
         version: 8,
         sources: {
           'terrain-dem': {
             type: 'raster-dem',
-            tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-            encoding: 'terrarium',
+            tiles: maptilerKey
+              ? [`https://api.maptiler.com/tiles/terrain-rgb-v2/{z}/{x}/{y}.webp?key=${maptilerKey}`]
+              : ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+            encoding: maptilerKey ? 'mapbox' : 'terrarium',
             tileSize: 256,
           },
           cyclosm: {
             type: 'raster',
-            tiles: ['https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'],
+            tiles: cycleTiles,
             tileSize: 256,
-            attribution: '© OpenStreetMap contributors, CyclOSM',
+            attribution: cycleAttr,
             maxzoom: 18,
           },
           topo: {
             type: 'raster',
-            tiles: ['https://a.tile.opentopomap.org/{z}/{x}/{y}.png'],
+            tiles: topoTiles,
             tileSize: 256,
             maxzoom: 17,
           },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.0 },
+        terrain: isPremium ? { source: 'terrain-dem', exaggeration: 1.5 } : { source: 'terrain-dem', exaggeration: 1.0 },
         layers: [
           { id: 'bg', type: 'background', paint: { 'background-color': '#111' } } as maplibregl.BackgroundLayerSpecification,
           { id: 'cyclosm', type: 'raster', source: 'cyclosm' } as maplibregl.RasterLayerSpecification,
@@ -132,77 +152,105 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
             id: 'hillshade',
             type: 'hillshade',
             source: 'terrain-dem',
-            paint: { 'hillshade-exaggeration': 0.4, 'hillshade-shadow-color': '#004040' },
+            paint: { 'hillshade-exaggeration': isPremium ? 0.8 : 0.4, 'hillshade-shadow-color': '#004040' },
           } as maplibregl.HillshadeLayerSpecification,
         ],
       };
-    case 'topo':
+    }
+    case 'topo-premium':
+    case 'topo': {
+      const topoTiles = maptilerKey
+        ? [`https://api.maptiler.com/maps/topo-v2/256/{z}/{x}/{y}.png?key=${maptilerKey}`]
+        : [
+            'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
+            'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
+            'https://c.tile.opentopomap.org/{z}/{x}/{y}.png',
+          ];
+      const topoAttr = maptilerKey
+        ? '© MapTiler © OpenStreetMap contributors'
+        : '© OpenStreetMap contributors, SRTM';
+
+      const isPremium = theme === 'topo-premium' && !!maptilerKey;
+
       return {
         version: 8,
         sources: {
           'terrain-dem': {
             type: 'raster-dem',
-            tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-            encoding: 'terrarium',
+            tiles: maptilerKey
+              ? [`https://api.maptiler.com/tiles/terrain-rgb-v2/{z}/{x}/{y}.webp?key=${maptilerKey}`]
+              : ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+            encoding: maptilerKey ? 'mapbox' : 'terrarium',
             tileSize: 256,
           },
           topo: {
             type: 'raster',
-            tiles: [
-              'https://a.tile.opentopomap.org/{z}/{x}/{y}.png',
-              'https://b.tile.opentopomap.org/{z}/{x}/{y}.png',
-              'https://c.tile.opentopomap.org/{z}/{x}/{y}.png',
-            ],
+            tiles: topoTiles,
             tileSize: 256,
-            attribution: '© OpenStreetMap contributors, SRTM',
+            attribution: topoAttr,
             maxzoom: 17,
           },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.2 },
+        terrain: isPremium ? { source: 'terrain-dem', exaggeration: 1.5 } : { source: 'terrain-dem', exaggeration: 1.2 },
         layers: [
           { id: 'topo', type: 'raster', source: 'topo' } as maplibregl.RasterLayerSpecification,
           {
             id: 'hillshade',
             type: 'hillshade',
             source: 'terrain-dem',
-            paint: { 'hillshade-exaggeration': 0.5, 'hillshade-shadow-color': '#2a1a08' },
+            paint: { 'hillshade-exaggeration': isPremium ? 0.8 : 0.5, 'hillshade-shadow-color': '#2a1a08' },
           } as maplibregl.HillshadeLayerSpecification,
         ],
       };
+    }
+    case 'satellite-3d':
     case 'satellite':
-    default:
+    default: {
+      const satTiles = maptilerKey
+        ? [`https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=${maptilerKey}`]
+        : ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'];
+
+      const satAttr = maptilerKey
+        ? '© MapTiler © OpenStreetMap contributors'
+        : '© Esri, DigitalGlobe, GeoEye, i-cubed, USDA FSA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo';
+
+      const isPremium = theme === 'satellite-3d' && !!maptilerKey;
+
       return {
         version: 8,
         sources: {
           'terrain-dem': {
             type: 'raster-dem',
-            tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-            encoding: 'terrarium',
+            tiles: maptilerKey
+              ? [`https://api.maptiler.com/tiles/terrain-rgb-v2/{z}/{x}/{y}.webp?key=${maptilerKey}`]
+              : ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+            encoding: maptilerKey ? 'mapbox' : 'terrarium',
             tileSize: 256,
           },
           esri: {
             type: 'raster',
-            tiles: [
-              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            ],
+            tiles: satTiles,
             tileSize: 256,
-            attribution: '© Esri, DigitalGlobe, GeoEye, i-cubed, USDA FSA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo',
+            attribution: satAttr,
             maxzoom: 19,
           },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.0 },
+        terrain: isPremium ? { source: 'terrain-dem', exaggeration: 1.5 } : { source: 'terrain-dem', exaggeration: 1.0 },
         layers: [
           { id: 'esri-satellite', type: 'raster', source: 'esri' } as maplibregl.RasterLayerSpecification,
           {
             id: 'hillshade',
             type: 'hillshade',
             source: 'terrain-dem',
-            paint: { 'hillshade-exaggeration': 0.25, 'hillshade-shadow-color': '#000020' },
+            paint: { 'hillshade-exaggeration': isPremium ? 0.6 : 0.25, 'hillshade-shadow-color': '#000020' },
           } as maplibregl.HillshadeLayerSpecification,
         ],
       };
+    }
   }
 }
+
+
 
 // ── Google Maps satellite hybrid — night style (from Google Styled Maps) ─────
 const SATELLITE_NIGHT_STYLE = [
@@ -388,8 +436,8 @@ export const MapView: React.FC<MapViewProps> = ({
   const [mapStyleReady, setMapStyleReady] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
 
-  const isMaplibreActive = MAPLIBRE_THEMES.has(tileTheme);
-  const isGoogleActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium' || tileTheme === 'cycle-premium';
+  const isMaplibreActive = MAPLIBRE_THEMES.has(tileTheme) || (MAPLIBRE_PREMIUM_THEMES.has(tileTheme) && !!(import.meta.env.VITE_MAPTILER_API_KEY as string | undefined));
+  const isGoogleActive = !(import.meta.env.VITE_MAPTILER_API_KEY as string | undefined) && (tileTheme === 'satellite-3d' || tileTheme === 'topo-premium' || tileTheme === 'cycle-premium');
   const isCardOpen = Boolean((!currentRoute && selectedDestination) || selectedStationState);
   const routePolyline = currentRoute?.pathCoordinates || [];
   const routeWaypoints = getRouteWaypoints(currentRoute);
