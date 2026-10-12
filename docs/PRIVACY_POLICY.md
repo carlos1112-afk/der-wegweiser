@@ -59,6 +59,8 @@ Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`
 | **Firebase App Hosting / CDN** | Bereitstellung der statischen Web-Assets | Server-Access-IP, User-Agent | **Global Edge Network**; Art. 6 Abs. 1 lit. f DSGVO | Rollierende Webserver-Access-Logs |
 | **AI-Gateway (Backend-Proxy)** | KI-Antizipations-Storys & Sprachassistent | Start-/Zielorte & Parameter ohne Personen-ID | **Frankfurt (`europe-west3`)**; Art. 6 Abs. 1 lit. b DSGVO; Eigener Backend-Proxy | Flüchtig im RAM während Inferenz |
 | **CartoDB & OpenStreetMap** | Kartendarstellung & Basiskacheln | Kachel-Koordinaten, IP-Adresse | **Global CDN / EU**; Art. 6 Abs. 1 lit. b DSGVO; ODbL Lizenz | Server-Access-Logs der CDN-Provider |
+| **MapTiler** (optional, nur wenn ein Schlüssel konfiguriert ist) | Kartenkacheln & Höhendaten | Kachel-Koordinaten, IP-Adresse, User-Agent | **Schweiz (MapTiler AG)**; Art. 6 Abs. 1 lit. b DSGVO; MapTiler Terms | Server-Access-Logs des Anbieters |
+| **Thunderforest** (optional, nur wenn ein Schlüssel konfiguriert ist) | Fahrradkarten-Kacheln | Kachel-Koordinaten, IP-Adresse, User-Agent | **Vereinigtes Königreich (Gravitystorm Ltd)**; Art. 6 Abs. 1 lit. b DSGVO; Thunderforest Terms | Server-Access-Logs des Anbieters |
 | **Open-Meteo API** | Wind-, Wetter- & Höhenabfragen | Geografische Koordinaten, IP-Adresse | **EU (Open-Meteo GmbH)**; Art. 6 Abs. 1 lit. b DSGVO; Open-Meteo Terms | Flüchtig zur Übertragung; Server-Logs werden nach max. 90 Tagen gelöscht |
 | **BitLabs / CPX Research** | Freiwillige bezahlte Marktforschung | Pseudonyme User-ID, Session-ID | **USA / EU**; Art. 6 Abs. 1 lit. a DSGVO; EU-US Data Privacy Framework / SCC | Gemäß Richtlinien des jeweiligen Umfrage-Partners |
 

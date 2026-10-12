@@ -68,6 +68,9 @@ jobs:
 
       - name: Build Web Assets
         run: npm run build
+        env:
+          VITE_MAPTILER_API_KEY: ${{ vars.VITE_MAPTILER_API_KEY }}
+          VITE_THUNDERFOREST_API_KEY: ${{ vars.VITE_THUNDERFOREST_API_KEY }}
 
       - name: Sync Capacitor Android
         run: npx cap sync android
