@@ -30,6 +30,11 @@ interface MapViewProps {
   selectedDestination?: { lat: number; lng: number; label?: string } | null;
 }
 
+// MapLibre v6 leitet die Worker-Datei aus import.meta.url ab ("./maplibre-gl-worker.mjs" neben dem Chunk).
+// Vite liefert sie dort nicht aus, der Worker lädt nicht und die Karte bleibt leer.
+// scripts/copy_maplibre_worker.mjs legt Worker und Shared-Datei unter public/maplibre/ ab.
+maplibregl.setWorkerUrl(`${import.meta.env.BASE_URL}maplibre/maplibre-gl-worker.mjs`);
+
 const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
   topo:            { name: 'OpenTopoMap',      premium: false },
   cycle:           { name: 'Cycle + Terrain',  premium: false },
