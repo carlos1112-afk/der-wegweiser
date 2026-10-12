@@ -56,3 +56,6 @@ reports/
 *.njsproj
 *.sln
 *.sw?
+
+# MapLibre-Worker, wird beim Build aus node_modules kopiert
+public/maplibre/
