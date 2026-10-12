@@ -24,7 +24,7 @@ vi.mock('../../services/spatialTelemetrySanitizerService', () => ({
 vi.mock('../../services/surveyWallService', () => ({
   SurveyWallService: {
     getAvailableSurveys: vi.fn(() => []),
-    getOfferwallUrl: vi.fn(() => ''),
+    getOfferwallUrl: vi.fn(() => Promise.resolve('')),
   },
 }));
 
