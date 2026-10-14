@@ -62,6 +62,8 @@
 
   --accent-red:        #C90000;
   --accent-red-bright: #FF3B3B;
+  --accent-blue:       #2D7FFF;
+  --accent-blue-dark:  #1A5FD9;
   --border-cyan:       rgba(0, 230, 163, 0.25);
   --border-cyan-hot:   rgba(0, 230, 163, 0.45);
   --border-gold:       rgba(255, 183, 0, 0.35);
@@ -122,7 +124,7 @@ body {
 .btn-cyberpunk {
   background: linear-gradient(135deg, rgba(201, 0, 0, 0.2), rgba(150, 0, 0, 0.12));
   border: 1.5px solid var(--accent-red-bright);
-  color: var(--accent-red-bright);
+  color: #ffffff;
   padding: 10px 20px;
   border-radius: 12px;
   font-weight: 700;
@@ -163,7 +165,7 @@ body {
 .btn-gold {
   background: linear-gradient(135deg, rgba(255, 183, 0, 0.28), rgba(255, 0, 127, 0.15));
   border: 1.5px solid var(--accent-gold);
-  color: var(--accent-gold);
+  color: #ffffff;
   font-weight: 700;
   backdrop-filter: blur(12px);
 }
@@ -172,6 +174,20 @@ body {
   background: linear-gradient(135deg, rgba(255, 183, 0, 0.5), rgba(255, 0, 127, 0.35));
   box-shadow: 0 0 20px rgba(255, 183, 0, 0.6);
   color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.btn-blue {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-dark));
+  border: 1.5px solid #ffffff;
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 4px 20px rgba(45, 127, 255, 0.5);
+}
+
+.btn-blue:hover {
+  background: linear-gradient(135deg, #5c9fff, var(--accent-blue));
+  box-shadow: 0 6px 26px rgba(45, 127, 255, 0.75);
   transform: translateY(-2px);
 }
 

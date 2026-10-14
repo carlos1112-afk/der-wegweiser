@@ -524,12 +524,12 @@ export function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '6px',
+          gap: '10px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <button 
-            className="btn-cyberpunk"
+          <button
+            className="btn-cyberpunk btn-blue"
             onClick={() => setMainMenuOpen(true)}
             style={{ padding: '8px', borderRadius: '50%' }}
           >
@@ -571,7 +571,7 @@ export function App() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <button
-            className="btn-cyberpunk"
+            className="btn-cyberpunk btn-blue"
             onClick={handleToggleOledMode}
             style={{ padding: '8px', borderRadius: '50%' }}
           >
@@ -611,21 +611,25 @@ export function App() {
         onOpenSearch={() => setSearchActive(true)}
       />
 
-      {/* Battery HUD - Relocated to Bottom, above BottomActionBar */}
-      <div style={{
-        position: 'absolute',
-        bottom: '80px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1900
-      }}>
-        <BatteryHUD
-          telemetry={telemetry}
-          currentRoute={currentRoute}
-          onConnectBLE={handleConnectBLE}
-          onOpenBoschModal={() => setShowBoschModal(true)}
-        />
-      </div>
+      {/* Battery HUD - Relocated to Bottom, above BottomActionBar. Nur sichtbar,
+          wenn tatsächlich ein E-Bike verbunden ist — sonst stand hier dauerhaft
+          eine bedeutungslose "--% / AUTO"-Pille über dem Mic-Button. */}
+      {telemetry.isConnected && (
+        <div style={{
+          position: 'absolute',
+          bottom: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1900
+        }}>
+          <BatteryHUD
+            telemetry={telemetry}
+            currentRoute={currentRoute}
+            onConnectBLE={handleConnectBLE}
+            onOpenBoschModal={() => setShowBoschModal(true)}
+          />
+        </div>
+      )}
 
       {/* GPX Track Recorder Pill - Relocated right side above right controls */}
       {!currentRoute && (
