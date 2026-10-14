@@ -791,9 +791,10 @@ export const MapView: React.FC<MapViewProps> = ({
         onPointerDown={(e) => e.stopPropagation()}
         style={{
           position: 'absolute',
-          bottom: currentRoute ? '148px' : isCardOpen ? '106px' : '20px',
+          top: '50%',
+          transform: currentRoute ? 'translateY(calc(-50% - 64px))' : isCardOpen ? 'translateY(calc(-50% - 43px))' : 'translateY(-50%)',
           right: '16px', zIndex: 1000, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', gap: '6px', transition: 'bottom 0.25s ease',
+          alignItems: 'center', gap: '6px', transition: 'transform 0.25s ease',
         }}
       >
         {/* Layer Picker Menu */}

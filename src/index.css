@@ -62,8 +62,6 @@
 
   --accent-red:        #C90000;
   --accent-red-bright: #FF3B3B;
-  --accent-blue:       #2D7FFF;
-  --accent-blue-dark:  #1A5FD9;
   --border-cyan:       rgba(0, 230, 163, 0.25);
   --border-cyan-hot:   rgba(0, 230, 163, 0.45);
   --border-gold:       rgba(255, 183, 0, 0.35);
@@ -177,17 +175,22 @@ body {
   transform: translateY(-2px);
 }
 
-.btn-blue {
-  background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-dark));
-  border: 1.5px solid #ffffff;
-  color: #ffffff;
-  font-weight: 800;
-  box-shadow: 0 4px 20px rgba(45, 127, 255, 0.5);
+/* Transparente Icon-Buttons im Ambient-Grün der Kartensteuerung
+   (Zoom/Recenter/Layer/3D) — für Icon-only-Buttons außerhalb von Modals,
+   z.B. Hauptmenü-/Sichtbarkeits-Button im Karten-Header. */
+.btn-icon-ghost {
+  background: rgba(28, 28, 28, 0.82);
+  border: 1.5px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: var(--glow-cyan);
+  backdrop-filter: blur(12px);
 }
 
-.btn-blue:hover {
-  background: linear-gradient(135deg, #5c9fff, var(--accent-blue));
-  box-shadow: 0 6px 26px rgba(45, 127, 255, 0.75);
+.btn-icon-ghost:hover {
+  background: rgba(0, 230, 163, 0.12);
+  box-shadow: 0 0 22px rgba(0, 230, 163, 0.5);
+  border-color: #ffffff;
+  color: #ffffff;
   transform: translateY(-2px);
 }
 

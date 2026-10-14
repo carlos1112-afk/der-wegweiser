@@ -547,7 +547,7 @@ export function App() {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <button
-            className="btn-cyberpunk btn-blue"
+            className="btn-cyberpunk btn-icon-ghost"
             onClick={() => setMainMenuOpen(true)}
             style={{ padding: '8px', borderRadius: '50%' }}
           >
@@ -589,7 +589,7 @@ export function App() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           <button
-            className="btn-cyberpunk btn-blue"
+            className="btn-cyberpunk btn-icon-ghost"
             onClick={handleToggleOledMode}
             style={{ padding: '8px', borderRadius: '50%' }}
           >

@@ -36,7 +36,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
       {/* Top Utility Bar: Settings + Login */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button
-          className="btn-cyberpunk btn-blue"
+          className="btn-cyberpunk btn-icon-ghost"
           onClick={onOpenLogin}
           style={{ padding: '8px', borderRadius: '50%' }}
           title={currentUser ? `Angemeldet als ${currentUser.email ?? currentUser.displayName ?? 'Nutzer'}` : 'Einloggen'}
@@ -44,7 +44,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           {currentUser ? <LogOut size={18} /> : <LogIn size={18} />}
         </button>
         <button
-          className="btn-cyberpunk btn-blue"
+          className="btn-cyberpunk btn-icon-ghost"
           onClick={onOpenSettings}
           style={{ padding: '8px', borderRadius: '50%' }}
           title="Einstellungen"
