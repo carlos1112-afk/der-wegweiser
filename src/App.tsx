@@ -19,6 +19,7 @@ import type { User } from 'firebase/auth';
 
 import { useUILayout } from './contexts/UILayoutContext';
 import { BurgerMenu } from './components/Navigation/BurgerMenu';
+import { StartScreen } from './components/StartScreen/StartScreen';
 import { BottomActionBar } from './components/Navigation/BottomActionBar';
 import { ConfettiOverlay } from './components/Overlays/ConfettiOverlay';
 import { Menu } from 'lucide-react';
@@ -101,6 +102,12 @@ export function App() {
   const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authUser, setAuthUser] = useState<User | null>(AuthService.getCurrentUser());
+  const [showStartScreen, setShowStartScreen] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = AuthService.onAuthStateChange(setAuthUser);
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChange((user) => {
@@ -502,6 +509,17 @@ export function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      {showStartScreen && (
+        <StartScreen
+          onStart={() => setShowStartScreen(false)}
+          onOpenSettings={() => setMainMenuOpen(true)}
+          onOpenLogin={() => setShowAuthModal(true)}
+          tokenBalance={tokenBalance}
+          telemetry={telemetry}
+          currentUser={authUser}
+        />
+      )}
+
       <ConfettiOverlay isNavigating={!!currentRoute} />
 
       {/* OLED Black Saver Cockpit Overlay */}
