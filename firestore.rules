@@ -25,6 +25,24 @@ service cloud.firestore {
         && !exists(/databases/$(database)/documents/suspended_users/$(request.auth.uid));
     }
 
+    // Validation for Charging Stations.
+    //
+    // WICHTIG: Felder sind PFLICHT, nicht nur "validiert falls vorhanden" — eine
+    // frühere Fassung prüfte z.B. `!('lat' in data) || (data.lat is number ...)`,
+    // das lässt ein Dokument OHNE das Feld komplett durch. Der echte
+    // ChargingStation-Typ (src/types/navigation.ts) verlangt name/lat/lng/
+    // plugType/createdByUserId ohnehin immer, Weglassen ist also nie ein
+    // legitimer Schreibpfad, nur eine Lücke für Angreifer, die diese Felder
+    // bewusst auslassen, um die Prüfung zu umgehen.
+    function isValidChargingStation() {
+      let data = request.resource.data;
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.lat is number && data.lat >= -90 && data.lat <= 90 &&
+             data.lng is number && data.lng >= -180 && data.lng <= 180 &&
+             data.plugType is string && data.plugType in ['schuko_230v', 'bosch', 'bike_energy', 'shimano', 'yamaha', 'unknown'] &&
+             data.createdByUserId is string && data.createdByUserId == request.auth.uid;
+    }
+
     // Ersteller-Prüfung. Je nach Schreibpfad wird das Feld `createdByUserId`
     // (Community-Inhalte) oder `userId` (gespeicherte Nutzerdaten) gesetzt,
     // daher werden beide geprüft. `get()` mit Vorgabewert vermeidet
@@ -63,14 +81,14 @@ service cloud.firestore {
     // Ladeinfrastruktur fremder Nutzer überschreiben.
     match /charging_stations/{stationId} {
       allow read: if true;
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isActiveUser() && isValidChargingStation();
+      allow update: if isCreator() && isValidChargingStation();
       allow delete: if isCreator();
     }
     match /charging_stations_v2/{stationId} {
       allow read: if true;
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isActiveUser() && isValidChargingStation();
+      allow update: if isCreator() && isValidChargingStation();
       allow delete: if isCreator();
     }
 
