@@ -47,6 +47,29 @@ const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
 
 const MAPLIBRE_THEMES = new Set<MapTileTheme>(['topo', 'cycle', 'satellite']);
 
+/**
+ * Terrain-Überhöhung je Free-Theme. Wird NICHT im Style-JSON gesetzt (siehe unten),
+ * sondern erst von applyTerrain() aktiviert, wenn der Nutzer den 3D-Toggle einschaltet.
+ * Grund: Mit Terrain fest im Style verschiebt MapLibre die Bodengeometrie anhand der
+ * DEM-Kachel-Werte IMMER, auch im "2D"-Modus. Liefert die DEM-Quelle bei einem Hakler
+ * (Netzwerk, falsche/fehlende Kachel) Müllwerte statt echter Höhendaten, entstehen daraus
+ * chaotische Höhen-Spitzen direkt unter der Kamera — sichtbar als der "Trichter"-Rendering-
+ * Fehler (radial verzerrtes Schachbrettmuster), der auch ohne aktiven 3D-Toggle auftrat.
+ */
+const TERRAIN_EXAGGERATION: Record<'topo' | 'cycle' | 'satellite', number> = {
+  topo: 1.2,
+  cycle: 1.0,
+  satellite: 1.0,
+};
+
+function applyTerrain(map: maplibregl.Map, theme: MapTileTheme, enabled: boolean): void {
+  if (!enabled || !(theme in TERRAIN_EXAGGERATION)) {
+    map.setTerrain(null);
+    return;
+  }
+  map.setTerrain({ source: 'terrain-dem', exaggeration: TERRAIN_EXAGGERATION[theme as 'topo' | 'cycle' | 'satellite'] });
+}
+
 // ── MapLibre style definitions ────────────────────────────────────────────────
 
 function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | string {
@@ -64,7 +87,6 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
           cyclosm: { type: 'raster', tiles: cycle.tiles, tileSize: 256, attribution: cycle.attribution, maxzoom: cycle.maxzoom },
           topo: { type: 'raster', tiles: topo.tiles, tileSize: 256, maxzoom: topo.maxzoom },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.0 },
         layers: [
           { id: 'bg', type: 'background', paint: { 'background-color': '#111' } } as maplibregl.BackgroundLayerSpecification,
           { id: 'cyclosm', type: 'raster', source: 'cyclosm' } as maplibregl.RasterLayerSpecification,
@@ -87,7 +109,6 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
           'terrain-dem': { type: 'raster-dem', ...dem },
           topo: { type: 'raster', tiles: topo.tiles, tileSize: 256, attribution: topo.attribution, maxzoom: topo.maxzoom },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.2 },
         layers: [
           { id: 'topo', type: 'raster', source: 'topo' } as maplibregl.RasterLayerSpecification,
           {
@@ -109,7 +130,6 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
           'terrain-dem': { type: 'raster-dem', ...dem },
           esri: { type: 'raster', tiles: sat.tiles, tileSize: 256, attribution: sat.attribution, maxzoom: sat.maxzoom },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.0 },
         layers: [
           { id: 'esri-satellite', type: 'raster', source: 'esri' } as maplibregl.RasterLayerSpecification,
           {
@@ -460,6 +480,13 @@ export const MapView: React.FC<MapViewProps> = ({
     if (!map || !isMaplibreActive) return;
     const targetPitch = is3DMode ? 45 : 0;
     map.easeTo({ pitch: targetPitch, duration: 500 });
+
+    const apply = () => applyTerrain(map, tileTheme, is3DMode);
+    if (map.isStyleLoaded()) {
+      apply();
+    } else {
+      map.once('style.load', apply);
+    }
   }, [is3DMode, tileTheme, isMaplibreActive]);
 
   // ── MapLibre: update route GeoJSON ────────────────────────────────────────────
@@ -595,6 +622,27 @@ export const MapView: React.FC<MapViewProps> = ({
       if (tileTheme === 'satellite-3d') m.setHeading(0);
     }
   }, [userLocation, tileTheme]);
+
+  /**
+   * Standort-Button (Zielkreuz + Kompass zusammengelegt, wie bei Google Maps' eigenem
+   * Standort-Button): 1. Tap zentriert (falls nicht zentriert), 2. Tap schaltet
+   * Course-Up ein, 3. Tap schaltet zurück auf Nordausrichtung (bleibt zentriert).
+   */
+  const handleLocationButton = useCallback(() => {
+    if (!isAutoFollow) {
+      handleRecenter();
+      return;
+    }
+    if (!isCourseUp) {
+      setIsCourseUp(true);
+      return;
+    }
+    setIsCourseUp(false);
+    mapRef.current?.easeTo({ bearing: 0, duration: 400 });
+    if (isGoogleActive && googleMapRef.current && tileTheme === 'satellite-3d') {
+      (googleMapRef.current as any).setHeading(0);
+    }
+  }, [isAutoFollow, isCourseUp, handleRecenter, isGoogleActive, tileTheme]);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     if (currentRoute) return;
@@ -789,14 +837,18 @@ export const MapView: React.FC<MapViewProps> = ({
           </button>
         </div>
 
-        {/* Recenter */}
+        {/* Standort & Ausrichtung (Neu zentrieren + Course-Up, zusammengelegt) */}
         <button className="glass-panel"
-          onClick={(e) => { e.stopPropagation(); handleRecenter(); }}
+          onClick={(e) => { e.stopPropagation(); handleLocationButton(); }}
           style={{ width: '38px', height: '38px', borderRadius: '10px', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', color: 'var(--accent-cyan)', cursor: 'pointer',
-            border: '1.5px solid var(--accent-cyan)', boxShadow: 'var(--glow-cyan)' }}
-          title="Auf GPS-Standort zentrieren">
-          <Crosshair size={18} />
+            alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
+            border: `1.5px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
+            boxShadow: isCourseUp ? 'var(--glow-green)' : 'var(--glow-cyan)' }}
+          title={!isAutoFollow ? 'Auf GPS-Standort zentrieren' : isCourseUp ? 'Auf Norden fixieren' : 'In Fahrtrichtung drehen (Course-Up)'}>
+          {isCourseUp
+            ? <Compass size={18} style={{ transform: `rotate(${currentHeadingDeg}deg)`, transition: 'transform 0.3s ease' }} />
+            : <Crosshair size={18} />}
         </button>
 
         {/* Layer picker button */}
@@ -824,18 +876,6 @@ export const MapView: React.FC<MapViewProps> = ({
             <Box size={18} />
           </button>
         )}
-
-        {/* Course-up / Compass */}
-        <button className="glass-panel"
-          onClick={(e) => { e.stopPropagation(); setIsCourseUp(!isCourseUp); if (isCourseUp) mapRef.current?.easeTo({ bearing: 0, duration: 400 }); }}
-          style={{ width: '38px', height: '38px', borderRadius: '10px', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-            color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
-            border: `1.5px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
-            boxShadow: isCourseUp ? 'var(--glow-green)' : 'var(--glow-cyan)' }}
-          title={isCourseUp ? 'Auf Norden fixieren' : 'In Fahrtrichtung drehen (Course-Up)'}>
-          <Compass size={20} style={{ transform: isCourseUp ? `rotate(${currentHeadingDeg}deg)` : 'none', transition: 'transform 0.3s ease' }} />
-        </button>
       </div>
     </div>
   );
