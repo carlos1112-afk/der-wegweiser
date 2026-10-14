@@ -1,5 +1,4 @@
-import { describe, it, beforeEach, afterEach } from 'node:test';
-import assert from 'node:assert';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -116,24 +115,24 @@ describe('OfflineMapService', () => {
       lastProgress = percent;
     });
 
-    assert.strictEqual(success, true);
-    assert.ok(progressCalls > 0);
-    assert.strictEqual(lastProgress, 100);
+    expect(success).toBe(true);
+    expect(progressCalls).toBeGreaterThan(0);
+    expect(lastProgress).toBe(100);
 
     // It should have generated tile urls and attempted to fetch them
-    assert.ok(fetchedUrls.length > 0);
+    expect(fetchedUrls.length).toBeGreaterThan(0);
 
     // It should have stored tiles in the mock cache
-    assert.ok(cachePuts.length > 0);
-    assert.strictEqual(cachePuts.length, fetchedUrls.length);
+    expect(cachePuts.length).toBeGreaterThan(0);
+    expect(cachePuts.length).toBe(fetchedUrls.length);
 
     // It should have saved region metadata to localStorage
     const savedData = localStorageStore['der_wegweiser_offline_regions'];
-    assert.ok(savedData);
+    expect(savedData).toBeTruthy();
     const regions: DownloadedRegionInfo[] = JSON.parse(savedData);
     const savedRegion = regions.find(r => r.name === 'TestRegion');
-    assert.ok(savedRegion);
-    assert.strictEqual(savedRegion.tileCount, fetchedUrls.length);
+    expect(savedRegion).toBeTruthy();
+    expect(savedRegion?.tileCount).toBe(fetchedUrls.length);
   });
 
   it('retrieves cached tiles when network is unavailable', async () => {
@@ -148,7 +147,7 @@ describe('OfflineMapService', () => {
     await OfflineMapService.downloadOfflineRegion('TestRegion', bounds, () => {});
 
     const previousCacheCount = cachePuts.length;
-    assert.ok(previousCacheCount > 0);
+    expect(previousCacheCount).toBeGreaterThan(0);
 
     // Reset fetchedUrls to track new fetches
     fetchedUrls = [];
@@ -158,16 +157,104 @@ describe('OfflineMapService', () => {
 
     // Call again - it should rely on cache and not fetch
     const success = await OfflineMapService.downloadOfflineRegion('TestRegion2', bounds, () => {});
-    assert.strictEqual(success, true);
+    expect(success).toBe(true);
 
     // Since tiles were in cache, it should not have attempted to fetch them
-    assert.strictEqual(fetchedUrls.length, 0);
+    expect(fetchedUrls.length).toBe(0);
 
     // It should have added metadata for TestRegion2
     const savedData = localStorageStore['der_wegweiser_offline_regions'];
-    assert.ok(savedData);
+    expect(savedData).toBeTruthy();
     const regions: DownloadedRegionInfo[] = JSON.parse(savedData);
-    assert.ok(regions.find(r => r.name === 'TestRegion2'));
+    expect(regions.find(r => r.name === 'TestRegion2')).toBeTruthy();
+  });
+
+  it('returns false for empty coordinates in prefetchRouteCorridor', async () => {
+    const success = await OfflineMapService.prefetchRouteCorridor([]);
+    expect(success).toBe(false);
+  });
+
+  it('prefetches a route corridor successfully', async () => {
+    const coordinates: [number, number][] = [
+      [52.5, 13.4],
+      [52.51, 13.41],
+    ];
+    let progressCalls = 0;
+    const originalDownload = OfflineMapService.downloadOfflineRegion;
+    let boundsPassed: any = null;
+    let regionNamePassed: any = null;
+    (OfflineMapService as any).downloadOfflineRegion = async (
+      regionName: string,
+      bounds: OfflineRegionBounds,
+      onProgress: (percent: number) => void
+    ) => {
+      boundsPassed = bounds;
+      regionNamePassed = regionName;
+      onProgress(100);
+      return true;
+    };
+
+    try {
+      const success = await OfflineMapService.prefetchRouteCorridor(coordinates);
+      expect(success).toBe(true);
+      expect(regionNamePassed).toBe('Aktive Route Korridor');
+      expect(boundsPassed).toBeTruthy();
+      expect(boundsPassed.minLat).toBeLessThan(52.5);
+      expect(boundsPassed.maxLat).toBeGreaterThan(52.51);
+      expect(boundsPassed.minLng).toBeLessThan(13.4);
+      expect(boundsPassed.maxLng).toBeGreaterThan(13.41);
+    } finally {
+      OfflineMapService.downloadOfflineRegion = originalDownload;
+    }
+  });
+
+  it('retrieves and parses existing regions from localStorage', async () => {
+    const mockRegions: DownloadedRegionInfo[] = [
+      {
+        name: 'Stored Region',
+        sizeMb: 10,
+        date: '01.01.2024',
+        tileCount: 100,
+      }
+    ];
+    localStorageStore['der_wegweiser_offline_regions'] = JSON.stringify(mockRegions);
+    const regions = await OfflineMapService.getDownloadedRegions();
+    expect(regions.length).toBe(1);
+    expect(regions[0].name).toBe('Stored Region');
+  });
+
+  it('handles malformed localStorage data in getDownloadedRegions', async () => {
+    localStorageStore['der_wegweiser_offline_regions'] = 'invalid-json';
+    const regions = await OfflineMapService.getDownloadedRegions();
+    expect(regions.length).toBeGreaterThan(0); // returns defaults
+    expect(regions[0].name).toBe('Berlin Zentrum & Badesee');
+  });
+
+  it('deletes an offline region successfully', async () => {
+    const mockRegions: DownloadedRegionInfo[] = [
+      {
+        name: 'Region To Delete',
+        sizeMb: 10,
+        date: '01.01.2024',
+        tileCount: 100,
+      },
+      {
+        name: 'Region To Keep',
+        sizeMb: 15,
+        date: '02.01.2024',
+        tileCount: 150,
+      }
+    ];
+    localStorageStore['der_wegweiser_offline_regions'] = JSON.stringify(mockRegions);
+
+    const success = await OfflineMapService.deleteOfflineRegion('Region To Delete');
+    expect(success).toBe(true);
+
+    const savedData = localStorageStore['der_wegweiser_offline_regions'];
+    expect(savedData).toBeTruthy();
+    const regions: DownloadedRegionInfo[] = JSON.parse(savedData);
+    expect(regions.length).toBe(1);
+    expect(regions[0].name).toBe('Region To Keep');
   });
 });
 
@@ -251,7 +338,7 @@ describe('Service Worker - Offline tile behavior', () => {
 
     // Get the fetch event handler
     const fetchHandler = eventListeners['fetch'];
-    assert.ok(fetchHandler, 'Fetch event listener was not registered by sw.js');
+    expect(fetchHandler).toBeTruthy();
 
     // Create a mock fetch event
     const mockEvent = {
@@ -265,13 +352,13 @@ describe('Service Worker - Offline tile behavior', () => {
     fetchHandler(mockEvent);
 
     // Verify that respondWith was called
-    assert.ok(respondedWithPromise, 'event.respondWith was not called');
+    expect(respondedWithPromise).toBeTruthy();
 
     // Wait for the response
     const response = await respondedWithPromise;
 
     // Assert honest degradation
-    assert.strictEqual(response.status, 504);
-    assert.strictEqual(response.statusText, 'Offline tile unavailable');
+    expect(response?.status).toBe(504);
+    expect(response?.statusText).toBe('Offline tile unavailable');
   });
 });
