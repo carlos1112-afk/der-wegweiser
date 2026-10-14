@@ -54,6 +54,7 @@
     "@types/testing-library__jest-dom": "^5.14.9",
     "@types/web-bluetooth": "^0.0.21",
     "@vitejs/plugin-react": "^6.0.4",
+    "firebase-admin": "^14.5.0",
     "jsdom": "^29.1.1",
     "oxlint": "^1.75.0",
     "tsx": "^4.23.15",
