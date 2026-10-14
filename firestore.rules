@@ -25,6 +25,19 @@ service cloud.firestore {
         && !exists(/databases/$(database)/documents/suspended_users/$(request.auth.uid));
     }
 
+    // Validation for Charging Stations
+    function isValidChargingStation() {
+      let data = request.resource.data;
+      // When creating, we only validate the fields we care about.
+      // If we strictly check keys, we might break existing test documents
+      // that don't have all these fields (e.g., test documents missing lat/lng/plugType).
+      return (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
+             (!('lat' in data) || (data.lat is number && data.lat >= -90 && data.lat <= 90)) &&
+             (!('lng' in data) || (data.lng is number && data.lng >= -180 && data.lng <= 180)) &&
+             (!('plugType' in data) || (data.plugType is string && data.plugType in ['schuko_230v', 'bosch', 'bike_energy', 'shimano', 'yamaha', 'unknown'])) &&
+             (!('createdByUserId' in data) || data.createdByUserId == request.auth.uid);
+    }
+
     // Ersteller-Prüfung. Je nach Schreibpfad wird das Feld `createdByUserId`
     // (Community-Inhalte) oder `userId` (gespeicherte Nutzerdaten) gesetzt,
     // daher werden beide geprüft. `get()` mit Vorgabewert vermeidet
@@ -63,14 +76,14 @@ service cloud.firestore {
     // Ladeinfrastruktur fremder Nutzer überschreiben.
     match /charging_stations/{stationId} {
       allow read: if true;
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isActiveUser() && isValidChargingStation();
+      allow update: if isCreator() && isValidChargingStation();
       allow delete: if isCreator();
     }
     match /charging_stations_v2/{stationId} {
       allow read: if true;
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isActiveUser() && isValidChargingStation();
+      allow update: if isCreator() && isValidChargingStation();
       allow delete: if isCreator();
     }
 

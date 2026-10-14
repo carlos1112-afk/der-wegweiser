@@ -256,3 +256,61 @@ test('Unbehandelte Pfade bleiben gesperrt', async () => {
   const user = ctx({ uid: 'u-1' });
   await assertFails(setDoc(doc(user, 'irgendwas', 'x'), { a: 1 }));
 });
+
+test('Ladesäulen-Validierung schlägt bei falschen Typen oder fehlenden/falschen Inhalten fehl', async () => {
+  const owner = ctx({ uid: 'owner-valid' });
+
+  // 1. Name is too long
+  await assertFails(
+    setDoc(doc(owner, 'charging_stations', 'val-1'), {
+      name: 'A'.repeat(101),
+      createdByUserId: 'owner-valid',
+    })
+  );
+
+  // 2. Lat is out of bounds
+  await assertFails(
+    setDoc(doc(owner, 'charging_stations', 'val-2'), {
+      name: 'Test',
+      lat: 91,
+      createdByUserId: 'owner-valid',
+    })
+  );
+
+  // 3. Lng is out of bounds
+  await assertFails(
+    setDoc(doc(owner, 'charging_stations', 'val-3'), {
+      name: 'Test',
+      lng: -181,
+      createdByUserId: 'owner-valid',
+    })
+  );
+
+  // 4. Invalid plugType
+  await assertFails(
+    setDoc(doc(owner, 'charging_stations', 'val-4'), {
+      name: 'Test',
+      plugType: 'unsupported_plug',
+      createdByUserId: 'owner-valid',
+    })
+  );
+
+  // 5. Wrong creator ID (does not match auth.uid)
+  await assertFails(
+    setDoc(doc(owner, 'charging_stations', 'val-5'), {
+      name: 'Test',
+      createdByUserId: 'other-user',
+    })
+  );
+
+  // 6. Valid Data successfully created
+  await assertSucceeds(
+    setDoc(doc(owner, 'charging_stations', 'val-6'), {
+      name: 'Valid Station',
+      lat: 52.5,
+      lng: 13.4,
+      plugType: 'schuko_230v',
+      createdByUserId: 'owner-valid',
+    })
+  );
+});
