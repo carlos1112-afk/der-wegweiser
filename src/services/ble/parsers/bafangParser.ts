@@ -101,6 +101,36 @@ export function detectBafangSubBrand(deviceName?: string): string {
   return 'Bafang E-Bike';
 }
 
+/**
+ * Prueft ob ein Bafang Modell gefahrlos beschrieben werden kann (z.B. Assist-Level wechseln).
+ * Verhindert Settings-Wipe bei Modellen wie M560, M820, C245.
+ */
+export function isBafangSafeToWrite(deviceName?: string): boolean {
+  if (!deviceName) return false;
+  const lower = deviceName.toLowerCase();
+
+  // Explicitly risky models (Blacklist)
+  if (lower.includes('m560') || lower.includes('m820') || lower.includes('c245')) {
+    return false;
+  }
+
+  // Known safe models (Whitelist)
+  const safePrefixes = [
+    'aeg', 'prophete', 'e-novation', 'e_novation', 'fischer',
+    '8fun', 'eightfun', 'm400', 'm420', 'm500', 'm510', 'm600', 'm620', 'm615',
+    'go+', 'c24', 'c26', 'c27', 'dp-c'
+  ];
+
+  for (const prefix of safePrefixes) {
+    if (lower.includes(prefix)) {
+      return true;
+    }
+  }
+
+  // Default to strict read-only for unknown models
+  return false;
+}
+
 export function parseBafangPacket(value: DataView): Partial<LiveBikeTelemetry> {
   if (value.byteLength < 4) {
     return {};

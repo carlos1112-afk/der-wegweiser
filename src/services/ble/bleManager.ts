@@ -6,7 +6,7 @@ import { parsePowerMeasurement, parseBatteryLevel, parseCscMeasurement, resetSta
 import { parseSpecializedTelemetry, buildSpecializedAssistCommand, SPECIALIZED_SERVICE_UUID, SPECIALIZED_TELEMETRY_CHAR, SPECIALIZED_ASSIST_CHAR } from './parsers/specializedParser';
 import { parseMahleTelemetry, buildMahleAssistCommand, MAHLE_SERVICE_UUID, MAHLE_TELEMETRY_CHAR, MAHLE_CONTROL_CHAR } from './parsers/mahleParser';
 import { parseShimanoTelemetry, SHIMANO_DFLY_SERVICE_UUID, SHIMANO_TELEMETRY_CHAR } from './parsers/shimanoParser';
-import { parseBafangPacket, buildBafangAssistCommand, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, BAFANG_RX_CHAR } from './parsers/bafangParser';
+import { parseBafangPacket, buildBafangAssistCommand, isBafangSafeToWrite, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, BAFANG_RX_CHAR } from './parsers/bafangParser';
 import type { BafangAssistLevel } from './parsers/bafangParser';
 import type { MahleAssistLevel } from './parsers/mahleParser';
 import { parseBoschLdiTelemetry, BOSCH_DIAGNOSTIC_SERVICE_UUID, BOSCH_LDI_TELEMETRY_CHAR } from './parsers/boschLdiParser';
@@ -530,8 +530,12 @@ export class BleManager {
           return true;
         } else if (this.activeManufacturer === 'bafang') {
           // SICHERHEIT: Bafang Schreibzugriffe sind riskant (z.B. M560/C245 Settings Wipe).
-          // TODO: In Zukunft striktes Read-Only fuer unbekannte Modelle erzwingen.
-          console.warn('BAFANG WRITE: Sende Command an BAFANG_RX_CHAR. Vorsicht bei M560/M820!');
+          // Strikte Read-Only fuer unbekannte/gefaehrliche Modelle erzwingen.
+          if (!isBafangSafeToWrite(this.lastKnownTelemetry.deviceName)) {
+            console.warn(`[BleManager] BAFANG WRITE BLOCKED: Schreibzugriff auf unbekanntes oder riskantes Modell gesperrt (${this.lastKnownTelemetry.deviceName}).`);
+            return false;
+          }
+          console.warn('BAFANG WRITE: Sende Command an BAFANG_RX_CHAR.');
           const bafangLevel = (mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5) as BafangAssistLevel;
           const payload = buildBafangAssistCommand(bafangLevel);
           await BleClient.write(this.activeDeviceId, BAFANG_UART_SERVICE_UUID, BAFANG_RX_CHAR, new DataView(payload));
@@ -564,8 +568,12 @@ export class BleManager {
         return true;
       } else if (this.activeManufacturer === 'bafang') {
         // SICHERHEIT: Bafang Schreibzugriffe sind riskant (z.B. M560/C245 Settings Wipe).
-        // TODO: In Zukunft striktes Read-Only fuer unbekannte Modelle erzwingen.
-        console.warn('BAFANG WRITE: Sende Command an BAFANG_RX_CHAR. Vorsicht bei M560/M820!');
+        // Strikte Read-Only fuer unbekannte/gefaehrliche Modelle erzwingen.
+        if (!isBafangSafeToWrite(this.lastKnownTelemetry.deviceName)) {
+          console.warn(`[BleManager] BAFANG WRITE BLOCKED: Schreibzugriff auf unbekanntes oder riskantes Modell gesperrt (${this.lastKnownTelemetry.deviceName}).`);
+          return false;
+        }
+        console.warn('BAFANG WRITE: Sende Command an BAFANG_RX_CHAR.');
         const service = await this.activeGattServer.getPrimaryService(BAFANG_UART_SERVICE_UUID);
         const char = await service.getCharacteristic(BAFANG_RX_CHAR);
         const bafangLevel = (mode === 'off' ? 0 : mode === 'eco' ? 2 : mode === 'tour' ? 4 : 5) as BafangAssistLevel;
