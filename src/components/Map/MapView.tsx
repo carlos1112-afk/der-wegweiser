@@ -623,6 +623,27 @@ export const MapView: React.FC<MapViewProps> = ({
     }
   }, [userLocation, tileTheme]);
 
+  /**
+   * Standort-Button (Zielkreuz + Kompass zusammengelegt, wie bei Google Maps' eigenem
+   * Standort-Button): 1. Tap zentriert (falls nicht zentriert), 2. Tap schaltet
+   * Course-Up ein, 3. Tap schaltet zurück auf Nordausrichtung (bleibt zentriert).
+   */
+  const handleLocationButton = useCallback(() => {
+    if (!isAutoFollow) {
+      handleRecenter();
+      return;
+    }
+    if (!isCourseUp) {
+      setIsCourseUp(true);
+      return;
+    }
+    setIsCourseUp(false);
+    mapRef.current?.easeTo({ bearing: 0, duration: 400 });
+    if (isGoogleActive && googleMapRef.current && tileTheme === 'satellite-3d') {
+      (googleMapRef.current as any).setHeading(0);
+    }
+  }, [isAutoFollow, isCourseUp, handleRecenter, isGoogleActive, tileTheme]);
+
   const handleMapClick = useCallback((lat: number, lng: number) => {
     if (currentRoute) return;
     setSelectedStationState(null);
@@ -816,14 +837,18 @@ export const MapView: React.FC<MapViewProps> = ({
           </button>
         </div>
 
-        {/* Recenter */}
+        {/* Standort & Ausrichtung (Neu zentrieren + Course-Up, zusammengelegt) */}
         <button className="glass-panel"
-          onClick={(e) => { e.stopPropagation(); handleRecenter(); }}
+          onClick={(e) => { e.stopPropagation(); handleLocationButton(); }}
           style={{ width: '38px', height: '38px', borderRadius: '10px', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', color: 'var(--accent-cyan)', cursor: 'pointer',
-            border: '1.5px solid var(--accent-cyan)', boxShadow: 'var(--glow-cyan)' }}
-          title="Auf GPS-Standort zentrieren">
-          <Crosshair size={18} />
+            alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
+            border: `1.5px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
+            boxShadow: isCourseUp ? 'var(--glow-green)' : 'var(--glow-cyan)' }}
+          title={!isAutoFollow ? 'Auf GPS-Standort zentrieren' : isCourseUp ? 'Auf Norden fixieren' : 'In Fahrtrichtung drehen (Course-Up)'}>
+          {isCourseUp
+            ? <Compass size={18} style={{ transform: `rotate(${currentHeadingDeg}deg)`, transition: 'transform 0.3s ease' }} />
+            : <Crosshair size={18} />}
         </button>
 
         {/* Layer picker button */}
@@ -851,18 +876,6 @@ export const MapView: React.FC<MapViewProps> = ({
             <Box size={18} />
           </button>
         )}
-
-        {/* Course-up / Compass */}
-        <button className="glass-panel"
-          onClick={(e) => { e.stopPropagation(); setIsCourseUp(!isCourseUp); if (isCourseUp) mapRef.current?.easeTo({ bearing: 0, duration: 400 }); }}
-          style={{ width: '38px', height: '38px', borderRadius: '10px', display: 'flex',
-            alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-            color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
-            border: `1.5px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
-            boxShadow: isCourseUp ? 'var(--glow-green)' : 'var(--glow-cyan)' }}
-          title={isCourseUp ? 'Auf Norden fixieren' : 'In Fahrtrichtung drehen (Course-Up)'}>
-          <Compass size={20} style={{ transform: isCourseUp ? `rotate(${currentHeadingDeg}deg)` : 'none', transition: 'transform 0.3s ease' }} />
-        </button>
       </div>
     </div>
   );
