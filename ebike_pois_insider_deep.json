@@ -1,0 +1,282 @@
+[
+  {
+    "name": "Radelbar Zschieren",
+    "category": "Imbiss",
+    "region": "Dresden-Zschieren / Elberadweg",
+    "address": "Zschierener Elbweg, 01259 Dresden (51°00’65.72″N, 13°86’62.12″E)",
+    "coordinates": "51.0182, 13.8839",
+    "specialty": "Geheimtipp der Dresdner Radlerszene: Unverbaute Strandbar direkt gegenüber Schloss Pillnitz mit kühlen Getränken und Liegestühlen",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Café Villa Else",
+    "category": "Imbiss",
+    "region": "Heidenau / Elberadweg",
+    "address": "Pirnaer Straße 39, 01809 Heidenau",
+    "coordinates": "zu verifizieren",
+    "specialty": "Liebevoller Einkehrstopp kurz vor Pirna mit hausgemachten Torten (Schwarzwälder, Joghurt), Eiscafé und schattigem Biergarten",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Gare de la lune (Luftgarten Wachwitz)",
+    "category": "Imbiss",
+    "region": "Dresden-Wachwitz / Elberadweg",
+    "address": "Pillnitzer Landstraße 148, 01326 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Idyllischer Sommer-Luftgarten rechtselbisch unterhalb des Fernsehturms mit Erfrischungen und kleiner Imbisskarte",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Café Os2 (Oswaldz am Elberadweg)",
+    "category": "Imbiss",
+    "region": "Dresden-Loschwitz / Elberadweg",
+    "address": "Körnerweg 24a, 01326 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Versteckte Terrasse direkt am Körnerweg unterhalb des Blauen Wunders, erreichbar über schmale Steintreppe",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Velo Verde Radebeul",
+    "category": "Imbiss",
+    "region": "Radebeul / Elberadweg",
+    "address": "Niederwarthaer Straße 50, 01445 Radebeul",
+    "coordinates": "zu verifizieren",
+    "specialty": "Grüne Radler-Oase mit Gartenbereich zwischen Dresden und Meißen direkt am Radweg",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Skopis Elbgarten Coswig",
+    "category": "Imbiss",
+    "region": "Coswig / Elberadweg",
+    "address": "Tännichthaus 37, 01640 Coswig",
+    "coordinates": "zu verifizieren",
+    "specialty": "Weitläufiger Biergarten direkt an den Elbauen mit frischer Küche für Radler",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Biergarten an der Gohliser Windmühle",
+    "category": "Imbiss",
+    "region": "Dresden-Gohlis / Elberadweg",
+    "address": "Windmühlenweg 17, 01156 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Historische Windmühle mit Biergarten direkt am Elberadweg, Schönwetter-Betrieb mit Elbblick",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Fährgarten Kleinzschachwitz (Feuchte Kurve)",
+    "category": "Imbiss",
+    "region": "Dresden-Kleinzschachwitz / Elberadweg",
+    "address": "Kleinzschachwitzer Ufer 7, 01259 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Traditionsreicher Biergarten an der Fähranlegestelle nach Pillnitz, Treffpunkt für Radwanderer",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Radlerhof Aurith",
+    "category": "Hotel",
+    "region": "Ziltendorf OT Aurith / Oder-Neiße-Radweg",
+    "address": "Aurith 1, 15295 Ziltendorf",
+    "coordinates": "52.2471, 14.7118",
+    "specialty": "Echter Geheimtipp der Radszene: 3000 qm grüner Rasen direkt hinterm Deich, Pension, Zeltplatz, Imbiss abseits jedes Lärms (kein Mobilnetz)",
+    "sourceUrl": "https://radlerhof-aurith.de/",
+    "query": "Oder-Neiße-Radweg Geheimtipp Radlerhof Aurith"
+  },
+  {
+    "name": "Turmcafé im Verladeturm Kulturhafen",
+    "category": "Imbiss",
+    "region": "Groß Neuendorf / Oderbruch",
+    "address": "Hafenstraße 1, 15324 Letschin OT Groß Neuendorf",
+    "coordinates": "52.7011, 14.4172",
+    "specialty": "Kult-Spot im Oderbruch: Café in den drei Ebenen eines alten Verladeturms mit Oderblick, Übernachtung in historischen Bahnwaggons",
+    "sourceUrl": "https://www.verladeturm.de/turmcafe.html",
+    "query": "Kulturhafen Groß Neuendorf Bahnwaggon Café"
+  },
+  {
+    "name": "Baumanns Eisgarten Leuba",
+    "category": "Imbiss",
+    "region": "Ostritz OT Leuba / Oder-Neiße-Radweg",
+    "address": "Hauptstraße 24, 02899 Ostritz OT Leuba",
+    "coordinates": "zu verifizieren",
+    "specialty": "Liebevoll geführter Kiosk & Eisdiele direkt am Neiße-Deich mit Getränken, Eis und Radlerpause",
+    "sourceUrl": "https://www.outdooractive.com/de/gastro/ostritz/baumanns-eisgarten-leuba/57269076/",
+    "query": "Baumanns Eisgarten Leuba Oder-Neiße"
+  },
+  {
+    "name": "Kolonisten Kaffee Neulietzegöricke",
+    "category": "Imbiss",
+    "region": "Neulietzegöricke / Oderbruch",
+    "address": "Neulietzegöricke 52, 16259 Neulewin",
+    "coordinates": "52.7667, 14.2333",
+    "specialty": "Imbiss & Kaffeegarten im ältesten Kolonistendorf Preußens von 1753, hausgebackener Kuchen direkt an der Dorfkirche",
+    "sourceUrl": "https://kulturfeste.de/orte/maerkisch-oderland/neulietzegoericke/kolonisten_kaffee/",
+    "query": "Neulietzegöricke Kolonisten-Kaffee Gasthof Radler"
+  },
+  {
+    "name": "Gasthof Zum Alten Fritz Neulietzegöricke",
+    "category": "Hotel",
+    "region": "Neulietzegöricke / Oderbruch",
+    "address": "Neulietzegöricke 41, 16259 Neulewin",
+    "coordinates": "zu verifizieren",
+    "specialty": "Historischer Dorfgasthof seit 1753 mit Sommergarten und Übernachtungsmöglichkeiten für Radtouristen",
+    "sourceUrl": "https://kulturfeste.de/orte/maerkisch-oderland/neulietzegoericke/kolonistendorf_neulietzegoericke/",
+    "query": "Kolonistendorf Neulietzegöricke Gasthof"
+  },
+  {
+    "name": "Dammmeisterei & Theater am Rand Zollbrücke",
+    "category": "Hotspot",
+    "region": "Zollbrücke / Oderaue / Oderbruch",
+    "address": "Zollbrücke 16, 15324 Oderaue",
+    "coordinates": "52.7644, 14.3056",
+    "specialty": "Kultur- und Genuss-Oase direkt auf dem Oderdeich mit saisonaler regionaler Bio-Küche und Theater im Holzbau",
+    "sourceUrl": "https://www.dammmeisterei.de",
+    "query": "Theater am Rand Zollbrücke Radweg"
+  },
+  {
+    "name": "Waldgasthaus Wotschofska",
+    "category": "Imbiss",
+    "region": "Lübbenau / Spreewald",
+    "address": "Wotschofskaweg 1, 03222 Lübbenau/Spreewald",
+    "coordinates": "51.8683, 13.9922",
+    "specialty": "Mitten im Hochwald auf einer Erleninsel: Ausschließlich per Fahrrad oder Kahn erreichbar! Großer schattiger Biergarten mit Hefeplinsen",
+    "sourceUrl": "https://www.spreewald-info.de/region/essen-trinken/gastronomie/biergarten-imbiss",
+    "query": "Wotschofska Spreewald Fahrrad Einkehr"
+  },
+  {
+    "name": "Spreewaldhof Leipe",
+    "category": "Hotel",
+    "region": "Leipe / Spreewald",
+    "address": "Leiper Dorfstraße 1, 03222 Lübbenau OT Leipe",
+    "coordinates": "51.8711, 14.0456",
+    "specialty": "Traditioneller Spreewaldhof am Fließ: Radverleih, E-Bike-Ladung, Spreewald-Fischküche und ruhige Pension am Gurkenradweg",
+    "sourceUrl": "https://spreewaldhof-leipe.de/",
+    "query": "Spreewaldhof Leipe Gurkenradweg Einkehr"
+  },
+  {
+    "name": "Biergarten Bootshaus Leineweber Burg",
+    "category": "Imbiss",
+    "region": "Burg (Spreewald)",
+    "address": "Hauptstraße 1, 03096 Burg (Spreewald)",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wasser-Biergarten direkt an der Hauptspree mit Gurkenradweg-Anbindung und deftigen Klassikern",
+    "sourceUrl": "https://www.spreewald-info.de/region/essen-trinken/gastronomie/biergarten-imbiss",
+    "query": "Biergärten & Imbiss im Spreewald Bootshaus Leineweber"
+  },
+  {
+    "name": "Biergarten Zum schwarzen Adler Windsfeld",
+    "category": "Imbiss",
+    "region": "Windsfeld / Dittenheim / Altmühltal",
+    "address": "Windsfeld 22, 91723 Dittenheim",
+    "coordinates": "zu verifizieren",
+    "specialty": "Verwunschener Insider-Biergarten mit Storchennest auf dem Dach, SB-Betrieb und authentischer fränkischer Brotzeit",
+    "sourceUrl": "https://freundeunterwegs.com/25-tage-fahrradrundtour-durch-das-altmuehltal/",
+    "query": "2,5 Tage Fahrradrundtour Altmühltal Geheimtipp"
+  },
+  {
+    "name": "Schäferwagen Vino an der Altmühl",
+    "category": "Imbiss",
+    "region": "Vor Eichstätt / Altmühltal",
+    "address": "Altmühltal-Radweg bei Eichstätt",
+    "coordinates": "zu verifizieren",
+    "specialty": "Foodtruck / Schäferwagen direkt an der Strecke: Fränkische Bratwurst in der Semmel & Kuchen wie bei Oma",
+    "sourceUrl": "https://freundeunterwegs.com/25-tage-fahrradrundtour-durch-das-altmuehltal/",
+    "query": "2,5 Tage Fahrradrundtour Altmühltal Geheimtipp"
+  },
+  {
+    "name": "Biergarten Alte Schule Solnhofen",
+    "category": "Imbiss",
+    "region": "Solnhofen / Altmühltal",
+    "address": "Senefelderstraße 2, 91807 Solnhofen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Idyllischer Biergarten direkt am Altmühlufer bei den Zwölf Aposteln mit regionalen Spezialitäten",
+    "sourceUrl": "https://altmuehlfranken-entdecken.de/geheimtipps/",
+    "query": "Geheimtipps Altmühlfranken Alte Schule Solnhofen"
+  },
+  {
+    "name": "Hotel & Pizzeria Postwirt Kipfenberg",
+    "category": "Hotel",
+    "region": "Kipfenberg / Altmühltal",
+    "address": "Marktplatz 1, 85110 Kipfenberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radler-freundliches Traditionshaus am Fuße der Burg Kipfenberg mit Holzofen-Pizzen und Biergarten",
+    "sourceUrl": "https://freundeunterwegs.com/25-tage-fahrradrundtour-durch-das-altmuehltal/",
+    "query": "2,5 Tage Fahrradrundtour Altmühltal Postwirt"
+  },
+  {
+    "name": "Schutzhütte Flüchtiger Hirsch am Rennsteig",
+    "category": "Rastplatz",
+    "region": "Ruhla-Ascherbrück / Thüringer Wald",
+    "address": "Rennsteig-Etappe 1, 99842 Ruhla",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wetterfester Unterstand am Gebirgskamm mit Tisch, 2 Bänken und offiziellem Rettungspunkt EA-6415",
+    "sourceUrl": "https://www.tourenportal-thueringer-wald.de/de/poi/unterstand/schutzhuette-fluechtiger-hirsch-am-rennsteig/32178808/",
+    "query": "Schutzhütte Flüchtiger Hirsch Rennsteig"
+  },
+  {
+    "name": "Rennsteiggrotte Aussichts- und Rastplatz",
+    "category": "Rastplatz",
+    "region": "Rennsteig / Thüringer Wald",
+    "address": "Rennsteig-Radweg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Natürlicher Felsüberhang als schützender Rastplatz bei Regen mit Panoramablick ins Thüringer Umland",
+    "sourceUrl": "https://www.thueringer-wald.com/w/opendata/poi/rennsteiggrotte",
+    "query": "Rennsteiggrotte Aussichts- und Rastplatz"
+  },
+  {
+    "name": "Dürrenberger Hütte Gehlberg",
+    "category": "Rastplatz",
+    "region": "Gehlberg / Schneekopf / Thüringen",
+    "address": "Dürrenberger Rundweg, 98528 Suhl-Gehlberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Erhöhte Wald-Schutzhütte auf 18,7 km Schleife um Gehlberg mit Blick auf die Kammlagen",
+    "sourceUrl": "https://www.komoot.com/de-de/guide/25774/radtouren-rund-um-gehlberg",
+    "query": "Dürrenberger Hütte Gehlberg Radtour"
+  },
+  {
+    "name": "Bikeshop Bodetal Thale",
+    "category": "Werkstatt",
+    "region": "Thale / Bodetal / Harz",
+    "address": "Am Bahnhof 1, 06502 Thale",
+    "coordinates": "zu verifizieren",
+    "specialty": "Genuss-Bike-Stützpunkt am Eingang zur wilden Bodetalschlucht: E-Bike Verleih, Reparaturen und Akkuladung",
+    "sourceUrl": "https://www.harzinfo.de/erlebnisse/genuss-bike-paradies/rund-ums-bike",
+    "query": "Genuss Bike Paradies Harz Bikeshop Bodetal"
+  },
+  {
+    "name": "Bike & BBQ Hornburg",
+    "category": "Imbiss",
+    "region": "Hornburg / Nördliches Harzvorland",
+    "address": "Vor dem Dammtor 5, 38315 Hornburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kult-Treffpunkt für Biker: Fahrrad-Werkstatt und E-Bike-Service direkt kombiniert mit BBQ-Garten",
+    "sourceUrl": "https://www.harzinfo.de/erlebnisse/genuss-bike-paradies/rund-ums-bike",
+    "query": "Genuss Bike Paradies Bike & BBQ Hornburg"
+  },
+  {
+    "name": "Omas Drahtesel Schöningen",
+    "category": "Imbiss",
+    "region": "Schöningen / Elm-Harzvorland",
+    "address": "Markt 14, 38364 Schöningen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Nostalgisches Fahrradcafé mit E-Bike-Verleih und Kuchenpause am Marktplatz",
+    "sourceUrl": "https://www.harzinfo.de/erlebnisse/genuss-bike-paradies/rund-ums-bike",
+    "query": "Genuss Bike Paradies Omas Drahtesel Schöningen"
+  },
+  {
+    "name": "Waldgasthaus & Rastplatz Plessenburg",
+    "category": "Imbiss",
+    "region": "Ilsenburg / Nationalpark Harz",
+    "address": "Plessenburg 1, 38871 Ilsenburg (Harz)",
+    "coordinates": "51.8344, 10.6389",
+    "specialty": "Mitten im Nationalpark Harz auf Waldlichtung (nur Forst-/Radwege): E-Bike-freundliche Waldgaststätte mit Wildgerichten",
+    "sourceUrl": "https://www.harzinfo.de",
+    "query": "Waldgasthaus Plessenburg Harz Radweg"
+  }
+]

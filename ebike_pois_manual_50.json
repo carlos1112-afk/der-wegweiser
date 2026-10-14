@@ -1,0 +1,502 @@
+[
+  {
+    "name": "E-Bike Ladestation Kyffhäuser / Kaiser-Picknick",
+    "category": "Ladesäule",
+    "region": "Kyffhäuser / Thüringen",
+    "address": "Am Kyffhäuser-Denkmal, 99707 Kyffhäuserland",
+    "coordinates": "zu verifizieren",
+    "specialty": "Lademöglichkeit für E-Bike-Akkus am Gipfel/Bistro Kaiser-Picknick nach anspruchsvollem Anstieg",
+    "sourceUrl": "https://www.naturpark-kyffhaeuser.de",
+    "query": "E-Bike Ladestation Kyffhäuser Denkmal"
+  },
+  {
+    "name": "Radsport Heller Schlauchomat",
+    "category": "Werkstatt",
+    "region": "Kipfenberg / Naturpark Altmühltal",
+    "address": "Eichstätter Straße 4, 85110 Kipfenberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 Schwalbe-Schlauchautomat für Notfälle auf dem Altmühltal-Radweg",
+    "sourceUrl": "https://www.naturpark-altmuehltal.de",
+    "query": "Schlauchautomat Fahrrad Altmühltal Eichstätt"
+  },
+  {
+    "name": "ADAC Fahrrad-Servicestation Winterberg",
+    "category": "Werkstatt",
+    "region": "Winterberg / Sauerland",
+    "address": "Großraumparkplatz Bikepark / Trailpark, 59955 Winterberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Rund um die Uhr frei zugängliche Pannen- und Montagestation mit Standpumpe und Bordwerkzeug",
+    "sourceUrl": "https://www.winterberg.de",
+    "query": "Fahrrad Reparaturstation Sauerland Winterberg"
+  },
+  {
+    "name": "Erlebnisgastronomie Gleis 3 Ladestation",
+    "category": "Ladesäule",
+    "region": "Pfalzfeld / Hunsrück",
+    "address": "Raiffeisenstraße / Alter Bahnhof, 56291 Pfalzfeld",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ladesäule direkt an der Bahntrasse des Schinderhannes-Radwegs mit Biergarten",
+    "sourceUrl": "https://www.rlp-tourismus.com",
+    "query": "E-Bike Ladestation Hunsrück Schinderhannes"
+  },
+  {
+    "name": "Rebgut Haltnau E-Bike Station",
+    "category": "Imbiss",
+    "region": "Meersburg / Bodensee",
+    "address": "Uferpromenade 107, 88709 Meersburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Historische Weineinkehr direkt am Bodensee-Radweg mit Echt-Bodensee E-Bike Ladestation",
+    "sourceUrl": "https://www.echt-bodensee.de",
+    "query": "Fahrradcafé Bodensee Meersburg Ladestation"
+  },
+  {
+    "name": "Bullhead House Ochsenkopf-Süd",
+    "category": "Ladesäule",
+    "region": "Fichtelgebirge / Bayern",
+    "address": "Fleckl 13, 95485 Warmensteinach",
+    "coordinates": "zu verifizieren",
+    "specialty": "Zentraler Bike-Knotenpunkt mit Ladeinfrastruktur, CUBE E-MTB-Verleih und Reparatur am Lift",
+    "sourceUrl": "https://www.bullheadhouse.de",
+    "query": "E-Bike Ladestation Fichtelgebirge Ochsenkopf"
+  },
+  {
+    "name": "Radservicestation Ludgeriplatz Promenade",
+    "category": "Werkstatt",
+    "region": "Münster / NRW",
+    "address": "Ludgeriplatz / Stadthaus 2, 48151 Münster",
+    "coordinates": "zu verifizieren",
+    "specialty": "Öffentliche Radservicestation direkt am Promenaden-Knotenpunkt mit Luftpumpe und Werkzeugsatz",
+    "sourceUrl": "https://www.stadt-muenster.de",
+    "query": "Fahrrad Reparaturstation Münster Promenade"
+  },
+  {
+    "name": "Sporthaus Weinberger Bike Service",
+    "category": "Werkstatt",
+    "region": "Bodenmais / Bayerischer Wald",
+    "address": "Jahnstraße 20, 94249 Bodenmais",
+    "coordinates": "zu verifizieren",
+    "specialty": "Trans Bayerwald Servicepunkt mit Notfall-Pannenservice und Schläuchen für E-MTBs",
+    "sourceUrl": "https://www.sport-weinberger.de",
+    "query": "Schlauchautomat Fahrrad Bayerischer Wald Bodenmais"
+  },
+  {
+    "name": "Weser-Radweg Ladefächer Pfortmühle Hameln",
+    "category": "Ladesäule",
+    "region": "Hameln / Weserbergland",
+    "address": "Pfortmühle, 31785 Hameln",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie 230V-Ladefächer mit IP44 Steckdose direkt 100m nördlich der Pfortmühle am Weserradweg",
+    "sourceUrl": "https://www.hameln.de",
+    "query": "E-Bike Ladestation Weser-Radweg Hameln Rattenfänger"
+  },
+  {
+    "name": "Brauers Landarthotel Eifel",
+    "category": "Hotel",
+    "region": "Daun / Vulkaneifel",
+    "address": "Hauptstraße 3, 54552 Daun-Rengen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radfahrer-Hotel für Maare-Mosel-Radweg mit abschließbarer Radgarage und E-Bike-Ladestation",
+    "sourceUrl": "https://www.brauers-landarthotel.de",
+    "query": "Bike Hotel Vulkaneifel Daun Maare"
+  },
+  {
+    "name": "E-Bike-Ladeschrank Bahnhof Herzhausen",
+    "category": "Ladesäule",
+    "region": "Nationalpark Kellerwald-Edersee / Hessen",
+    "address": "Nationalparkbahnhof Herzhausen, 34516 Vöhl",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie Schließfächer mit Steckdosen am Edersee-Radweg (Pfandschloss mit 1-2 Euro)",
+    "sourceUrl": "https://www.edersee.com",
+    "query": "E-Bike Ladestation Nationalpark Kellerwald-Edersee"
+  },
+  {
+    "name": "Fahrradwerkstatt in der Fabrik Die Radgeber",
+    "category": "Werkstatt",
+    "region": "Freiburg / Baden-Württemberg",
+    "address": "Habsburgerstraße 9, 79104 Freiburg im Breisgau",
+    "coordinates": "zu verifizieren",
+    "specialty": "Offene Selbsthilfewerkstatt mit professionellem Werkzeug und Schrauber-Hilfe",
+    "sourceUrl": "https://www.radgeber-freiburg.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Freiburg Wiehre"
+  },
+  {
+    "name": "Weingut & Häckerwirtschaft Mainschleife",
+    "category": "Imbiss",
+    "region": "Volkach / Franken",
+    "address": "Main-Radweg Nordheim / Escherndorf, 97334 Volkach",
+    "coordinates": "zu verifizieren",
+    "specialty": "Winzerrast an der Radler-Fähre mit fränkischen Brotzeiten und Stellplätzen",
+    "sourceUrl": "https://www.fraenkisches-weinland.de",
+    "query": "Radler Imbiss Main-Radweg Volkach Mainschleife"
+  },
+  {
+    "name": "Zoiglwirtschaft Rechersimer E-Bike Station",
+    "category": "Ladesäule",
+    "region": "Röthenbach am Steinwald / Oberpfälzer Wald",
+    "address": "Röthenbach 22, 95689 Reuth bei Erbendorf",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie Ladesäule direkt an der Zoiglwirtschaft am Zoigl-Radweg",
+    "sourceUrl": "https://www.oberpfaelzerwald.de",
+    "query": "E-Bike Ladestation Oberpfälzer Wald Zoigl"
+  },
+  {
+    "name": "Aussichtsturm Cloef Saarschleife",
+    "category": "Hotspot",
+    "region": "Mettlach-Orscholz / Saarland",
+    "address": "Cloef-Atrium, 66693 Mettlach",
+    "coordinates": "zu verifizieren",
+    "specialty": "42m Holzaussichtsturm über der Saarschleife mit Radler-Abstellanlagen und Höhen-Rastplatz",
+    "sourceUrl": "https://www.adfc-radtourismus.de",
+    "query": "Aussichtsturm Rastplatz Radweg Saarschleife"
+  },
+  {
+    "name": "E-Radtankstelle Hafen Prien/Stock",
+    "category": "Ladesäule",
+    "region": "Prien am Chiemsee / Bayern",
+    "address": "Alte Festwiese / Seestraße, 83209 Prien am Chiemsee",
+    "coordinates": "zu verifizieren",
+    "specialty": "Öffentliche E-Bike-Ladestation am Anleger der Chiemsee-Schifffahrt und Chiemsee-Radweg",
+    "sourceUrl": "https://www.chiemseeagenda.de",
+    "query": "E-Bike Ladestation Chiemsee Schifffahrt Prien"
+  },
+  {
+    "name": "Schlauchautomat Fahrrad-Station Weiche",
+    "category": "Werkstatt",
+    "region": "Flensburg / Schleswig-Holstein",
+    "address": "Ochsenweg 75, 24941 Flensburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 Schwalbe-Schlauchautomat an der Förde- und Ochsenweg-Radroute",
+    "sourceUrl": "https://www.destination.one",
+    "query": "Fahrrad Schlauchautomat Flensburg Förde"
+  },
+  {
+    "name": "Gartencafé Schloss Corvey",
+    "category": "Imbiss",
+    "region": "Höxter / Weserbergland",
+    "address": "Corvey 2, 37671 Höxter",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radler-Café direkt am Weser-Radweg mit Corveyer Gourmetbrot und E-Bike-Fahrradscheune",
+    "sourceUrl": "https://www.corvey.de",
+    "query": "Radlercafé Weserbergland Corvey Höxter"
+  },
+  {
+    "name": "Südsee-Camp E-Bike Servicepoint",
+    "category": "Hotel",
+    "region": "Wietzendorf / Lüneburger Heide",
+    "address": "Südsee-Camp 1, 29649 Wietzendorf",
+    "coordinates": "zu verifizieren",
+    "specialty": "Campingresort mit SB-Reparaturstation, Werkzeug, Luftpumpe und Lademöglichkeiten",
+    "sourceUrl": "https://www.suedsee-camp.de",
+    "query": "Campingplatz E-Bike Ladeschrank Lüneburger Heide Wietzendorf"
+  },
+  {
+    "name": "Schutzhütte Roggenberg Panoramaweg",
+    "category": "Rastplatz",
+    "region": "Liebliches Taubertal / Baden-Württemberg",
+    "address": "Roggenberg, 97922 Lauda-Königshofen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wetterfeste Schutzhütte mit Panoramablick über das Taubertal für Radreisende",
+    "sourceUrl": "https://www.wanderbares-deutschland.de",
+    "query": "Schutzhütte Rastplatz Panoramaweg Taubertal"
+  },
+  {
+    "name": "BIKE950 Wasserkuppe E-Bike Station",
+    "category": "Ladesäule",
+    "region": "Wasserkuppe / Rhön / Hessen",
+    "address": "Wasserkuppe 46, 36129 Gersfeld",
+    "coordinates": "zu verifizieren",
+    "specialty": "Höchstgelegene E-Bike-Ladestation Hessens (950m ü. NN) mit E-Bike-Waschanlage und Werkstatt",
+    "sourceUrl": "https://www.wasserkuppe.net",
+    "query": "E-Bike Ladestation Wasserkuppe Rhön"
+  },
+  {
+    "name": "ADFC Selbsthilfewerkstatt Regensburg",
+    "category": "Werkstatt",
+    "region": "Regensburg / Bayern",
+    "address": "Weinweg 6, 93055 Regensburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ehrenamtlich betreute Selbsthilfe-Werkstatt mit Werkzeugkoffern und Zentrierständer",
+    "sourceUrl": "https://regensburg.adfc.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Regensburg"
+  },
+  {
+    "name": "Haus Oveney Biergarten & Radlerstopp",
+    "category": "Imbiss",
+    "region": "Bochum / RuhrtalRadweg",
+    "address": "Oveneystraße 65, 44797 Bochum",
+    "coordinates": "zu verifizieren",
+    "specialty": "Klassischer Radlertreffpunkt direkt am Kemnader See / Ruhrtalradweg mit großem Biergarten",
+    "sourceUrl": "https://www.ruhrtalradweg.de",
+    "query": "Radler Imbiss Ruhrtalradweg Kemnade"
+  },
+  {
+    "name": "Schorfheide-Info Ladeschrank Joachimsthal",
+    "category": "Ladesäule",
+    "region": "Joachimsthal / Schorfheide / Brandenburg",
+    "address": "Töpferstraße 1, 16247 Joachimsthal",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 E-Bike-Ladeschrank mit 3 abschließbaren Fächern und integrierter Fahrradreparatursäule",
+    "sourceUrl": "https://www.reiseland-brandenburg.de",
+    "query": "E-Bike Ladestation Schorfheide Joachimsthal"
+  },
+  {
+    "name": "E-Bike Ladestation Donauursprung",
+    "category": "Ladesäule",
+    "region": "Donaueschingen / Schwarzwald",
+    "address": "Schlosspark / Donauquelle, 78166 Donaueschingen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie E-Bike-Ladesäule direkt am Beginn des Donauradwegs",
+    "sourceUrl": "https://www.schwarzwald-tourismus.info",
+    "query": "Fahrrad Reparaturstation Donaueschingen Donauursprung"
+  },
+  {
+    "name": "Der Radladen Schlauchomat Gangolfsweg",
+    "category": "Werkstatt",
+    "region": "Bamberg / Franken",
+    "address": "Gangolfsweg 2a, 96050 Bamberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 Schwalbe-Schlauchautomat nahe des Hainparks und Regnitz-Radwegs",
+    "sourceUrl": "https://reparadius.de",
+    "query": "Schlauchautomat Fahrrad Bamberg Hain"
+  },
+  {
+    "name": "Gasthof Zum Hollerstein Bike Lodge",
+    "category": "Hotel",
+    "region": "Pappenheim-Zimmern / Altmühltal",
+    "address": "Hollersteinstraße 1, 91788 Pappenheim",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bett+Bike-Gasthof direkt an der Altmühl mit Radlergarage, Trockenraum und E-Bike-Ladung",
+    "sourceUrl": "https://www.jurahoehe.de",
+    "query": "Bike Hotel Altmühltal Pappenheim"
+  },
+  {
+    "name": "Rastplatz Elbdeich Wörlitz-Wittenberg",
+    "category": "Rastplatz",
+    "region": "Lutherstadt Wittenberg / Sachsen-Anhalt",
+    "address": "Elbdeich Coswig-Wittenberg, 06886 Lutherstadt Wittenberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Überdachte Schutzhütte im Biosphärenreservat Mittelelbe mit Weitblick über die Auen",
+    "sourceUrl": "https://www.lutherstadt-wittenberg.de",
+    "query": "Radler Rastplatz Elberadweg Lutherstadt Wittenberg"
+  },
+  {
+    "name": "Aussichtsturm Mützenich Hohes Venn",
+    "category": "Hotspot",
+    "region": "Monschau-Mützenich / Eifel",
+    "address": "Im Venn, 52156 Monschau",
+    "coordinates": "zu verifizieren",
+    "specialty": "8,5m Holzaussichtsturm mit Rastplatz und Baumtelefon nahe dem Vennbahn-Radweg",
+    "sourceUrl": "https://www.der-eifelyeti.de",
+    "query": "Aussichtsturm Rastplatz Radweg Eifel Hohes Venn"
+  },
+  {
+    "name": "Seetelhotel Pommerscher Hof Ladestation",
+    "category": "Ladesäule",
+    "region": "Heringsdorf / Usedom",
+    "address": "Seestraße 41, 17424 Seebad Heringsdorf",
+    "coordinates": "zu verifizieren",
+    "specialty": "Pedelec-Power-Ladepunkt direkt an der Strandpromenade für Radurlauber",
+    "sourceUrl": "https://www.pedelec-power-usedom.de",
+    "query": "E-Bike Ladestation Usedom Heringsdorf Promenade"
+  },
+  {
+    "name": "ADFC Selbsthilfewerkstatt Saarbrücken",
+    "category": "Werkstatt",
+    "region": "Saarbrücken / Saarland",
+    "address": "Kronenstraße 1B, 66111 Saarbrücken",
+    "coordinates": "zu verifizieren",
+    "specialty": "Werkstatt mit Werkzeugverleih im Haus der Umwelt, 5 Min vom Saar-Radweg / Staden",
+    "sourceUrl": "https://www.saarbruecken.de",
+    "query": "Fahrrad Reparaturstation Saarbrücken Staden"
+  },
+  {
+    "name": "Weser-Imbiss Reileifzen",
+    "category": "Imbiss",
+    "region": "Reileifzen / Weserbergland",
+    "address": "Fährstraße 1, 37639 Bevern-Reileifzen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Legendäre Radler-Kultbude direkt am Weser-Radweg mit Flussblick und Erfrischungen",
+    "sourceUrl": "https://www.weser-imbiss.de",
+    "query": "Radler Imbiss Weser-Radweg Stolzenau"
+  },
+  {
+    "name": "Elberadweg-Station Hitzacker Ladepünktchen",
+    "category": "Ladesäule",
+    "region": "Hitzacker (Elbe) / Wendland",
+    "address": "Am Markt 7 / Elbpromenade, 29456 Hitzacker (Elbe)",
+    "coordinates": "zu verifizieren",
+    "specialty": "Offizielles Wendland-Ladepünktchen mit Fahrradboxen direkt an der Elbe",
+    "sourceUrl": "https://www.wendlandmobil.de",
+    "query": "E-Bike Ladestation Wendland Hitzacker Elbe"
+  },
+  {
+    "name": "Waldhotel Mellestollen Bett+Bike",
+    "category": "Hotel",
+    "region": "Saalfeld / Thüringer Schiefergebirge",
+    "address": "Wittmannsgereuther Str. 50, 07318 Saalfeld",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bett+Bike-Hotel mitten im Wald mit E-Bike-Ladeinfrastruktur und Saaleradweg-Anbindung",
+    "sourceUrl": "https://www.bettundbike.de",
+    "query": "Bike Hotel Thüringer Schiefergebirge Saalfeld"
+  },
+  {
+    "name": "Aussichtsturm Zabelstein Lingmann-Haus",
+    "category": "Hotspot",
+    "region": "Steigerwald / Franken",
+    "address": "Zabelstein, 97514 Michelau im Steigerwald",
+    "coordinates": "zu verifizieren",
+    "specialty": "19,5m Holzturm mit 360-Grad-Blick, Pavillon-Kiosk und Radler-Rastplatz auf 483m Höhe",
+    "sourceUrl": "https://www.hassberge-tourismus.de",
+    "query": "Aussichtsturm Rastplatz Radweg Steigerwald Zabelstein"
+  },
+  {
+    "name": "Radstation Lindau Festland Schlauchomat",
+    "category": "Werkstatt",
+    "region": "Lindau / Bodensee",
+    "address": "Kemptener Str. 8, 88131 Lindau (Bodensee)",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 Schlauchautomat und Lufttankstelle nahe der Lindauer Insel",
+    "sourceUrl": "https://reparadius.de",
+    "query": "Schlauchautomat Fahrrad Bodensee Lindau Insel"
+  },
+  {
+    "name": "Fahrradselbsthilfe Hansa48",
+    "category": "Werkstatt",
+    "region": "Kiel / Schleswig-Holstein",
+    "address": "Hansastraße 48, 24118 Kiel",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kult-Selbsthilfewerkstatt mit Ersatzteilfundus und Schrauberanleitung",
+    "sourceUrl": "https://www.hansa48.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Kiel Gaarden"
+  },
+  {
+    "name": "Das Radhaus Harzmobil Torfhaus",
+    "category": "Ladesäule",
+    "region": "Torfhaus / Harz / Niedersachsen",
+    "address": "Torfhaus 2, 38667 Torfhaus",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-MTB-Servicestation am Hochharz-Plateau (800m ü. NN) mit E-Bike-Support",
+    "sourceUrl": "https://www.ebike-harz.info",
+    "query": "E-Bike Ladestation Harz Torfhaus Nationalpark"
+  },
+  {
+    "name": "Restaurant Bootshaus Donauradweg",
+    "category": "Imbiss",
+    "region": "Neuburg an der Donau / Bayern",
+    "address": "Oskar-Wittmann-Straße 5, 86633 Neuburg an der Donau",
+    "coordinates": "zu verifizieren",
+    "specialty": "Biergarten direkt am Donauradweg mit Blick auf das Schloss und sicheren Radstellplätzen",
+    "sourceUrl": "https://www.bootshaus-neuburg.de",
+    "query": "Radlercafé Donauradweg Neuburg Donau"
+  },
+  {
+    "name": "Freizeitzentrum Kratzmühlsee Ladeschrank",
+    "category": "Ladesäule",
+    "region": "Kinding-Kratzmühle / Altmühltal",
+    "address": "Freizeitzentrum Kratzmühle 1, 85125 Kinding",
+    "coordinates": "zu verifizieren",
+    "specialty": "Öffentlicher Outdoor-Ladeschrank mit 1-Euro-Kaution direkt am Seerestaurant am Altmühltalradweg",
+    "sourceUrl": "https://www.naturpark-altmuehltal.de",
+    "query": "Campingplatz E-Bike Ladestation Altmühltal Kratzmühle"
+  },
+  {
+    "name": "Erthal-Sozialwerk Schlauchomat & Service",
+    "category": "Werkstatt",
+    "region": "Würzburg / Unterfranken",
+    "address": "Sanderstraße 27, 97070 Würzburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7-Schlauchautomat und Radservice nur 5 Min vom Main-Radweg / Mainkai entfernt",
+    "sourceUrl": "https://www.mainradweg.com",
+    "query": "Fahrrad Reparaturstation Würzburg Mainkai"
+  },
+  {
+    "name": "Biergarten Sundische Wiese",
+    "category": "Imbiss",
+    "region": "Zingst / Fischland-Darß-Zingst",
+    "address": "Landstraße 32, 18374 Zingst",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradstation mit E-Bike-Ladestation, Grill und Fischbrötchen auf dem Deichradweg nach Pramort",
+    "sourceUrl": "https://www.zingst.de",
+    "query": "Radler Imbiss Ostseeküsten-Radweg Zingst Darß"
+  },
+  {
+    "name": "Möhnesee Staumauer moBILET Ladeboxen",
+    "category": "Ladesäule",
+    "region": "Möhnesee / Sauerland",
+    "address": "Möhnestraße 10, 59519 Möhnesee",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradboxen mit integrierter Ladestation direkt am Hauptparkplatz der historischen Sperrmauer",
+    "sourceUrl": "https://www.moehnesee.de",
+    "query": "E-Bike Ladestation Sauerland Möhnesee Staumauer"
+  },
+  {
+    "name": "Kurpark-Hotel Bad Dürkheim Bett+Bike",
+    "category": "Hotel",
+    "region": "Bad Dürkheim / Pfalz",
+    "address": "Schloßplatz 1-4, 67098 Bad Dürkheim",
+    "coordinates": "zu verifizieren",
+    "specialty": "Zertifiziertes Bett+Bike-Hotel mit abschließbarem Fahrradkeller und E-Bike-Ladestationen an der Weinstraße",
+    "sourceUrl": "https://www.kurpark-hotel.de",
+    "query": "Bike Hotel Pfalz Bad Dürkheim Weinstraße"
+  },
+  {
+    "name": "Aussichtsplateau Fuchskaute Rastplatz",
+    "category": "Hotspot",
+    "region": "Willingen / Westerwald",
+    "address": "Fuchskaute, 56479 Willingen (Westerwald)",
+    "coordinates": "zu verifizieren",
+    "specialty": "Höchster Punkt des Westerwaldes (657m) mit Weitblick, Rastbänken und Einstieg in den Nister-Radweg",
+    "sourceUrl": "https://www.radtouren.de",
+    "query": "Aussichtsturm Rastplatz Radweg Westerwald Fuchskaute"
+  },
+  {
+    "name": "Öffentliche Reparaturstation Bahnhof Fulda",
+    "category": "Werkstatt",
+    "region": "Fulda / Rhön-Vorland",
+    "address": "Bahnhofsvorplatz, 36037 Fulda",
+    "coordinates": "zu verifizieren",
+    "specialty": "Frei zugängliche städtische Reparaturstation mit Reifenpumpe und Multitool am Fuldaradweg R1",
+    "sourceUrl": "https://www.tourismus-fulda.de",
+    "query": "Schlauchautomat Fahrrad Fulda Domplatz"
+  },
+  {
+    "name": "Dorfladen Hopfen am See 24/7 Ladefächer",
+    "category": "Ladesäule",
+    "region": "Füssen-Hopfen am See / Allgäu",
+    "address": "Uferstraße 21a, 87629 Füssen-Hopfen am See",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 kostenlose Schließfach-Ladestation für E-Bikes auf dem Vorplatz direkt an der Seepromenade",
+    "sourceUrl": "https://www.fuessen.de",
+    "query": "E-Bike Ladestation Allgäu Forggensee Füssen"
+  },
+  {
+    "name": "Werkhaus Potsdam Offene Fahrradwerkstatt",
+    "category": "Werkstatt",
+    "region": "Potsdam-Babelsberg / Brandenburg",
+    "address": "Rudolf-Breitscheid-Straße 164, 14482 Potsdam",
+    "coordinates": "zu verifizieren",
+    "specialty": "Selbsthilfe-Werkstatt mit Werkzeug und Reparaturkursen im Projekthaus Babelsberg",
+    "sourceUrl": "https://www.inwole.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Potsdam Babelsberg"
+  },
+  {
+    "name": "Radlercafé Ferienhof Zander Bälow",
+    "category": "Imbiss",
+    "region": "Rühstädt-Bälow / Elbe-Havel / Prignitz",
+    "address": "Bälower Dorfstraße 11, 19322 Rühstädt OT Bälow",
+    "coordinates": "zu verifizieren",
+    "specialty": "Traditionelles Radlercafé auf dem Bauernhof direkt am Elberadweg mit Deichterrasse und Kuchen",
+    "sourceUrl": "https://www.dieprignitz.de",
+    "query": "Radlercafé Altmark Havelberg Elb-Havel-Winkel"
+  },
+  {
+    "name": "Rastplatz Bahnhof Kalteneck Ilztal",
+    "category": "Rastplatz",
+    "region": "Hutthurm-Kalteneck / Bayerischer Wald",
+    "address": "Bahnhof Kalteneck, 94107 Hutthurm",
+    "coordinates": "zu verifizieren",
+    "specialty": "Überdachte Holz-Schutzhütte am Endpunkt des Donau-Ilz-Radwegs direkt an der wilden Ilz",
+    "sourceUrl": "https://www.ostbayern-tourismus.de",
+    "query": "Schutzhütte Rastplatz Radweg Bayerischer Wald Ilztal"
+  }
+]

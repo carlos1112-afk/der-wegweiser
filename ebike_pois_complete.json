@@ -1,0 +1,2162 @@
+[
+  {
+    "name": "Radsport Heller Schlauchomat",
+    "category": "Werkstatt",
+    "region": "Kipfenberg / Naturpark Altmühltal",
+    "address": "Eichstätter Straße 4, 85110 Kipfenberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 Schwalbe-Schlauchautomat für Notfälle auf dem Altmühltal-Radweg",
+    "sourceUrl": "https://www.naturpark-altmuehltal.de",
+    "query": "Schlauchautomat Fahrrad Altmühltal Eichstätt"
+  },
+  {
+    "name": "ADAC Fahrrad-Servicestation Winterberg",
+    "category": "Werkstatt",
+    "region": "Winterberg / Sauerland",
+    "address": "Großraumparkplatz Bikepark / Trailpark, 59955 Winterberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Rund um die Uhr frei zugängliche Pannen- und Montagestation mit Standpumpe und Bordwerkzeug",
+    "sourceUrl": "https://www.winterberg.de",
+    "query": "Fahrrad Reparaturstation Sauerland Winterberg"
+  },
+  {
+    "name": "Rebgut Haltnau E-Bike Station",
+    "category": "Imbiss",
+    "region": "Meersburg / Bodensee",
+    "address": "Uferpromenade 107, 88709 Meersburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Historische Weineinkehr direkt am Bodensee-Radweg mit Echt-Bodensee E-Bike Ladestation",
+    "sourceUrl": "https://www.echt-bodensee.de",
+    "query": "Fahrradcafé Bodensee Meersburg Ladestation"
+  },
+  {
+    "name": "Radservicestation Ludgeriplatz Promenade",
+    "category": "Werkstatt",
+    "region": "Münster / NRW",
+    "address": "Ludgeriplatz / Stadthaus 2, 48151 Münster",
+    "coordinates": "zu verifizieren",
+    "specialty": "Öffentliche Radservicestation direkt am Promenaden-Knotenpunkt mit Luftpumpe und Werkzeugsatz",
+    "sourceUrl": "https://www.stadt-muenster.de",
+    "query": "Fahrrad Reparaturstation Münster Promenade"
+  },
+  {
+    "name": "Sporthaus Weinberger Bike Service",
+    "category": "Werkstatt",
+    "region": "Bodenmais / Bayerischer Wald",
+    "address": "Jahnstraße 20, 94249 Bodenmais",
+    "coordinates": "zu verifizieren",
+    "specialty": "Trans Bayerwald Servicepunkt mit Notfall-Pannenservice und Schläuchen für E-MTBs",
+    "sourceUrl": "https://www.sport-weinberger.de",
+    "query": "Schlauchautomat Fahrrad Bayerischer Wald Bodenmais"
+  },
+  {
+    "name": "Weser-Radweg Ladefächer Pfortmühle Hameln",
+    "category": "Ladesäule",
+    "region": "Hameln / Weserbergland",
+    "address": "Pfortmühle, 31785 Hameln",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie 230V-Ladefächer mit IP44 Steckdose direkt 100m nördlich der Pfortmühle am Weserradweg",
+    "sourceUrl": "https://www.hameln.de",
+    "query": "E-Bike Ladestation Weser-Radweg Hameln Rattenfänger"
+  },
+  {
+    "name": "Brauers Landarthotel Eifel",
+    "category": "Hotel",
+    "region": "Daun / Vulkaneifel",
+    "address": "Hauptstraße 3, 54552 Daun-Rengen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radfahrer-Hotel für Maare-Mosel-Radweg mit abschließbarer Radgarage und E-Bike-Ladestation",
+    "sourceUrl": "https://www.brauers-landarthotel.de",
+    "query": "Bike Hotel Vulkaneifel Daun Maare"
+  },
+  {
+    "name": "E-Bike-Ladeschrank Bahnhof Herzhausen",
+    "category": "Ladesäule",
+    "region": "Nationalpark Kellerwald-Edersee / Hessen",
+    "address": "Nationalparkbahnhof Herzhausen, 34516 Vöhl",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie Schließfächer mit Steckdosen am Edersee-Radweg (Pfandschloss mit 1-2 Euro)",
+    "sourceUrl": "https://www.edersee.com",
+    "query": "E-Bike Ladestation Nationalpark Kellerwald-Edersee"
+  },
+  {
+    "name": "Fahrradwerkstatt in der Fabrik Die Radgeber",
+    "category": "Werkstatt",
+    "region": "Freiburg / Baden-Württemberg",
+    "address": "Habsburgerstraße 9, 79104 Freiburg im Breisgau",
+    "coordinates": "zu verifizieren",
+    "specialty": "Offene Selbsthilfewerkstatt mit professionellem Werkzeug und Schrauber-Hilfe",
+    "sourceUrl": "https://www.radgeber-freiburg.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Freiburg Wiehre"
+  },
+  {
+    "name": "Weingut & Häckerwirtschaft Mainschleife",
+    "category": "Imbiss",
+    "region": "Volkach / Franken",
+    "address": "Main-Radweg Nordheim / Escherndorf, 97334 Volkach",
+    "coordinates": "zu verifizieren",
+    "specialty": "Winzerrast an der Radler-Fähre mit fränkischen Brotzeiten und Stellplätzen",
+    "sourceUrl": "https://www.fraenkisches-weinland.de",
+    "query": "Radler Imbiss Main-Radweg Volkach Mainschleife"
+  },
+  {
+    "name": "Zoiglwirtschaft Rechersimer E-Bike Station",
+    "category": "Ladesäule",
+    "region": "Röthenbach am Steinwald / Oberpfälzer Wald",
+    "address": "Röthenbach 22, 95689 Reuth bei Erbendorf",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie Ladesäule direkt an der Zoiglwirtschaft am Zoigl-Radweg",
+    "sourceUrl": "https://www.oberpfaelzerwald.de",
+    "query": "E-Bike Ladestation Oberpfälzer Wald Zoigl"
+  },
+  {
+    "name": "E-Radtankstelle Hafen Prien/Stock",
+    "category": "Ladesäule",
+    "region": "Prien am Chiemsee / Bayern",
+    "address": "Alte Festwiese / Seestraße, 83209 Prien am Chiemsee",
+    "coordinates": "zu verifizieren",
+    "specialty": "Öffentliche E-Bike-Ladestation am Anleger der Chiemsee-Schifffahrt und Chiemsee-Radweg",
+    "sourceUrl": "https://www.chiemseeagenda.de",
+    "query": "E-Bike Ladestation Chiemsee Schifffahrt Prien"
+  },
+  {
+    "name": "Gartencafé Schloss Corvey",
+    "category": "Imbiss",
+    "region": "Höxter / Weserbergland",
+    "address": "Corvey 2, 37671 Höxter",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radler-Café direkt am Weser-Radweg mit Corveyer Gourmetbrot und E-Bike-Fahrradscheune",
+    "sourceUrl": "https://www.corvey.de",
+    "query": "Radlercafé Weserbergland Corvey Höxter"
+  },
+  {
+    "name": "Südsee-Camp E-Bike Servicepoint",
+    "category": "Hotel",
+    "region": "Wietzendorf / Lüneburger Heide",
+    "address": "Südsee-Camp 1, 29649 Wietzendorf",
+    "coordinates": "zu verifizieren",
+    "specialty": "Campingresort mit SB-Reparaturstation, Werkzeug, Luftpumpe und Lademöglichkeiten",
+    "sourceUrl": "https://www.suedsee-camp.de",
+    "query": "Campingplatz E-Bike Ladeschrank Lüneburger Heide Wietzendorf"
+  },
+  {
+    "name": "Schutzhütte Roggenberg Panoramaweg",
+    "category": "Rastplatz",
+    "region": "Liebliches Taubertal / Baden-Württemberg",
+    "address": "Roggenberg, 97922 Lauda-Königshofen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wetterfeste Schutzhütte mit Panoramablick über das Taubertal für Radreisende",
+    "sourceUrl": "https://www.wanderbares-deutschland.de",
+    "query": "Schutzhütte Rastplatz Panoramaweg Taubertal"
+  },
+  {
+    "name": "ADFC Selbsthilfewerkstatt Regensburg",
+    "category": "Werkstatt",
+    "region": "Regensburg / Bayern",
+    "address": "Weinweg 6, 93055 Regensburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ehrenamtlich betreute Selbsthilfe-Werkstatt mit Werkzeugkoffern und Zentrierständer",
+    "sourceUrl": "https://regensburg.adfc.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Regensburg"
+  },
+  {
+    "name": "Haus Oveney Biergarten & Radlerstopp",
+    "category": "Imbiss",
+    "region": "Bochum / RuhrtalRadweg",
+    "address": "Oveneystraße 65, 44797 Bochum",
+    "coordinates": "zu verifizieren",
+    "specialty": "Klassischer Radlertreffpunkt direkt am Kemnader See / Ruhrtalradweg mit großem Biergarten",
+    "sourceUrl": "https://www.ruhrtalradweg.de",
+    "query": "Radler Imbiss Ruhrtalradweg Kemnade"
+  },
+  {
+    "name": "E-Bike Ladestation Donauursprung",
+    "category": "Ladesäule",
+    "region": "Donaueschingen / Schwarzwald",
+    "address": "Schlosspark / Donauquelle, 78166 Donaueschingen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kostenfreie E-Bike-Ladesäule direkt am Beginn des Donauradwegs",
+    "sourceUrl": "https://www.schwarzwald-tourismus.info",
+    "query": "Fahrrad Reparaturstation Donaueschingen Donauursprung"
+  },
+  {
+    "name": "Der Radladen Schlauchomat Gangolfsweg",
+    "category": "Werkstatt",
+    "region": "Bamberg / Franken",
+    "address": "Gangolfsweg 2a, 96050 Bamberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 Schwalbe-Schlauchautomat nahe des Hainparks und Regnitz-Radwegs",
+    "sourceUrl": "https://reparadius.de",
+    "query": "Schlauchautomat Fahrrad Bamberg Hain"
+  },
+  {
+    "name": "Gasthof Zum Hollerstein Bike Lodge",
+    "category": "Hotel",
+    "region": "Pappenheim-Zimmern / Altmühltal",
+    "address": "Hollersteinstraße 1, 91788 Pappenheim",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bett+Bike-Gasthof direkt an der Altmühl mit Radlergarage, Trockenraum und E-Bike-Ladung",
+    "sourceUrl": "https://www.jurahoehe.de",
+    "query": "Bike Hotel Altmühltal Pappenheim"
+  },
+  {
+    "name": "Rastplatz Elbdeich Wörlitz-Wittenberg",
+    "category": "Rastplatz",
+    "region": "Lutherstadt Wittenberg / Sachsen-Anhalt",
+    "address": "Elbdeich Coswig-Wittenberg, 06886 Lutherstadt Wittenberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Überdachte Schutzhütte im Biosphärenreservat Mittelelbe mit Weitblick über die Auen",
+    "sourceUrl": "https://www.lutherstadt-wittenberg.de",
+    "query": "Radler Rastplatz Elberadweg Lutherstadt Wittenberg"
+  },
+  {
+    "name": "Aussichtsturm Mützenich Hohes Venn",
+    "category": "Hotspot",
+    "region": "Monschau-Mützenich / Eifel",
+    "address": "Im Venn, 52156 Monschau",
+    "coordinates": "zu verifizieren",
+    "specialty": "8,5m Holzaussichtsturm mit Rastplatz und Baumtelefon nahe dem Vennbahn-Radweg",
+    "sourceUrl": "https://www.der-eifelyeti.de",
+    "query": "Aussichtsturm Rastplatz Radweg Eifel Hohes Venn"
+  },
+  {
+    "name": "Seetelhotel Pommerscher Hof Ladestation",
+    "category": "Ladesäule",
+    "region": "Heringsdorf / Usedom",
+    "address": "Seestraße 41, 17424 Seebad Heringsdorf",
+    "coordinates": "zu verifizieren",
+    "specialty": "Pedelec-Power-Ladepunkt direkt an der Strandpromenade für Radurlauber",
+    "sourceUrl": "https://www.pedelec-power-usedom.de",
+    "query": "E-Bike Ladestation Usedom Heringsdorf Promenade"
+  },
+  {
+    "name": "ADFC Selbsthilfewerkstatt Saarbrücken",
+    "category": "Werkstatt",
+    "region": "Saarbrücken / Saarland",
+    "address": "Kronenstraße 1B, 66111 Saarbrücken",
+    "coordinates": "zu verifizieren",
+    "specialty": "Werkstatt mit Werkzeugverleih im Haus der Umwelt, 5 Min vom Saar-Radweg / Staden",
+    "sourceUrl": "https://www.saarbruecken.de",
+    "query": "Fahrrad Reparaturstation Saarbrücken Staden"
+  },
+  {
+    "name": "Weser-Imbiss Reileifzen",
+    "category": "Imbiss",
+    "region": "Reileifzen / Weserbergland",
+    "address": "Fährstraße 1, 37639 Bevern-Reileifzen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Legendäre Radler-Kultbude direkt am Weser-Radweg mit Flussblick und Erfrischungen",
+    "sourceUrl": "https://www.weser-imbiss.de",
+    "query": "Radler Imbiss Weser-Radweg Stolzenau"
+  },
+  {
+    "name": "Elberadweg-Station Hitzacker Ladepünktchen",
+    "category": "Ladesäule",
+    "region": "Hitzacker (Elbe) / Wendland",
+    "address": "Am Markt 7 / Elbpromenade, 29456 Hitzacker (Elbe)",
+    "coordinates": "zu verifizieren",
+    "specialty": "Offizielles Wendland-Ladepünktchen mit Fahrradboxen direkt an der Elbe",
+    "sourceUrl": "https://www.wendlandmobil.de",
+    "query": "E-Bike Ladestation Wendland Hitzacker Elbe"
+  },
+  {
+    "name": "Waldhotel Mellestollen Bett+Bike",
+    "category": "Hotel",
+    "region": "Saalfeld / Thüringer Schiefergebirge",
+    "address": "Wittmannsgereuther Str. 50, 07318 Saalfeld",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bett+Bike-Hotel mitten im Wald mit E-Bike-Ladeinfrastruktur und Saaleradweg-Anbindung",
+    "sourceUrl": "https://www.bettundbike.de",
+    "query": "Bike Hotel Thüringer Schiefergebirge Saalfeld"
+  },
+  {
+    "name": "Aussichtsturm Zabelstein Lingmann-Haus",
+    "category": "Hotspot",
+    "region": "Steigerwald / Franken",
+    "address": "Zabelstein, 97514 Michelau im Steigerwald",
+    "coordinates": "zu verifizieren",
+    "specialty": "19,5m Holzturm mit 360-Grad-Blick, Pavillon-Kiosk und Radler-Rastplatz auf 483m Höhe",
+    "sourceUrl": "https://www.hassberge-tourismus.de",
+    "query": "Aussichtsturm Rastplatz Radweg Steigerwald Zabelstein"
+  },
+  {
+    "name": "Fahrradselbsthilfe Hansa48",
+    "category": "Werkstatt",
+    "region": "Kiel / Schleswig-Holstein",
+    "address": "Hansastraße 48, 24118 Kiel",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kult-Selbsthilfewerkstatt mit Ersatzteilfundus und Schrauberanleitung",
+    "sourceUrl": "https://www.hansa48.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Kiel Gaarden"
+  },
+  {
+    "name": "Das Radhaus Harzmobil Torfhaus",
+    "category": "Ladesäule",
+    "region": "Torfhaus / Harz / Niedersachsen",
+    "address": "Torfhaus 2, 38667 Torfhaus",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-MTB-Servicestation am Hochharz-Plateau (800m ü. NN) mit E-Bike-Support",
+    "sourceUrl": "https://www.ebike-harz.info",
+    "query": "E-Bike Ladestation Harz Torfhaus Nationalpark"
+  },
+  {
+    "name": "Restaurant Bootshaus Donauradweg",
+    "category": "Imbiss",
+    "region": "Neuburg an der Donau / Bayern",
+    "address": "Oskar-Wittmann-Straße 5, 86633 Neuburg an der Donau",
+    "coordinates": "zu verifizieren",
+    "specialty": "Biergarten direkt am Donauradweg mit Blick auf das Schloss und sicheren Radstellplätzen",
+    "sourceUrl": "https://www.bootshaus-neuburg.de",
+    "query": "Radlercafé Donauradweg Neuburg Donau"
+  },
+  {
+    "name": "Biergarten Sundische Wiese",
+    "category": "Imbiss",
+    "region": "Zingst / Fischland-Darß-Zingst",
+    "address": "Landstraße 32, 18374 Zingst",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradstation mit E-Bike-Ladestation, Grill und Fischbrötchen auf dem Deichradweg nach Pramort",
+    "sourceUrl": "https://www.zingst.de",
+    "query": "Radler Imbiss Ostseeküsten-Radweg Zingst Darß"
+  },
+  {
+    "name": "Möhnesee Staumauer moBILET Ladeboxen",
+    "category": "Ladesäule",
+    "region": "Möhnesee / Sauerland",
+    "address": "Möhnestraße 10, 59519 Möhnesee",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradboxen mit integrierter Ladestation direkt am Hauptparkplatz der historischen Sperrmauer",
+    "sourceUrl": "https://www.moehnesee.de",
+    "query": "E-Bike Ladestation Sauerland Möhnesee Staumauer"
+  },
+  {
+    "name": "Kurpark-Hotel Bad Dürkheim Bett+Bike",
+    "category": "Hotel",
+    "region": "Bad Dürkheim / Pfalz",
+    "address": "Schloßplatz 1-4, 67098 Bad Dürkheim",
+    "coordinates": "zu verifizieren",
+    "specialty": "Zertifiziertes Bett+Bike-Hotel mit abschließbarem Fahrradkeller und E-Bike-Ladestationen an der Weinstraße",
+    "sourceUrl": "https://www.kurpark-hotel.de",
+    "query": "Bike Hotel Pfalz Bad Dürkheim Weinstraße"
+  },
+  {
+    "name": "Öffentliche Reparaturstation Bahnhof Fulda",
+    "category": "Werkstatt",
+    "region": "Fulda / Rhön-Vorland",
+    "address": "Bahnhofsvorplatz, 36037 Fulda",
+    "coordinates": "zu verifizieren",
+    "specialty": "Frei zugängliche städtische Reparaturstation mit Reifenpumpe und Multitool am Fuldaradweg R1",
+    "sourceUrl": "https://www.tourismus-fulda.de",
+    "query": "Schlauchautomat Fahrrad Fulda Domplatz"
+  },
+  {
+    "name": "Dorfladen Hopfen am See 24/7 Ladefächer",
+    "category": "Ladesäule",
+    "region": "Füssen-Hopfen am See / Allgäu",
+    "address": "Uferstraße 21a, 87629 Füssen-Hopfen am See",
+    "coordinates": "zu verifizieren",
+    "specialty": "24/7 kostenlose Schließfach-Ladestation für E-Bikes auf dem Vorplatz direkt an der Seepromenade",
+    "sourceUrl": "https://www.fuessen.de",
+    "query": "E-Bike Ladestation Allgäu Forggensee Füssen"
+  },
+  {
+    "name": "Werkhaus Potsdam Offene Fahrradwerkstatt",
+    "category": "Werkstatt",
+    "region": "Potsdam-Babelsberg / Brandenburg",
+    "address": "Rudolf-Breitscheid-Straße 164, 14482 Potsdam",
+    "coordinates": "zu verifizieren",
+    "specialty": "Selbsthilfe-Werkstatt mit Werkzeug und Reparaturkursen im Projekthaus Babelsberg",
+    "sourceUrl": "https://www.inwole.de",
+    "query": "Fahrrad Selbsthilfewerkstatt Potsdam Babelsberg"
+  },
+  {
+    "name": "Radlercafé Ferienhof Zander Bälow",
+    "category": "Imbiss",
+    "region": "Rühstädt-Bälow / Elbe-Havel / Prignitz",
+    "address": "Bälower Dorfstraße 11, 19322 Rühstädt OT Bälow",
+    "coordinates": "zu verifizieren",
+    "specialty": "Traditionelles Radlercafé auf dem Bauernhof direkt am Elberadweg mit Deichterrasse und Kuchen",
+    "sourceUrl": "https://www.dieprignitz.de",
+    "query": "Radlercafé Altmark Havelberg Elb-Havel-Winkel"
+  },
+  {
+    "name": "Rastplatz Bahnhof Kalteneck Ilztal",
+    "category": "Rastplatz",
+    "region": "Hutthurm-Kalteneck / Bayerischer Wald",
+    "address": "Bahnhof Kalteneck, 94107 Hutthurm",
+    "coordinates": "zu verifizieren",
+    "specialty": "Überdachte Holz-Schutzhütte am Endpunkt des Donau-Ilz-Radwegs direkt an der wilden Ilz",
+    "sourceUrl": "https://www.ostbayern-tourismus.de",
+    "query": "Schutzhütte Rastplatz Radweg Bayerischer Wald Ilztal"
+  },
+  {
+    "name": "E-Bike-Ladestation in Neustadt wieder in Betrieb - Gemeinde",
+    "category": "Ladesäule",
+    "region": "Harz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Die beliebte E-Bike-Ladestation im Herzen von Neustadt/Harz ist ab sofort wieder nutzbar. In unmittelbarer Nähe des bekannten Rolands gelegen, bietet die Station Platz für vier Fahrräder.",
+    "sourceUrl": "https://www.harztor.de/2024/09/08/e-bike-ladestation-in-neustadt-wieder-in-betrieb/",
+    "query": "E-Bike Ladestation Harz Schließfach"
+  },
+  {
+    "name": "Ladestationen",
+    "category": "Ladesäule",
+    "region": "Harz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "In der Ortschaft Neustadt/Harz gibt es zudem eine E-Bike-Ladestation für bis zu vier Fahrradakkus. Diese Station wird von der Gemeinde Harztor betrieben.",
+    "sourceUrl": "https://www.harztor.de/ladestationen/",
+    "query": "E-Bike Ladestation Harz Schließfach"
+  },
+  {
+    "name": "Schlauch",
+    "category": "Werkstatt",
+    "region": "Harz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Hier können sich pannengeplagte Radler jederzeit einfach einen neuen Schlauch samt Ventil „ziehen\". Übrigens: Die benötigte Größe lässt sich an der Seitenwand des Reifens ablesen. Die meisten „Schl...",
+    "sourceUrl": "https://www.radfahren.de/service/schlauch-o-mat-continental/",
+    "query": "Schlauchautomat Fahrrad Harz"
+  },
+  {
+    "name": "Eldorado",
+    "category": "Werkstatt",
+    "region": "Harz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bei Online-Käufen ist auch eine Zahlung per Vorabüberweisung oder PayPal möglich. Ein besonderes Highlight bei Eldorado ist der Schwalbe Schlauchautomat. Mit ...",
+    "sourceUrl": "https://www.suedniedersachsen.de/branchenbuch/268408",
+    "query": "Schlauchautomat Fahrrad Harz"
+  },
+  {
+    "name": "E-Bike-Ladestelle | Rad-/Wander-Rastplatz Kurpark Bad Salzsc",
+    "category": "Ladesäule",
+    "region": "Rhön",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-Bike-Ladestation · Rhön. E-Bike-Ladestelle | Rad-/Wander-Rastplatz Kurpark Bad Salzschlirf. (Noch) keine Bewertungen. In App öffnen. Teilen Merken. My Map",
+    "sourceUrl": "https://www.outdooractive.com/de/poi/roehn/e-bike-ladestelle-rad-wander-rastplatz-kurpark-bad-salzschlirf/805260278/",
+    "query": "E-Bike Ladestation Rhön Rastplatz"
+  },
+  {
+    "name": "Biosphärenzentrum Rhön \"Haus der Schwarzen Berge\"",
+    "category": "Ladesäule",
+    "region": "Rhön",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Am Biosphärenzentrum Rhön \"Haus der Schwarzen Berge\" gibt es im Eingangsbereich eine kostenlose Ladestation für E-Bikes, Kabel gibt entsprechend zum Ausleihen, ...",
+    "sourceUrl": "https://www.biosphaerenreservat-rhoen.de/wissen/biosphaeren-informationszentren/biosphaerenzentrum-rhoen-haus-der-schwarzen-berge",
+    "query": "E-Bike Ladestation Rhön Rastplatz"
+  },
+  {
+    "name": "Radschlag Leipzig",
+    "category": "Werkstatt",
+    "region": "Leipzig / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Menschen, die unsere Dienstleistungen in Anspruch nahmen und ihre Erfahrungen teilen. Danke für das Vetrauen und Hilfe! Ich kann mir vorstellen, dass wir im Zuge unseres Umzugs gerne nochmal auf di...",
+    "sourceUrl": "https://radschlag-leipzig.de/",
+    "query": "Fahrrad Selbsthilfewerkstatt Leipzig"
+  },
+  {
+    "name": "Die Radgeber",
+    "category": "Werkstatt",
+    "region": "Leipzig / Sachsen",
+    "address": "Emilienstraße 17, 04107 Leipzig",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ihr findet uns ab sofort in der Emilienstraße 17, 04107 Leipzig. Wir freuen uns auf euren Besuch! Hier finden sich Links zu befreundeten Geschäften oder Firmen, die wir gut finden.",
+    "sourceUrl": "https://radgeber-leipzig.de/",
+    "query": "Fahrrad Selbsthilfewerkstatt Leipzig"
+  },
+  {
+    "name": "E-Bike Ladestation am Haus des Gastes - Naturpark Altmühltal",
+    "category": "Ladesäule",
+    "region": "Altmühltal / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Am Haus des Gastes gibt es speziell für alle Radfahrer eine E-Bike Ladestation. Das Laden der E-Bikes ist kostenlos und für jeden frei zugänglich.",
+    "sourceUrl": "https://www.naturpark-altmuehltal.de/verkehr/e-bike_ladestation_am_haus_des-17960/",
+    "query": "E-Bike Ladestation Altmühltal Gasthof"
+  },
+  {
+    "name": "E-Bike Ladestation | Gasthof \"Zum Blauen Hecht\" - Grösdorf",
+    "category": "Ladesäule",
+    "region": "Altmühltal / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-Bike Ladestation | Gasthof \"Zum Blauen Hecht\" - Grösdorf ... Mit seiner zentralen Lage im Naturpark Altmühltal ist unser Gasthof ein idealer Ausgangspunkt für ...",
+    "sourceUrl": "https://www.kipfenberg.de/verkehr/e-bike_ladestation_gasthof_zum-9212/",
+    "query": "E-Bike Ladestation Altmühltal Gasthof"
+  },
+  {
+    "name": "Die schönsten Radwege in Deutschland",
+    "category": "Werkstatt",
+    "region": "Schwarzwald / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Auf dem „Panorama-Radweg Wasserquintett“ radeln Sie steigungsarm durch Tunnel und über Viadukte. Die Landschaft hier ist geprägt von saftigen Wiesen, markanten ...",
+    "sourceUrl": "https://schöne-aussicht.de/radwege/",
+    "query": "Schlauchautomat Schwarzwald Panoramaradweg"
+  },
+  {
+    "name": "Bürger gestalten zukunftsfähige Mobilität im Eifelkreis",
+    "category": "Ladesäule",
+    "region": "Eifel / Rheinland-Pfalz / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "21.03.2025 ... Dies können Parkplätze, Ladestationen, Fahrradstellplätze und Bushaltestellen sein, die um Schließfächer, Paketstationen etc. ... E-Mail: ...",
+    "sourceUrl": "https://www.eifelkreis-verbindet.de/einladung-buergerworkshop-mobilitaet-eifelkreis/",
+    "query": "E-Bike Ladestation Eifel Schließfächer"
+  },
+  {
+    "name": "SauerlandRadring mit Hennesee Schleife",
+    "category": "Werkstatt",
+    "region": "Sauerland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "03.06.2024 ... Der SauerlandRadring ist ein echtes Radfahrer-Highlight: Auf einer 84 Kilometer langen Runde verbindet er Städte wie Finnentrop, Eslohe, ...",
+    "sourceUrl": "https://www.komoot.com/de-de/smarttour/e62260893/sauerlandradring-mit-hennesee-schleife",
+    "query": "Fahrrad Reparaturstation Sauerland Radring"
+  },
+  {
+    "name": "Radurlaub im Sauerland",
+    "category": "Werkstatt",
+    "region": "Sauerland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Die Hennesee Umrundung · Der Ruhr-Sieg-Radweg · Der RuhrtalRadweg · Sauerland Radring: Hennesee Schleife · Tagestouren rund um unser Hotel.",
+    "sourceUrl": "https://www.welcome-hotels.com/hotels/meschede/freizeit/fahrradurlaub/",
+    "query": "Fahrrad Reparaturstation Sauerland Radring"
+  },
+  {
+    "name": "Fotostrecke unserer Ladestationen",
+    "category": "Ladesäule",
+    "region": "Mecklenburgische Seenplatte",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "24.03.2021 ... Hier finden Sie eine bildliche Auswahl einiger unserer 4-fach E-Bike Ladestationen.",
+    "sourceUrl": "https://radfahrland-mv.de/partner/fotostrecke-unserer-ladestationen/",
+    "query": "E-Bike Ladestation Mecklenburger Seenplatte Camping"
+  },
+  {
+    "name": "Mit E",
+    "category": "Ladesäule",
+    "region": "Mecklenburgische Seenplatte",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-Bike-Pausen in der Seenplatte – auf dem Steg, vor der Fischerhütte oder im Schloss-Café ... Deshalb ist die nächste Pause auch erst nach weiteren 23 Kilometern ...",
+    "sourceUrl": "https://www.auf-nach-mv.de/magazin/elektro-bike-mecklenburgische-seenplatte",
+    "query": "E-Bike Ladestation Mecklenburger Seenplatte Camping"
+  },
+  {
+    "name": "Fahrradwerkstatt mit Schlauchautomat in Münster und Umgebung",
+    "category": "Werkstatt",
+    "region": "Münsterland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "1 Fahrradwerkstatt in Münster (Münster, Stadt) und 0 in Umgebung mit Schlauchautomat gefunden (von 7487) · Fahrradwerkstatt Suche - Schlauchautomat - Münster ( ...",
+    "sourceUrl": "https://reparadius.de/fahrradwerkstatt-suche/m%C3%BCnster-m%C3%BCnster-stadt/schlauchautomat",
+    "query": "Fahrrad Schlauchautomat Münsterland"
+  },
+  {
+    "name": "Fahrradschlauchautomat",
+    "category": "Werkstatt",
+    "region": "Münsterland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradschlauchautomat · Münsterland-Radler · Karl-Heinz · Dirk Schwennecker · Dennis K · Thomas Wicknig · AN JA · vogelfreier · Nitram.",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/5549635",
+    "query": "Fahrrad Schlauchautomat Münsterland"
+  },
+  {
+    "name": "Ladestationen für E",
+    "category": "Ladesäule",
+    "region": "Thüringer Wald",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ladestation für Ihren e-Bike-Akku. Ein Ladeschrank für E-Bikes mit drei abschließbaren Fächern und jeweils einer Steckdose (SchuKo-Steckdose, 230 Vole, 16 ...",
+    "sourceUrl": "https://www.tourenportal-thueringer-wald.de/de/poi/e-bike-ladestation/ladestationen-fuer-e-bikes-e-ladeschrank-/44773454/",
+    "query": "E-Bike Ladestation Thüringer Wald Rennsteig"
+  },
+  {
+    "name": "Rennsteighaus Masserberg",
+    "category": "Ladesäule",
+    "region": "Thüringer Wald",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Rennsteighaus Masserberg – Fahrradgarage & E-Bike-Ladestation ... An diesem Ort ist Radfahren verboten. ... Praktische Angelegenheit für alle welche ihr Rad hier ...",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/5758461",
+    "query": "E-Bike Ladestation Thüringer Wald Rennsteig"
+  },
+  {
+    "name": "E-Bike Verleih- & Ladestationen entlang des Bodensees",
+    "category": "Ladesäule",
+    "region": "Bodensee / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Die Vierländerregion Bodensee bietet jede Menge abwechslungsreiche Radtouren, die sich ausgezeichnet mit dem E-Bike befahren lassen. Dazu zählt auch der ...",
+    "sourceUrl": "https://www.bodensee.eu/de/was-erleben/aktiv/radfahren/e-bike-service",
+    "query": "E-Bike Ladestation Bodensee Radweg kostenfrei"
+  },
+  {
+    "name": "E-Bike Ladestationen - Nördlicher Bodensee",
+    "category": "Ladesäule",
+    "region": "Bodensee / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Nutzen Sie das relativ dichte Netzwerk an Akkuladestationen und genießen Ihre kurze oder auch längere Radtour ganz unbeschwert. Sie finden hier neben ...",
+    "sourceUrl": "https://www.noerdlicher-bodensee.de/aktiv/radfahren/e-bike-ladestationen",
+    "query": "E-Bike Ladestation Bodensee Radweg kostenfrei"
+  },
+  {
+    "name": "Fahrradverleih an der Mosel",
+    "category": "Werkstatt",
+    "region": "Mosel / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wo finde ich Reparaturstationen für mein Fahrrad? · Fahrradfachgeschäft Fun Bike Team GmbH · Fahrrad Reparaturstation am Gestade · Fahrrad Reparaturstation am ...",
+    "sourceUrl": "https://www.bernkastel.de/radfahren/fahrradservice",
+    "query": "Fahrrad Reparaturstation Moselradweg"
+  },
+  {
+    "name": "Fahrrad Reparaturstation am Gestade",
+    "category": "Werkstatt",
+    "region": "Mosel / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrrad Reparaturstation am Gestade in Bernkastel-Kues. Fahrrad Reperaturstation am Gestade in Bernkastel-Kues. +−.",
+    "sourceUrl": "https://www.piesport.de/poi/fahrrad-reparaturstation-am-gestade/poi.html",
+    "query": "Fahrrad Reparaturstation Moselradweg"
+  },
+  {
+    "name": "E-Bike-Ladestation Totenkopfhütte - Pfalz.de",
+    "category": "Ladesäule",
+    "region": "Pfälzerwald / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "An E-Bike-Ladestation der Totenkopfhütte können drei E-Bikes gleichzeitig mit Strom versorgt werden. Die Station ist an der Außenseite der Hütte ...",
+    "sourceUrl": "https://www.pfalz.de/de/sehenswuerdigkeit/e-bike-ladestation-totenkopfhuette",
+    "query": "E-Bike Ladestation Pfälzerwald Hütte"
+  },
+  {
+    "name": "E-bike Ladestationen nach Radwegen - Pfälzerwald Tourismus",
+    "category": "Ladesäule",
+    "region": "Pfälzerwald / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Hier finden sie E-bike Ladestationen gelistet nach Radwegen. Einrichtungen, Geschäfte und Einkehrmöglichkeiten, bei denen sie für die Dauer Ihres ...",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "E-Bike Ladestation Pfälzerwald Hütte"
+  },
+  {
+    "name": "Fahrradselbsthilfewerkstätten",
+    "category": "Werkstatt",
+    "region": "Dresden / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradselbsthilfewerkstätten · Fahrradwerkstatt - Selbsthilfewerkstatt in Dresden-Nickern · Werkstatt Prohlis · Fahrradselbsthilfewerkstatt Radschlag · Der ...",
+    "sourceUrl": "https://adfc-dresden.de/fahrradselbsthilfewerkstaetten/",
+    "query": "Fahrrad Selbsthilfewerkstatt Dresden"
+  },
+  {
+    "name": "Fahrradselbsthilfewerkstatt Radschlag Dresden",
+    "category": "Werkstatt",
+    "region": "Dresden / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrrad. Unser Name „Fahrradselbsthilfewerkstatt RADSCHLAG“ ist, hoffen wir, selbsterklärend. Jede und jeder kann mit jeder Art Fahrrad zu uns kommen und es ...",
+    "sourceUrl": "https://www.radschlag-dresden.de/",
+    "query": "Fahrrad Selbsthilfewerkstatt Dresden"
+  },
+  {
+    "name": "E-Bike Ladestation, Hoya - Der Weser-Radweg",
+    "category": "Ladesäule",
+    "region": "Weserbergland / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-Bike Ladestation am Rathaus SG Grafschaft Hoya. ... E-Bike-Ladestation · Mittelweser · 18 m. E-Bike Ladestation, Hoya. (Noch) keine ...",
+    "sourceUrl": "https://www.weserradweg-info.de/de/poi/e-bike-ladestation/e-bike-ladestation-hoya/53069381/",
+    "query": "E-Bike Ladestation Weser-Radweg Rathaus"
+  },
+  {
+    "name": "E-Bike-Ladestationen am Weser-Radweg | Outdooractive",
+    "category": "Ladesäule",
+    "region": "Weserbergland / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Auf dem. Link ist der genaue Standort sowie ein Hinweis zu den Öffnungszeiten hinterlegt. Ort. E-Bike Ladestation. Etappe 1: Hann. Münden bis Höxter – ca. 71 km.",
+    "sourceUrl": "https://www.outdooractive.com/en/media/uebersicht-e-bike-ladestationen-am-weser-radweg/626755780/download",
+    "query": "E-Bike Ladestation Weser-Radweg Rathaus"
+  },
+  {
+    "name": "DE:Germany/Schlauchomaten - OpenStreetMap Wiki",
+    "category": "Werkstatt",
+    "region": "Fränkische Schweiz / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "11.11.2023 ... Kein Schlauchautomat. Browse map, 48428, Fahrrad Grebe, Benrather ... Fahrrad-Franken, Inh. Wolfgang Müller, Hafenstr. 3, 97340, Marktbreit, DE ...",
+    "sourceUrl": "https://wiki.openstreetmap.org/wiki/DE:Germany/Schlauchomaten",
+    "query": "Schlauchautomat Fahrrad Fränkische Schweiz"
+  },
+  {
+    "name": "Fahrradschlauch",
+    "category": "Werkstatt",
+    "region": "Fränkische Schweiz / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": ", Sächsische Schweiz-Osterzgebirge, Sachsen, Deutschland. Meld dich an, um ... Fahrrad. Falls mal die Luft komplett raus ist ;-) Weiter so, Zigaretten ...",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/967658",
+    "query": "Schlauchautomat Fahrrad Fränkische Schweiz"
+  },
+  {
+    "name": "Radtankstelle in Seebruck",
+    "category": "Ladesäule",
+    "region": "Chiemgau / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "... Schließfächer – ideal für ... Rote Fahrrad-Ladestation mit weißem Fahrradpiktogramm und Texten zu Chiemsee-Rundweg und Chiemsee-. 1 / 3. E-Bike Ladestation.",
+    "sourceUrl": "https://www.chiemsee-alpenland.de/entdecken/alle-sehenswuerdigkeiten/radtankstelle-in-seebruck-b8ea73bcdc",
+    "query": "E-Bike Ladestation Chiemsee Schließfächer"
+  },
+  {
+    "name": "Radtankstelle in Seebruck • E",
+    "category": "Ladesäule",
+    "region": "Chiemgau / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "An der Ladestation bei der Taverne Seebruck gibt es sichere Schließfächer – ideal für Wertgegenstände während des Ladevorgangs und eine entspannte Pause.",
+    "sourceUrl": "https://regio.outdooractive.com/oar-chiemsee-alpenland/de/punkt/e-bike-ladestation/radtankstelle-in-seebruck/11099858/",
+    "query": "E-Bike Ladestation Chiemsee Schließfächer"
+  },
+  {
+    "name": "RadSERVICE",
+    "category": "Werkstatt",
+    "region": "Allgäu / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Oberschwaben-Allgäu-Radweg · Donau-Bodensee-Radweg · RadReiseRegion ... Hier finden Sie eine Reparaturstation für Fahrräder, die eine Luftpumpe und alle ...",
+    "sourceUrl": "https://www.oberschwaben-tourismus.de/attraktionen/radservice-punkt-ccd8df0536",
+    "query": "Fahrrad Reparaturstation Allgäu Radweg"
+  },
+  {
+    "name": "Service rund ums Rad",
+    "category": "Werkstatt",
+    "region": "Allgäu / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Naturerlebniszentrum Allgäu. Reparaturen. Reparaturmöglichkeiten. Reparaturstation Grüntenstraße, Nähe Spitalplatz (Fußgängerzone); Schlauchautomat bei Radsport ...",
+    "sourceUrl": "https://www.stadt-sonthofen.de/radstadt/service-rund-ums-rad/",
+    "query": "Fahrrad Reparaturstation Allgäu Radweg"
+  },
+  {
+    "name": "E-Bike Ladestationen - Radfahrland-MV.de",
+    "category": "Ladesäule",
+    "region": "Rügen / Mecklenburg-Vorpommern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "24.08.2022 ... Unser Ziel ist es, zusammen mit anderen Partnern an den bekanntesten Radwegen und Radtouren in MV im Abstand von 10 bis 20 km den Radlern die ...",
+    "sourceUrl": "https://radfahrland-mv.de/services/e-bike-ladestationen/",
+    "query": "E-Bike Ladestation Rügen Ostseeküsten-Radweg"
+  },
+  {
+    "name": "Tipps für den Ostseeradweg",
+    "category": "Ladesäule",
+    "region": "Rügen / Mecklenburg-Vorpommern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "03.01.2025 ... Mittlerweile gibt es viele Restaurants und Hotels entlang des Weges, die Ladestationen für Pedelec-Fahrer anbieten. Bezüglich Mecklenburg- ...",
+    "sourceUrl": "https://www.cagobike.com/de/magazin/ostseeradweg",
+    "query": "E-Bike Ladestation Rügen Ostseeküsten-Radweg"
+  },
+  {
+    "name": "Verleih, Service & Ladestationen",
+    "category": "Ladesäule",
+    "region": "Erzgebirge / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-Bike Ladestationen im Erzgebirge · E-Bike Ladestation am Erlebnisberg… · Fahrrad- und Gepäckbox · Walderlebnisdorf Blockhausen · Berggaststätte \" ...",
+    "sourceUrl": "https://www.erzgebirge-tourismus.de/radfahren/verleih-service",
+    "query": "E-Bike Ladestation Erzgebirge Kammweg"
+  },
+  {
+    "name": "E-Bike-Ladestationen im Erzgebirge - Outdooractive",
+    "category": "Ladesäule",
+    "region": "Erzgebirge / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "22.08.2026 ... E-Bike-Ladestationen im Erzgebirge ... Station befindet sich im Außengelände direkt am Haus gegenüber vom Parkplatz. Eigenes Ladegerät ist ... von ...",
+    "sourceUrl": "https://regio.outdooractive.com/oar-erzgebirge/de/liste/e-bike-ladestationen-im-erzgebirge/213504056/",
+    "query": "E-Bike Ladestation Erzgebirge Kammweg"
+  },
+  {
+    "name": "6 Fahrradwerkstätten in Lüneburg und Umgebung",
+    "category": "Werkstatt",
+    "region": "Lüneburger Heide / Niedersachsen",
+    "address": "21335 Lüneburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Martin's Fahrradladen. 1 Bew. 21335 Lüneburg, Niedersachsen, Deutschland. Reparaturzeit / Wartezeit.",
+    "sourceUrl": "https://reparadius.de/fahrradwerkstatt-suche/l%C3%BCneburg",
+    "query": "Fahrrad Schlauchautomat Lüneburger Heide"
+  },
+  {
+    "name": "HeidekreisTour Etappe 02",
+    "category": "Werkstatt",
+    "region": "Lüneburger Heide / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radverleih und Reparatur Fahrradhaus Sandau / Fahrradhaus Drewes, Schlauchautomaten bei Fahrradhaus Sandau und an der Schafstallkirche. Streckenverlauf. 3 km.",
+    "sourceUrl": "https://www.lueneburger-heide.de/natur/touren/0100297204/heidekreistour-etappe-02-bispingen-munster.html",
+    "query": "Fahrrad Schlauchautomat Lüneburger Heide"
+  },
+  {
+    "name": "Regional Main",
+    "category": "Ladesäule",
+    "region": "Taunus / Hessen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Eine erste öffentliche E-Bike-Ladestation hat die Eppsteiner Stadtverwaltung am Gottfriedplatz in Betrieb genommen, einem beliebten Haltepunkt für ...",
+    "sourceUrl": "https://www.adfc-frankfurt.de/frankfurt-aktuell/ausgaben/2022-06/regional-main-taunus-kreis-eppstein-oeffentliche-ladestation/",
+    "query": "E-Bike Ladestation Taunus Radweg"
+  },
+  {
+    "name": "E-Bikeroute - Taunus.info",
+    "category": "Ladesäule",
+    "region": "Taunus / Hessen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "In der Wehrheimer Mitte (am Cafe Klatsch) und vor dem REWE gibt es E-Bike Ladestationen. Radreparaturen führt CL Bike Kultur, Am Ried 7, aus. Kleine ...",
+    "sourceUrl": "https://www.taunus.info/tour/e-bikeroute",
+    "query": "E-Bike Ladestation Taunus Radweg"
+  },
+  {
+    "name": "Fahrradservice & Radwerkstätten",
+    "category": "Werkstatt",
+    "region": "Hunsrück / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradladen- und reparaturwerkstatt - ca. 200 m vom Ruwer-Hochwald-Radweg entfernt. Kell am See. pois/fahrradwerkstatt ...",
+    "sourceUrl": "https://www.hunsruecknahe.de/fahrradservice-radwerkstaetten",
+    "query": "Fahrrad Reparaturstation Hunsrück Radweg"
+  },
+  {
+    "name": "Fahrrad",
+    "category": "Werkstatt",
+    "region": "Hunsrück / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Als besondere Dienstleistung für Radfahrer bietet die Stadt Oberwesel eine Fahrrad-Reparaturstation an. Ganz zentral neben dem Rathaus in Oberwesel und in ...",
+    "sourceUrl": "https://www.romantischer-rhein.de/a-fahrrad-reparaturstation-mit-schlauchautomat",
+    "query": "Fahrrad Reparaturstation Hunsrück Radweg"
+  },
+  {
+    "name": "E-Bike Ladestationen - TMU - Tourismus Uckermark",
+    "category": "Ladesäule",
+    "region": "Uckermark / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "In der Uckermark können Radreisende mit dem E-Bike aktuell an ca. 30 Standorten, teilweise kostenlos, den Akku für die Weiterreise aufladen.",
+    "sourceUrl": "https://www.tourismus-uckermark.de/erleben/radfahren/e-bikes/e-bike-ladestationen/",
+    "query": "E-Bike Ladestation Uckermark Radfernweg"
+  },
+  {
+    "name": "E-Bike - Ladestation Doritas Gartenbistro, Uckermark, Flieth",
+    "category": "Ladesäule",
+    "region": "Uckermark / Brandenburg",
+    "address": "Weg 13, 17268 Flieth-Stegelitz",
+    "coordinates": "zu verifizieren",
+    "specialty": "direkt am Radfernweg Berlin-Usedom gelegen. Aufladestation für E-Bikes ... Adresse. Steinhöfler Weg 13 17268 Flieth-Stegelitz. Dieser Anbieter liegt in der Region",
+    "sourceUrl": "https://www.reiseland-brandenburg.de/poi/uckermark/fahrradvermietung-strich-service/e-bike-ladestation-doritas-gartenbistro/",
+    "query": "E-Bike Ladestation Uckermark Radfernweg"
+  },
+  {
+    "name": "URLAUB IM SPREEWALD",
+    "category": "Imbiss",
+    "region": "Spreewald / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "www.spreewald-info.de. SCHLEPZIG kleine Perle im Unterspreewald. Radlerpause am. Gurkenradweg: Biker Duo und Velo Trio. Aus Zwei mach Eins! Biker und Velo gibt ...",
+    "sourceUrl": "https://www.spreewald-info.de/storage/media/pdf/spreewald-prospekt.pdf",
+    "query": "Radlerpause Imbiss Gurkenradweg Spreewald"
+  },
+  {
+    "name": "ausflugsplaner",
+    "category": "Imbiss",
+    "region": "Spreewald / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "18.04.2021 ... möglich, kleiner Imbiss. PRODUKTE Rindfleisch (küchen- fertig ... Spreewald. Hochwertige Rohstoffe von ausgesuchten Lieferanten und.",
+    "sourceUrl": "https://www.brandenburger-landpartie.de/wp-content/uploads/sites/2/2021/04/Ausflugsplaner_2021_Download.pdf",
+    "query": "Radlerpause Imbiss Gurkenradweg Spreewald"
+  },
+  {
+    "name": "Die besten Fahrrad",
+    "category": "Imbiss",
+    "region": "Elberadweg / Sachsen-Anhalt",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Seit 2015 gibt es in Hannover diese Anlaufstelle für alle Radfahrer. Und damit meinen ich wirklich alle! Das Fahrradcafé deckt das gesamte Spektrum ab.",
+    "sourceUrl": "https://www.komoot.com/de-de/collection/483/die-besten-fahrrad-cafes-deutschlands",
+    "query": "Fahrradcafé Elberadweg E-Bike Laden"
+  },
+  {
+    "name": "Café in Calau",
+    "category": "Imbiss",
+    "region": "Elberadweg / Sachsen-Anhalt",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "24.04.2024 ... Von der baufälligen Scheune zum urigen Ruhepol in der Calauer Schweiz: das Fahrradcafé „Zum Feldblick“ steht kurz vor der Eröffnung.",
+    "sourceUrl": "https://www.lr-online.de/lausitz/luebbenau/cafe-in-calau-alte-scheune-wird-zum-geheimtipp-fuer-radfahrer-73631913.html",
+    "query": "Fahrradcafé Elberadweg E-Bike Laden"
+  },
+  {
+    "name": "Radlerhof Aurith",
+    "category": "Imbiss",
+    "region": "Oder-Neiße-Radweg / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Dem Lärm der Stadt entfliehen! Willkommen auf unserem Fahrrad-Rastplatz. direkt am Oder-Neiße Radweg. Grenzpfahl am Oderdeich.",
+    "sourceUrl": "https://radlerhof-aurith.de/",
+    "query": "Radler Rast Imbiss Oder-Neiße-Radweg"
+  },
+  {
+    "name": "Die Gaststätte Neisseaue",
+    "category": "Imbiss",
+    "region": "Oder-Neiße-Radweg / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Direkt am Oder- Neisse- Radweg. der Kulturinsel Einsiedel und dem Flugplatz Rothenburg bieten wir Ihnen genussvolle Stunden in unserer Gaststätte und eine ...",
+    "sourceUrl": "https://www.gasthof-neisseaue.de/gaststaette/",
+    "query": "Radler Rast Imbiss Oder-Neiße-Radweg"
+  },
+  {
+    "name": "Fahrradladestationen",
+    "category": "Imbiss",
+    "region": "Altmühltal / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ein dichtes Netz an Akkuladestationen sorgt im Naturpark Altmühltal dafür, dass unterwegs mit dem E-Bike die Power nie ausgeht. Öffnungszeiten.",
+    "sourceUrl": "https://www.naturpark-altmuehltal.de/radfahren/ladestationen/",
+    "query": "Biergarten E-Bike Ladestation Altmühltal"
+  },
+  {
+    "name": "Radfahren im Naturpark Altmühltal Landhotel zur Jurahöhe",
+    "category": "Imbiss",
+    "region": "Altmühltal / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ob mit dem E-Bike oder Ihrem Fahrrad - auf den Radwegen im Altmühltal kommt jeder auf seine Kosten. Erfreuen Sie sich an der wunderbaren Landschaft und ...",
+    "sourceUrl": "https://www.jurahoehe.de/de/aktiv-im-altmuehltal/radfahren.html",
+    "query": "Biergarten E-Bike Ladestation Altmühltal"
+  },
+  {
+    "name": "E-Bike Ladestation am Regattaplatz Bad Saarow",
+    "category": "Imbiss",
+    "region": "Seenland Oder-Spree / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Direkt am Regattaplatz befindet sich eine E-Bike-Ladestation und während Sie eine kleine Pause am See genießen, können Sie ihr E-Bike ausfladen. Einklappen ...",
+    "sourceUrl": "https://www.seenland-oderspree.de/poi/e-bike-ladestation-am-regattaplatz-bad-saarow",
+    "query": "Eiscafé E-Bike Ladestation Seenland Oder-Spree"
+  },
+  {
+    "name": "E-Bike-Ladestation in der Touristinformation Fürstenwalde",
+    "category": "Imbiss",
+    "region": "Seenland Oder-Spree / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "An der Touristinformation Fürstenwalde steht eine E-Bike-Ladestation zur Verfügung. Ein zusätzlicher Außenanschluss kann während der Öffnungszeiten genutzt ...",
+    "sourceUrl": "https://www.scharmuetzelsee.de/poi/e-bike-ladestation-in-der-touristinformation-fuerstenwalde",
+    "query": "Eiscafé E-Bike Ladestation Seenland Oder-Spree"
+  },
+  {
+    "name": "Radfahren am Steinhuder Meer",
+    "category": "Imbiss",
+    "region": "Steinhuder Meer / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wo kann ich den Akku für mein E‑Bike aufladen?",
+    "sourceUrl": "https://www.steinhuder-meer.de/meer-erleben/aktiv-erleben/radfahren",
+    "query": "Ausflugslokal E-Bike Ladestation Steinhuder Meer"
+  },
+  {
+    "name": "E-Bike-Ladestation an der St.-Nicolai-Kirche Sachsenhagen -",
+    "category": "Imbiss",
+    "region": "Steinhuder Meer / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "An der Kirche in Sachsenhagen befindet sich eine kostenlose ebike Ladestation. Leider gibt es dort keine Sitzgelegenheit. guide_signup. Du kennst dich aus?",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/4346322",
+    "query": "Ausflugslokal E-Bike Ladestation Steinhuder Meer"
+  },
+  {
+    "name": "Kulinarische Tipps für den Donauradweg",
+    "category": "Imbiss",
+    "region": "Donau / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "26.03.2024 ... Die lange Geschichte der Wege entlang der Donau hinterließ zahlreiche kulinarische Spuren, von traditionellen Gasthöfen bei Fährstationen bis ...",
+    "sourceUrl": "https://www.gaultmillau.at/news/kulinarische-tipps-fuer-den-donauradweg",
+    "query": "Fahrrad Imbiss Donauradweg Passau"
+  },
+  {
+    "name": "Donauradweg Etappe 1 Südufer",
+    "category": "Imbiss",
+    "region": "Donau / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Direkt an der Anlegestelle befindet sich das Riverresort Donauschlinge, Ihr erstes Etappenziel am Donauradweg Passau - Wien. ... Die Fahrrad Reparatur befindet ...",
+    "sourceUrl": "https://www.donauregion.at/oesterreich-tour/detail/490000030/donauradweg-etappe-1-suedufer-passau-schloegen.html",
+    "query": "Fahrrad Imbiss Donauradweg Passau"
+  },
+  {
+    "name": "Fahrradtouren",
+    "category": "Imbiss",
+    "region": "Münsterland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "... Hofcafé bei einer wohlverdienten Pause mit unseren Spezialitäten verwöhnen. Auf unserem Hof finden Sie außerdem einige E-Bike-Ladestationen - Sie können bei ...",
+    "sourceUrl": "https://www.hof-grothues-potthoff.de/hof-aktiv/fahrradtouren/",
+    "query": "Hofcafé E-Bike Ladestation Münsterland"
+  },
+  {
+    "name": "Gut Heidefeld",
+    "category": "Imbiss",
+    "region": "Münsterland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Zum Münsterland gehörend grenzt das Gut auch an den Niederrhein. Intern ... E-Bike an unserer Ladestation neue Energie tanken.. Denn noch ist der ...",
+    "sourceUrl": "https://gutheidefeld.de/",
+    "query": "Hofcafé E-Bike Ladestation Münsterland"
+  },
+  {
+    "name": "E-Bike Ladestation - Schwarzwald Tourismus Kinzigtal",
+    "category": "Imbiss",
+    "region": "Schwarzwald / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Direkt vor dem Gasthof Martinshof kann man bis zu 10 E-Bike gleichzeitig laden (Ladegeräte sind selbst mitzubringen).",
+    "sourceUrl": "https://www.schwarzwald-kinzigtal.info/attraktionen/e-bike-ladestation-cc3ad5ccbf",
+    "query": "Waldgasthof E-Bike Ladestation Schwarzwald"
+  },
+  {
+    "name": "Fahrradverleih und Ladestationen",
+    "category": "Imbiss",
+    "region": "Schwarzwald / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Regionen ; E-Bike Ladestation an der Köhlerei am See ; E-Bike Ladestation beim Hotel Hochfirst ; E-Bike Ladestation Gasthaus Kranz. Geöffnet bis 22:00.",
+    "sourceUrl": "https://www.wutachschlucht.de/erleben/radfahren/fahrradverleih-und-ladestationen",
+    "query": "Waldgasthof E-Bike Ladestation Schwarzwald"
+  },
+  {
+    "name": "Taubertal",
+    "category": "Imbiss",
+    "region": "Liebliches Taubertal / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Entdecke die besten Radrouten zu Taubertal-Radweg und plane deinen Weg dorthin ... Taubertal-Radweg. Fahrrad. 4.7. (836). Gravelbike. 5.0. (5). Mountainbike. 4.0.",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/1019214",
+    "query": "Fahrrad-Raststätte Taubertal Radweg"
+  },
+  {
+    "name": "Genussradeln rund um Rothenburg",
+    "category": "Imbiss",
+    "region": "Liebliches Taubertal / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Die sportive Variante des Taubertal-Rad- ... Wer mit kleinen Kindern unterwegs ist, folgt dem Klassiker »Taubertal-Radweg« an Tauberzell (siehe Tour 1) vorbei bis ...",
+    "sourceUrl": "https://www.rothenburg.de/fileadmin/Tourismus/Dateien/Radeln/RTS_BR_Genussradeln_WEB_Neu.pdf",
+    "query": "Fahrrad-Raststätte Taubertal Radweg"
+  },
+  {
+    "name": "E-Bike Ladestationen am Weser-Radweg",
+    "category": "Imbiss",
+    "region": "Weserbergland / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Hann. Münden · Gieselwerder Campingplatz Gieselwerder · Wesertal-Oedelsheim Gemeindeverwaltung Oberweser · Bodenfelde E-Bike Ladestation Bodenfelde · Wahmbeck E ...",
+    "sourceUrl": "https://www.weserradweg-info.de/de/page/e-bike-ladestationen-am-weser-radweg/54466518/",
+    "query": "Kaffee E-Bike Ladestation Weserbergland"
+  },
+  {
+    "name": "Hofgarten am Kloster",
+    "category": "Imbiss",
+    "region": "Weserbergland / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "In der Nähe ; Mit dem E-Bike entlang der Weser · Touristikzentrum Westliches Weserbergland, Jens König | CC-BY-SA · Elektrotankstelle und Akkuladestation ...",
+    "sourceUrl": "https://www.westliches-weserbergland.de/gastro/hofgarten-am-kloster",
+    "query": "Kaffee E-Bike Ladestation Weserbergland"
+  },
+  {
+    "name": "Ohne Titel",
+    "category": "Imbiss",
+    "region": "Fläming / Brandenburg",
+    "address": "03238 Finsterwalde",
+    "coordinates": "zu verifizieren",
+    "specialty": "... brandenburg.de Hotel Zum Vetter Lange Str. 15, 03238 Finsterwalde, Tel ... Fläming Zum Reiterhof 1, 14823 Niemegk - Neuendorf, Tel. (033843) 92719-0 ...",
+    "sourceUrl": "https://www.placeoweb.com/gps/gpx/files/2011-12-06-001020_86.196.28.235_adfc_bettundbike.gpx",
+    "query": "Radlercafé Fläming-Skate Brandenburg"
+  },
+  {
+    "name": "Tipps & Highlights für Ihren Brombachsee Urlaub",
+    "category": "Imbiss",
+    "region": "Fränkisches Seenland / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "21.01.2026 ... In Pleinfeld, Ramsberg und Langlau gibt es moderne Verleihstationen mit E-Bikes für jedes Alter und Niveau. Brombachsee vom Wasser aus entdecken ...",
+    "sourceUrl": "https://de.jackery.com/blogs/lifestyle/brombachsee-urlaub-reisetipps?srsltid=AU7gw4V1fZquUvmINgh7dpSD2XhRJXgglXbT8858oLCwta7tIaOsViwK",
+    "query": "Ausflugslokal E-Bike Ladung Brombachsee"
+  },
+  {
+    "name": "Seeparkplatz Brombachsee Pleinfeld Deutschland #101948",
+    "category": "Imbiss",
+    "region": "Fränkisches Seenland / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "06.10.2026 ... Lade dein Elektroauto bei Seeparkplatz Brombachsee (Parkplatz) an 2 Ladesäulen im Verbund Ladeverbund+ in Pleinfeld, Leitenbuckstraße, ...",
+    "sourceUrl": "https://www.goingelectric.de/stromtankstellen/Deutschland/Pleinfeld/Seeparkplatz-Brombachsee-Leitenbuckstrasse-8/101948/",
+    "query": "Ausflugslokal E-Bike Ladung Brombachsee"
+  },
+  {
+    "name": "Einkehrmöglichkeiten",
+    "category": "Imbiss",
+    "region": "Kocher-Jagst / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ein altes Sprichwort sagt: Essen und Trinken hält Leib und Seele zusammen. Das gilt natürlich umso mehr nach einer ausgiebigen Radtour.",
+    "sourceUrl": "https://www.kocher-jagst.de/unterwegssein/einkehrmoeglichkeiten",
+    "query": "Fahrrad-Imbiss Kocher-Jagst-Radweg"
+  },
+  {
+    "name": "Kocher",
+    "category": "Imbiss",
+    "region": "Kocher-Jagst / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kocher-Jagst-Radweg, Jagsttalradweg, Jagstradweg, Kochertalradweg, Kocherradweg, Jagst-Kocherradweg, Fahrradtour, Radwandern, Unterkunft, Pension, Hotel, ...",
+    "sourceUrl": "https://www.fahrrad-tour.de/Jagsttal/gastro_kocher.php",
+    "query": "Fahrrad-Imbiss Kocher-Jagst-Radweg"
+  },
+  {
+    "name": "Seenland",
+    "category": "Hotel",
+    "region": "Lausitzer Seenland / Sachsen / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radfernweg(e) und Entfernung zum Haus · Radweg Berlin - Dresden (0,00km) · Seenland-Route (2,60km) · Niederlausitzer Bergbautour (2,60km) · Tour Brandenburg (2,60km) ...",
+    "sourceUrl": "https://www.bettundbike.de/unterkunft/seenland-oase-reppist-1012966",
+    "query": "Bett und Bike Hotel Lausitzer Seenland E-Bike"
+  },
+  {
+    "name": "Strandhotel Senftenberger See",
+    "category": "Hotel",
+    "region": "Lausitzer Seenland / Sachsen / Brandenburg",
+    "address": "See 3, 01968 Senftenberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Strandhotel Senftenberger See. Am See 3, 01968 Senftenberg (Brandenburg). Telefon : +49 3573 / 800400; Mobil : –. E- ...",
+    "sourceUrl": "https://www.bettundbike.de/unterkunft/strandhotel-senftenberger-see-1003490",
+    "query": "Bett und Bike Hotel Lausitzer Seenland E-Bike"
+  },
+  {
+    "name": "Schlafen im Verladeturm",
+    "category": "Hotel",
+    "region": "Oderbruch / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Entdeckungstour im Oderbruch: außergewöhnlich schlafen im Verladeturm & eine Kanutour auf der Alten Oder - so schön ist Urlaub im Seenland Oder-Spree.",
+    "sourceUrl": "https://www.reiseland-brandenburg.de/erlebnisberichte/seenland-oder-spree/schlafen-im-verladeturm-urlaub-in-brandenburg/",
+    "query": "Fahrrad Pension Oderbruch Oder-Neiße-Radweg"
+  },
+  {
+    "name": "Fahrradtouristik mit hauseigenem Fahrradverleih am Oder",
+    "category": "Hotel",
+    "region": "Oderbruch / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Fahrradtouristik im Oderbruch ... Direkt an der Oder gelegen bietet der Oder-Neisse-Radweg dem Fernradwanderer die direkte Verbindung von Tschechien bis zur ...",
+    "sourceUrl": "https://www.dammmeisterei.de/fahrradtouristik_im_oderbruch_oder_neisse_radweg_fahrradverleih/",
+    "query": "Fahrrad Pension Oderbruch Oder-Neiße-Radweg"
+  },
+  {
+    "name": "E-Bike Akku-Ladestation Campingplatz Wangen - Öhningen",
+    "category": "Hotel",
+    "region": "Bodensee / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Beim Campingplatz in Wangen können Sie den Akku Ihres E-Bike laden, einen Spaziergang durch den Ort machen, oder auf der schönen Seeterrasse kühle Getränke, ...",
+    "sourceUrl": "https://www.oehningen-tourismus.de/attraktion/e-bike-akku-ladestation-campingplatz-wangen-063c62c339",
+    "query": "Campingplatz E-Bike Ladeschrank Bodensee"
+  },
+  {
+    "name": "Radfahrer auf dem Park",
+    "category": "Hotel",
+    "region": "Bodensee / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Perfekter Zwischenstopp auf der Bodensee-Radtour ... Durchreisende Fahrradtouristen können einen Platz auf unseren beiden Zeltwiesen auch nur für eine Nacht ...",
+    "sourceUrl": "https://www.park-camping.de/radfahrer/",
+    "query": "Campingplatz E-Bike Ladeschrank Bodensee"
+  },
+  {
+    "name": "Harz",
+    "category": "Hotel",
+    "region": "Harz / Sachsen-Anhalt / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Klassifizierung · Preisniveau: günstig · Mountainbike Region Name: Oberharz · organisierter Transport zu Touren · geprüfter MTB-Guide · Bikeverleih beim Hotel.",
+    "sourceUrl": "https://mtb-hotels.info/mountainbikehotel/harz-bnb-werkmeister",
+    "query": "Bike Hotel Harz Mountainbike Ladestation"
+  },
+  {
+    "name": "10 Top",
+    "category": "Hotel",
+    "region": "Harz / Sachsen-Anhalt / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "24.04.2023 ... Der sympathische Familienbetrieb ist der ideale Ausgangspunkt für Bike-Urlauber, geboten werden geführte Touren (nach Verfügbarkeit), ...",
+    "sourceUrl": "https://www.relax-guide.com/wellnessblog-12057",
+    "query": "Bike Hotel Harz Mountainbike Ladestation"
+  },
+  {
+    "name": "Ferienwohnungen Halber Mond",
+    "category": "Hotel",
+    "region": "Rhön / Hessen / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radfernwege und Lage ; Radfernweg(e) und Entfernung zum Haus. Werratal-Radweg (1,00km); Rhönradweg (1,00km) ; Lage. Anreisebahnhof : Bad Salzungen, 0,4 km.",
+    "sourceUrl": "https://www.bettundbike.de/unterkunft/ferienwohnungen-halber-mond-1009592",
+    "query": "Fahrradfreundliche Unterkunft Rhön Bett und Bike"
+  },
+  {
+    "name": "Entdecke 8 charmante Fahrradhotels an der Rhön",
+    "category": "Hotel",
+    "region": "Rhön / Hessen / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "8 Fahrradhotels, Pensionen und Ferienwohnungen erwarten dich mit offenen Armen an der Rhön. Hier findest du die ideale Unterkunft für deine nächste Fahrradreise ...",
+    "sourceUrl": "https://www.radsport-hotels.de/fahrrad-hotels/fahrradhotels-rhoen.html",
+    "query": "Fahrradfreundliche Unterkunft Rhön Bett und Bike"
+  },
+  {
+    "name": "Zeltwiese Haidhof",
+    "category": "Hotel",
+    "region": "Altmühltal / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Dein Platz für eine kleine Auszeit im Altmühltal – direkt am Wasser, am Altmühlpanoramaradweg und mit echtem Hafen-Flair. ... E-Bike-Ladestation. Lade dein E-Bike ...",
+    "sourceUrl": "https://www.zeltwiese-haidhof.de/",
+    "query": "Campingplatz E-Bike Ladestation Altmühltal"
+  },
+  {
+    "name": "Camping & Stellplätze",
+    "category": "Hotel",
+    "region": "Altmühltal / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-Bike Ladestation für 6 Fahrräder. Moderner Baby - Wickelraum. Waschmaschinen und Trockner. 5284b02f77840443e2d56ff976bf3c89_SupermarktIcon. Lebensmittelmarkt ...",
+    "sourceUrl": "https://www.camping-herzog.de/campingplatz-stellplatz-altmuehlsee-fraenkisches-seenland/",
+    "query": "Campingplatz E-Bike Ladestation Altmühltal"
+  },
+  {
+    "name": "Deutschland",
+    "category": "Hotel",
+    "region": "Schwarzwald / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Akkuladung berechnen wir 3€ pro Nacht/E-Bike.\" Hotel Schöne Aussicht ... fahrradfreundliches Hotel in Feldberg (Schwarzwald) (79868) · Hotel Waldeck ...",
+    "sourceUrl": "https://www.biroto.eu/de/fahrradfreundliche-unterkuenfte/deutschland",
+    "query": "Bike Hotel Schwarzwald Bett+Bike Akkuladung"
+  },
+  {
+    "name": "E-Bike Ladestationen - Nationalparkregion Schwarzwald",
+    "category": "Hotel",
+    "region": "Schwarzwald / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bei größeren, hügeligen Touren kann es leicht passieren, dass die Akkuladung zu Neige geht. Damit Sie immer gut an Ihr Ziel kommen, finden Sie hier alle ...",
+    "sourceUrl": "https://www.nationalparkregion-schwarzwald.de/urlaubsthemen/aktiv/radfahren/e-bike-ladestationen",
+    "query": "Bike Hotel Schwarzwald Bett+Bike Akkuladung"
+  },
+  {
+    "name": "Entdecke 29 charmante Fahrradhotels in der Eifel",
+    "category": "Hotel",
+    "region": "Eifel / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Erkunde 29 einladende Fahrradhotels, die zentral in in der Eifel gelegen sind. Von gemütlichen Pensionen bis hin zu komfortablen Wellnesshotels - hier ist für ...",
+    "sourceUrl": "https://www.radsport-hotels.de/fahrrad-hotels/fahrradhotels-eifel.html",
+    "query": "Fahrradfreundliche Pension Eifel Radweg"
+  },
+  {
+    "name": "Ihr Hotel für Radfahren im Nationalpark Eifel. Urlaub mit dem Rad.",
+    "category": "Hotel",
+    "region": "Eifel / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Das Hotel Eifelkern ist Ihr Fahrradhotel inmitten der Eifel. Wenn Sie hier übernachten, befinden Sie sich bereits im Nationalpark Eifel. Wunderschöne Radwege ...",
+    "sourceUrl": "https://hotel-eifelkern.de/erleben/radfahren/",
+    "query": "Fahrradfreundliche Pension Eifel Radweg"
+  },
+  {
+    "name": "Mietangebote",
+    "category": "Hotel",
+    "region": "Mecklenburgische Seenplatte",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Unser e-Up! zum Mieten. Ganz neu ab 2024 bieten ... Bei beyondcamping.de gehören wir zu den 12 besten Campingplätzen in der Mecklenburgischen Seenplatte.",
+    "sourceUrl": "https://www.campingpark-zuruf.de/mietangebote/",
+    "query": "Campingplatz Mecklenburger Seenplatte E-Bike Akku"
+  },
+  {
+    "name": "Stellplätze entlang der mecklenburgischen Seenplatte",
+    "category": "Hotel",
+    "region": "Mecklenburgische Seenplatte",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "26.02.2023 ... Gebühren: Je nach Saison 20 bis 30 Euro/Nacht und Mobil inklusive 2 Erwachsene und V+E, WLAN 2 Euro/Tag. Freizeit: Kanuverleih, Altstadt, ...",
+    "sourceUrl": "https://www.promobil.de/uebernachtungstipps/stellplaetze-mecklenburgischen-seenplatte/",
+    "query": "Campingplatz Mecklenburger Seenplatte E-Bike Akku"
+  },
+  {
+    "name": "Gasthaus & Pension \"Am Rennsteig\"",
+    "category": "Hotel",
+    "region": "Thüringer Wald / Thüringen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ausstattung und Service · Serviceangebot im Zimmer · Serviceangebot im Haus · Gastronomie · Bett+Bike Zusatzangebote · Sonstiges.",
+    "sourceUrl": "https://www.bettundbike.de/unterkunft/gasthaus-pension-am-rennsteig-1009558",
+    "query": "Bett und Bike Pension Thüringer Wald Rennsteig"
+  },
+  {
+    "name": "Bett+Bike Gastgeber im Thüringer Wald",
+    "category": "Hotel",
+    "region": "Thüringer Wald / Thüringen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bett+Bike Gastgeber im Thüringer Wald ... Der ADFC zertifiziert Unterkünfte, die den passenden Service bieten. Dieses Erfolgsmodell spricht sich herum: Mit der ...",
+    "sourceUrl": "https://www.tourenportal-thueringer-wald.de/de/list/bett-bike-gastgeber-im-thueringer-wald/277027028/",
+    "query": "Bett und Bike Pension Thüringer Wald Rennsteig"
+  },
+  {
+    "name": "Rad-Gastgeber an der Mosel mit Bett+Bike & Arrangements",
+    "category": "Hotel",
+    "region": "Mosel / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Deine Radreise an der Mosel entspannt planen: Entdecke radfreundliche Gastgeber, Bett & Bike Mosel und ausgewählte Rad-Arrangements mit Gepäckservice.",
+    "sourceUrl": "https://www.visitmosel.de/radfahren/gastgeber-arrangements",
+    "query": "Fahrrad Hotel Mosel Winzerhof E-Bike"
+  },
+  {
+    "name": "Die 7 schönsten Hotels entlang des Mosel",
+    "category": "Hotel",
+    "region": "Mosel / Rheinland-Pfalz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "06.08.2025 ... Der Familienbetrieb gilt als eine der fahrradfreundlichsten Unterkünfte im Saarland. Als ausgezeichnetes E-Bike-Hotel an der Mosel verfügt das ...",
+    "sourceUrl": "https://www.holidaycheck.de/urlaub/deutschland/inspiration/hotels-mosel-radweg",
+    "query": "Fahrrad Hotel Mosel Winzerhof E-Bike"
+  },
+  {
+    "name": "Radtouren im Sauerland",
+    "category": "Hotel",
+    "region": "Sauerland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Das Sauerland ist das Land der 1000 Berge. Die Radwege haben es also manchmal in sich. Am bequemsten sind Sie mit dem E-Bike unterwegs. An unserer Ladestation ...",
+    "sourceUrl": "https://seemer.de/ebike-sauerland/",
+    "query": "Campingplatz Sauerland Radring E-Bike"
+  },
+  {
+    "name": "Campingplätze im Sauerland in Nordrhein",
+    "category": "Hotel",
+    "region": "Sauerland / NRW",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radfahren durch die hügelige Landschaft. Ob mit dem Rennrad, E-Bike oder Mountainbike – im Sauerland finden Sie Radstrecken für jedes Level: SauerlandRadring – ...",
+    "sourceUrl": "https://www.campingdirect.com/de/camping-sauerland",
+    "query": "Campingplatz Sauerland Radring E-Bike"
+  },
+  {
+    "name": "Übernachten Rennrad",
+    "category": "Hotel",
+    "region": "Erzgebirge / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "... liegen in unmittelbarer Nähe der Stoneman Miriquidi Road-Strecke. ·... verfügen über einen Bike-Wash, einen verschließbaren Fahrradraum und eine Mini- ...",
+    "sourceUrl": "https://road.stoneman-miriquidi.com/uebernachten-rennrad-hotel/",
+    "query": "Bike Hotel Erzgebirge Stoneman Miriquidi"
+  },
+  {
+    "name": "Übernachten Mountainbike",
+    "category": "Hotel",
+    "region": "Erzgebirge / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Hotel Sächsischer Hof ... Heute sind mindestens 4 Starter auf dem Stoneman Miriquidi unterwegs. ... Du hast Fragen rund um Dein Stoneman Miriquidi Mountainbike- ...",
+    "sourceUrl": "https://www.stoneman-miriquidi.com/uebernachten-mountainbike-hotel/",
+    "query": "Bike Hotel Erzgebirge Stoneman Miriquidi"
+  },
+  {
+    "name": "Land und Leute Tour",
+    "category": "Hotspot",
+    "region": "Lausitz / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Süß geht es dagegen in der Confiserie Felicitas in Hornow zu, das bei Strittmatter übrigens „Gulitzscha“ heißt. Den schönsten Rastplatz bietet der Aussichtsturm ...",
+    "sourceUrl": "https://www.lausitzerseenland.de/de/erleben/radfahren/thematische-tagestouren/artikel-land-und-leute-tour-auf-den-spuren-strittmatters.html",
+    "query": "Aussichtsturm Rastplatz Radweg Lausitz"
+  },
+  {
+    "name": "Von Großräschen nach Aussichtsturm \"Rostiger Nagel\"",
+    "category": "Hotspot",
+    "region": "Lausitz / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Von Großräschen nach Aussichtsturm \"Rostiger Nagel\" ist eine mäßige Radtour ... Rastplatz Kleinkoschen am Senftenberger See. Highlight • Einrichtungen. Der ...",
+    "sourceUrl": "https://www.komoot.com/de-de/tour/50884642",
+    "query": "Aussichtsturm Rastplatz Radweg Lausitz"
+  },
+  {
+    "name": "Rampe 6",
+    "category": "Rastplatz",
+    "region": "Spreewald / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Bei Rampe 6 befinden sich außerdem eine alemannsche Hütte zur Besichtigung und Übernachtung sowie ein Rastplatz für Radler, Wanderer und Reiter. Dieser ...",
+    "sourceUrl": "https://www.burgimspreewald.de/de/sommer/erleben/ausflugstipps/ausflugsziele-in-der-region/artikel-rampe-6.html",
+    "query": "Radler Rastplatz Schutzhütte Spreewald"
+  },
+  {
+    "name": "Wanderrastplatz Petkampsberg und Spreewaldabzeichen 15",
+    "category": "Rastplatz",
+    "region": "Spreewald / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": ", Dahme-Spreewald, Brandenburg ... Schöner Rastplatz direkt an der Spree, nicht nur für Wasserwanderer auch gut zu erreichen für Radler und Wanderer.",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/1433390",
+    "query": "Radler Rastplatz Schutzhütte Spreewald"
+  },
+  {
+    "name": "Oderbruch in Brandenburg",
+    "category": "Hotspot",
+    "region": "Oderbruch / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "02.07.2025 ... Strampelnd durch den Oderbruch: unterwegs auf dem Oder-Neiße-Radweg ... Wams Reise Radfahren im Oderbruch Blick vom Aussichtsturm auf der ...",
+    "sourceUrl": "https://www.welt.de/reise/article256292272/Oderbruch-in-Brandenburg-Radeln-wo-frueher-niemand-hin-wollte.html",
+    "query": "Aussichtsturm Oderbruch Radweg Highlight"
+  },
+  {
+    "name": "Beobachtungstürme",
+    "category": "Hotspot",
+    "region": "Oderbruch / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Ein Turm wurde unmittelbar am südlichen Rand der Stadt Gartz direkt am Oder-Neiße Radweg errichtet. Von hier sind vor allem die Bewegungen der Kraniche für ...",
+    "sourceUrl": "https://www.nationalpark-unteres-odertal.eu/besucher/beobachtungstuerme/",
+    "query": "Aussichtsturm Oderbruch Radweg Highlight"
+  },
+  {
+    "name": "Schutzhütte am Rennsteig Runde von Allzunah",
+    "category": "Rastplatz",
+    "region": "Rennsteig / Thüringen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "10.06.2026 ... Mittelpunkt des Rennsteigs – Schutzhütte am Rennsteig Runde von Allzunah ; Beginn des Ilmtal-Radwegs in Allzunah. Highlight • Radweg.",
+    "sourceUrl": "https://www.komoot.com/de-de/smarttour/3396417",
+    "query": "Schutzhütte Radweg Rennsteig Thüringen"
+  },
+  {
+    "name": "Rennsteig Schutzhütten als Übernachtungsmöglichkeit",
+    "category": "Rastplatz",
+    "region": "Rennsteig / Thüringen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Der Rennsteig ist der älteste Fernwanderweg Deutschlands. Auf einer Länge von 170km läuft er von den Ufern der Werra durch den Thüringer Wald bis zur Saale.",
+    "sourceUrl": "https://locke-und-hut.de/rennsteig-schutzhuetten-als-uebernachtungsmoeglichkeit/",
+    "query": "Schutzhütte Radweg Rennsteig Thüringen"
+  },
+  {
+    "name": "Rastplatz Himmelsbar mit Blick auf den Schwarzwald",
+    "category": "Hotspot",
+    "region": "Schwarzwald / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wandern. 4.9. (1018) ; Mountainbike. 4.7. (15) ; Fahrrad. 5.0. (1).",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/246000",
+    "query": "Fahrrad Rastplatz Aussichtspunkt Schwarzwald"
+  },
+  {
+    "name": "Rastplatz Teufelsschuppen mit Aussicht",
+    "category": "Hotspot",
+    "region": "Schwarzwald / Baden-Württemberg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Rastplatz Teufelsschuppen mit Aussicht · #1. · Lautenbacher Teufelsteig in der Nationalparkregion Schwarzwald · #2. · Burgruine Bärenburg – Blick vom ...",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/1335130",
+    "query": "Fahrrad Rastplatz Aussichtspunkt Schwarzwald"
+  },
+  {
+    "name": "Wetterschutzhütte im BikeStop Hetzlos",
+    "category": "Rastplatz",
+    "region": "Rhön / Bayern / Hessen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Während der Rast können die E-Bikes vor dem alten Feuerwehrhaus und die Handys im alten Feuerwehrhaus laden. Der Raum ist mit einem Tisch mit zwei Bänken, einem ...",
+    "sourceUrl": "https://www.rhoen.info/w/opendata/infrastructure/wetterschutzhuette-im-bikestop-hetzlos",
+    "query": "Schutzhütte E-Bike Ladestation Rhön"
+  },
+  {
+    "name": "Übersicht der E",
+    "category": "Rastplatz",
+    "region": "Rhön / Bayern / Hessen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "E-Bike Ladestation Bad Neustadt · E-Bike Ladestation Bad Salzungen · E-Bike Ladestation Bernshausen · E-Bike Ladestation Dermbach · E-Bike Ladestation Fladungen · E- ...",
+    "sourceUrl": "https://www.rhoentravel.de/e-bike-ladestation-rhoen/",
+    "query": "Schutzhütte E-Bike Ladestation Rhön"
+  },
+  {
+    "name": "Kloster Weltenburg Runde von Kelheim",
+    "category": "Hotspot",
+    "region": "Weltenburger Enge / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "20.07.2026 ... Der Donaudurchbruch befindet sich zwischen Weltenburg und Kelheim. Der offizielle Donau-Radweg geht hier über den Berg (circa 120 Höhenmeter ...",
+    "sourceUrl": "https://www.komoot.com/de-de/smarttour/41243642",
+    "query": "Aussichtspunkt Rastplatz Donauradweg Durchbruch"
+  },
+  {
+    "name": "Donausteig Etappe 1_S03 Engelhartszell",
+    "category": "Hotspot",
+    "region": "Weltenburger Enge / Bayern",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kurzbeschreibung: Donausteig-einfach sagenhaft! Diese Etappe führt uns von Engelhartszell zuerst durch das waldreiche Durchbruchstal der oberen Donau, ...",
+    "sourceUrl": "https://www.ausflugstipps.at/oesterreich-tour/detail/430007070/donausteig-etappe-1-s03-engelhartszell-schloegen-ueber-den-4-4-blick-zur-schloegener-schlinge.html",
+    "query": "Aussichtspunkt Rastplatz Donauradweg Durchbruch"
+  },
+  {
+    "name": "Elberadweg Schönebeck",
+    "category": "Rastplatz",
+    "region": "Elberadweg / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "08.09.2023 ... Bereits jetzt sind einige der blauen Stahlpfähle beschmiert. Zu einem dauerhaften Schutz vor Regen dient der neue Rastplatz daher nicht, wie ...",
+    "sourceUrl": "https://www.volksstimme.de/lokal/schoenebeck/neue-rastplatze-fur-radler-in-pretzien-3686831",
+    "query": "Radler Rastplatz Unterstand Elberadweg"
+  },
+  {
+    "name": "Radler",
+    "category": "Rastplatz",
+    "region": "Elberadweg / Sachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Der Rastplatz befindet sich am Radweg von Krakow am See nach Güstrow. Der Weg hier im Wald ist ein Traum für Radfahrer. Die schön gestaltete Hütte lädt zur ...",
+    "sourceUrl": "https://www.komoot.com/de-de/highlight/4543616",
+    "query": "Radler Rastplatz Unterstand Elberadweg"
+  },
+  {
+    "name": "Die schönsten Radtouren in der Mecklenburgischen Schweiz",
+    "category": "Hotspot",
+    "region": "Mecklenburgische Schweiz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "29.09.2026 ... Der Naturpark Mecklenburgische Schweiz und Kummerower See umfasst bedeutende Naturelemente und bietet vielfältige Flusslandschaften und ...",
+    "sourceUrl": "https://www.komoot.com/de-de/guide/1184/radtouren-in-der-mecklenburgischen-schweiz",
+    "query": "Aussichtsturm Radweg Mecklenburgische Schweiz"
+  },
+  {
+    "name": "Radtour rund um den Malchiner See in Teterow",
+    "category": "Hotspot",
+    "region": "Mecklenburgische Schweiz",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Sportliche Fahrradtour in der Mecklenburgischen Schweiz · Beschreibung der Tour · Unterkunft in Teterow finden · Empfehlungen · Karte & Anreise · Kontakt · Newsletter",
+    "sourceUrl": "https://www.teterow.m-vp.de/entdecken/radtour-rund-um-den-malchiner-see/",
+    "query": "Aussichtsturm Radweg Mecklenburgische Schweiz"
+  },
+  {
+    "name": "Vennbahn",
+    "category": "Rastplatz",
+    "region": "Vennbahn / Eifel",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Km 7: ▽ Knotenpunkt 38 am ehemaligen Bahnhof Kalterherberg (D)/Leykaul (B) ​ info 50.5212726.20661 - Rastplatz mit Schutzhütte am ehemaligen Grenzübergang.",
+    "sourceUrl": "https://de.wikivoyage.org/wiki/Vennbahn",
+    "query": "Rastplatz Schutzhütte Vennbahn Radweg Eifel"
+  },
+  {
+    "name": "Etappe 3",
+    "category": "Rastplatz",
+    "region": "Vennbahn / Eifel",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Das Restaurant mit Hüttenflair bietet familienfreundliche Küche und liegt am Vennbahn-Radweg. ... Im Heimatmuseum „Zwischen Venn und Schneifel“ kann man ...",
+    "sourceUrl": "https://www.vennbahn.eu/etappe/etappe-3/",
+    "query": "Rastplatz Schutzhütte Vennbahn Radweg Eifel"
+  },
+  {
+    "name": "Die 16 beeindruckendsten Naturdenkmäler rund um Uckerland",
+    "category": "Hotspot",
+    "region": "Uckermark / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "18.08.2026 ... ... Nationalpark Unteres Odertal und den Naturpark Uckermärkische Seen gekennzeichnet. ... Aussichtsturm Fuchsberg. Highlight • Aussichtspunkt.",
+    "sourceUrl": "https://www.komoot.com/de-de/guide/3981474/naturdenkmaeler-rund-um-uckerland",
+    "query": "Aussichtsturm Rastplatz Naturpark Uckermärkische Seen"
+  },
+  {
+    "name": "Beobachtungstürme in Brandenburg",
+    "category": "Hotspot",
+    "region": "Uckermark / Brandenburg",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Auf jeden. Fall wünschen wir Ihnen schöne Naturerlebnisse und aufregende Beobachtungen. NABU Brandenburg. Naturpark Uckermärkische Seen ... See ist wichtiger ...",
+    "sourceUrl": "https://brandenburg.nabu.de/imperia/md/content/brandenburg2/beobachtungst__rme_brandenburg_web.pdf",
+    "query": "Aussichtsturm Rastplatz Naturpark Uckermärkische Seen"
+  },
+  {
+    "name": "Sehenswürdigkeiten",
+    "category": "Rastplatz",
+    "region": "Lüneburger Heide / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Nature-Guides - SUP Adventure · Wietze: Lyrik am Fluss - Lyrik im Fluss · Abenteuerland Trampolinhalle Lüneburger Heide · Das Salzhaus · Schutzhütte und Rastplatz, ...",
+    "sourceUrl": "https://www.lueneburger-heide.de/service/sehenswuerdigkeiten/p/70",
+    "query": "Radler Rastplatz Schutzhütte Lüneburger Heide"
+  },
+  {
+    "name": "Wietze",
+    "category": "Rastplatz",
+    "region": "Lüneburger Heide / Niedersachsen",
+    "address": "zu verifizieren",
+    "coordinates": "zu verifizieren",
+    "specialty": "Die ehemalige Hutelandschaft liegt direkt am Aller-Radweg und ist somit gut bei einer Radtour durch die Lüneburger Heide zu erreichen. Auf engstem Raum ...",
+    "sourceUrl": "https://www.lueneburger-heide.de/natur/sehenswuerdigkeiten/7822/wietze-naturschutzgebiet-hornbosteler-hutweide.html",
+    "query": "Radler Rastplatz Schutzhütte Lüneburger Heide"
+  },
+  {
+    "name": "Radelbar Zschieren",
+    "category": "Imbiss",
+    "region": "Dresden-Zschieren / Elberadweg",
+    "address": "Zschierener Elbweg, 01259 Dresden (51°00’65.72″N, 13°86’62.12″E)",
+    "coordinates": "51.0182, 13.8839",
+    "specialty": "Geheimtipp der Dresdner Radlerszene: Unverbaute Strandbar direkt gegenüber Schloss Pillnitz mit kühlen Getränken und Liegestühlen",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Café Villa Else",
+    "category": "Imbiss",
+    "region": "Heidenau / Elberadweg",
+    "address": "Pirnaer Straße 39, 01809 Heidenau",
+    "coordinates": "zu verifizieren",
+    "specialty": "Liebevoller Einkehrstopp kurz vor Pirna mit hausgemachten Torten (Schwarzwälder, Joghurt), Eiscafé und schattigem Biergarten",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Gare de la lune (Luftgarten Wachwitz)",
+    "category": "Imbiss",
+    "region": "Dresden-Wachwitz / Elberadweg",
+    "address": "Pillnitzer Landstraße 148, 01326 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Idyllischer Sommer-Luftgarten rechtselbisch unterhalb des Fernsehturms mit Erfrischungen und kleiner Imbisskarte",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Café Os2 (Oswaldz am Elberadweg)",
+    "category": "Imbiss",
+    "region": "Dresden-Loschwitz / Elberadweg",
+    "address": "Körnerweg 24a, 01326 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Versteckte Terrasse direkt am Körnerweg unterhalb des Blauen Wunders, erreichbar über schmale Steintreppe",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Velo Verde Radebeul",
+    "category": "Imbiss",
+    "region": "Radebeul / Elberadweg",
+    "address": "Niederwarthaer Straße 50, 01445 Radebeul",
+    "coordinates": "zu verifizieren",
+    "specialty": "Grüne Radler-Oase mit Gartenbereich zwischen Dresden und Meißen direkt am Radweg",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Skopis Elbgarten Coswig",
+    "category": "Imbiss",
+    "region": "Coswig / Elberadweg",
+    "address": "Tännichthaus 37, 01640 Coswig",
+    "coordinates": "zu verifizieren",
+    "specialty": "Weitläufiger Biergarten direkt an den Elbauen mit frischer Küche für Radler",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Biergarten an der Gohliser Windmühle",
+    "category": "Imbiss",
+    "region": "Dresden-Gohlis / Elberadweg",
+    "address": "Windmühlenweg 17, 01156 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Historische Windmühle mit Biergarten direkt am Elberadweg, Schönwetter-Betrieb mit Elbblick",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Fährgarten Kleinzschachwitz (Feuchte Kurve)",
+    "category": "Imbiss",
+    "region": "Dresden-Kleinzschachwitz / Elberadweg",
+    "address": "Kleinzschachwitzer Ufer 7, 01259 Dresden",
+    "coordinates": "zu verifizieren",
+    "specialty": "Traditionsreicher Biergarten an der Fähranlegestelle nach Pillnitz, Treffpunkt für Radwanderer",
+    "sourceUrl": "https://so-lebt-dresden.de/radlerstopps-entlang-der-elbe/",
+    "query": "Radlerstopps entlang der Elbe Magazin"
+  },
+  {
+    "name": "Turmcafé im Verladeturm Kulturhafen",
+    "category": "Imbiss",
+    "region": "Groß Neuendorf / Oderbruch",
+    "address": "Hafenstraße 1, 15324 Letschin OT Groß Neuendorf",
+    "coordinates": "52.7011, 14.4172",
+    "specialty": "Kult-Spot im Oderbruch: Café in den drei Ebenen eines alten Verladeturms mit Oderblick, Übernachtung in historischen Bahnwaggons",
+    "sourceUrl": "https://www.verladeturm.de/turmcafe.html",
+    "query": "Kulturhafen Groß Neuendorf Bahnwaggon Café"
+  },
+  {
+    "name": "Baumanns Eisgarten Leuba",
+    "category": "Imbiss",
+    "region": "Ostritz OT Leuba / Oder-Neiße-Radweg",
+    "address": "Hauptstraße 24, 02899 Ostritz OT Leuba",
+    "coordinates": "zu verifizieren",
+    "specialty": "Liebevoll geführter Kiosk & Eisdiele direkt am Neiße-Deich mit Getränken, Eis und Radlerpause",
+    "sourceUrl": "https://www.outdooractive.com/de/gastro/ostritz/baumanns-eisgarten-leuba/57269076/",
+    "query": "Baumanns Eisgarten Leuba Oder-Neiße"
+  },
+  {
+    "name": "Kolonisten Kaffee Neulietzegöricke",
+    "category": "Imbiss",
+    "region": "Neulietzegöricke / Oderbruch",
+    "address": "Neulietzegöricke 52, 16259 Neulewin",
+    "coordinates": "52.7667, 14.2333",
+    "specialty": "Imbiss & Kaffeegarten im ältesten Kolonistendorf Preußens von 1753, hausgebackener Kuchen direkt an der Dorfkirche",
+    "sourceUrl": "https://kulturfeste.de/orte/maerkisch-oderland/neulietzegoericke/kolonisten_kaffee/",
+    "query": "Neulietzegöricke Kolonisten-Kaffee Gasthof Radler"
+  },
+  {
+    "name": "Gasthof Zum Alten Fritz Neulietzegöricke",
+    "category": "Hotel",
+    "region": "Neulietzegöricke / Oderbruch",
+    "address": "Neulietzegöricke 41, 16259 Neulewin",
+    "coordinates": "zu verifizieren",
+    "specialty": "Historischer Dorfgasthof seit 1753 mit Sommergarten und Übernachtungsmöglichkeiten für Radtouristen",
+    "sourceUrl": "https://kulturfeste.de/orte/maerkisch-oderland/neulietzegoericke/kolonistendorf_neulietzegoericke/",
+    "query": "Kolonistendorf Neulietzegöricke Gasthof"
+  },
+  {
+    "name": "Dammmeisterei & Theater am Rand Zollbrücke",
+    "category": "Hotspot",
+    "region": "Zollbrücke / Oderaue / Oderbruch",
+    "address": "Zollbrücke 16, 15324 Oderaue",
+    "coordinates": "52.7644, 14.3056",
+    "specialty": "Kultur- und Genuss-Oase direkt auf dem Oderdeich mit saisonaler regionaler Bio-Küche und Theater im Holzbau",
+    "sourceUrl": "https://www.dammmeisterei.de",
+    "query": "Theater am Rand Zollbrücke Radweg"
+  },
+  {
+    "name": "Waldgasthaus Wotschofska",
+    "category": "Imbiss",
+    "region": "Lübbenau / Spreewald",
+    "address": "Wotschofskaweg 1, 03222 Lübbenau/Spreewald",
+    "coordinates": "51.8683, 13.9922",
+    "specialty": "Mitten im Hochwald auf einer Erleninsel: Ausschließlich per Fahrrad oder Kahn erreichbar! Großer schattiger Biergarten mit Hefeplinsen",
+    "sourceUrl": "https://www.spreewald-info.de/region/essen-trinken/gastronomie/biergarten-imbiss",
+    "query": "Wotschofska Spreewald Fahrrad Einkehr"
+  },
+  {
+    "name": "Spreewaldhof Leipe",
+    "category": "Hotel",
+    "region": "Leipe / Spreewald",
+    "address": "Leiper Dorfstraße 1, 03222 Lübbenau OT Leipe",
+    "coordinates": "51.8711, 14.0456",
+    "specialty": "Traditioneller Spreewaldhof am Fließ: Radverleih, E-Bike-Ladung, Spreewald-Fischküche und ruhige Pension am Gurkenradweg",
+    "sourceUrl": "https://spreewaldhof-leipe.de/",
+    "query": "Spreewaldhof Leipe Gurkenradweg Einkehr"
+  },
+  {
+    "name": "Biergarten Bootshaus Leineweber Burg",
+    "category": "Imbiss",
+    "region": "Burg (Spreewald)",
+    "address": "Hauptstraße 1, 03096 Burg (Spreewald)",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wasser-Biergarten direkt an der Hauptspree mit Gurkenradweg-Anbindung und deftigen Klassikern",
+    "sourceUrl": "https://www.spreewald-info.de/region/essen-trinken/gastronomie/biergarten-imbiss",
+    "query": "Biergärten & Imbiss im Spreewald Bootshaus Leineweber"
+  },
+  {
+    "name": "Biergarten Zum schwarzen Adler Windsfeld",
+    "category": "Imbiss",
+    "region": "Windsfeld / Dittenheim / Altmühltal",
+    "address": "Windsfeld 22, 91723 Dittenheim",
+    "coordinates": "zu verifizieren",
+    "specialty": "Verwunschener Insider-Biergarten mit Storchennest auf dem Dach, SB-Betrieb und authentischer fränkischer Brotzeit",
+    "sourceUrl": "https://freundeunterwegs.com/25-tage-fahrradrundtour-durch-das-altmuehltal/",
+    "query": "2,5 Tage Fahrradrundtour Altmühltal Geheimtipp"
+  },
+  {
+    "name": "Schäferwagen Vino an der Altmühl",
+    "category": "Imbiss",
+    "region": "Vor Eichstätt / Altmühltal",
+    "address": "Altmühltal-Radweg bei Eichstätt",
+    "coordinates": "zu verifizieren",
+    "specialty": "Foodtruck / Schäferwagen direkt an der Strecke: Fränkische Bratwurst in der Semmel & Kuchen wie bei Oma",
+    "sourceUrl": "https://freundeunterwegs.com/25-tage-fahrradrundtour-durch-das-altmuehltal/",
+    "query": "2,5 Tage Fahrradrundtour Altmühltal Geheimtipp"
+  },
+  {
+    "name": "Biergarten Alte Schule Solnhofen",
+    "category": "Imbiss",
+    "region": "Solnhofen / Altmühltal",
+    "address": "Senefelderstraße 2, 91807 Solnhofen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Idyllischer Biergarten direkt am Altmühlufer bei den Zwölf Aposteln mit regionalen Spezialitäten",
+    "sourceUrl": "https://altmuehlfranken-entdecken.de/geheimtipps/",
+    "query": "Geheimtipps Altmühlfranken Alte Schule Solnhofen"
+  },
+  {
+    "name": "Hotel & Pizzeria Postwirt Kipfenberg",
+    "category": "Hotel",
+    "region": "Kipfenberg / Altmühltal",
+    "address": "Marktplatz 1, 85110 Kipfenberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Radler-freundliches Traditionshaus am Fuße der Burg Kipfenberg mit Holzofen-Pizzen und Biergarten",
+    "sourceUrl": "https://freundeunterwegs.com/25-tage-fahrradrundtour-durch-das-altmuehltal/",
+    "query": "2,5 Tage Fahrradrundtour Altmühltal Postwirt"
+  },
+  {
+    "name": "Schutzhütte Flüchtiger Hirsch am Rennsteig",
+    "category": "Rastplatz",
+    "region": "Ruhla-Ascherbrück / Thüringer Wald",
+    "address": "Rennsteig-Etappe 1, 99842 Ruhla",
+    "coordinates": "zu verifizieren",
+    "specialty": "Wetterfester Unterstand am Gebirgskamm mit Tisch, 2 Bänken und offiziellem Rettungspunkt EA-6415",
+    "sourceUrl": "https://www.tourenportal-thueringer-wald.de/de/poi/unterstand/schutzhuette-fluechtiger-hirsch-am-rennsteig/32178808/",
+    "query": "Schutzhütte Flüchtiger Hirsch Rennsteig"
+  },
+  {
+    "name": "Rennsteiggrotte Aussichts- und Rastplatz",
+    "category": "Rastplatz",
+    "region": "Rennsteig / Thüringer Wald",
+    "address": "Rennsteig-Radweg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Natürlicher Felsüberhang als schützender Rastplatz bei Regen mit Panoramablick ins Thüringer Umland",
+    "sourceUrl": "https://www.thueringer-wald.com/w/opendata/poi/rennsteiggrotte",
+    "query": "Rennsteiggrotte Aussichts- und Rastplatz"
+  },
+  {
+    "name": "Dürrenberger Hütte Gehlberg",
+    "category": "Rastplatz",
+    "region": "Gehlberg / Schneekopf / Thüringen",
+    "address": "Dürrenberger Rundweg, 98528 Suhl-Gehlberg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Erhöhte Wald-Schutzhütte auf 18,7 km Schleife um Gehlberg mit Blick auf die Kammlagen",
+    "sourceUrl": "https://www.komoot.com/de-de/guide/25774/radtouren-rund-um-gehlberg",
+    "query": "Dürrenberger Hütte Gehlberg Radtour"
+  },
+  {
+    "name": "Bikeshop Bodetal Thale",
+    "category": "Werkstatt",
+    "region": "Thale / Bodetal / Harz",
+    "address": "Am Bahnhof 1, 06502 Thale",
+    "coordinates": "zu verifizieren",
+    "specialty": "Genuss-Bike-Stützpunkt am Eingang zur wilden Bodetalschlucht: E-Bike Verleih, Reparaturen und Akkuladung",
+    "sourceUrl": "https://www.harzinfo.de/erlebnisse/genuss-bike-paradies/rund-ums-bike",
+    "query": "Genuss Bike Paradies Harz Bikeshop Bodetal"
+  },
+  {
+    "name": "Bike & BBQ Hornburg",
+    "category": "Imbiss",
+    "region": "Hornburg / Nördliches Harzvorland",
+    "address": "Vor dem Dammtor 5, 38315 Hornburg",
+    "coordinates": "zu verifizieren",
+    "specialty": "Kult-Treffpunkt für Biker: Fahrrad-Werkstatt und E-Bike-Service direkt kombiniert mit BBQ-Garten",
+    "sourceUrl": "https://www.harzinfo.de/erlebnisse/genuss-bike-paradies/rund-ums-bike",
+    "query": "Genuss Bike Paradies Bike & BBQ Hornburg"
+  },
+  {
+    "name": "Omas Drahtesel Schöningen",
+    "category": "Imbiss",
+    "region": "Schöningen / Elm-Harzvorland",
+    "address": "Markt 14, 38364 Schöningen",
+    "coordinates": "zu verifizieren",
+    "specialty": "Nostalgisches Fahrradcafé mit E-Bike-Verleih und Kuchenpause am Marktplatz",
+    "sourceUrl": "https://www.harzinfo.de/erlebnisse/genuss-bike-paradies/rund-ums-bike",
+    "query": "Genuss Bike Paradies Omas Drahtesel Schöningen"
+  },
+  {
+    "name": "Waldgasthaus & Rastplatz Plessenburg",
+    "category": "Imbiss",
+    "region": "Ilsenburg / Nationalpark Harz",
+    "address": "Plessenburg 1, 38871 Ilsenburg (Harz)",
+    "coordinates": "51.8344, 10.6389",
+    "specialty": "Mitten im Nationalpark Harz auf Waldlichtung (nur Forst-/Radwege): E-Bike-freundliche Waldgaststätte mit Wildgerichten",
+    "sourceUrl": "https://www.harzinfo.de",
+    "query": "Waldgasthaus Plessenburg Harz Radweg"
+  },
+  {
+    "name": "Landhotel Weihermühle",
+    "category": "Hotel / Ladesäule",
+    "region": "Pfälzerwald / Sickinger Höhe, Rheinland-Pfalz",
+    "address": "Weihermühle 1, 66987 Thaleichweiler-Fröschen",
+    "coordinates": "49.2625, 7.5684",
+    "specialty": "Romantisches Mühlental am Sickinger Mühlenradweg mit hauseigener E-Bike-Ladestation und Biergarten.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Pfälzerwald Verein PWV Hütte E-Bike ladestation Sickinger Mühlenradweg"
+  },
+  {
+    "name": "Brauhaus Ehrstein",
+    "category": "Gastro / Ladesäule",
+    "region": "Dahner Felsenland / Pfälzerwald, Rheinland-Pfalz",
+    "address": "Im Handschuhteich 3, 66999 Hinterweidenthal",
+    "coordinates": "49.1972, 7.7483",
+    "specialty": "Braugasthaus am Pirminius- und Wieslauter-Radweg mit Lademöglichkeit und sonniger Terrasse am Teich.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Pfälzerwald Verein PWV Hütte E-Bike ladestation Dahner Felsenland"
+  },
+  {
+    "name": "Landgasthof am Teufelstisch",
+    "category": "Gastro / Ladesäule",
+    "region": "Dahner Felsenland, Rheinland-Pfalz",
+    "address": "Im Handschuhteich 29, 66999 Hinterweidenthal",
+    "coordinates": "49.1965, 7.7471",
+    "specialty": "Direkt am Erlebnispark Teufelstisch und Schusterland-Radweg; kostenloses Akkuladen während der Einkehr.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "E-Bike Ladestation Dahner Felsenland Teufelstisch"
+  },
+  {
+    "name": "Gasthaus Zum Landgrafen Ludwigswinkel",
+    "category": "Gastro / Ladesäule",
+    "region": "Wasgau / Pfälzerwald, Rheinland-Pfalz",
+    "address": "Landgrafenstraße 33, 66996 Ludwigswinkel",
+    "coordinates": "49.0831, 7.6628",
+    "specialty": "Beliebter Stopp an der deutsch-französischen Freundschafts-Tour mit Ladestation für Ausflügler.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Wasgau Ludwigswinkel Freundschafts-Tour E-Bike"
+  },
+  {
+    "name": "Barfußpfad Freizeitgelände Birkenfeld",
+    "category": "Rastplatz / Ladesäule",
+    "region": "Wasgau / Pfälzerwald, Rheinland-Pfalz",
+    "address": "Am Barfußpfad, 66996 Ludwigswinkel",
+    "coordinates": "49.0792, 7.6589",
+    "specialty": "Naturnahes Freizeitgelände mit Barfußpfad, Schutzhütte und frei zugänglicher E-Bike-Ladesäule.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Freizeitgelände Birkenfeld Ludwigswinkel E-Bike Ladestation"
+  },
+  {
+    "name": "PWV-Hilschberghaus Rodalben",
+    "category": "Hütte / Ladesäule",
+    "region": "Gräfensteiner Land / Pfälzerwald, Rheinland-Pfalz",
+    "address": "Fichtenstraße 1b, 66976 Rodalben",
+    "coordinates": "49.2396, 7.6391",
+    "specialty": "Traditionsreiches Wanderheim des PWV mit Panoramaterrasse, E-Bike-Ladestation und MTB-Knotenpunkt.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Gräfensteiner Land PWV Hilschberghaus Rodalben E-Bike"
+  },
+  {
+    "name": "PWV-Hütte Dicke Eiche",
+    "category": "Hütte / Rastplatz",
+    "region": "Pfälzerwald, Rheinland-Pfalz",
+    "address": "Im Winterkirchel, 76846 Hauenstein",
+    "coordinates": "49.1912, 7.8542",
+    "specialty": "Urig bewirtschaftete Hütte des Pfälzerwaldvereins mitten im Biosphärenreservat am Queichtal-Radweg.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "PWV Hütte Dicke Eiche Hauenstein Queichtal Radweg"
+  },
+  {
+    "name": "Paddelweiherhütte Hauenstein",
+    "category": "Gastro / Rastplatz",
+    "region": "Dahner Felsenland / Queichtal, Rheinland-Pfalz",
+    "address": "Dahner Straße 100, 76846 Hauenstein",
+    "coordinates": "49.1843, 7.8488",
+    "specialty": "Idyllische Waldgaststätte am See mit Bootsverleih, E-Bike-Ladepunkten und großer Seeterrasse.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Paddelweiherhütte Hauenstein Dahner Felsenland"
+  },
+  {
+    "name": "Bio-Gasthof Bärenbrunnerhof",
+    "category": "Gastro / Hofladen",
+    "region": "Dahner Felsenland, Rheinland-Pfalz",
+    "address": "Bärenbrunnerhof 1, 66996 Schindhard",
+    "coordinates": "49.1389, 7.8341",
+    "specialty": "Bio-Bauernhof und Kletterer-/Bikertreff im Bärenbrunnertal an der Raubritter-Radtour mit E-Bike-Lademöglichkeit.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Bärenbrunnerhof Schindhard Bio-Gasthof E-Bike Ladestation"
+  },
+  {
+    "name": "Gasthaus Altes Bahnhöfl Dahn",
+    "category": "Gastro / Ladesäule",
+    "region": "Dahner Felsenland, Rheinland-Pfalz",
+    "address": "An der Reichenbach 6, 66944 Dahn",
+    "coordinates": "49.1511, 7.7812",
+    "specialty": "Historisches Bahnhofsgebäude an der Wieslauterbahn mit Biergarten und E-Bike-Ladestation.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Altes Bahnhöfl Dahn Biosphären-Tour E-Bike"
+  },
+  {
+    "name": "Hirzeckhaus PWV-Hütte Erlenbach",
+    "category": "Hütte / Aussichtspunkt",
+    "region": "Wasgau / Südpfalz, Rheinland-Pfalz",
+    "address": "Oberhalb Burg Berwartstein, 76891 Erlenbach bei Dahn",
+    "coordinates": "49.1124, 7.8765",
+    "specialty": "PWV-Hütte auf 480 m Höhe mit grandiosem Weitblick über den Wasgau und Ladesteckdosen für E-Biker.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Hirzeckhaus PWV-Ortsgruppe Bad Bergzabern E-Bike"
+  },
+  {
+    "name": "Kloster Hornbach E-Bike Ladepunkt",
+    "category": "Hotel / Ladesäule",
+    "region": "Zweibrücken / Pirminiusland, Rheinland-Pfalz",
+    "address": "Im Klosterbezirk, 66500 Hornbach",
+    "coordinates": "49.1882, 7.3683",
+    "specialty": "Historisches Klosterhotel an der Schnittstelle von Hornbach-Fleckenstein-Radweg und Pirminius-Radweg.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Kloster Hornbach E-Bike Ladestation Pirminius Radweg"
+  },
+  {
+    "name": "Gasthaus Zum Roten Baum Wallhalben",
+    "category": "Gastro / Ladesäule",
+    "region": "Sickinger Höhe, Rheinland-Pfalz",
+    "address": "Hettenhauser Straße 4, 66917 Wallhalben",
+    "coordinates": "49.3142, 7.5289",
+    "specialty": "Klassische Einkehr am Sickinger Mühlenradweg und der Rheinland-Pfalz-Radroute mit Ladeinfrastruktur.",
+    "sourceUrl": "https://www.pfaelzerwald-tourismus.de/radfahren/e-bike-stationen/e-bike-stationen-nach-radwegen.html",
+    "query": "Gasthaus Zum Roten Baum Wallhalben Mühlenradweg"
+  },
+  {
+    "name": "Landauer Hütte am Zimmerbrunnen",
+    "category": "Hütte / Ladesäule",
+    "region": "Südliche Weinstraße / Pfälzerwald, Rheinland-Pfalz",
+    "address": "Am Zimmerbrunnen, 76835 Dernbach",
+    "coordinates": "49.2431, 8.0145",
+    "specialty": "PWV-Hütte unterhalb des Orensfelsens mit moderner E-Bike-Ladestation und mehreren Ladepunkten.",
+    "sourceUrl": "https://pwv-landau.de/landauer-huette/radfahrer-reiter",
+    "query": "Landauer Hütte Zimmerbrunnen E-Bike Ladestationen"
+  },
+  {
+    "name": "Totenkopfhütte PWV Maikammer",
+    "category": "Hütte / Ladesäule",
+    "region": "Haardt / Kalmit-Region, Rheinland-Pfalz",
+    "address": "Totenkopfstraße 1, 67487 Maikammer",
+    "coordinates": "49.3175, 8.0823",
+    "specialty": "Waldhütte auf der Passhöhe Totenkopf (513 m) zwischen Maikammer und Elmstein mit eigener Ladesäule.",
+    "sourceUrl": "https://www.pfalz.de/de/sehenswuerdigkeit/e-bike-ladestation-totenkopfhuette",
+    "query": "Totenkopfhütte PWV Maikammer E-Bike Ladestation"
+  },
+  {
+    "name": "Elbsee Restaurant & E-Bike Ladepunkt",
+    "category": "Gastro / Ladesäule",
+    "region": "Ostallgäu, Bayern",
+    "address": "Am Elbsee 1, 87648 Aitrang",
+    "coordinates": "47.8182, 10.5367",
+    "specialty": "Moorbadesee mit Panoramarestaurant, Liegewiese und E-Bike-Akkuladestation an der Schlosspark-Radrunde.",
+    "sourceUrl": "https://www.bad-woerishofen.de/entdecken-entspannen-bewegen/bewegen-wandern-radeln/radeln/e-bike-radtankstellen",
+    "query": "Elbsee Restaurant Aitrang E-Bike Ladestation"
+  },
+  {
+    "name": "Gasthaus zum Metzgerwirt Lechbruck",
+    "category": "Gastro / Ladesäule",
+    "region": "Ostallgäu / Via Claudia Augusta, Bayern",
+    "address": "Flößerstraße 14, 86983 Lechbruck am See",
+    "coordinates": "47.6974, 10.7938",
+    "specialty": "Traditionsgasthaus am Flößerdorf am Lechsee mit 6 E-Bike-Ladepunkten direkt an der Via Claudia Augusta.",
+    "sourceUrl": "https://www.bad-woerishofen.de/entdecken-entspannen-bewegen/bewegen-wandern-radeln/radeln/e-bike-radtankstellen",
+    "query": "Gasthaus zum Metzgerwirt Lechbruck E-Bike Ladesysteme"
+  },
+  {
+    "name": "Kaltentaler Brauhaus & Restaurant Zur Traube",
+    "category": "Brauhaus / Ladesäule",
+    "region": "Ostallgäu, Bayern",
+    "address": "Blonhofener Straße 12, 87662 Kaltental-Aufkirch",
+    "coordinates": "47.8923, 10.7412",
+    "specialty": "Privatbrauerei und Biergarten an der Dampflok-Radrunde mit eigener E-Bike-Ladestation.",
+    "sourceUrl": "https://www.bad-woerishofen.de/entdecken-entspannen-bewegen/bewegen-wandern-radeln/radeln/e-bike-radtankstellen",
+    "query": "Kaltentaler Brauhaus Kaltental Aufkirch E-Bike Ladestation"
+  },
+  {
+    "name": "Wirtshaus Beim Füchsle Ettringen",
+    "category": "Gastro / Ladesäule",
+    "region": "Unterallgäu / Wertachtal, Bayern",
+    "address": "Kirchsiebnach 3, 86833 Ettringen",
+    "coordinates": "48.1634, 10.6618",
+    "specialty": "Uriges Dorfgasthaus an der Wertach-Radroute mit Ladesäule im Biergarten.",
+    "sourceUrl": "https://www.bad-woerishofen.de/entdecken-entspannen-bewegen/bewegen-wandern-radeln/radeln/e-bike-radtankstellen",
+    "query": "Wirtshaus Beim Füchsle Kirchsiebnach Ettringen E-Bike"
+  },
+  {
+    "name": "Brauereigasthof Holzhausen",
+    "category": "Brauhaus / Ladesäule",
+    "region": "Lechrain / Ostallgäu, Bayern",
+    "address": "Hauptstraße 8, 86859 Igling-Holzhausen",
+    "coordinates": "48.0512, 10.7951",
+    "specialty": "Brauereigasthof mit Biergarten und Ladestation an der Welfen-Radrunde nahe Landsberg.",
+    "sourceUrl": "https://www.bad-woerishofen.de/entdecken-entspannen-bewegen/bewegen-wandern-radeln/radeln/e-bike-radtankstellen",
+    "query": "Brauereigasthof Holzhausen Igling E-Bike Ladestation"
+  },
+  {
+    "name": "Gasthof Stern Rammingen",
+    "category": "Gastro / Ladesäule",
+    "region": "Unterallgäu / Kneippland, Bayern",
+    "address": "Hauptstraße 13, 86871 Rammingen",
+    "coordinates": "48.0673, 10.5849",
+    "specialty": "Schwäbischer Landgasthof mit Bike-Ladestationen an der Kneipp-Radrunde.",
+    "sourceUrl": "https://www.bad-woerishofen.de/entdecken-entspannen-bewegen/bewegen-wandern-radeln/radeln/e-bike-radtankstellen",
+    "query": "Gasthof Stern Rammingen E-Bike Ladesäule"
+  },
+  {
+    "name": "Biberhof Sonthofen Öko-Ladestation",
+    "category": "Ladesäule / Rastplatz",
+    "region": "Oberallgäu, Bayern",
+    "address": "Biberhof 1, 87527 Sonthofen",
+    "coordinates": "47.5187, 10.2831",
+    "specialty": "Ökologisches Bildungszentrum mit Hof-Café und Solar-E-Bike-Ladestation an der Dörfer-Radrunde Sonthofen.",
+    "sourceUrl": "https://www.allgaeu.de/touren/doerfer-radrunde-sonthofen",
+    "query": "Dörfer-Radrunde Sonthofen Akkuladestation Biberhof"
+  },
+  {
+    "name": "Alpenrose Tiefenbach E-Bike Hub",
+    "category": "Hotel / Ladesäule",
+    "region": "Allgäuer Hochalpen, Bayern",
+    "address": "Rohrmooser Straße 1, 87561 Oberstdorf OT Tiefenbach",
+    "coordinates": "47.4309, 10.2458",
+    "specialty": "Alpenhotel am Eingang zum Rohrmoostal und zur Breitachklamm mit E-Bike-Ladeinfrastruktur für Gebirgstouren.",
+    "sourceUrl": "https://www.oberstdorf.de/sommer/rad-bike/",
+    "query": "Oberstdorf Tiefenbach Alpenrose E-Bike Ladestation"
+  },
+  {
+    "name": "Pier 1 Höxter Weserstrand Ladestation",
+    "category": "Gastro / Strandbar / Ladesäule",
+    "region": "Weserbergland, Nordrhein-Westfalen",
+    "address": "Sportzentrum 1, 37671 Höxter",
+    "coordinates": "51.7745, 9.3872",
+    "specialty": "Weserstrandbar direkt am Weser-Radweg mit Liegestühlen, kühlen Getränken und E-Bike-Ladefächern.",
+    "sourceUrl": "https://www.teutoburgerwald.de/region/ausflugsziele/mein-ziel/e-bike-lademoeglichkeit-pier-1-hoexter",
+    "query": "Pier 1 Höxter Weserstrand E-Bike Lademöglichkeit"
+  },
+  {
+    "name": "Bauernhof-Café Morgenfelderhof Eckfeld",
+    "category": "Café / Hof / Ladesäule",
+    "region": "Vulkaneifel, Rheinland-Pfalz",
+    "address": "Morgenfelderhof 1, 54531 Eckfeld",
+    "coordinates": "50.1147, 6.8489",
+    "specialty": "Bekanntes Bauernhof-Café nahe Eckfelder Trockenmaar und Maare-Mosel-Radweg mit E-Bike-Ladestation.",
+    "sourceUrl": "https://bauernhofcafe-morgenfelderhof.de/die-eifel/",
+    "query": "Bauernhof Café Eckfeld Vulkaneifel E-Bike Ladestation"
+  }
+]
