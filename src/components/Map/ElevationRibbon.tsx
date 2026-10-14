@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Mountain, TrendingUp } from 'lucide-react';
-import type { Route } from '../../types/navigation';
+import type { Route, LiveBikeTelemetry } from '../../types/navigation';
 import { ElevationService } from '../../services/elevationService';
 
 interface ElevationRibbonProps {
   currentRoute: Route | null;
   userLocation: { lat: number; lng: number };
-  telemetry?: any;
+  telemetry?: LiveBikeTelemetry;
   isNavigating?: boolean;
 }
 
@@ -109,11 +109,14 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, 
         maxWidth: 'calc(100vw - 116px)',
       }}
     >
-      {/* Telemetry & Weather compact row during navigation */}
-      {isNavigating && telemetry && (
+      {/* E-Bike-Telemetrie-Zeile während der Navigation — nur mit echten Daten, kein Fake-Fallback */}
+      {isNavigating && telemetry?.batteryKnown && typeof telemetry.batteryPercent === 'number' && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--accent-neon-green)', paddingBottom: '3px', borderBottom: '1px solid rgba(0, 240, 255, 0.15)' }}>
-          <span>🔋 Akku: {telemetry.batteryLevel ?? 85}% ({telemetry.estimatedRangeKm ?? 45}km)</span>
-          <span>⚡ {telemetry.powerWatts ?? 150}W</span>
+          <span>
+            🔋 Akku: {telemetry.batteryPercent}%
+            {typeof telemetry.rangeRemainingKm === 'number' && ` (${telemetry.rangeRemainingKm}km)`}
+          </span>
+          {typeof telemetry.motorPowerWatts === 'number' && <span>⚡ {telemetry.motorPowerWatts}W</span>}
         </div>
       )}
 
