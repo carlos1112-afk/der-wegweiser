@@ -4,7 +4,7 @@ import { parseBoschLdiTelemetry } from '../../src/services/ble/parsers/boschLdiP
 import { parseSpecializedTelemetry } from '../../src/services/ble/parsers/specializedParser';
 import { parseShimanoTelemetry } from '../../src/services/ble/parsers/shimanoParser';
 import { parseMahleTelemetry } from '../../src/services/ble/parsers/mahleParser';
-import { parseBafangPacket } from '../../src/services/ble/parsers/bafangParser';
+import { parseBafangPacket, isBafangSafeToWrite } from '../../src/services/ble/parsers/bafangParser';
 
 function view(size: number, fill: (v: DataView) => void): DataView {
   const v = new DataView(new ArrayBuffer(size));
@@ -79,5 +79,21 @@ describe('Szenario 3: BLE-Parser (echter Code aus src/services/ble/parsers)', ()
     const r = parseBafangPacket(view(7, (v) => { v.setUint8(0, 0x00); v.setUint8(1, 0x32); }));
     expect(r.batteryPercent).toBeUndefined();
     expect(r.motorPowerWatts).toBeUndefined();
+  });
+
+  it('Bafang Schreibschutz: bekannte Risiko-Modelle (Settings-Wipe-Gefahr) gesperrt', () => {
+    expect(isBafangSafeToWrite('Bafang M560')).toBe(false);
+    expect(isBafangSafeToWrite('Bafang M820')).toBe(false);
+    expect(isBafangSafeToWrite('C245 Display')).toBe(false);
+  });
+
+  it('Bafang Schreibschutz: bekannte sichere Modelle erlaubt', () => {
+    expect(isBafangSafeToWrite('Bafang M400')).toBe(true);
+    expect(isBafangSafeToWrite('AEG ComfortDrive')).toBe(true);
+  });
+
+  it('Bafang Schreibschutz: unbekannte Modelle und fehlender Name per Default gesperrt', () => {
+    expect(isBafangSafeToWrite('Irgendein Fremdgeraet')).toBe(false);
+    expect(isBafangSafeToWrite(undefined)).toBe(false);
   });
 });
