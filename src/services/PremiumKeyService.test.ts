@@ -11,6 +11,14 @@ import {
   setAppCheckInstance,
 } from './PremiumKeyService';
 
+vi.mock('../firebase', () => ({
+  auth: { currentUser: { getIdToken: vi.fn().mockResolvedValue('ID_TOKEN') } },
+}));
+vi.mock('firebase/app-check', () => ({
+  getToken: vi.fn().mockResolvedValue({ token: 'APPCHECK_TOKEN' }),
+}));
+import { auth } from '../firebase';
+
 // Stable mock for fetch — overridden per test as needed
 let mockFetch: ReturnType<typeof vi.fn>;
 
@@ -19,7 +27,7 @@ beforeEach(() => {
   _resetForTesting(); // resets both key cache and rate limiter
   mockFetch = vi.fn().mockResolvedValue({
     ok: true,
-    json: async () => ({ key: 'MAPS_KEY_OK' }),
+    json: async () => ({ result: { key: 'MAPS_KEY_OK' } }),
   });
   globalThis.fetch = mockFetch as typeof fetch;
 });
@@ -194,6 +202,44 @@ describe('HTTP error responses', () => {
     const err = await getGoogleMapsKey().catch((e) => e);
     expect(err).toBeInstanceOf(UserFacingError);
     expect(err.code).toBe('INVALID_RESPONSE');
+  });
+});
+
+describe('onCall wire protocol', () => {
+  beforeEach(() => {
+    vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', '');
+    vi.stubEnv('VITE_FIREBASE_FUNCTIONS_URL', 'https://fake.functions.url');
+    setAppCheckInstance({} as any);
+  });
+
+  it('sends ID token as Bearer, App Check in X-Firebase-AppCheck, {data} body', async () => {
+    await getGoogleMapsKey();
+    const [url, init] = mockFetch.mock.calls[0];
+    expect(url).toBe('https://fake.functions.url/issueGoogleMapsKey');
+    expect(init.headers['Authorization']).toBe('Bearer ID_TOKEN');
+    expect(init.headers['X-Firebase-AppCheck']).toBe('APPCHECK_TOKEN');
+    expect(JSON.parse(init.body)).toEqual({ data: {} });
+  });
+
+  it('throws UNAUTHENTICATED without fetching when no user is signed in', async () => {
+    const original = (auth as any).currentUser;
+    (auth as any).currentUser = null;
+    const err = await getGoogleMapsKey().catch((e) => e);
+    (auth as any).currentUser = original;
+    expect(err.code).toBe('UNAUTHENTICATED');
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('maps HTTP 401 to UNAUTHENTICATED and 429 to RATE_LIMIT_EXCEEDED', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 401, json: async () => ({}) });
+    expect((await getGoogleMapsKey().catch((e) => e)).code).toBe('UNAUTHENTICATED');
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({}) });
+    expect((await getGoogleMapsKey().catch((e) => e)).code).toBe('RATE_LIMIT_EXCEEDED');
+  });
+
+  it('rejects unwrapped legacy {key} response as INVALID_RESPONSE', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({ key: 'X' }) });
+    expect((await getGoogleMapsKey().catch((e) => e)).code).toBe('INVALID_RESPONSE');
   });
 });
 

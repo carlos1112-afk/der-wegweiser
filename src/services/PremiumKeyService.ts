@@ -11,6 +11,7 @@
 
 import type { AppCheck } from 'firebase/app-check';
 import { getToken } from 'firebase/app-check';
+import { auth } from '../firebase';
 
 /** Error surfaced directly to the user (localised message, no stack trace). */
 export class UserFacingError extends Error {
@@ -74,31 +75,53 @@ async function issueGoogleMapsKey(): Promise<string> {
   // Client-side rate limit check
   checkRateLimit();
 
-  // Obtain Firebase App Check token for instance binding (Bearer schema)
+  // Firebase Auth ID token (required by the onCall function: Authorization header)
+  let idToken: string | null = null;
+  try {
+    idToken = (await auth?.currentUser?.getIdToken()) ?? null;
+  } catch (e) {
+    console.warn('[PremiumKeyService] ID-Token nicht verfügbar:', e);
+  }
+  if (!idToken) {
+    throw new UserFacingError(
+      'Bitte melde dich an, um den Premium-Kartenschlüssel zu erhalten.',
+      'UNAUTHENTICATED',
+    );
+  }
+
+  // Firebase App Check token (separate X-Firebase-AppCheck header)
   let appCheckToken: string | null = null;
   if (_appCheckInstance) {
     try {
       const tokenResult = await getToken(_appCheckInstance, /* forceRefresh */ false);
       appCheckToken = tokenResult.token;
     } catch (e) {
-      // Non-fatal: proceed without token; server enforces App Check if configured.
+      // Non-fatal: proceed without token; server enforces App Check and rejects.
       console.warn('[PremiumKeyService] App Check token nicht verfügbar:', e);
     }
   }
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    Authorization: `Bearer ${idToken}`,
   };
   if (appCheckToken) {
-    headers['Authorization'] = `Bearer ${appCheckToken}`;
+    headers['X-Firebase-AppCheck'] = appCheckToken;
   }
 
+  // onCall protocol: request body is wrapped in {"data": ...}
   const response = await fetch(`${functionsUrl}/issueGoogleMapsKey`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({}),
+    body: JSON.stringify({ data: {} }),
   });
 
+  if (response.status === 401) {
+    throw new UserFacingError(
+      'Anmeldung oder App-Prüfung fehlgeschlagen. Bitte erneut anmelden.',
+      'UNAUTHENTICATED',
+    );
+  }
   if (response.status === 402) {
     throw new UserFacingError(
       'Kein aktives Premium-Abonnement. Bitte Premium erwerben, um fortzufahren.',
@@ -111,6 +134,12 @@ async function issueGoogleMapsKey(): Promise<string> {
       'FORBIDDEN',
     );
   }
+  if (response.status === 429) {
+    throw new UserFacingError(
+      'Zu viele Schlüsselanforderungen. Bitte warte eine Minute.',
+      'RATE_LIMIT_EXCEEDED',
+    );
+  }
   if (!response.ok) {
     throw new UserFacingError(
       `Schlüsselanforderung fehlgeschlagen (HTTP ${response.status}).`,
@@ -118,14 +147,16 @@ async function issueGoogleMapsKey(): Promise<string> {
     );
   }
 
-  const data = (await response.json()) as { key?: string };
-  if (!data.key) {
+  // onCall protocol: response is wrapped in {"result": ...}
+  const data = (await response.json()) as { result?: { key?: string } };
+  const key = data.result?.key;
+  if (!key) {
     throw new UserFacingError(
       'Ungültige Antwort vom Schlüssel-Service.',
       'INVALID_RESPONSE',
     );
   }
-  return data.key;
+  return key;
 }
 
 export async function getGoogleMapsKey(): Promise<string> {
