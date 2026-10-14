@@ -110,14 +110,14 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
     if (confirmWipe) {
       SoundFxService.playWarningTone();
-      const result = await AccountDeletionService.executeFullAccountDeletion();
-      if (result.success) {
+      try {
+        await AccountDeletionService.deleteAccount();
         setIsDataDeleted(true);
         setTimeout(() => {
           window.location.reload();
         }, 1500);
-      } else {
-        alert(result.message);
+      } catch (e: any) {
+        alert(e?.message ?? 'Die Kontolöschung ist fehlgeschlagen. Bitte versuche es erneut.');
       }
     }
   };
