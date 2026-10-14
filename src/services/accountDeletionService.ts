@@ -3,27 +3,15 @@ import { deleteUser } from 'firebase/auth';
 import { doc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { ref, listAll, deleteObject } from 'firebase/storage';
 
-export interface DeletionResult {
-  success: boolean;
-  message: string;
-  authDeleted: boolean;
-  cloudDataDeleted: boolean;
-  localDataDeleted: boolean;
-}
-
 export class AccountDeletionService {
   /**
-   * Performs complete end-to-end deletion of user account and all associated data across:
+   * Permanently deletes the user's account and all associated data.
    * 1. Firestore collections (users, user_tokens, user_preferences, user_memory_patterns, routes, charging_stations, scout_reports)
    * 2. Cloud Storage (user uploads and photos)
    * 3. Firebase Authentication account (auth.currentUser) - executed ONLY AFTER cloud data wipe
    * 4. Local device storage (localStorage, sessionStorage, IndexedDB)
    */
-  public static async executeFullAccountDeletion(): Promise<DeletionResult> {
-    let authDeleted = false;
-    let cloudDataDeleted = false;
-    let localDataDeleted = false;
-
+  public static async deleteAccount(): Promise<void> {
     const currentUser = auth.currentUser;
 
     if (currentUser) {
@@ -78,8 +66,6 @@ export class AccountDeletionService {
         } catch (e) {
           // Ignore if directory doesn't exist
         }
-
-        cloudDataDeleted = true;
       } catch (e) {
         console.warn('[AccountDeletionService] Cloud data deletion warning:', e);
       }
@@ -87,23 +73,12 @@ export class AccountDeletionService {
       // ── 3. Delete Firebase Authentication account (ONLY AFTER cloud data is wiped) ──
       try {
         await deleteUser(currentUser);
-        authDeleted = true;
       } catch (e: any) {
         console.warn('[AccountDeletionService] Auth deletion error (requires re-auth if stale):', e);
         if (e.code === 'auth/requires-recent-login') {
-          return {
-            success: false,
-            message: 'Bitte melde dich kurz erneut an, um die Kontolöschung aus Sicherheitsgründen zu bestätigen.',
-            authDeleted: false,
-            cloudDataDeleted,
-            localDataDeleted: false,
-          };
+          throw new Error('Bitte melde dich kurz erneut an, um die Kontolöschung aus Sicherheitsgründen zu bestätigen.');
         }
       }
-    } else {
-      // Anonymous / Local-only user: no cloud account to delete
-      cloudDataDeleted = true;
-      authDeleted = true;
     }
 
     // ── 4. Clear all local storage & caches ──
@@ -144,17 +119,8 @@ export class AccountDeletionService {
           );
         }
       }
-      localDataDeleted = true;
     } catch (e) {
       console.warn('[AccountDeletionService] Local storage clear error:', e);
     }
-
-    return {
-      success: true,
-      message: 'Konto und alle zugehörigen Daten wurden erfolgreich und unwiderruflich gelöscht.',
-      authDeleted,
-      cloudDataDeleted,
-      localDataDeleted,
-    };
   }
 }
