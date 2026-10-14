@@ -38,7 +38,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.88)',
+        backgroundColor: 'rgba(24, 24, 24, 0.88)',
         backdropFilter: 'blur(16px)',
         zIndex: 2100,
         display: 'flex',
@@ -141,7 +141,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
                 style={{
                   width: '100%',
                   padding: '10px 14px',
-                  backgroundColor: 'rgba(10, 15, 25, 0.8)',
+                  backgroundColor: 'rgba(28, 28, 28, 0.8)',
                   border: '1px solid var(--border-glass)',
                   borderRadius: '10px',
                   color: '#fff',
@@ -163,7 +163,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
                 style={{
                   width: '100%',
                   padding: '10px 14px',
-                  backgroundColor: 'rgba(10, 15, 25, 0.8)',
+                  backgroundColor: 'rgba(28, 28, 28, 0.8)',
                   border: '1px solid var(--border-glass)',
                   borderRadius: '10px',
                   color: '#fff',
@@ -182,7 +182,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
                   borderRadius: '12px',
                   cursor: 'pointer',
                   border: selectedPlan === 'free' ? '2px solid var(--accent-cyan)' : '1px solid var(--border-glass)',
-                  backgroundColor: selectedPlan === 'free' ? 'rgba(0, 240, 255, 0.1)' : 'transparent',
+                  backgroundColor: selectedPlan === 'free' ? 'rgba(0, 230, 163, 0.1)' : 'transparent',
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.8rem', color: '#fff' }}>Basis Eintrag</div>

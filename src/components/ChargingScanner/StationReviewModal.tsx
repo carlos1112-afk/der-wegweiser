@@ -80,7 +80,7 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.88)',
+        backgroundColor: 'rgba(24, 24, 24, 0.88)',
         backdropFilter: 'blur(16px)',
         zIndex: 2200,
         display: 'flex',
@@ -152,7 +152,7 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                backgroundColor: 'rgba(10, 15, 25, 0.8)',
+                backgroundColor: 'rgba(28, 28, 28, 0.8)',
                 border: '1px solid var(--border-glass)',
                 borderRadius: '10px',
                 color: '#fff',
@@ -260,7 +260,7 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  backgroundColor: 'rgba(10, 15, 25, 0.8)',
+                  backgroundColor: 'rgba(28, 28, 28, 0.8)',
                   border: '1px solid var(--border-glass)',
                   borderRadius: '10px',
                   color: '#fff',

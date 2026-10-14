@@ -101,7 +101,7 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, 
         display: 'flex',
         flexDirection: 'column',
         gap: '4px',
-        backgroundColor: 'rgba(10, 18, 30, 0.92)',
+        backgroundColor: 'rgba(28, 28, 28, 0.92)',
         backdropFilter: 'blur(12px)',
         border: '1px solid var(--border-glass)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
@@ -111,7 +111,7 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({ currentRoute, 
     >
       {/* E-Bike-Telemetrie-Zeile während der Navigation — nur mit echten Daten, kein Fake-Fallback */}
       {isNavigating && telemetry?.batteryKnown && typeof telemetry.batteryPercent === 'number' && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--accent-neon-green)', paddingBottom: '3px', borderBottom: '1px solid rgba(0, 240, 255, 0.15)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: 'var(--accent-neon-green)', paddingBottom: '3px', borderBottom: '1px solid rgba(0, 230, 163, 0.15)' }}>
           <span>
             🔋 Akku: {telemetry.batteryPercent}%
             {typeof telemetry.rangeRemainingKm === 'number' && ` (${telemetry.rangeRemainingKm}km)`}

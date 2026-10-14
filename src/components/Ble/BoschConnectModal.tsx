@@ -201,7 +201,7 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.88)',
+        backgroundColor: 'rgba(24, 24, 24, 0.88)',
         backdropFilter: 'blur(16px)',
         zIndex: 2200,
         display: 'flex',
@@ -373,7 +373,7 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       cursor: 'pointer',
-                      backgroundColor: 'rgba(0, 240, 255, 0.08)',
+                      backgroundColor: 'rgba(0, 230, 163, 0.08)',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -413,7 +413,7 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
                 padding: '12px',
                 backgroundColor: 'rgba(0, 80, 157, 0.15)',
                 borderRadius: '12px',
-                border: '1px solid rgba(0, 240, 255, 0.2)',
+                border: '1px solid rgba(0, 230, 163, 0.2)',
               }}
             >
               <div>

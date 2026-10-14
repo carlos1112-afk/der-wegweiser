@@ -39,7 +39,7 @@ export const WeatherHUD: React.FC<WeatherHUDProps> = ({ userLocation }) => {
           display: 'flex',
           alignItems: 'center',
           gap: '5px',
-          border: '1px solid rgba(0, 240, 255, 0.25)',
+          border: '1px solid rgba(0, 230, 163, 0.25)',
           fontSize: '0.78rem',
           cursor: 'pointer',
         }}
@@ -83,7 +83,7 @@ export const WeatherHUD: React.FC<WeatherHUDProps> = ({ userLocation }) => {
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
-            backgroundColor: 'rgba(10, 16, 28, 0.96)',
+            backgroundColor: 'rgba(28, 28, 28, 0.96)',
             border: '1px solid var(--accent-cyan)',
             boxShadow: 'var(--glow-cyan)',
             fontSize: '0.8rem',

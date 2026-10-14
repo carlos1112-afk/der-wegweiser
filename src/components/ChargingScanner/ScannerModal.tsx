@@ -88,7 +88,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
       particleCount: 80,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#00f0ff', '#00ff66', '#ffb700']
+      colors: ['#00E6A3', '#00ff66', '#ffb700']
     });
 
     setTokensEarned(20);
@@ -105,7 +105,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(5, 8, 15, 0.85)',
+        backgroundColor: 'rgba(20, 20, 20, 0.85)',
         backdropFilter: 'blur(10px)',
         zIndex: 2000,
         display: 'flex',
@@ -164,7 +164,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    backgroundColor: 'rgba(10, 15, 25, 0.8)',
+                    backgroundColor: 'rgba(28, 28, 28, 0.8)',
                     border: '1px solid var(--border-glass)',
                     borderRadius: '8px',
                     color: '#fff',
@@ -236,7 +236,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    backgroundColor: 'rgba(10, 15, 25, 0.8)',
+                    backgroundColor: 'rgba(28, 28, 28, 0.8)',
                     border: '1px solid var(--border-glass)',
                     borderRadius: '8px',
                     color: '#fff',
@@ -285,7 +285,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
                       padding: '8px',
                       borderRadius: '6px',
                       border: '1px solid var(--border-glass)',
-                      backgroundColor: isFree ? 'rgba(0, 240, 255, 0.2)' : 'transparent',
+                      backgroundColor: isFree ? 'rgba(0, 230, 163, 0.2)' : 'transparent',
                       color: isFree ? 'var(--accent-cyan)' : 'var(--text-muted)',
                       cursor: 'pointer',
                     }}

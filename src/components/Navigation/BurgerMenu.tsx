@@ -61,12 +61,12 @@ export const BurgerMenu: React.FC<BurgerMenuProps> = ({
           padding: '20px',
           overflowY: 'auto',
           animation: 'slideInLeft 0.3s ease',
-          backgroundColor: 'rgba(10, 16, 28, 0.95)',
-          borderRight: '1px solid var(--accent-cyan)'
+          backgroundColor: 'rgba(28, 28, 28, 0.95)',
+          borderRight: '1px solid rgba(148, 163, 184, 0.4)'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '1.2rem', color: 'var(--accent-cyan)', margin: 0, fontWeight: 'bold' }}>Menü</h2>
+          <h2 style={{ fontSize: '1.2rem', color: '#ffffff', margin: 0, fontWeight: 'bold' }}>Menü</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>
             <X size={24} />
           </button>

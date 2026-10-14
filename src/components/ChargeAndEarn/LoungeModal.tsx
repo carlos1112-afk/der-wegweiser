@@ -398,11 +398,11 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   const sectors = [
     { label: '+8 Tok.', amount: 8, color: '#111c30', strokeColor: '#ffb700', textColor: '#ffb700', fullLabel: '🪙 +8 Tokens gewonnen! Toller Pausengewinn! 🎉' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
-    { label: '+5 Tok.', amount: 5, color: '#0c2533', strokeColor: '#00f0ff', textColor: '#00f0ff', fullLabel: '🪙 +5 Tokens gewonnen! Dranbleiben! 🚀' },
+    { label: '+5 Tok.', amount: 5, color: '#0c2533', strokeColor: '#00E6A3', textColor: '#00E6A3', fullLabel: '🪙 +5 Tokens gewonnen! Dranbleiben! 🚀' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
     { label: '+2 Tok.', amount: 2, color: '#1a102f', strokeColor: '#b026ff', textColor: '#b026ff', fullLabel: '🪙 +2 Tokens gewonnen! Kleinvieh macht auch Mist! 🔋' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
-    { label: '+10 Tok.', amount: 10, color: '#0c2533', strokeColor: '#00f0ff', textColor: '#00f0ff', fullLabel: '🪙 +10 Tokens gewonnen! Großartig! 🌟' },
+    { label: '+10 Tok.', amount: 10, color: '#0c2533', strokeColor: '#00E6A3', textColor: '#00E6A3', fullLabel: '🪙 +10 Tokens gewonnen! Großartig! 🌟' },
     { label: 'Niete', amount: 0, color: '#090d16', strokeColor: '#1e293b', textColor: '#64748b', fullLabel: 'Leider eine Niete erwischt! Beim nächsten Mal klappt es bestimmt. 😉' },
   ];
 
@@ -684,7 +684,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 8, 15, 0.88)',
+        backgroundColor: 'rgba(20, 20, 20, 0.88)',
         backdropFilter: 'blur(16px)',
         zIndex: 2000,
         display: 'flex',
@@ -988,7 +988,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                   <div
                     style={{
                       padding: '12px 14px',
-                      backgroundColor: 'rgba(0, 240, 255, 0.06)',
+                      backgroundColor: 'rgba(0, 230, 163, 0.06)',
                       borderRadius: '12px',
                       border: '1px dashed var(--accent-cyan)',
                       marginBottom: '16px',
@@ -1044,7 +1044,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     padding: '12px 14px',
                     borderRadius: '12px',
                     border: questPinConfirmed ? '1px solid #00ff66' : '1px solid var(--accent-cyan)',
-                    backgroundColor: questPinConfirmed ? 'rgba(0, 255, 102, 0.08)' : 'rgba(0, 240, 255, 0.05)',
+                    backgroundColor: questPinConfirmed ? 'rgba(0, 255, 102, 0.08)' : 'rgba(0, 230, 163, 0.05)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -1105,7 +1105,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                 <div
                   style={{
                     padding: '12px 16px',
-                    backgroundColor: 'rgba(0, 240, 255, 0.08)',
+                    backgroundColor: 'rgba(0, 230, 163, 0.08)',
                     borderRadius: '14px',
                     border: '1px solid var(--accent-cyan)',
                     marginBottom: '14px',
@@ -1136,7 +1136,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                           padding: '14px',
                           borderRadius: '14px',
                           border: isDone ? '1px solid rgba(0, 255, 102, 0.3)' : '1px solid var(--accent-gold)',
-                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(15, 22, 36, 0.6)',
+                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(32, 32, 32, 0.6)',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
@@ -1279,7 +1279,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                           padding: '14px',
                           borderRadius: '14px',
                           border: isDone ? '1px solid rgba(0, 255, 102, 0.3)' : '1px solid var(--border-glass)',
-                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(15, 22, 36, 0.6)',
+                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(32, 32, 32, 0.6)',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
@@ -1329,7 +1329,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
         {activeTab === 'catcher' && (
           <div style={{ padding: '8px 0', textAlign: 'center' }}>
             {!catcherActive ? (
-              <div style={{ padding: '20px', backgroundColor: 'rgba(0, 240, 255, 0.05)', borderRadius: '14px', border: '1px solid var(--border-glass)' }}>
+              <div style={{ padding: '20px', backgroundColor: 'rgba(0, 230, 163, 0.05)', borderRadius: '14px', border: '1px solid var(--border-glass)' }}>
                 <Zap size={40} className="glow-text-cyan" style={{ margin: '0 auto 12px' }} />
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>
                   WATT-CATCHER REAKTIONS-GAME
@@ -1357,7 +1357,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     position: 'relative',
                     width: '100%',
                     height: '240px',
-                    backgroundColor: 'rgba(5, 12, 24, 0.9)',
+                    backgroundColor: 'rgba(24, 24, 24, 0.9)',
                     borderRadius: '16px',
                     border: '1px solid var(--accent-cyan)',
                     overflow: 'hidden',
@@ -1398,7 +1398,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
         {activeTab === 'quiz' && (
           <div style={{ padding: '8px 0' }}>
             {quizAlreadyCompletedOnLoad ? (
-              <div style={{ padding: '24px 16px', backgroundColor: 'rgba(0, 240, 255, 0.05)', borderRadius: '12px', border: '1px dashed rgba(0, 240, 255, 0.3)', textAlign: 'center' }}>
+              <div style={{ padding: '24px 16px', backgroundColor: 'rgba(0, 230, 163, 0.05)', borderRadius: '12px', border: '1px dashed rgba(0, 230, 163, 0.3)', textAlign: 'center' }}>
                 <p style={{ fontWeight: 'bold', color: 'var(--accent-cyan)', marginBottom: '8px', fontSize: '1.1rem' }}>
                   🔒 Quiz bereits absolviert
                 </p>
@@ -1426,7 +1426,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     const showCorrect = quizAnswered && opt.isCorrect;
                     const showWrong = quizAnswered && isSelected && !opt.isCorrect;
 
-                    let buttonBg = 'rgba(10, 15, 25, 0.8)';
+                    let buttonBg = 'rgba(28, 28, 28, 0.8)';
                     let buttonBorder = '1px solid var(--border-glass)';
                     let buttonColor = '#fff';
 
@@ -1519,7 +1519,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                   </button>
                 </div>
 
-                <div style={{ padding: '10px', backgroundColor: 'rgba(0, 240, 255, 0.08)', borderRadius: '10px', border: '1px solid rgba(0, 240, 255, 0.2)' }}>
+                <div style={{ padding: '10px', backgroundColor: 'rgba(0, 230, 163, 0.08)', borderRadius: '10px', border: '1px solid rgba(0, 230, 163, 0.2)' }}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>🚀 Power-Pack (500 Tok.)</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', marginBottom: '8px' }}>4,99 € (Beliebt)</div>
                   <button onClick={() => handleInitiateBuyTokenPack(500, '4,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
@@ -1555,7 +1555,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                       flexDirection: 'column',
                       justifyContent: 'space-between',
                       gap: '10px',
-                      backgroundColor: 'rgba(15, 22, 36, 0.6)',
+                      backgroundColor: 'rgba(32, 32, 32, 0.6)',
                     }}
                   >
                     <div>
@@ -1656,7 +1656,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     justifyContent: 'space-between',
                     padding: '10px 14px',
                     borderRadius: '12px',
-                    backgroundColor: entry.isUser ? 'rgba(0, 240, 255, 0.15)' : 'rgba(15, 22, 36, 0.5)',
+                    backgroundColor: entry.isUser ? 'rgba(0, 230, 163, 0.15)' : 'rgba(32, 32, 32, 0.5)',
                     border: entry.isUser ? '1px solid var(--accent-cyan)' : '1px solid var(--border-glass)',
                   }}
                 >
@@ -1787,7 +1787,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(5, 10, 20, 0.94)',
+            backgroundColor: 'rgba(24, 24, 24, 0.94)',
             backdropFilter: 'blur(16px)',
             zIndex: 3500,
             display: 'flex',

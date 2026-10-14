@@ -64,7 +64,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.95)',
+        backgroundColor: 'rgba(24, 24, 24, 0.95)',
         backdropFilter: 'blur(20px)',
         zIndex: 3000,
         display: 'flex',
@@ -131,9 +131,9 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
               <div
                 style={{
                   padding: '12px 14px',
-                  backgroundColor: 'rgba(0, 240, 255, 0.08)',
+                  backgroundColor: 'rgba(0, 230, 163, 0.08)',
                   borderRadius: '14px',
-                  border: '1px solid rgba(0, 240, 255, 0.25)',
+                  border: '1px solid rgba(0, 230, 163, 0.25)',
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '10px',
@@ -211,7 +211,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
               gap: '8px',
               position: 'sticky',
               bottom: '-26px', // offset the 26px padding of the parent
-              backgroundColor: 'rgba(5, 10, 20, 0.98)',
+              backgroundColor: 'rgba(24, 24, 24, 0.98)',
               padding: '16px 26px 26px 26px',
               margin: '16px -26px -26px -26px',
               borderTop: '1px solid rgba(0, 255, 255, 0.2)',
@@ -318,7 +318,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
               gap: '8px', 
               position: 'sticky',
               bottom: '-26px', // offset the 26px padding of the parent
-              backgroundColor: 'rgba(5, 10, 20, 0.98)',
+              backgroundColor: 'rgba(24, 24, 24, 0.98)',
               padding: '16px 26px 26px 26px',
               margin: '16px -26px -26px -26px',
               borderTop: '1px solid rgba(0, 255, 255, 0.2)',

@@ -32,7 +32,7 @@ export const ConfettiOverlay: React.FC<ConfettiOverlayProps> = ({ isNavigating }
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#00ffff', '#ffb700'],
+        colors: ['#00E6A3', '#ffb700'],
         gravity: 0.5,
         scalar: 0.7,
       });
@@ -42,7 +42,7 @@ export const ConfettiOverlay: React.FC<ConfettiOverlayProps> = ({ isNavigating }
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#00ffff', '#ffb700'],
+        colors: ['#00E6A3', '#ffb700'],
         gravity: 0.5,
         scalar: 0.7,
       });
