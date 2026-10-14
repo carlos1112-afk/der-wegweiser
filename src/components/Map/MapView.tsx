@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { Feature, FeatureCollection, LineString, Polygon } from 'geojson';
-import { setOptions as gMapsSetOptions, importLibrary as gMapsImportLibrary } from '@googlemaps/js-api-loader';
 import type { Route, ChargingStation } from '../../types/navigation';
 import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Lock } from 'lucide-react';
 import { TurnByTurnBanner } from './TurnByTurnBanner';
 import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
-import { getGoogleMapsKey } from '../../services/PremiumKeyService';
+import { CesiumPremiumCanvas, type CesiumPremiumCanvasHandle, type CesiumPremiumTheme } from './CesiumPremiumCanvas';
 import { readMapKeys, demSource, cycleSource, topoSource, satelliteSource } from './mapSources';
 
 export type MapTileTheme = 'topo' | 'cycle' | 'satellite' | 'satellite-3d' | 'topo-premium' | 'cycle-premium';
@@ -144,69 +143,6 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
   }
 }
 
-// ── Google Maps satellite hybrid — night style (from Google Styled Maps) ─────
-const SATELLITE_NIGHT_STYLE = [
-  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-  { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#263c3f' }] },
-  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#6b9a76' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#38414e' }] },
-  { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#212a37' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#9ca5b3' }] },
-  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#746855' }] },
-  { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#1f2835' }] },
-  { featureType: 'road.highway', elementType: 'labels.text.fill', stylers: [{ color: '#f3d19c' }] },
-  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2f3948' }] },
-  { featureType: 'transit.station', elementType: 'labels.text.fill', stylers: [{ color: '#d59563' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#515c6d' }] },
-  { featureType: 'water', elementType: 'labels.text.stroke', stylers: [{ color: '#17263c' }] },
-];
-
-// ── Google Maps topo-premium style (fallback when no Map ID configured) ──────
-const TOPO_PREMIUM_STYLE = [
-  { elementType: 'geometry',           stylers: [{ color: '#f5ede0' }] },
-  { elementType: 'labels.text.fill',   stylers: [{ color: '#4a3728' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5ede0' }] },
-  { featureType: 'landscape.natural',  elementType: 'geometry',           stylers: [{ color: '#d4e8c2' }] },
-  { featureType: 'poi.park',           elementType: 'geometry',           stylers: [{ color: '#b8dba0' }] },
-  { featureType: 'poi.park',           elementType: 'labels.text.fill',   stylers: [{ color: '#2d6a1f' }] },
-  { featureType: 'water',              elementType: 'geometry',           stylers: [{ color: '#7ab8d4' }] },
-  { featureType: 'water',              elementType: 'labels.text.fill',   stylers: [{ color: '#1a5c80' }] },
-  { featureType: 'water',              elementType: 'labels.text.stroke', stylers: [{ color: '#7ab8d4' }] },
-  { featureType: 'road',               elementType: 'geometry',           stylers: [{ color: '#ffffff' }] },
-  { featureType: 'road',               elementType: 'geometry.stroke',    stylers: [{ color: '#c8b89a' }] },
-  { featureType: 'road',               elementType: 'labels.text.fill',   stylers: [{ color: '#6b4f3a' }] },
-  { featureType: 'road.highway',       elementType: 'geometry',           stylers: [{ color: '#f5c05a' }] },
-  { featureType: 'road.highway',       elementType: 'geometry.stroke',    stylers: [{ color: '#e0a030' }] },
-  { featureType: 'road.local',         elementType: 'geometry',           stylers: [{ color: '#ede8df' }] },
-  { featureType: 'landscape.man_made', elementType: 'geometry',           stylers: [{ color: '#e8ddd0' }] },
-  { featureType: 'administrative',     elementType: 'geometry.stroke',    stylers: [{ color: '#9c8070' }] },
-  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#4a3728' }] },
-  { featureType: 'transit',            stylers: [{ visibility: 'off' }] },
-  { featureType: 'poi.business',       stylers: [{ visibility: 'off' }] },
-];
-
-// ── Google Maps cycle-premium style (fallback when no Map ID configured) ─────
-const CYCLE_PREMIUM_STYLE = [
-  { elementType: 'geometry', stylers: [{ color: '#f5f0e8' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#3d3522' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f0e8' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
-  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#f5c842' }] },
-  { featureType: 'road.local', elementType: 'geometry', stylers: [{ color: '#e8e0d0' }] },
-  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#c8e6c9' }] },
-  { featureType: 'poi.park', elementType: 'labels.text.fill', stylers: [{ color: '#2e7d32' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#a0c4e8' }] },
-  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#1a6fa8' }] },
-  { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#dcedc8' }] },
-  { featureType: 'administrative', elementType: 'geometry.stroke', stylers: [{ color: '#b0a090' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-];
-
 // ── Slope-colored GeoJSON builder ────────────────────────────────────────────
 
 type RouteGeoJSON = FeatureCollection<LineString, { layer: string; color?: string; weight?: number }>;
@@ -311,11 +247,10 @@ export const MapView: React.FC<MapViewProps> = ({
 }) => {
   // ── Map engine refs
   const mlContainerRef = useRef<HTMLDivElement>(null);    // MapLibre canvas
-  const googleContainerRef = useRef<HTMLDivElement>(null); // Google Maps canvas
   const mapRef = useRef<maplibregl.Map | null>(null);
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const stationMarkersRef = useRef<Map<string, maplibregl.Marker>>(new Map());
-  const googleMapRef = useRef<unknown>(null); // Google Maps instance (typed loosely)
+  const cesiumRef = useRef<CesiumPremiumCanvasHandle>(null); // Cesium premium viewer (imperative recenter)
 
   // ── State
   const [is3DMode, setIs3DMode] = useState(false);
@@ -326,10 +261,10 @@ export const MapView: React.FC<MapViewProps> = ({
   const [selectedDestination, setSelectedDestination] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedStationState, setSelectedStationState] = useState<ChargingStation | null>(null);
   const [mapStyleReady, setMapStyleReady] = useState(false);
-  const [googleError, setGoogleError] = useState<string | null>(null);
+  const [cesiumError, setCesiumError] = useState<string | null>(null);
 
   const isMaplibreActive = MAPLIBRE_THEMES.has(tileTheme);
-  const isGoogleActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium' || tileTheme === 'cycle-premium';
+  const isCesiumActive = tileTheme === 'satellite-3d' || tileTheme === 'topo-premium' || tileTheme === 'cycle-premium';
   const isCardOpen = Boolean((!currentRoute && selectedDestination) || selectedStationState);
   const routePolyline = currentRoute?.pathCoordinates || [];
   const routeWaypoints = getRouteWaypoints(currentRoute);
@@ -340,6 +275,11 @@ export const MapView: React.FC<MapViewProps> = ({
   );
 
   const currentHeadingDeg = heading ?? 0;
+
+  // Neuer Premium-Submodus → neuer Versuch, kein alter Fehler aus dem vorherigen Submodus.
+  useEffect(() => {
+    setCesiumError(null);
+  }, [tileTheme]);
 
   useEffect(() => {
     if (currentRoute) setSelectedDestination(null);
@@ -541,71 +481,8 @@ export const MapView: React.FC<MapViewProps> = ({
     });
   }, [chargingStations, isMaplibreActive, onSelectStation]);
 
-  // ── Google Maps: lazy init for premium modes ──────────────────────────────────
-
-  useEffect(() => {
-    if (!isGoogleActive || !googleContainerRef.current) return;
-
-    let cancelled = false;
-    setGoogleError(null);
-
-    (async () => {
-      try {
-        const apiKey = await getGoogleMapsKey();
-        if (cancelled) return;
-
-        gMapsSetOptions({ key: apiKey, v: 'weekly' });
-        const { Map } = await gMapsImportLibrary('maps') as any;
-        if (cancelled) return;
-
-        const mapOptions: Record<string, unknown> = {
-          center: { lat: userLocation.lat, lng: userLocation.lng },
-          disableDefaultUI: true,
-        };
-
-        if (tileTheme === 'satellite-3d') {
-          mapOptions.zoom = 14;
-          mapOptions.mapTypeId = 'hybrid';
-          mapOptions.tilt = 0;
-          mapOptions.styles = SATELLITE_NIGHT_STYLE;
-        } else if (tileTheme === 'topo-premium') {
-          mapOptions.zoom = 13;
-          mapOptions.mapTypeId = 'terrain';
-          mapOptions.tilt = 45;
-          const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID_TOPO as string | undefined;
-          if (mapId) mapOptions.mapId = mapId;
-          else mapOptions.styles = TOPO_PREMIUM_STYLE;
-        } else if (tileTheme === 'cycle-premium') {
-          mapOptions.zoom = 14;
-          mapOptions.mapTypeId = 'roadmap';
-          mapOptions.tilt = 0;
-          const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID_CYCLE as string | undefined;
-          if (mapId) mapOptions.mapId = mapId;
-          else mapOptions.styles = CYCLE_PREMIUM_STYLE;
-        }
-
-        const gMap = new Map(googleContainerRef.current!, mapOptions);
-        googleMapRef.current = gMap;
-      } catch (err) {
-        if (!cancelled) {
-          setGoogleError(err instanceof Error ? err.message : 'Google Maps Fehler');
-        }
-      }
-    })();
-
-    return () => { cancelled = true; };
-  }, [tileTheme, isGoogleActive]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Update Google Maps position/heading ──────────────────────────────────────
-
-  useEffect(() => {
-    if (!isGoogleActive || !googleMapRef.current) return;
-    const m = googleMapRef.current as any;
-    m.setCenter({ lat: userLocation.lat, lng: userLocation.lng });
-    if (tileTheme === 'satellite-3d' && isCourseUp) {
-      m.setHeading(-currentHeadingDeg);
-    }
-  }, [userLocation, isCourseUp, currentHeadingDeg, tileTheme, isGoogleActive]);
+  // Cesium-Premium-Viewer-Lebenszyklus (Init, Terrain-Fallback, Positions-/Kamera-Folge,
+  // Ladesäulen-Entities) wird vollständig von <CesiumPremiumCanvas> selbst verwaltet.
 
   // ── Map control handlers ───────────────────────────────────────────────────────
 
@@ -616,12 +493,8 @@ export const MapView: React.FC<MapViewProps> = ({
     setIsAutoFollow(true);
     setIsCourseUp(false);
     mapRef.current?.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 16, speed: 1.5 });
-    if (isGoogleActive && googleMapRef.current) {
-      const m = googleMapRef.current as any;
-      m.setCenter({ lat: userLocation.lat, lng: userLocation.lng });
-      if (tileTheme === 'satellite-3d') m.setHeading(0);
-    }
-  }, [userLocation, tileTheme]);
+    cesiumRef.current?.recenter();
+  }, [userLocation]);
 
   /**
    * Standort-Button (Zielkreuz + Kompass zusammengelegt, wie bei Google Maps' eigenem
@@ -639,10 +512,8 @@ export const MapView: React.FC<MapViewProps> = ({
     }
     setIsCourseUp(false);
     mapRef.current?.easeTo({ bearing: 0, duration: 400 });
-    if (isGoogleActive && googleMapRef.current && tileTheme === 'satellite-3d') {
-      (googleMapRef.current as any).setHeading(0);
-    }
-  }, [isAutoFollow, isCourseUp, handleRecenter, isGoogleActive, tileTheme]);
+    cesiumRef.current?.recenter();
+  }, [isAutoFollow, isCourseUp, handleRecenter]);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     if (currentRoute) return;
@@ -676,24 +547,33 @@ export const MapView: React.FC<MapViewProps> = ({
         }}
       />
 
-      {/* Google Maps canvas — premium modes */}
-      <div
-        ref={googleContainerRef}
-        style={{
-          width: '100%', height: '100%', position: 'absolute', top: 0, left: 0,
-          display: isGoogleActive ? 'block' : 'none',
-          backgroundColor: '#181818',
-        }}
-      >
-        {googleError && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            height: '100%', gap: '12px', color: 'var(--text-muted)', padding: '24px', textAlign: 'center' }}>
-            <Lock size={32} style={{ color: 'var(--accent-gold)' }} />
-            <div style={{ color: '#fff', fontWeight: 'bold' }}>Premium-Karte nicht verfügbar</div>
-            <div style={{ fontSize: '0.8rem' }}>{googleError}</div>
-          </div>
-        )}
-      </div>
+      {/* Cesium-3D-Viewer — Premium-Modi. Vollständig un-/gemountet statt nur versteckt:
+          eine WebGL-Viewer-Instanz pro aktivem Premium-Submodus, kein unsichtbarer Viewer
+          im Hintergrund, wenn eine Free-Karte aktiv ist. */}
+      {isCesiumActive && (
+        <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, backgroundColor: '#181818' }}>
+          {cesiumError ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              height: '100%', gap: '12px', color: 'var(--text-muted)', padding: '24px', textAlign: 'center' }}>
+              <Lock size={32} style={{ color: 'var(--accent-gold)' }} />
+              <div style={{ color: '#fff', fontWeight: 'bold' }}>Premium-Karte nicht verfügbar</div>
+              <div style={{ fontSize: '0.8rem' }}>{cesiumError}</div>
+            </div>
+          ) : (
+            <CesiumPremiumCanvas
+              key={tileTheme}
+              ref={cesiumRef}
+              theme={tileTheme as CesiumPremiumTheme}
+              userLocation={userLocation}
+              heading={heading}
+              isCourseUp={isCourseUp}
+              chargingStations={chargingStations}
+              onSelectStation={handleStationClick}
+              onError={setCesiumError}
+            />
+          )}
+        </div>
+      )}
 
       {/* Elevation ribbon */}
       {!selectedDestination && !selectedStationState && (

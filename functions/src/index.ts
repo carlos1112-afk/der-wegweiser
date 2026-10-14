@@ -117,5 +117,6 @@ export const redeemVoucher = onCall({ region: "europe-west3" }, async (request) 
 });
 
 export * from "./issueGoogleMapsKey";
+export * from "./issueCesiumIonToken";
 export * from "./vertexRouting";
 export * from "./aiProxy";
