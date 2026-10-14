@@ -131,9 +131,9 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
               <div
                 style={{
                   padding: '12px 14px',
-                  backgroundColor: 'rgba(0, 240, 255, 0.08)',
+                  backgroundColor: 'rgba(0, 230, 163, 0.08)',
                   borderRadius: '14px',
-                  border: '1px solid rgba(0, 240, 255, 0.25)',
+                  border: '1px solid rgba(0, 230, 163, 0.25)',
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '10px',

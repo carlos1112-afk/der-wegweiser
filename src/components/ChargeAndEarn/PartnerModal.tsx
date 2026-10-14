@@ -182,7 +182,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
                   borderRadius: '12px',
                   cursor: 'pointer',
                   border: selectedPlan === 'free' ? '2px solid var(--accent-cyan)' : '1px solid var(--border-glass)',
-                  backgroundColor: selectedPlan === 'free' ? 'rgba(0, 240, 255, 0.1)' : 'transparent',
+                  backgroundColor: selectedPlan === 'free' ? 'rgba(0, 230, 163, 0.1)' : 'transparent',
                 }}
               >
                 <div style={{ fontWeight: 'bold', fontSize: '0.8rem', color: '#fff' }}>Basis Eintrag</div>

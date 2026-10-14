@@ -11,14 +11,15 @@
 export const designTokens = {
   /** Primäre Markenfarben */
   color: {
-    // Neon-Akzente (Design Freeze v88)
-    accentCyan:        '#00E5FF',  // --accent-cyan
-    accentCyanDark:    '#00a8e8',  // --accent-cyan-dark
+    // Neon-Akzente (Design Freeze v89 — Blauanteil reduziert, Ambient-Akzent ins Grünliche verschoben, Buttons auf Rot)
+    accentCyan:        '#00E6A3',  // --accent-cyan
+    accentCyanDark:    '#00B37D',  // --accent-cyan-dark
     accentGold:        '#ffb700',  // --accent-gold
     accentPink:        '#ff007f',  // --accent-pink
     accentGreen:       '#00ff66',  // --accent-neon-green
     accentDanger:      '#ff3366',  // --accent-danger
     accentRed:         '#C90000',  // --accent-red (Auth + kritische Alerts)
+    accentRedBright:   '#FF3B3B',  // --accent-red-bright (Standard-Buttons)
 
     // Hintergrund-Basis
     bgPrimary:         '#0a0d14',  // --bg-primary
@@ -33,7 +34,7 @@ export const designTokens = {
 
   /** Semitransparente Tints (Glassmorphism) */
   tint: {
-    cyan:    'rgba(0, 240, 255, 0.15)',   // --accent-cyan-subtle
+    cyan:    'rgba(0, 230, 163, 0.15)',   // --accent-cyan-subtle
     gold:    'rgba(255, 183, 0, 0.15)',   // --accent-gold-subtle
     green:   'rgba(0, 255, 102, 0.12)',   // --accent-green-subtle
     pink:    'rgba(255, 0, 127, 0.15)',   // --accent-pink-subtle
@@ -79,11 +80,11 @@ export const designTokens = {
     whiteSubtle:  'rgba(255, 255, 255, 0.08)', // --border-white-subtle
     whiteMedium:  'rgba(255, 255, 255, 0.12)', // --border-white-medium
     whiteStrong:  'rgba(255, 255, 255, 0.20)', // --border-white-strong
-    cyan:         'rgba(0, 229, 255, 0.25)',  // --border-cyan
-    cyanHot:      'rgba(0, 229, 255, 0.45)',  // --border-cyan-hot
+    cyan:         'rgba(0, 230, 163, 0.25)',  // --border-cyan
+    cyanHot:      'rgba(0, 230, 163, 0.45)',  // --border-cyan-hot
     gold:         'rgba(255, 183, 0, 0.35)',  // --border-gold
     goldHot:      'rgba(255, 183, 0, 0.55)',  // --border-gold-hot
-    glass:        'rgba(0, 229, 255, 0.32)',  // --border-glass
+    glass:        'rgba(0, 230, 163, 0.32)',  // --border-glass
   },
 
   /** Border-Radius System */
@@ -122,19 +123,20 @@ export const designTokens = {
     '--bg-primary':           '#0a0d14',
     '--bg-secondary':         '#060812',
     '--bg-card':              'rgba(6, 10, 22, 0.88)',
-    '--accent-cyan':          '#00E5FF',
+    '--accent-cyan':          '#00E6A3',
     '--accent-neon-green':    '#00ff66',
     '--accent-gold':          '#ffb700',
     '--accent-pink':          '#ff007f',
     '--accent-danger':        '#ff3366',
     '--accent-danger-subtle': 'rgba(255, 51, 102, 0.15)',
     '--accent-red':           '#C90000',
+    '--accent-red-bright':    '#FF3B3B',
     '--text-primary':         '#f0f4f8',
     '--text-muted':           '#94a3b8',
     '--text-dim':             'rgba(148, 163, 184, 0.5)',
-    '--border-glass':         'rgba(0, 229, 255, 0.32)',
-    '--border-cyan':          'rgba(0, 229, 255, 0.25)',
-    '--border-cyan-hot':      'rgba(0, 229, 255, 0.45)',
+    '--border-glass':         'rgba(0, 230, 163, 0.32)',
+    '--border-cyan':          'rgba(0, 230, 163, 0.25)',
+    '--border-cyan-hot':      'rgba(0, 230, 163, 0.45)',
     '--border-gold':          'rgba(255, 183, 0, 0.35)',
     '--border-gold-hot':      'rgba(255, 183, 0, 0.55)',
     '--bg-overlay':           'rgba(5, 8, 17, 0.82)',
@@ -148,8 +150,8 @@ export const designTokens = {
     '--bg-floating-control':  'rgba(15, 23, 42, 0.92)',
     '--bg-map-dark':          '#0b0e17',
     '--text-on-accent':       '#050a14',
-    '--accent-cyan-subtle':   'rgba(0, 240, 255, 0.15)',
-    '--accent-cyan-dark':     '#00a8e8',
+    '--accent-cyan-subtle':   'rgba(0, 230, 163, 0.15)',
+    '--accent-cyan-dark':     '#00B37D',
     '--accent-gold-subtle':   'rgba(255, 183, 0, 0.15)',
     '--accent-green-subtle':  'rgba(0, 255, 102, 0.12)',
     '--accent-pink-subtle':   'rgba(255, 0, 127, 0.15)',

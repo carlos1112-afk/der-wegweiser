@@ -49,7 +49,7 @@ export const BatteryHUD: React.FC<BatteryHUDProps> = ({ telemetry, currentRoute,
           alignItems: 'center',
           gap: '6px',
           cursor: 'pointer',
-          border: '1px solid rgba(0, 240, 255, 0.3)',
+          border: '1px solid rgba(0, 230, 163, 0.3)',
         }}
         title="Akku & E-Bike Telemetrie Details anzeigen"
       >

@@ -146,7 +146,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           padding: '28px',
           borderRadius: '24px',
           border: '1px solid var(--accent-cyan)',
-          boxShadow: '0 0 40px rgba(0, 240, 255, 0.25)',
+          boxShadow: '0 0 40px rgba(0, 230, 163, 0.25)',
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',
@@ -161,7 +161,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                backgroundColor: 'rgba(0, 230, 163, 0.1)',
                 border: '1px solid var(--accent-cyan)',
                 display: 'flex',
                 alignItems: 'center',
@@ -218,8 +218,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         {currentUser ? (
           <div
             style={{
-              backgroundColor: 'rgba(0, 240, 255, 0.05)',
-              border: '1px solid rgba(0, 240, 255, 0.2)',
+              backgroundColor: 'rgba(0, 230, 163, 0.05)',
+              border: '1px solid rgba(0, 230, 163, 0.2)',
               borderRadius: '16px',
               padding: '16px',
               display: 'flex',

@@ -119,12 +119,12 @@ export const TurnByTurnBanner: React.FC<TurnByTurnBannerProps> = ({
           width: '44px',
           height: '44px',
           borderRadius: '10px',
-          backgroundColor: 'rgba(0, 240, 255, 0.15)',
+          backgroundColor: 'rgba(0, 230, 163, 0.15)',
           border: '1px solid var(--accent-cyan)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 0 15px rgba(0, 240, 255, 0.3)',
+          boxShadow: '0 0 15px rgba(0, 230, 163, 0.3)',
           flexShrink: 0,
         }}
       >

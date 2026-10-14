@@ -231,7 +231,7 @@ function buildRouteGeoJSON(polyline: [number, number][], route: Route | null): R
       (progress > 0.35 && progress < 0.5) ||
       (route !== null && route.elevationGainM > 180 && idx % 7 === 2);
     const isDownhill = (progress > 0.75 && progress < 0.9) || idx % 7 === 5;
-    const color = isClimb ? '#ff3333' : isDownhill ? '#00ff66' : '#00f0ff';
+    const color = isClimb ? '#ff3333' : isDownhill ? '#00ff66' : '#00E6A3';
     features.push({
       type: 'Feature',
       properties: { layer: 'segment', color, weight: isClimb ? 6 : 5 },
@@ -368,11 +368,11 @@ export const MapView: React.FC<MapViewProps> = ({
       map.addSource('route', { type: 'geojson', data: buildRouteGeoJSON(routePolyline, currentRoute) });
       map.addLayer({ id: 'route-glow', type: 'line', source: 'route',
         filter: ['==', ['get', 'layer'], 'glow'],
-        paint: { 'line-color': '#00f0ff', 'line-width': 10, 'line-opacity': 0.35, 'line-blur': 4 },
+        paint: { 'line-color': '#00E6A3', 'line-width': 10, 'line-opacity': 0.35, 'line-blur': 4 },
         layout: { 'line-cap': 'round', 'line-join': 'round' } });
       map.addLayer({ id: 'route-main', type: 'line', source: 'route',
         filter: ['==', ['get', 'layer'], 'segment'],
-        paint: { 'line-color': ['coalesce', ['get', 'color'], '#00f0ff'], 'line-width': 5, 'line-opacity': 0.95 },
+        paint: { 'line-color': ['coalesce', ['get', 'color'], '#00E6A3'], 'line-width': 5, 'line-opacity': 0.95 },
         layout: { 'line-cap': 'round', 'line-join': 'round' } });
     }
     // Accuracy circle source + layer
@@ -380,9 +380,9 @@ export const MapView: React.FC<MapViewProps> = ({
       const accData = buildAccuracyGeoJSON(userLocation, accuracy ?? 0);
       map.addSource('accuracy', { type: 'geojson', data: accData });
       map.addLayer({ id: 'accuracy-fill', type: 'fill', source: 'accuracy',
-        paint: { 'fill-color': '#00f0ff', 'fill-opacity': 0.12 } });
+        paint: { 'fill-color': '#00E6A3', 'fill-opacity': 0.12 } });
       map.addLayer({ id: 'accuracy-border', type: 'line', source: 'accuracy',
-        paint: { 'line-color': '#00f0ff', 'line-width': 1, 'line-opacity': 0.5 } });
+        paint: { 'line-color': '#00E6A3', 'line-width': 1, 'line-opacity': 0.5 } });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -713,7 +713,7 @@ export const MapView: React.FC<MapViewProps> = ({
             boxShadow: 'var(--glow-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             gap: '10px', backgroundColor: 'rgba(5, 10, 20, 0.96)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'rgba(0, 240, 255, 0.15)',
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'rgba(0, 230, 163, 0.15)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MapPin size={18} className="glow-text-cyan" />
             </div>
@@ -828,7 +828,7 @@ export const MapView: React.FC<MapViewProps> = ({
             title="Vergrößern">
             <Plus size={18} />
           </button>
-          <div style={{ height: '1px', backgroundColor: 'rgba(0, 240, 255, 0.3)' }} />
+          <div style={{ height: '1px', backgroundColor: 'rgba(0, 230, 163, 0.3)' }} />
           <button onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}
             style={{ width: '38px', height: '32px', background: 'none', border: 'none',
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-cyan)', cursor: 'pointer' }}

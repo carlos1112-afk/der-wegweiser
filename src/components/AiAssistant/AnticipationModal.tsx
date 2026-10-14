@@ -134,7 +134,7 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
             padding: '14px',
             backgroundColor: 'rgba(10, 15, 25, 0.6)',
             borderRadius: '12px',
-            border: '1px solid rgba(0, 240, 255, 0.15)',
+            border: '1px solid rgba(0, 230, 163, 0.15)',
           }}
         >
           <div>
@@ -216,7 +216,7 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
                 left: 0,
                 right: 0,
                 backgroundColor: 'rgba(5, 10, 20, 0.98)',
-                border: '1px solid rgba(0, 240, 255, 0.2)',
+                border: '1px solid rgba(0, 230, 163, 0.2)',
                 borderRadius: '12px',
                 overflow: 'hidden',
                 zIndex: 10,

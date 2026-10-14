@@ -154,7 +154,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
         }}
       >
         {/* Header with Tabs */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(0, 240, 255, 0.2)', paddingBottom: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(0, 230, 163, 0.2)', paddingBottom: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="glow-text-cyan">
             <ShieldCheck size={24} />
             <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>
@@ -349,7 +349,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               </div>
             ) : (
               <>
-                <div style={{ padding: '12px', backgroundColor: 'rgba(0, 240, 255, 0.08)', borderRadius: '12px', border: '1px solid var(--accent-cyan)' }}>
+                <div style={{ padding: '12px', backgroundColor: 'rgba(0, 230, 163, 0.08)', borderRadius: '12px', border: '1px solid var(--accent-cyan)' }}>
                   <div style={{ fontWeight: 'bold', color: 'var(--accent-cyan)', marginBottom: '4px' }}>
                     🛡️ Deine lokale Datenhoheit auf diesem Smartphone:
                   </div>

@@ -119,7 +119,7 @@ export const GpxImportModal: React.FC<GpxImportModalProps> = ({
               borderRadius: '16px',
               padding: '32px 16px',
               textAlign: 'center',
-              backgroundColor: isDragging ? 'rgba(0, 240, 255, 0.1)' : 'rgba(10, 15, 25, 0.6)',
+              backgroundColor: isDragging ? 'rgba(0, 230, 163, 0.1)' : 'rgba(10, 15, 25, 0.6)',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
@@ -165,7 +165,7 @@ export const GpxImportModal: React.FC<GpxImportModalProps> = ({
             <div
               style={{
                 padding: '16px',
-                backgroundColor: 'rgba(0, 240, 255, 0.08)',
+                backgroundColor: 'rgba(0, 230, 163, 0.08)',
                 border: '1px solid var(--accent-cyan)',
                 borderRadius: '14px',
               }}
