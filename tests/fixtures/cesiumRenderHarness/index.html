@@ -1,0 +1,17 @@
+<!doctype html>
+<!--
+  Test-Fixture für tests/scripts/cesiumPremiumCanvas.render.test.ts (Playwright-Headless-Rendertest).
+  Mountet die ECHTE CesiumPremiumCanvas-Komponente (kein Nachbau) über den echten Dev-Server
+  (vite.config.ts inkl. vite-plugin-cesium), damit der Test beweist, dass die Premium-Karte
+  tatsächlich ein WebGL-Canvas mit Inhalt zeigt — nicht nur, dass der Build fehlerfrei durchläuft.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Cesium Render Harness</title>
+  </head>
+  <body style="margin:0;">
+    <div id="root" style="width:800px;height:600px;"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
+</html>
