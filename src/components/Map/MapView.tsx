@@ -47,6 +47,29 @@ const THEME_META: Record<MapTileTheme, { name: string; premium: boolean }> = {
 
 const MAPLIBRE_THEMES = new Set<MapTileTheme>(['topo', 'cycle', 'satellite']);
 
+/**
+ * Terrain-Überhöhung je Free-Theme. Wird NICHT im Style-JSON gesetzt (siehe unten),
+ * sondern erst von applyTerrain() aktiviert, wenn der Nutzer den 3D-Toggle einschaltet.
+ * Grund: Mit Terrain fest im Style verschiebt MapLibre die Bodengeometrie anhand der
+ * DEM-Kachel-Werte IMMER, auch im "2D"-Modus. Liefert die DEM-Quelle bei einem Hakler
+ * (Netzwerk, falsche/fehlende Kachel) Müllwerte statt echter Höhendaten, entstehen daraus
+ * chaotische Höhen-Spitzen direkt unter der Kamera — sichtbar als der "Trichter"-Rendering-
+ * Fehler (radial verzerrtes Schachbrettmuster), der auch ohne aktiven 3D-Toggle auftrat.
+ */
+const TERRAIN_EXAGGERATION: Record<'topo' | 'cycle' | 'satellite', number> = {
+  topo: 1.2,
+  cycle: 1.0,
+  satellite: 1.0,
+};
+
+function applyTerrain(map: maplibregl.Map, theme: MapTileTheme, enabled: boolean): void {
+  if (!enabled || !(theme in TERRAIN_EXAGGERATION)) {
+    map.setTerrain(null);
+    return;
+  }
+  map.setTerrain({ source: 'terrain-dem', exaggeration: TERRAIN_EXAGGERATION[theme as 'topo' | 'cycle' | 'satellite'] });
+}
+
 // ── MapLibre style definitions ────────────────────────────────────────────────
 
 function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | string {
@@ -64,7 +87,6 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
           cyclosm: { type: 'raster', tiles: cycle.tiles, tileSize: 256, attribution: cycle.attribution, maxzoom: cycle.maxzoom },
           topo: { type: 'raster', tiles: topo.tiles, tileSize: 256, maxzoom: topo.maxzoom },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.0 },
         layers: [
           { id: 'bg', type: 'background', paint: { 'background-color': '#111' } } as maplibregl.BackgroundLayerSpecification,
           { id: 'cyclosm', type: 'raster', source: 'cyclosm' } as maplibregl.RasterLayerSpecification,
@@ -87,7 +109,6 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
           'terrain-dem': { type: 'raster-dem', ...dem },
           topo: { type: 'raster', tiles: topo.tiles, tileSize: 256, attribution: topo.attribution, maxzoom: topo.maxzoom },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.2 },
         layers: [
           { id: 'topo', type: 'raster', source: 'topo' } as maplibregl.RasterLayerSpecification,
           {
@@ -109,7 +130,6 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
           'terrain-dem': { type: 'raster-dem', ...dem },
           esri: { type: 'raster', tiles: sat.tiles, tileSize: 256, attribution: sat.attribution, maxzoom: sat.maxzoom },
         },
-        terrain: { source: 'terrain-dem', exaggeration: 1.0 },
         layers: [
           { id: 'esri-satellite', type: 'raster', source: 'esri' } as maplibregl.RasterLayerSpecification,
           {
@@ -460,6 +480,13 @@ export const MapView: React.FC<MapViewProps> = ({
     if (!map || !isMaplibreActive) return;
     const targetPitch = is3DMode ? 45 : 0;
     map.easeTo({ pitch: targetPitch, duration: 500 });
+
+    const apply = () => applyTerrain(map, tileTheme, is3DMode);
+    if (map.isStyleLoaded()) {
+      apply();
+    } else {
+      map.once('style.load', apply);
+    }
   }, [is3DMode, tileTheme, isMaplibreActive]);
 
   // ── MapLibre: update route GeoJSON ────────────────────────────────────────────
