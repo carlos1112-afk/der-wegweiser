@@ -25,17 +25,22 @@ service cloud.firestore {
         && !exists(/databases/$(database)/documents/suspended_users/$(request.auth.uid));
     }
 
-    // Validation for Charging Stations
+    // Validation for Charging Stations.
+    //
+    // WICHTIG: Felder sind PFLICHT, nicht nur "validiert falls vorhanden" — eine
+    // frühere Fassung prüfte z.B. `!('lat' in data) || (data.lat is number ...)`,
+    // das lässt ein Dokument OHNE das Feld komplett durch. Der echte
+    // ChargingStation-Typ (src/types/navigation.ts) verlangt name/lat/lng/
+    // plugType/createdByUserId ohnehin immer, Weglassen ist also nie ein
+    // legitimer Schreibpfad, nur eine Lücke für Angreifer, die diese Felder
+    // bewusst auslassen, um die Prüfung zu umgehen.
     function isValidChargingStation() {
       let data = request.resource.data;
-      // When creating, we only validate the fields we care about.
-      // If we strictly check keys, we might break existing test documents
-      // that don't have all these fields (e.g., test documents missing lat/lng/plugType).
-      return (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
-             (!('lat' in data) || (data.lat is number && data.lat >= -90 && data.lat <= 90)) &&
-             (!('lng' in data) || (data.lng is number && data.lng >= -180 && data.lng <= 180)) &&
-             (!('plugType' in data) || (data.plugType is string && data.plugType in ['schuko_230v', 'bosch', 'bike_energy', 'shimano', 'yamaha', 'unknown'])) &&
-             (!('createdByUserId' in data) || data.createdByUserId == request.auth.uid);
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.lat is number && data.lat >= -90 && data.lat <= 90 &&
+             data.lng is number && data.lng >= -180 && data.lng <= 180 &&
+             data.plugType is string && data.plugType in ['schuko_230v', 'bosch', 'bike_energy', 'shimano', 'yamaha', 'unknown'] &&
+             data.createdByUserId is string && data.createdByUserId == request.auth.uid;
     }
 
     // Ersteller-Prüfung. Je nach Schreibpfad wird das Feld `createdByUserId`
