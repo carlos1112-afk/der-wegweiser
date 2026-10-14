@@ -1,0 +1,2000 @@
+[
+  {
+    "name": "Gasthof „Zum Hafen“",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Bad Saarow / Scharmützelsee, Brandenburg",
+    "adresse": "Seestraße 34, 15526 Bad Saarow (am Deich)",
+    "beschreibung": "E-Bike-Ladeservice direkt am Radweg rund um den Scharmützelsee; Gastronomie mit Seeterrasse.",
+    "quelle": "https://www.scharmuetzelsee.de",
+    "suchanfrage": "\"E-Bike Ladestation\" Gasthof \"kostenlos laden\" Brandenburg OR Mecklenburg"
+  },
+  {
+    "name": "Restaurant & Gasthof „Alter Weinberg“",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Storkow (Mark), Seenland Oder-Spree, Brandenburg",
+    "adresse": "Alter Weinberg 1, 15859 Storkow (Mark)",
+    "beschreibung": "Frei zugängliche E-Bike-Ladestation im Außenbereich, ideal kombinierbar mit Rast im Biergarten am Storkower See.",
+    "quelle": "https://www.reiseland-brandenburg.de",
+    "suchanfrage": "\"E-Bike Ladestation\" Gasthof \"kostenlos laden\" Brandenburg OR Mecklenburg"
+  },
+  {
+    "name": "Gasthof „Der Adler“",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Seelow, Märkisch-Oderland, Brandenburg",
+    "adresse": "Mittelstraße 10, 15306 Seelow (nahe Marktplatz)",
+    "beschreibung": "Außensteckdose und Lademöglichkeit im Innenhof für Tourenfahrer im Oderbruch.",
+    "quelle": "https://www.seenland-oderspree.de",
+    "suchanfrage": "\"E-Bike Ladestation\" Gasthof \"kostenlos laden\" Brandenburg OR Mecklenburg"
+  },
+  {
+    "name": "Fleether Mühle Naturcamping & Gastwirtschaft",
+    "kategorie": "Ladesäule / Camping",
+    "region_ort": "Mirow, Mecklenburgische Seenplatte, Mecklenburg-Vorpommern",
+    "adresse": "Fleether Mühle 1, 17252 Mirow",
+    "beschreibung": "Standardisierte 4fach-Ladestation im Biergarten / Mühlenareal an der Mecklenburgischen Kleinseenplatte.",
+    "quelle": "https://www.radfahrland-mv.de",
+    "suchanfrage": "\"E-Bike Ladestation\" Gasthof \"kostenlos laden\" Brandenburg OR Mecklenburg"
+  },
+  {
+    "name": "Schlauchautomat Rad-Sport-Studio Henze",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Wunstorf / Steinhuder Meer, Niedersachsen",
+    "adresse": "Hindenburgstraße 51, 31515 Wunstorf",
+    "beschreibung": "24/7 Continental-Schlauchautomat direkt an der Wand, Münzeinwurf, gängige Größen (SV/AV/DV).",
+    "quelle": "https://www.steinhuder-meer.de",
+    "suchanfrage": "\"Schlauchautomat\" 24/7 \"Radweg\" site:de"
+  },
+  {
+    "name": "BikeOmat Moseltal Rad-Service",
+    "kategorie": "Schlauchautomat / Werkzeug",
+    "region_ort": "Treis-Karden, Mosel, Rheinland-Pfalz",
+    "adresse": "Moselstraße 12, 56253 Treis-Karden (am Moselradweg)",
+    "beschreibung": "24/7 BikeOmat mit Schläuchen, Flickzeug, CO2-Patronen und Standpumpe direkt an der Uferpromenade.",
+    "quelle": "https://www.visitmosel.de",
+    "suchanfrage": "\"Schlauchautomat\" 24/7 \"Radweg\" site:de"
+  },
+  {
+    "name": "VCD Radservice-Station Angermünde",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Angermünde, Brandenburg",
+    "adresse": "Brüderstraße 18 (vor dem Kaffee Konsum), 16278 Angermünde",
+    "beschreibung": "Öffentliche Reparatursäule mit Pumpe (Manometer) und Spezialwerkzeug an Stahlseilen direkt am Berlin-Usedom-Radweg.",
+    "quelle": "https://www.vcd.org",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" Werkzeug Luftpumpe Radweg Brandenburg OR Sachsen"
+  },
+  {
+    "name": "Fahrrad-Reparaturstation Potsdam Breite Straße",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Potsdam, Brandenburg",
+    "adresse": "Breite Straße (hinter Naturkundemuseum), 14467 Potsdam",
+    "beschreibung": "24/7 zugängliche Servicesäule mit Aufhängevorrichtung, Torx, Inbus und Standfußpumpe.",
+    "quelle": "https://www.vcd.org",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" Werkzeug Luftpumpe Radweg Brandenburg OR Sachsen"
+  },
+  {
+    "name": "ADAC Radservice-Station Havelradweg Gollwitz",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Brandenburg an der Havel, Brandenburg",
+    "adresse": "Schlossallee / Havelradweg, 14778 Brandenburg an der Havel (OT Gollwitz)",
+    "beschreibung": "Rund um die Uhr nutzbare Radservice-Station mit Reifenhebern, Werkzeugsatz und QR-Reparaturcode.",
+    "quelle": "https://www.stadt-brandenburg.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" Werkzeug Luftpumpe Radweg Brandenburg OR Sachsen"
+  },
+  {
+    "name": "Radservice-Station Bahnhof Kirchmöser",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Kirchmöser, Brandenburg",
+    "adresse": "Bahnhofsvorplatz Kirchmöser, 14774 Brandenburg an der Havel",
+    "beschreibung": "Fahrrad-Reparaturstele an der Schnittstelle Bahn-Radwanderweg, ausgestattet mit robuster Doppelventil-Luftpumpe.",
+    "quelle": "https://www.stadt-brandenburg.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" Werkzeug Luftpumpe Radweg Brandenburg OR Sachsen"
+  },
+  {
+    "name": "Radlerstop Lorenzkirch",
+    "kategorie": "Imbiss / Rastplatz",
+    "region_ort": "Zeithain OT Lorenzkirch, Sachsen",
+    "adresse": "Alte Elbstraße (direkt an der Elbfähre nach Strehla), 01619 Zeithain",
+    "beschreibung": "Kultiger Selbstbedienungs-Radlerstopp auf Vertrauensbasis mit Blick auf Strehla; Kaltgetränke, Snacks, überdachte Bänke, Bezahlung bar/PayPal.",
+    "quelle": "https://www.elberadweg.de",
+    "suchanfrage": "\"Fahrradcafé\" OR \"Radlerpause\" Kiosk direkt am Radweg Elbe OR Oder"
+  },
+  {
+    "name": "Radlerstopp zum Altstadtblick",
+    "kategorie": "Imbiss / Kiosk",
+    "region_ort": "Dresden-Pieschen, Sachsen",
+    "adresse": "Elbradweg / Kötzschenbroder Str. 20, 01139 Dresden",
+    "beschreibung": "Imbiss direkt an der Elberadweg-Trasse mit Panoramablick auf die Dresdner Altstadtsilhouette; Bratwurst, Eis, Getränke.",
+    "quelle": "https://www.so-lebt-dresden.de",
+    "suchanfrage": "\"Fahrradcafé\" OR \"Radlerpause\" Kiosk direkt am Radweg Elbe OR Oder"
+  },
+  {
+    "name": "Weltrad Café & Manufaktur",
+    "kategorie": "Fahrradcafé / Werkstatt",
+    "region_ort": "Schönebeck (Elbe) / Magdeburg, Sachsen-Anhalt",
+    "adresse": "Cunoweg 1b, 39218 Schönebeck (Elbe)",
+    "beschreibung": "Kombination aus historischer Fahrrad-Manufaktur, Restaurant-Café direkt an der Elbe mit Radler-Terrasse und Reparaturservice.",
+    "quelle": "https://www.elberadweg.de",
+    "suchanfrage": "\"Fahrradcafé\" OR \"Radlerpause\" Kiosk direkt am Radweg Elbe OR Oder"
+  },
+  {
+    "name": "Pausenhof Wartenburg 24/7 Automatenrast",
+    "kategorie": "Imbiss / Rastplatz",
+    "region_ort": "Kemberg OT Wartenburg, Sachsen-Anhalt",
+    "adresse": "Elbstraße, 06901 Kemberg",
+    "beschreibung": "Moderne 24/7 Verpflegungsstation direkt am Elberadweg mit Softeisautomat, Kaltgetränken, Snacks und Ladesitzplätzen.",
+    "quelle": "https://www.elberadweg.de",
+    "suchanfrage": "\"Fahrradcafé\" OR \"Radlerpause\" Kiosk direkt am Radweg Elbe OR Oder"
+  },
+  {
+    "name": "Vesperstube Unterkrummenhof",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Schluchsee, Schwarzwald, Baden-Württemberg",
+    "adresse": "Unterkrummen 1, 79859 Schluchsee",
+    "beschreibung": "Traditionelle, abgelegene Vesperstube direkt am Rundweg Schluchsee mit kostenloser E-Bike-Ladestation für Gäste.",
+    "quelle": "https://www.schwarzwald-tourismus.info",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Schwarzwald\" \"Almhütte\" OR \"Vesperstube\" kostenlos OR Schließfächer"
+  },
+  {
+    "name": "Vesperstube Stöcklewaldturm",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Furtwangen im Schwarzwald, Baden-Württemberg",
+    "adresse": "Stöcklewald 1, 78120 Furtwangen",
+    "beschreibung": "Aussichtsturm auf 1.069m Höhe mit zünftiger Vesperstube und E-Bike-Ladestation für Höhenmeter-Bezwinger.",
+    "quelle": "https://www.schwarzwald-donau.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Schwarzwald\" \"Almhütte\" OR \"Vesperstube\" kostenlos OR Schließfächer"
+  },
+  {
+    "name": "Skilift & Lifthäusle Rohrhardsberg",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Schönwald im Schwarzwald, Baden-Württemberg",
+    "adresse": "Rohrhardsberg 1, 78141 Schönwald",
+    "beschreibung": "Naturstopp am Höhenrücken mit Außensteckdosen und E-Bike-Lademöglichkeit.",
+    "quelle": "https://www.rad-und-wanderparadies.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Schwarzwald\" \"Almhütte\" OR \"Vesperstube\" kostenlos OR Schließfächer"
+  },
+  {
+    "name": "ArtHotel Kiebitzberg Radservice-Station",
+    "kategorie": "Hotel / Ladesäule / Werkstatt",
+    "region_ort": "Havelberg, Sachsen-Anhalt (Grenze Prignitz/Altmark)",
+    "adresse": "Schönberger Weg 6, 39539 Havelberg",
+    "beschreibung": "24/7 öffentlich zugängliche Reparatur- und E-Bike-Ladestation, abschließbare Fahrradgarage, Bett+Bike-Betrieb.",
+    "quelle": "https://www.arthotel-kiebitzberg.de",
+    "suchanfrage": "\"Bike & Bed\" ODER \"Fahrrad-Reparaturstation\" \"Altmark\" OR \"Prignitz\" site:de"
+  },
+  {
+    "name": "La Maison Bett & Bike Pritzwalk",
+    "kategorie": "Hotel / Basis",
+    "region_ort": "Pritzwalk, Prignitz, Brandenburg",
+    "adresse": "Hainholzweg 20, 16928 Pritzwalk",
+    "beschreibung": "Fahrradfreundliches Boutique-Quartier mit Spezial-Ladeinfrastruktur für Akkus und Werkstattkit.",
+    "quelle": "https://www.reiseland-brandenburg.de",
+    "suchanfrage": "\"Bike & Bed\" ODER \"Fahrrad-Reparaturstation\" \"Altmark\" OR \"Prignitz\" site:de"
+  },
+  {
+    "name": "Schlauchautomat Bikesports Holzer",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Kempten (Allgäu) / Illerradweg, Bayern",
+    "adresse": "Ludwigstraße 109, 87437 Kempten (Allgäu)",
+    "beschreibung": "24/7 Schwalbe-Automat direkt an der Zubringer-Achse zum Illerradweg, Kartenzahlung und Bargeld.",
+    "quelle": "https://www.fahrrad-holzer.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Allgäu\" OR \"Bodensee-Königssee-Radweg\" Standort Adresse"
+  },
+  {
+    "name": "24/7 Schlauchstation Tourist-Info Bad Kohlgrub",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Bad Kohlgrub, Ammergauer Alpen, Bayern",
+    "adresse": "Hauptstraße 1, 82433 Bad Kohlgrub",
+    "beschreibung": "Rund um die Uhr zugänglicher Schlauchspender direkt an der Routenpassage des Bodensee-Königssee-Radwegs.",
+    "quelle": "https://www.zugspitz-region.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Allgäu\" OR \"Bodensee-Königssee-Radweg\" Standort Adresse"
+  },
+  {
+    "name": "Landgasthof Fischer E-Bike-Stopp",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Betzenstein, Fränkische Schweiz, Bayern",
+    "adresse": "Stierberg 25, 91282 Betzenstein",
+    "beschreibung": "Traditioneller Landgasthof mit hauseigener E-Bike-Ladestation im Biergarten (Schuko-Anschlüsse).",
+    "quelle": "https://www.fraenkische-schweiz.com",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Gasthof\" \"Franken\" \"Adresse\" site:fraenkische-schweiz.com"
+  },
+  {
+    "name": "Brauereigasthof Rothenbach",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Aufseß, Fränkische Schweiz, Bayern",
+    "adresse": "Im Tal 70, 91347 Aufseß",
+    "beschreibung": "Direkt am Brauereien-Wander- und Radweg Aufseß gelegener Brauereigasthof mit Akku-Ladesäule.",
+    "quelle": "https://www.fraenkische-schweiz.com",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Gasthof\" \"Franken\" \"Adresse\" site:fraenkische-schweiz.com"
+  },
+  {
+    "name": "Landgasthof Lahner Veilbronn",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Heiligenstadt in Oberfranken, Bayern",
+    "adresse": "Veilbronn 10, 91332 Heiligenstadt",
+    "beschreibung": "Ruhig gelegener Gasthof im Leinleitertal mit reservierten E-Bike-Ladeplätzen während der Einkehr.",
+    "quelle": "https://www.bayern-online.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Gasthof\" \"Franken\" \"Adresse\" site:fraenkische-schweiz.com"
+  },
+  {
+    "name": "ADAC Radservice-Station Fähranleger St. Goarshausen",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Sankt Goarshausen, Mittelrhein, Rheinland-Pfalz",
+    "adresse": "Bahnhofstraße (direkt an der Rheinfähre), 56246 Sankt Goarshausen",
+    "beschreibung": "Selbstbedienungssäule direkt am Rhein-Radweg (B42) mit Standpumpe, Inbus-Set und Reifenhebern.",
+    "quelle": "https://www.adac.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Rhein-Radweg\" OR \"Mosel\" Standort Adresse"
+  },
+  {
+    "name": "BikeRepair-Servicestation Spay",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Spay, Mittelrhein, Rheinland-Pfalz",
+    "adresse": "Rheinufer / Mainzer Straße, 56322 Spay",
+    "beschreibung": "Kostenfreie Werkzeug- und Pumpstele am Rheinradweg gegenüber der Marksburg.",
+    "quelle": "https://www.romantischer-rhein.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Rhein-Radweg\" OR \"Mosel\" Standort Adresse"
+  },
+  {
+    "name": "Radler-Reparaturstation Kobern-Gondorf",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Kobern-Gondorf, Untermosel, Rheinland-Pfalz",
+    "adresse": "Lennigstraße 12–14, 56330 Kobern-Gondorf",
+    "beschreibung": "Gemeindliche Pannenstation mit digitaler Videoanleitung via QR-Code direkt am Mosel-Radweg.",
+    "quelle": "https://www.visitmosel.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Rhein-Radweg\" OR \"Mosel\" Standort Adresse"
+  },
+  {
+    "name": "Radlertreff Freienohl",
+    "kategorie": "Imbiss / Kiosk",
+    "region_ort": "Meschede-Freienohl, Sauerland, Nordrhein-Westfalen",
+    "adresse": "Im Ohl 13, 59872 Meschede",
+    "beschreibung": "Strategischer Rast- und Verpflegungspunkt direkt am RuhrtalRadweg mit Radlerterrasse und Serviceinfos.",
+    "quelle": "https://www.sauerland.com",
+    "suchanfrage": "\"Radlertreff\" OR \"Radlerkiosk\" \"Ruhrstau\" OR \"Ruhrtalradweg\" OR \"Münsterland\" Adresse"
+  },
+  {
+    "name": "Ostseequelle.camp Radler-Camp",
+    "kategorie": "Camping / Ladesäule",
+    "region_ort": "Hohenkirchen-Niendorf, Mecklenburg-Vorpommern",
+    "adresse": "Strandstraße 21, 23968 Hohenkirchen",
+    "beschreibung": "Direkt am Ostseeküsten-Radweg an der Wohlenberger Wiek; spezielle Mini-Pitches für Biker und Akku-Lademöglichkeit.",
+    "quelle": "https://www.ostsee-campingplatz.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Ostseeküsten-Radweg\" Hofcafé OR Campingplatz Adresse"
+  },
+  {
+    "name": "Fahrrad-Rastplatz & Radservicestation Bad Hopfenberg",
+    "kategorie": "Rastplatz / Werkstatt",
+    "region_ort": "Petershagen, Weserbergland, Nordrhein-Westfalen",
+    "adresse": "Bremer Straße / Weser-Radweg, 32469 Petershagen",
+    "beschreibung": "Kostenfreie Werkzeugstation mit stabiler Standpumpe, Schutzhütte und Infotafel direkt am Deich.",
+    "quelle": "https://www.weserradweg-info.de",
+    "suchanfrage": "\"Fahrradstation\" OR \"Radservicestation\" Weser-Radweg \"Adresse\" site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Emmerthal",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Emmerthal-Hagenohsen, Niedersachsen",
+    "adresse": "Hagenohsener Straße 19, 31860 Emmerthal",
+    "beschreibung": "24/7 Reparatursäule unmittelbar am Weser-Radweg mit Werkzeugen für alle gängigen Schraubtypen.",
+    "quelle": "https://www.emmerthal.de",
+    "suchanfrage": "\"Fahrradstation\" OR \"Radservicestation\" Weser-Radweg \"Adresse\" site:de"
+  },
+  {
+    "name": "Gasthof Thüringer Hütte Oberhof",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Oberhof, Rennsteig, Thüringen",
+    "adresse": "Am Grenzadler 3, 98559 Oberhof",
+    "beschreibung": "Traditionelles Blockhaus am Grenzadler/Rennsteig-Radweg mit E-Bike-Ladeanschluss und Servicestützpunkt am Rennsteighaus.",
+    "quelle": "https://www.thueringen.info",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Thüringer Wald\" Gasthaus OR Berghütte \"Adresse\""
+  },
+  {
+    "name": "E-Bike Ladeschrank Prümer Land",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Prüm, Eifel, Rheinland-Pfalz",
+    "adresse": "Hahnplatz 1 (an der Tourist-Info), 54595 Prüm",
+    "beschreibung": "Schließfachschrank mit 6 Fächern zum sicheren Verschließen des Akkus samt Wertsachen beim Stadtbummel.",
+    "quelle": "https://www.eifel.info",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Eifel\" \"Vennbahn\" Schließfächer OR kostenlos \"Adresse\""
+  },
+  {
+    "name": "Vennbahn Rastplatz Roetgen E-Bike Ladesäule",
+    "kategorie": "Ladesäule / Rastplatz",
+    "region_ort": "Roetgen, Städteregion Aachen, Nordrhein-Westfalen",
+    "adresse": "Bundesstraße 18a / Alter Bahnhof, 52159 Roetgen",
+    "beschreibung": "Kostenfreie Ladesäule direkt auf der Vennbahn-Trasse am ehemaligen Bahnhofsgelände.",
+    "quelle": "https://www.goingelectric.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Eifel\" \"Vennbahn\" Schließfächer OR kostenlos \"Adresse\""
+  },
+  {
+    "name": "Radservicestation Seestraße Konstanz",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Konstanz, Bodensee, Baden-Württemberg",
+    "adresse": "Seestraße, 78465 Konstanz",
+    "beschreibung": "24/7 Panoramastation direkt an der Konstanzer Uferpromenade am Bodensee-Radweg mit Werkzeugen und Druckluftpumpe.",
+    "quelle": "https://www.konstanz-info.com",
+    "suchanfrage": "\"Fahrradreparaturstation\" OR \"Radservice-Station\" \"Bodensee\" Adresse site:de"
+  },
+  {
+    "name": "SB-Fahrradreparatur Station Bodman",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Bodman-Ludwigshafen, Bodensee, Baden-Württemberg",
+    "adresse": "Kaiserpfalzstraße 6 (Mobility Point), 78351 Bodman-Ludwigshafen",
+    "beschreibung": "Mobilitätsstation mit Selbstreparatur-Werkzeug, E-Bike-Boxen und Luftstation am Überlinger See.",
+    "quelle": "https://www.bodman-ludwigshafen.de",
+    "suchanfrage": "\"Fahrradreparaturstation\" OR \"Radservice-Station\" \"Bodensee\" Adresse site:de"
+  },
+  {
+    "name": "Hof Grothues-Potthoff E-Bike Station",
+    "kategorie": "Ladesäule / Bauerncafé",
+    "region_ort": "Senden, Münsterland, Nordrhein-Westfalen",
+    "adresse": "Altsendsener Straße 34, 48308 Senden",
+    "beschreibung": "Beliebtes Hofcafé und Hofladen mit Ladesäulen für Radurlauber entlang der 100-Schlösser-Route.",
+    "quelle": "https://www.hof-grothues-potthoff.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Münsterland\" Bauerncafé OR Hofladen \"Adresse\""
+  },
+  {
+    "name": "Hof Lütke Laxen Akkuladepunkt",
+    "kategorie": "Ladesäule / Hofladen",
+    "region_ort": "Münster-Handorf, Nordrhein-Westfalen",
+    "adresse": "Gittruper Straße 37, 48157 Münster",
+    "beschreibung": "Spargel- und Beerenhof mit idyllischem Außenbereich und E-Bike-Nachlademöglichkeit.",
+    "quelle": "https://www.stadt-muenster.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Münsterland\" Bauerncafé OR Hofladen \"Adresse\""
+  },
+  {
+    "name": "Reparaturstation Waldgaststätte Molkenhaus",
+    "kategorie": "Werkstatt / Gastro / Hotspot",
+    "region_ort": "Bad Harzburg, Harz, Niedersachsen",
+    "adresse": "Molkenhaus 1, 38667 Bad Harzburg",
+    "beschreibung": "Mitten im Nationalpark Harz: Reparatursäule mit Edelstahlseil-Werkzeug und E-Bike-Ladestation.",
+    "quelle": "https://www.molkenhaus-harzburg.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Harz\" Hexenstieg OR Radweg Adresse"
+  },
+  {
+    "name": "Radschober Leiper Hafen",
+    "kategorie": "Ladesäule / Schließfach / Hotspot",
+    "region_ort": "Lübbenau/Spreewald OT Leipe, Brandenburg",
+    "adresse": "Leiper Dorfstraße / Hafen, 03222 Lübbenau/Spreewald",
+    "beschreibung": "Traditioneller Holz-Heuschober mit modernen, diebstahlsicheren Fahrrad-Ladeboxen am Gurkenradweg.",
+    "quelle": "https://www.luebbenau-spreewald.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Spreewald\" Gurkenradweg Gasthaus OR Hafen Adresse"
+  },
+  {
+    "name": "Gasthaus Hafeneck Burg E-Bike-Stop",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Burg (Spreewald), Brandenburg",
+    "adresse": "Am Spreehafen 1, 03096 Burg (Spreewald)",
+    "beschreibung": "Gasthaus am Kahnhafen mit Radlerterrasse und Akkuladung am Gurkenradweg.",
+    "quelle": "https://www.spreewald.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Spreewald\" Gurkenradweg Gasthaus OR Hafen Adresse"
+  },
+  {
+    "name": "24/7 Schlauchautomat Fahrradwerkstatt Bühlau",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Dresden (Weißer Hirsch / Bühlau), Sachsen",
+    "adresse": "Bautzner Landstraße 146, 01324 Dresden",
+    "beschreibung": "Continental-Automat mit allen gängigen Reifendurchmessern am Tor zur Dresdner Heide.",
+    "quelle": "https://www.fahrradwerkstatt-buehlau.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Dresden\" OR \"Leipzig\" OR \"Chemnitz\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Schlauchautomat Zweirad Resewski",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Dresden-Prohlis, Sachsen",
+    "adresse": "Reicker Straße 103, 01237 Dresden",
+    "beschreibung": "24/7 Münzautomat für Notfall-Schläuche auf Touren Richtung Sächsische Schweiz.",
+    "quelle": "https://www.automatensucher.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Dresden\" OR \"Leipzig\" OR \"Chemnitz\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "E-Bike Schließfachanlage Bostalsee",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Nohfelden-Bosen, Saarland",
+    "adresse": "Am Seehafen, 66625 Nohfelden-Bosen",
+    "beschreibung": "14 Schließfächer mit kostenlosen Steckdosen zum Aufladen der Akkus beim Baden oder Einkehren.",
+    "quelle": "https://www.urlaub.saarland",
+    "suchanfrage": "\"E-Bike Ladestation\" Saarland OR \"Saar-Radweg\" Gasthof OR Schließfach Adresse"
+  },
+  {
+    "name": "E-Bike Ladestation Schaumbergplateau",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Tholey, Saarland",
+    "adresse": "Auf dem Schaumbergplateau, 66636 Tholey",
+    "beschreibung": "Exponierte Ladesäule auf dem Gipfelplateau (568 m) für anspruchsvolle E-Bike-Bergetappen.",
+    "quelle": "https://www.urlaub.saarland",
+    "suchanfrage": "\"E-Bike Ladestation\" Saarland OR \"Saar-Radweg\" Gasthof OR Schließfach Adresse"
+  },
+  {
+    "name": "Fahrrad-Reparaturstation Wilhelmsteg",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Heuzert, Kroppacher Schweiz, Westerwald, Rheinland-Pfalz",
+    "adresse": "Wilhelmsteg 1, 57627 Heuzert",
+    "beschreibung": "Rund um die Uhr zugängliche Reparaturstele am Nister-Radweg mit Werkzeugen und Multiventil-Luftpumpe.",
+    "quelle": "https://www.westerwald.info",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Taunus\" OR \"Westerwald\" Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Taunus-Informationszentrum",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Oberursel (Taunus), Hessen",
+    "adresse": "Hohemarkstraße 192, 61350 Oberursel (Taunus)",
+    "beschreibung": "Zentraler Bike-Startpunkt in den Hochtaunus (Großer Feldberg); Werkzeug, Pumpe und Rad-Kartenmaterial.",
+    "quelle": "https://www.adac.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Taunus\" OR \"Westerwald\" Adresse site:de"
+  },
+  {
+    "name": "Rad-Rastplatz Umrathshausen",
+    "kategorie": "Rastplatz / Werkstatt",
+    "region_ort": "Frasdorf / Chiemsee-Voralpen, Bayern",
+    "adresse": "Dorfplatz Umrathshausen, 83112 Frasdorf",
+    "beschreibung": "Idyllischer Voralpen-Rastplatz mit Rad-Service-Säule, Trinkbrunnen und Ruhebänken.",
+    "quelle": "https://www.chiemsee-alpenland.de",
+    "suchanfrage": "\"Radler-Rast\" OR \"Radlerpause\" Chiemsee OR \"Altmühltal\" Kiosk Adresse"
+  },
+  {
+    "name": "Kiosk & Biergarten Freizeitanlage Hammermühle",
+    "kategorie": "Imbiss / Biergarten",
+    "region_ort": "Mörnsheim, Altmühltal, Bayern",
+    "adresse": "Hammermühle 5, 91836 Mörnsheim",
+    "beschreibung": "Direkt am Altmühltal-Radweg gelegener Kiosk und Biergarten mit Naturrastplatz und Radlerrast.",
+    "quelle": "https://www.freizeitanlage-hammermuehle.de",
+    "suchanfrage": "\"Radler-Rast\" OR \"Radlerpause\" Chiemsee OR \"Altmühltal\" Kiosk Adresse"
+  },
+  {
+    "name": "Leezenküche ADFC Selbsthilfewerkstatt",
+    "kategorie": "Werkstatt / Selbsthilfe",
+    "region_ort": "Münster, Nordrhein-Westfalen",
+    "adresse": "Dortmunder Straße 19, 48155 Münster",
+    "beschreibung": "Ehrenamtliche Fahrrad-Selbsthilfewerkstatt mit professionellem Montageständer, Spezialwerkzeugen und fachlicher Anleitung.",
+    "quelle": "https://www.adfc.de",
+    "suchanfrage": "\"Fahrradstation\" \"Münster\" OR \"Osnabrück\" \"Selbsthilfewerkstatt\" Adresse"
+  },
+  {
+    "name": "AStA Fahrrad-Selbsthilfewerkstatt Osnabrück",
+    "kategorie": "Werkstatt / Selbsthilfe",
+    "region_ort": "Osnabrück, Niedersachsen",
+    "adresse": "Kolpingstraße 1a (Gebäude 53, Studz), 49074 Osnabrück",
+    "beschreibung": "Offene Werkstatt für Radreisende und Studenten mit vollem Werkzeugsortiment und zentrierständern.",
+    "quelle": "https://www.uni-osnabrueck.de",
+    "suchanfrage": "\"Fahrradstation\" \"Münster\" OR \"Osnabrück\" \"Selbsthilfewerkstatt\" Adresse"
+  },
+  {
+    "name": "Kösseinehaus Berggasthof",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Wunsiedel / Kösseine-Gipfel, Fichtelgebirge, Bayern",
+    "adresse": "Kösseinehaus 1, 95632 Wunsiedel",
+    "beschreibung": "Exponierter Berggasthof auf 939 m Höhe mit E-Bike-Ladestation für anspruchsvolle Mittelgebirgstrails.",
+    "quelle": "https://www.fichtelgebirge.bayern",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Fichtelgebirge\" Gasthof OR Gipfel Adresse site:de"
+  },
+  {
+    "name": "Bullhead House Biker-Pension & Outdoor-Zentrum",
+    "kategorie": "Hotel / Ladesäule / Werkstatt",
+    "region_ort": "Warmensteinach (Ochsenkopf-Süd), Bayern",
+    "adresse": "Fleckl 13, 95485 Warmensteinach",
+    "beschreibung": "Zentraler Gravity- und Tourenstützpunkt an der Ochsenkopf-Südbahn mit Werkstatt, Ladestation und Biker-Gastronomie.",
+    "quelle": "https://www.bullheadhouse.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Ochsenkopf\" Gasthaus Adresse"
+  },
+  {
+    "name": "Gipfelrestaurant Asenturm Ochsenkopf",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Bischofsgrün / Ochsenkopfgipfel, Bayern",
+    "adresse": "Auf dem Ochsenkopf, 95493 Bischofsgrün",
+    "beschreibung": "Höchstgelegene E-Bike-Akkuladestation des Fichtelgebirges (1.024 m) mit Panoramarestaurant.",
+    "quelle": "https://www.erlebnis-ochsenkopf.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Ochsenkopf\" Gasthaus Adresse"
+  },
+  {
+    "name": "Gasthaus-Pension Waldesruhe Bikerherberge",
+    "kategorie": "Hotel / Basis",
+    "region_ort": "Elmstein (Elmsteiner Tal), Pfälzerwald, Rheinland-Pfalz",
+    "adresse": "Elmsteiner Tal (nahe Johanniskreuz), 67471 Elmstein",
+    "beschreibung": "Ausgeprägte Bikerpension mit geschlossener Fahrradgarage, Waschplatz mit Hochdruckreiniger und Trockenraum.",
+    "quelle": "https://www.pfaelzerwald-waldesruhe.de",
+    "suchanfrage": "\"Bike-Hotel\" OR \"fahrradfreundliche Pension\" \"Pfälzerwald\" Adresse site:de"
+  },
+  {
+    "name": "Naturpark Pink Servicestation Bispingen",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Bispingen, Lüneburger Heide, Niedersachsen",
+    "adresse": "Bahnhofstraße 19 (an der Tourist-Info), 29646 Bispingen",
+    "beschreibung": "Auffällige pinkfarbene LEADER-Pannenstele mit robustem Werkzeugset und Manometerpumpe am Heidschnuckenweg.",
+    "quelle": "https://www.naturpark-lueneburger-heide.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Lüneburger Heide\" Heidschnuckenweg OR Radweg Adresse"
+  },
+  {
+    "name": "Milchhalle Wilsede Reparaturstation",
+    "kategorie": "Werkstatt / Rastplatz",
+    "region_ort": "Undeloh OT Wilsede, Lüneburger Heide, Niedersachsen",
+    "adresse": "Wilsede 1 (Milchhalle), 29646 Undeloh",
+    "beschreibung": "Pannenstation im komplett autofreien Naturschutzgebiet Wilseder Berg – Lebensretter für gestrandete Biker.",
+    "quelle": "https://www.entdecke-nds.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Lüneburger Heide\" Heidschnuckenweg OR Radweg Adresse"
+  },
+  {
+    "name": "Gutshof Kraatz E-Bike-Laden",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Nordwestuckermark OT Kraatz, Brandenburg",
+    "adresse": "Schloßstraße 7, 17291 Nordwestuckermark",
+    "beschreibung": "Historischer Gutshof, Kelterei und Hofschänke mit eigener E-Bike-Ladesäule inmitten der weiten Uckermark-Hügel.",
+    "quelle": "https://www.tourismus-uckermark.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Uckermark\" Gasthof OR Gutshof Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Radhus Horn",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Glückstadt, Nordseeküsten-Radweg, Schleswig-Holstein",
+    "adresse": "Große Deichstraße 22, 25548 Glückstadt",
+    "beschreibung": "Schlauchautomat direkt am Elbdeich / Nordseeküsten-Radweg vor dem historischen Radhus Horn.",
+    "quelle": "https://www.sh-tourismus.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Schleswig-Holstein\" OR \"Nordseeküsten-Radweg\" Adresse site:de"
+  },
+  {
+    "name": "Hotel Müller Kyllburg",
+    "kategorie": "Hotel / Basis",
+    "region_ort": "Kyllburg, Eifel, Rheinland-Pfalz",
+    "adresse": "Mühlengasse 3, 54655 Kyllburg",
+    "beschreibung": "Traditionelles Rad-Hotel am Kylltal-Radweg mit gesichertem Fahrradkeller und E-Bike-Ladeanschluss.",
+    "quelle": "https://www.mueller-kyllburg.de",
+    "suchanfrage": "\"Fahrradhotel\" OR \"Bike & Bed\" \"Kylltal-Radweg\" OR \"Ahr-Radweg\" Adresse site:de"
+  },
+  {
+    "name": "E-Bike Ladestation Schloss Simmern",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Simmern/Hunsrück, Rheinland-Pfalz",
+    "adresse": "Schlossplatz 4–8, 55469 Simmern",
+    "beschreibung": "Ladestation im Innenhof des Neuen Schlosses am Schnittpunkt Schinderhannes-Radweg und Soonwald.",
+    "quelle": "https://www.hunsruecknahe.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Hunsrück\" Schlosspark OR Landgasthof Adresse"
+  },
+  {
+    "name": "Auersberg Haus & Aussichtsturm",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Eibenstock OT Wildenthal, Erzgebirge, Sachsen",
+    "adresse": "Auersberg 8, 08309 Eibenstock",
+    "beschreibung": "Berggasthof am zweithöchsten Berg Sachsens (1.018 m) mit Außentankstelle für E-Bikes.",
+    "quelle": "https://www.auersberghaus.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Erzgebirge\" Berggasthof OR Aussichtsturm Adresse site:de"
+  },
+  {
+    "name": "Berghotel Bärenstein",
+    "kategorie": "Hotel / Ladesäule / Hotspot",
+    "region_ort": "Bärenstein, Erzgebirge, Sachsen",
+    "adresse": "Bergstraße 18, 09471 Bärenstein",
+    "beschreibung": "Berggasthaus mit historischem Aussichtsturm und Ladesäule direkt an der Kammtour Erzgebirge.",
+    "quelle": "https://www.erzgebirge-tourismus.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Erzgebirge\" Berggasthof OR Aussichtsturm Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat EGO-SPORT Detmold",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Detmold, Teutoburger Wald, Nordrhein-Westfalen",
+    "adresse": "Bielefelder Straße 16, 32756 Detmold",
+    "beschreibung": "Automat für Schläuche aller Dimensionen direkt an der Achse zu den Externsteinen / Hermannsweg.",
+    "quelle": "https://www.ego-sport.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Bielefeld\" OR \"Paderborn\" OR \"Detmold\" Adresse site:de"
+  },
+  {
+    "name": "Fahrradservice Erthal-Sozialwerk Würzburg",
+    "kategorie": "Werkstatt / Selbsthilfe",
+    "region_ort": "Würzburg, Unterfranken, Bayern",
+    "adresse": "Sanderstraße 27, 97070 Würzburg",
+    "beschreibung": "Gemeinnützige Werkstatt direkt am Main-Radweg, Pannensoforthilfe für Radreisende.",
+    "quelle": "https://www.erthal-sozialwerk.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Main-Radweg\" OR \"Würzburg\" OR \"Bamberg\" Adresse site:de"
+  },
+  {
+    "name": "Gaststätte Radlertreff Eriskirch",
+    "kategorie": "Imbiss / Gastro",
+    "region_ort": "Eriskirch, Bodenseekreis, Baden-Württemberg",
+    "adresse": "Mariabrunnstraße 15, 88097 Eriskirch",
+    "beschreibung": "Kult-Einkehr am Naturschutzgebiet Eriskircher Ried am Bodensee-Radweg mit Radabstellplätzen.",
+    "quelle": "https://www.typisch-bodenseekreis.de",
+    "suchanfrage": "\"Radlerkiosk\" OR \"Radlertreff\" Bodensee OR Donauradweg Adresse"
+  },
+  {
+    "name": "Erlebnisgastronomie Gleis 3 Pfalzfeld",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Pfalzfeld, Hunsrück, Rheinland-Pfalz",
+    "adresse": "Raiffeisenstraße (am alten Bahnhof), 56291 Pfalzfeld",
+    "beschreibung": "Direkt am Schinderhannes-Radweg im alten Eisenbahnwaggon mit E-Bike-Ladesäulen.",
+    "quelle": "https://www.hunsruecknahe.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Hunsrück\" \"Schinderhannes-Radweg\" Adresse site:de"
+  },
+  {
+    "name": "Reparaturstation Peißnitzhaus Halle",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Halle (Saale), Sachsen-Anhalt",
+    "adresse": "Peißnitzinsel 4, 06108 Halle (Saale)",
+    "beschreibung": "Selbstbedienungssäule mit Werkzeug und Universalpumpe direkt an der Saale-Radweg-Insel.",
+    "quelle": "https://www.dubisthalle.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Saale-Radweg\" Adresse site:de"
+  },
+  {
+    "name": "Saale-Radoase Theresienstein",
+    "kategorie": "Rastplatz / Werkstatt",
+    "region_ort": "Hof, Oberfranken, Bayern",
+    "adresse": "Theresienstein 6, 95028 Hof",
+    "beschreibung": "Überdachte Radoase mit 24/7 Reparaturstele am Saale-Radweg.",
+    "quelle": "https://www.fichtelgebirge.bayern",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Saale-Radweg\" Adresse site:de"
+  },
+  {
+    "name": "Gasthaus „Zum Eichenkranz“ Kolzenburg",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Luckenwalde OT Kolzenburg, Brandenburg",
+    "adresse": "Unter den Eichen 1, 14943 Luckenwalde",
+    "beschreibung": "Direkt am Rundkurs 1 der Fläming-Skate; E-Bike-Ladeanschluss und sonniger Biergarten.",
+    "quelle": "https://www.reiseland-brandenburg.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Fläming-Skate\" Gasthof OR Rastplatz Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Bikeambulanz Regensburg",
+    "kategorie": "Schlauchautomat / Werkstatt",
+    "region_ort": "Regensburg, Oberpfalz, Bayern",
+    "adresse": "Bahnhofstraße 18, 93047 Regensburg",
+    "beschreibung": "24/7 Notfallautomat mit Schlauchsortiment und Pressluft-Tankstelle nahe dem Donauradweg.",
+    "quelle": "https://www.ostbayern-tourismus.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Regensburg\" OR \"Passau\" OR \"Ingolstadt\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Reparaturstation Dampferanleger Hameln",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Hameln, Weserbergland, Niedersachsen",
+    "adresse": "Inselstraße / Weserpromenade, 31785 Hameln",
+    "beschreibung": "Öffentliche Reparatursäule der Stadt direkt am Weser-Radweg hinter dem Dampferanleger.",
+    "quelle": "https://www.hameln.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Weserbergland\" Hameln OR Rinteln Adresse"
+  },
+  {
+    "name": "Hotel Burg Waldau E-Bike-Station",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Grasellenbach OT Wahlen, Odenwald, Hessen",
+    "adresse": "Volkerstraße 1, 64689 Grasellenbach",
+    "beschreibung": "Fahrradhotel mit Akku-Ladeplätzen im Biergarten und verschließbarem Radraum.",
+    "quelle": "https://www.bergstrasse-odenwald.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Odenwald\" Gasthaus OR Burg Adresse site:de"
+  },
+  {
+    "name": "E-Bike Ladestation Minneburgplatz",
+    "kategorie": "Ladesäule / Rastplatz",
+    "region_ort": "Neckargerach, Neckartal / Odenwald, Baden-Württemberg",
+    "adresse": "Hauptstraße 32 (Minneburgplatz), 69437 Neckargerach",
+    "beschreibung": "Ladesäule am Neckartal-Radweg unterhalb der Burgruine Minneburg.",
+    "quelle": "https://www.tg-odenwald.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Odenwald\" Gasthaus OR Burg Adresse site:de"
+  },
+  {
+    "name": "Strandhotel Buckow E-Ladesäule",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Buckow (Märkische Schweiz), Brandenburg",
+    "adresse": "Wriezener Straße 27–28, 15377 Buckow",
+    "beschreibung": "Direkt am Schermützelsee-Rundweg gelegene Kombi-Ladesäule für E-Bikes.",
+    "quelle": "https://www.reiseland-brandenburg.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Märkische Schweiz\" OR \"Buckow\" Gasthof Adresse site:de"
+  },
+  {
+    "name": "Bikepark Arber Talstation Service-Center",
+    "kategorie": "Ladesäule / Werkstatt / Hotspot",
+    "region_ort": "Bayerisch Eisenstein, Bayerischer Wald, Bayern",
+    "adresse": "Talstation Arber 1, 94252 Bayerisch Eisenstein",
+    "beschreibung": "Offizielles Lade- und Reparaturservicezentrum am Fuße des Großen Arber.",
+    "quelle": "https://www.dreilaenderbike.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bayerischer Wald\" Arber OR Bodenmais Adresse site:de"
+  },
+  {
+    "name": "E-Bike-Ladestation am Alten Siel Greetsiel",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Krummhörn-Greetsiel, Ostfriesland, Niedersachsen",
+    "adresse": "Sielstraße 25, 26736 Krummhörn",
+    "beschreibung": "Zentrale Lademöglichkeit direkt am historischen Kutterhafen / Siel im Fischerdorf Greetsiel.",
+    "quelle": "https://www.ostfriesland.travel",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Ostfriesland\" Sielhafen OR Mühle Adresse site:de"
+  },
+  {
+    "name": "E-Bike Station Mühle Rhaude",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Rhauderfehn (Rhaude), Ostfriesland, Niedersachsen",
+    "adresse": "Mühlenweg 13, 26817 Rhauderfehn",
+    "beschreibung": "Ladesäule an der historischen Galerieholländer-Mühle, Knotenpunkt regionaler Fehn-Routen.",
+    "quelle": "https://www.ostfriesland-rhauderfehn.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Ostfriesland\" Sielhafen OR Mühle Adresse site:de"
+  },
+  {
+    "name": "Fahrradschließ- & Ladeanlage Mühlenstraße Aurich",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Aurich, Ostfriesland, Niedersachsen",
+    "adresse": "Mühlenstraße 20 (nahe Stiftsmühle), 26603 Aurich",
+    "beschreibung": "Fahrradschließfächer mit integrierten Ladesteckdosen am Ems-Jade-Kanal-Radweg.",
+    "quelle": "https://www.aurich-tourismus.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Ostfriesland\" Sielhafen OR Mühle Adresse site:de"
+  },
+  {
+    "name": "Bike & Ski 950 Wasserkuppe Ladepunkt",
+    "kategorie": "Ladesäule / Hotspot / Werkstatt",
+    "region_ort": "Wasserkuppe (Rhön), Hessen",
+    "adresse": "Wasserkuppe 46, 36129 Gersfeld (Rhön)",
+    "beschreibung": "Höchster Radservicepunkt Hessens (950 m) mit E-Bike-Verleih, Ladeanschluss und Notfallwerkzeug.",
+    "quelle": "https://www.rhoentravel.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Wasserkuppe\" OR \"Milseburg\" Rhön Adresse site:de"
+  },
+  {
+    "name": "Ladefächer Festplatz Milseburg",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Milseburg / Hofbieber, Rhön, Hessen",
+    "adresse": "Milseburgradweg / Festplatz, 36145 Hofbieber",
+    "beschreibung": "Öffentlich zugängliche Ladefächer mit Schließsystem direkt am beliebten Bahntrassen-Radweg (Milseburgradweg).",
+    "quelle": "https://www.milseburgradweg.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Wasserkuppe\" OR \"Milseburg\" Rhön Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Frischborn",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Lauterbach-Frischborn, Vogelsberg, Hessen",
+    "adresse": "Am Waldschlösschen 1, 36341 Lauterbach",
+    "beschreibung": "24/7 Reparatursäule mit Pumpe und Werkzeugen direkt am geteerten Vulkanradweg.",
+    "quelle": "https://www.vogelsberg-touristik.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bahnradweg Hessen\" OR \"Vulkanradweg\" Adresse site:de"
+  },
+  {
+    "name": "Solar-E-Bike-Ladestation & Reparaturset Homberg (Ohm)",
+    "kategorie": "Ladesäule / Werkstatt",
+    "region_ort": "Homberg (Ohm), Vogelsberg, Hessen",
+    "adresse": "Stadhallenweg 12 (Walter-Seitz-Platz), 35315 Homberg (Ohm)",
+    "beschreibung": "Autarke Solar-Ladesäule mit integriertem Reparaturwerkzeugsatz am Bahnradweg Hessen.",
+    "quelle": "https://www.vogelsberg-touristik.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bahnradweg Hessen\" OR \"Vulkanradweg\" Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Bimbel",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Burghaun-Bimbel, Rhön/Hessen",
+    "adresse": "Am Kegelspielradweg, 36151 Burghaun",
+    "beschreibung": "Selbstbedienungssäule am Kegelspielradweg (Verbindung Fulda-Rhön).",
+    "quelle": "https://www.adac.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bahnradweg Hessen\" OR \"Vulkanradweg\" Adresse site:de"
+  },
+  {
+    "name": "Radstation Bahnhof Husum",
+    "kategorie": "Werkstatt / Ladesäule",
+    "region_ort": "Husum, Nordfriesland, Schleswig-Holstein",
+    "adresse": "Poggenburgstraße 12, 25813 Husum",
+    "beschreibung": "Zentraler E-Bike-Infrastruktur-Hub für Ausflüge nach Eiderstedt; Verleih, Werkstatt, Ladeanschlüsse.",
+    "quelle": "https://www.nordseetourismus.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Nordfriesland\" Husum OR Eiderstedt Hofcafé Adresse site:de"
+  },
+  {
+    "name": "Thode’s Bauernhofcafé Ladepunkt",
+    "kategorie": "Ladesäule / Bauerncafé",
+    "region_ort": "Offenbüttel, Dithmarschen/Schleswig-Holstein",
+    "adresse": "Heinkenstruck 1, 25767 Offenbüttel",
+    "beschreibung": "Traditionelles Hofcafé mit Garten und E-Bike-Ladestation direkt am Nord-Ostsee-Kanal-Radweg.",
+    "quelle": "https://www.kuestenforum.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Schleswig\" OR \"Eiderstedt\" \"Bauernhofcafé\" Adresse"
+  },
+  {
+    "name": "E-Bike Ladestation Rathaus Bad Marienberg",
+    "kategorie": "Ladesäule / Basis",
+    "region_ort": "Bad Marienberg, Westerwald, Rheinland-Pfalz",
+    "adresse": "Kirburger Straße 4, 56470 Bad Marienberg",
+    "beschreibung": "Mehrere Ladepunkte vor der Verbandsgemeindeverwaltung; Verleihkabel im Bürgerbüro verfügbar.",
+    "quelle": "https://www.ww-kurier.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Westerwald\" \"Fuchskaute\" OR \"Bad Marienberg\" Adresse"
+  },
+  {
+    "name": "Fuchskaute-Lodge Ladepunkt",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Willingen (Westerwald), Rheinland-Pfalz",
+    "adresse": "Fuchskaute 1, 56479 Willingen",
+    "beschreibung": "Höchster Berg des Westerwaldes (657 m); Berggasthaus mit Akkulademöglichkeit.",
+    "quelle": "https://www.deskline.net",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Westerwald\" \"Fuchskaute\" OR \"Bad Marienberg\" Adresse"
+  },
+  {
+    "name": "Krombachtalsperre E-Bike Ladestation",
+    "kategorie": "Ladesäule / Rastplatz",
+    "region_ort": "Driedorf, Westerwald / Hessen",
+    "adresse": "Krombachtalsperre / Campingbereich, 35759 Driedorf",
+    "beschreibung": "Öffentlich zugängliche Akkuladestation direkt an den Liegewiesen des Stausees.",
+    "quelle": "https://www.wittich.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Westerwald\" \"Fuchskaute\" OR \"Bad Marienberg\" Adresse"
+  },
+  {
+    "name": "24/7 Schlauchautomat Fahrrad Heßlich Cottbus",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Cottbus, Lausitz, Brandenburg",
+    "adresse": "Wilhelm-Külz-Straße 12, 03046 Cottbus",
+    "beschreibung": "Rund um die Uhr zugänglicher Schwalbe-Automat am Radweg Richtung Spreeauenpark.",
+    "quelle": "https://www.automatensucher.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Cottbus\" OR \"Görlitz\" OR \"Bautzen\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Kunstmühle Ludwigsdorf",
+    "kategorie": "Schlauchautomat / Hotspot",
+    "region_ort": "Görlitz-Ludwigsdorf, Oder-Neiße-Radweg, Sachsen",
+    "adresse": "An der Kunstmühle, 02827 Görlitz OT Ludwigsdorf",
+    "beschreibung": "Strategisch gelegener Schlauchautomat direkt an der historischen Mühle am Oder-Neiße-Radweg.",
+    "quelle": "https://www.goerlitz-insider.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Cottbus\" OR \"Görlitz\" OR \"Bautzen\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Seezentrum Muhr am See Strandhaus-Ladesäule",
+    "kategorie": "Ladesäule / Kiosk / Rastplatz",
+    "region_ort": "Muhr am See, Fränkisches Seenland, Bayern",
+    "adresse": "Seezentrum Muhr a.See 6, 91735 Muhr am See",
+    "beschreibung": "E-Bike-Ladestation der Stromtreter-Initiative direkt am Kiosk / Strandhaus des Altmühlsees.",
+    "quelle": "https://www.fraenkischer-wasserradweg.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Fränkisches Seenland\" Altmühlsee OR Brombachsee Kiosk Adresse"
+  },
+  {
+    "name": "Freizeitanlage Enderndorf Zwei-Seen-Platz",
+    "kategorie": "Ladesäule / Kiosk / Hotspot",
+    "region_ort": "Spalt-Enderndorf, Großer Brombachsee, Bayern",
+    "adresse": "Zum Hafen (Zwei-Seen-Platz), 91174 Spalt",
+    "beschreibung": "Kombinierte Lade- und Rastinfrastruktur an der Schleuse zwischen Großem Brombachsee und Igelsbachsee.",
+    "quelle": "https://www.zv-brombachsee.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Fränkisches Seenland\" Altmühlsee OR Brombachsee Kiosk Adresse"
+  },
+  {
+    "name": "Haus des Gastes E-Bike Ladeschrank Waren",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Waren (Müritz), Mecklenburg-Vorpommern",
+    "adresse": "Neuer Markt 21 (Hofseite), 17192 Waren (Müritz)",
+    "beschreibung": "24/7 zugängliche Schließfachanlage mit Steckdosen zum geschützten Laden an der Müritz.",
+    "quelle": "https://www.waren-tourismus.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Mecklenburgische Schweiz\" Malchin OR Teterow OR Waren Adresse site:de"
+  },
+  {
+    "name": "Schloss Teschow E-Bike Station",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Teterow OT Teschow, Meckl. Schweiz, Meck-Pomm",
+    "adresse": "Gutshofallee 1, 17166 Teterow",
+    "beschreibung": "Gutshotel am Teterower See mit Radverleih, Schuko-Außenladepunkten und Servicestützpunkt.",
+    "quelle": "https://www.radfahrland-mv.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Mecklenburgische Schweiz\" Malchin OR Teterow OR Waren Adresse site:de"
+  },
+  {
+    "name": "Rad-Reparaturstation Würzbacher Weiher",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Blieskastel-Niederwürzbach, Biosphäre Bliesgau, Saarland",
+    "adresse": "Am Würzbacher Weiher, 66440 Blieskastel",
+    "beschreibung": "Frei zugängliche Edelstahl-Servicestation am Weiher-Rundweg (what3words: ortszeit.natürlich.zeltplane).",
+    "quelle": "https://www.urlaub.saarland",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Saar-Radweg\" OR \"Bliesgau\" Adresse site:de"
+  },
+  {
+    "name": "Radservicestation & E-Lader Bahnhof Gersheim",
+    "kategorie": "Werkstatt / Ladesäule",
+    "region_ort": "Gersheim, Bliestal-Freizeitweg, Saarland",
+    "adresse": "Busbahnhof / Historischer Bahnhof, 66453 Gersheim",
+    "beschreibung": "Kombination aus Akkuladestation und Werkzeugstele direkt an der stillgelegten Bahntrasse.",
+    "quelle": "https://www.saarpfalz-touristik.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Saar-Radweg\" OR \"Bliesgau\" Adresse site:de"
+  },
+  {
+    "name": "Burghof Kyffhäuser Denkmalwirtschaft",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Kyffhäuserland OT Steinthaleben, Thüringen",
+    "adresse": "Kyffhäuser 4, 99707 Kyffhäuserland",
+    "beschreibung": "Gaststätte direkt am Fuße des Kaiser-Wilhelm-Denkmals; Ladepunkte auf dem Vorplatz und Außensteckdosen.",
+    "quelle": "https://www.naturpark-kyffhaeuser.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Kyffhäuser\" Denkmal OR Gasthof Adresse site:de"
+  },
+  {
+    "name": "Automaten Emma 24/7 Bikeomat Freiburg",
+    "kategorie": "Schlauchautomat / Werkzeug",
+    "region_ort": "Freiburg im Breisgau, Baden-Württemberg",
+    "adresse": "Schreiberstraße 18, 79098 Freiburg im Breisgau",
+    "beschreibung": "24/7 Zubehör- und Schlauchautomat mit Werkzeugkleinteilen und Ventilen im Zentrum.",
+    "quelle": "https://www.instagram.com",
+    "suchanfrage": "\"Schlauchautomat\" \"Freiburg\" OR \"Offenburg\" OR \"Lörrach\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Fahrrad-Ecke Oberau Luft- & Schlauchtankstelle",
+    "kategorie": "Schlauchautomat / Werkstatt",
+    "region_ort": "Freiburg im Breisgau, Baden-Württemberg",
+    "adresse": "Kartäuserstraße 38, 79102 Freiburg im Breisgau",
+    "beschreibung": "Mehrere Automatenbatterien für alle Schlauchgrößen plus kostenlose Druckluftstation am Dreisamufer.",
+    "quelle": "https://www.velobiz.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Freiburg\" OR \"Offenburg\" OR \"Lörrach\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Zweirad-Schmid 24/7 Bikeomat Offenburg",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Offenburg, Kinzigtal, Baden-Württemberg",
+    "adresse": "Okenstraße 51, 77652 Offenburg",
+    "beschreibung": "Außenstehender Automat für Schläuche am Zubringer zum Kinzigtalradweg.",
+    "quelle": "https://www.reparadius.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Freiburg\" OR \"Offenburg\" OR \"Lörrach\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Gut Oestergaard Obstcafé Ladesäule",
+    "kategorie": "Ladesäule / Bauerncafé",
+    "region_ort": "Steinberg (Angeln), Schleswig-Holstein",
+    "adresse": "Oestergaard 2, 24972 Steinberg",
+    "beschreibung": "Historischer Gutshof mit Gartencafé und E-Bike-Ladestation zwischen Flensburger Förde und Gelting.",
+    "quelle": "https://www.lksh.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Flensburg\" OR \"Angeln\" Gasthof OR Hofcafé Adresse site:de"
+  },
+  {
+    "name": "Holgers Erzbahnbude Radservicestation",
+    "kategorie": "Werkstatt / Kiosk / Hotspot",
+    "region_ort": "Gelsenkirchen, Ruhrgebiet, Nordrhein-Westfalen",
+    "adresse": "Erzbahntrasse / Pfeilerbahn, 45888 Gelsenkirchen",
+    "beschreibung": "Kult-Kiosk an der Kreuzung Erzbahntrasse / Kray-Wanner-Bahn mit 24/7 Fahrrad-Reparatursäule.",
+    "quelle": "https://www.gelsenkirchen.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ruhrgebiet\" \"Emscher Park\" OR \"Erzbahntrasse\" Adresse"
+  },
+  {
+    "name": "Hoheleyer Hütte Kahler Asten",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Winterberg OT Hoheleye, Sauerland, NRW",
+    "adresse": "Hoheleye 17 (Ladestation Hoheleye 2), 59955 Winterberg",
+    "beschreibung": "Traditionelle Wander- und Bikerhütte am Westhang des Kahlen Astens mit E-Bike-Ladesäule.",
+    "quelle": "https://www.winterberg.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Sauerland\" \"Kahler Asten\" Gasthof Adresse site:de"
+  },
+  {
+    "name": "Gasthof Spessartruh Ladepunkt",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Bessenbach OT Steiger, Spessart, Bayern",
+    "adresse": "Steiger 16, 63856 Bessenbach",
+    "beschreibung": "Zertifizierter Partner der Initiative „Wald erFahren“ mit Ladestation im Hochspessart.",
+    "quelle": "https://www.spessart-mainland.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Spessart\" Wirtshaus im Spessart OR Berghütte Adresse site:de"
+  },
+  {
+    "name": "Gasthaus im Hochspessart Lichtenau",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Rothenbuch OT Lichtenau, Hafenlohrtal, Bayern",
+    "adresse": "Lichtenau 3, 63860 Rothenbuch",
+    "beschreibung": "Idyllisch im Hafenlohrtal gelegen; E-Bike-Ladestation mit Systemkabeln für Bosch, Yamaha und Impulse.",
+    "quelle": "https://www.fabuly.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Spessart\" Wirtshaus im Spessart OR Berghütte Adresse site:de"
+  },
+  {
+    "name": "Stöffel-Park WällerLand E-Bike Station",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Enspel, Westerwald, Rheinland-Pfalz",
+    "adresse": "Stöffelstraße, 57647 Enspel",
+    "beschreibung": "Industrie-Erlebnispark mit E-Bike-Verleih, Werkzeug und Lademöglichkeit am Westerwald-Radweg.",
+    "quelle": "https://www.stoeffelpark.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Westerwald\" \"Stöffel-Park\" Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Schmachter See Binz",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Ostseebad Binz, Rügen, Meck-Pomm",
+    "adresse": "Am Schmachter See / Sonnenpfad, 18609 Binz",
+    "beschreibung": "24/7 kostenfreie Reparatursäule mit Werkzeugen und Luftpumpe am Uferrundweg.",
+    "quelle": "https://www.gemeinde-binz.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Rügen OR Usedom Adresse site:de"
+  },
+  {
+    "name": "Kurverwaltung Göhren Rad- & E-Ladesäule",
+    "kategorie": "Ladesäule / Werkstatt",
+    "region_ort": "Ostseebad Göhren, Rügen, Meck-Pomm",
+    "adresse": "Poststraße 9, 18586 Ostseebad Göhren",
+    "beschreibung": "Kombination aus Akkuladestation und Fahrradreparaturstele auf Mönchgut.",
+    "quelle": "https://www.goehren-ruegen.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Rügen OR Usedom Adresse site:de"
+  },
+  {
+    "name": "Besucherzentrum Geierlay E-Bike Ladepunkt",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Mörsdorf (Hunsrück), Rheinland-Pfalz",
+    "adresse": "Kastellauner Straße 23, 56290 Mörsdorf",
+    "beschreibung": "Akkuladestation direkt am Besucherzentrum der berühmten Hängeseilbrücke Geierlay.",
+    "quelle": "https://www.geierlay.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Hunsrück\" \"Geierlay\" Hängeseilbrücke Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat RADWEG Neu-Ulm",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Neu-Ulm, Bayern / Baden-Württemberg",
+    "adresse": "Industriestraße 12, 89231 Neu-Ulm",
+    "beschreibung": "Rund um die Uhr zugänglicher Automat mit Schläuchen von 20 bis 29 Zoll am Donauradweg-Zubringer.",
+    "quelle": "https://www.radweg-schneider.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Ulm\" OR \"Neu-Ulm\" OR \"Biberach\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Die Fahrradprofis 24/7 Schlauchspender",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Biberach an der Riß, Oberschwaben, Baden-Württemberg",
+    "adresse": "Kolpingstraße 12, 88400 Biberach an der Riß",
+    "beschreibung": "Außenautomat für Notfall-Fahrradschläuche an der Oberschwaben-Allgäu-Radroute.",
+    "quelle": "https://www.oberschwaben-tourismus.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Ulm\" OR \"Neu-Ulm\" OR \"Biberach\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Winzer vom Silberberg E-Bike-Ladesäule",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Bahlingen am Kaiserstuhl, Baden-Württemberg",
+    "adresse": "Kapellenstraße 13, 79353 Bahlingen",
+    "beschreibung": "Kostenlose E-Bike-Ladesäule (24/7) direkt an der Winzergenossenschaft am Kaiserstuhl-Radweg.",
+    "quelle": "https://www.goingelectric.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Kaiserstuhl\" Winzergenossenschaft OR Gasthaus Adresse site:de"
+  },
+  {
+    "name": "E-Bike Solartankstelle Stadthafen Senftenberg",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Senftenberg, Lausitzer Seenland, Brandenburg",
+    "adresse": "Am Stadthafen 4, 01968 Senftenberg",
+    "beschreibung": "Solarbetriebene Ladestation mit 3 Schließfächern und je 2 Steckdosen am Hafenplatz.",
+    "quelle": "https://www.lausitzerseenland.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Lausitzer Seenland\" Senftenberger See OR Bärwalder See Adresse"
+  },
+  {
+    "name": "ADAC Radservicestation 510 Bärwalder See",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Boxberg/Oberlausitz, Sachsen",
+    "adresse": "Zur Strandpromenade 1 (am TIZ), 02943 Boxberg",
+    "beschreibung": "Reparaturstele mit Werkzeugsatz und Pumpe am Seerundweg des Bärwalder Sees.",
+    "quelle": "https://www.reiseland-brandenburg.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Lausitzer Seenland\" Senftenberger See OR Bärwalder See Adresse"
+  },
+  {
+    "name": "Rad Service Station Kardinal-Preysing-Platz",
+    "kategorie": "Werkstatt / Ladesäule",
+    "region_ort": "Eichstätt, Altmühltal, Bayern",
+    "adresse": "Kardinal-Preysing-Platz 14, 85072 Eichstätt",
+    "beschreibung": "Kombi-Station aus SKS-Werkzeugstele und Bike-Energy-E-Bike-Ladestation (365 Tage zugänglich).",
+    "quelle": "https://www.eichstaett.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Altmühltal\" Eichstätt OR Gunzenhausen Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat CUBE Store Rostock",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Rostock, Mecklenburg-Vorpommern",
+    "adresse": "Gewerbegebiet / Storefront, 18055 Rostock",
+    "beschreibung": "Schwalbe-Schlauchautomat für Standard- und Plus-Bereifungen an der Warnow-Mündung.",
+    "quelle": "https://www.reparadius.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Rostock\" OR \"Schwerin\" OR \"Stralsund\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Landgasthof Haus Odenwald RadServiceStation",
+    "kategorie": "Ladesäule / Gastro / Hotel",
+    "region_ort": "Waldbrunn-Strümpfelbrunn, Odenwald, Baden-Württemberg",
+    "adresse": "Alte Marktstraße 5, 69429 Waldbrunn",
+    "beschreibung": "Zertifizierte RadServiceStation mit Ladestation für Akkus am Fuße des Katzenbuckels.",
+    "quelle": "https://www.pension-haus-odenwald.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Odenwald\" \"Katzenbuckel\" Gasthaus Adresse site:de"
+  },
+  {
+    "name": "Katzenbuckel-Therme Arkaden-Ladesäule",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Waldbrunn (Katzenbuckel), Baden-Württemberg",
+    "adresse": "Zu den Kuranlagen 18, 69429 Waldbrunn",
+    "beschreibung": "Öffentliche Ladestation unter den Arkaden mit festen Systemsteckern (Bosch, Shimano, Yamaha) am höchsten Gipfel des Odenwalds (626 m).",
+    "quelle": "https://www.katzenbuckel-therme.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Odenwald\" \"Katzenbuckel\" Gasthaus Adresse site:de"
+  },
+  {
+    "name": "Fahrradreparaturstation Tourist Info Homburg",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Homburg (Saar), Saarland",
+    "adresse": "Talstraße 57a (La-Baule-Platz), 66424 Homburg",
+    "beschreibung": "Überdachte 24/7 Reparatursäule mit Pumpe und Werkzeugen am Marktplatz.",
+    "quelle": "https://www.urlaub.saarland",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Saarbrücken\" OR \"Neunkirchen\" OR \"Homburg\" Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Neunkirchen",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Neunkirchen, Saarland",
+    "adresse": "An der Lakaienschäferei, 66538 Neunkirchen",
+    "beschreibung": "Öffentliche Pannenstation zur Selbstreparatur und Reifendruckprüfung.",
+    "quelle": "https://www.adac.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Saarbrücken\" OR \"Neunkirchen\" OR \"Homburg\" Adresse site:de"
+  },
+  {
+    "name": "E-Bike-Ladestation Carl Zeiss Naturzentrum Amrum",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Norddorf auf Amrum, Nordfriesische Inseln, Schleswig-Holstein",
+    "adresse": "Strunwai 31, 25946 Norddorf auf Amrum",
+    "beschreibung": "Kostenlose Ökostrom-Akkuladung für Insel-Radler direkt am Naturschutzzentrum am Norddorfer Dünenrand.",
+    "quelle": "https://www.amrum-news.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Helgoland\" OR \"Amrum\" OR \"Juist\" Adresse site:de"
+  },
+  {
+    "name": "JuistBike Akkutausch-Station",
+    "kategorie": "Werkstatt / Ladesäule",
+    "region_ort": "Juist, Ostfriesische Inseln, Niedersachsen",
+    "adresse": "Mittelstraße 7c, 26571 Juist",
+    "beschreibung": "Schneller Bosch-Akkutausch auf der autofreien Nordseeinsel Juist zur Vermeidung von Lade-Wartezeiten.",
+    "quelle": "https://www.juistbike.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Helgoland\" OR \"Amrum\" OR \"Juist\" Adresse site:de"
+  },
+  {
+    "name": "Altes Wallberghaus Gipfel-Servicestation",
+    "kategorie": "Ladesäule / Werkstatt / Hotspot",
+    "region_ort": "Rottach-Egern / Wallberg (1.512 m), Tegernsee, Bayern",
+    "adresse": "Wallberg 2, 83700 Rottach-Egern",
+    "beschreibung": "Höchste Servicestation am Tegernsee: Montageständer, Handpumpe mit Manometer und E-Bike-Ladestation auf über 1.500 m.",
+    "quelle": "https://www.tegernsee.com",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bayerische Alpen\" \"Wendelstein\" OR \"Wallberg\" OR \"Sudelfeld\" Adresse"
+  },
+  {
+    "name": "Zahnradbahn Talbahnhof Brannenburg E-Mobility",
+    "kategorie": "Ladesäule / Basis",
+    "region_ort": "Brannenburg / Wendelstein, Inntal, Bayern",
+    "adresse": "Sudelfeldstraße 106, 83098 Brannenburg",
+    "beschreibung": "Ladeinfrastruktur an der Talstation der historischen Wendelstein-Zahnradbahn für Voralpen-Touren.",
+    "quelle": "https://www.wendelsteinbahn.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bayerische Alpen\" \"Wendelstein\" OR \"Wallberg\" OR \"Sudelfeld\" Adresse"
+  },
+  {
+    "name": "Berghotel Sudelfeld Bike-Stützpunkt",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Bayrischzell / Sudelfeld, Bayerische Alpen, Bayern",
+    "adresse": "Unteres Sudelfeld 4, 83098 Brannenburg",
+    "beschreibung": "Zentraler Bike-Stützpunkt an der Sudelfeld-Passstraße mit Lademöglichkeiten für Alpenüberquerer.",
+    "quelle": "https://www.mtb-hotels.info",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bayerische Alpen\" \"Wendelstein\" OR \"Wallberg\" OR \"Sudelfeld\" Adresse"
+  },
+  {
+    "name": "Gaststätte Lichtenhainer Wasserfall Ladesäule",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Sebnitz OT Lichtenhain, Kirnitzschtal, Sächsische Schweiz, Sachsen",
+    "adresse": "Kirnitzschtalstraße 16, 01855 Sebnitz",
+    "beschreibung": "Direkt an der Endstation der historischen Kirnitzschtalbahn; E-Bike-Ladepunkte für Elbsandstein-Kletterer und Biker.",
+    "quelle": "https://www.lichtenhainer-wasserfall.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Sächsische Schweiz\" \"Kirnitzschtal\" Gasthof OR Mühle Adresse"
+  },
+  {
+    "name": "Gasthaus & Pension Neumannmühle",
+    "kategorie": "Gastro / Basis",
+    "region_ort": "Ottendorf (Sebnitz), Kirnitzschtal, Sachsen",
+    "adresse": "Kirnitzschtalstraße 4–5, 01855 Ottendorf",
+    "beschreibung": "Historische Sägemühle im wildromantischen Kirnitzschtal; Anlaufpunkt und Raststätte für Biker.",
+    "quelle": "https://www.kirnitzschtal.org",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Sächsische Schweiz\" \"Kirnitzschtal\" Gasthof OR Mühle Adresse"
+  },
+  {
+    "name": "Altländer Obsthof Ferienhof Ladepunkt",
+    "kategorie": "Ladesäule / Bauerncafé",
+    "region_ort": "Hollern-Twielenfleth, Altes Land, Niedersachsen",
+    "adresse": "Hollernstraße 97, 21723 Hollern-Twielenfleth",
+    "beschreibung": "Zwischen Apfelplantagen direkt hinterm Elbdeich; E-Bike-Lademöglichkeit für Deichradler.",
+    "quelle": "https://www.bettundbike.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Altes Land\" Hofcafé OR Obsthof Adresse site:de"
+  },
+  {
+    "name": "Herzapfelhof Lühs Hofcafé",
+    "kategorie": "Bauerncafé / Hotspot",
+    "region_ort": "Jork, Altes Land, Niedersachsen",
+    "adresse": "Osterjork 102, 21635 Jork",
+    "beschreibung": "Bekannter Obsthof mit Hofcafé, Hofladen und Radler-Rastplätzen im Herzen des Alten Landes.",
+    "quelle": "https://www.herzapfelhof.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Altes Land\" Hofcafé OR Obsthof Adresse site:de"
+  },
+  {
+    "name": "Radsport Kleinschroth E-Bike Werkstatt",
+    "kategorie": "Werkstatt",
+    "region_ort": "Reit im Winkl, Chiemgau, Bayern",
+    "adresse": "Weitseestraße 6, 83242 Reit im Winkl",
+    "beschreibung": "Alpine Fachwerkstatt und E-Bike-Servicestation am Knotenpunkt Chiemgau-Kaiserwinkl.",
+    "quelle": "https://www.reitimwinkl.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Chiemgau\" Reit im Winkl OR Ruhpolding Adresse site:de"
+  },
+  {
+    "name": "Radl Sepp Bahnhofswerkstatt Ruhpolding",
+    "kategorie": "Werkstatt / Verleih",
+    "region_ort": "Ruhpolding, Chiemgau, Bayern",
+    "adresse": "Bahnhofstraße 3, 83324 Ruhpolding",
+    "beschreibung": "Traditionsbetrieb direkt am Bahnhof Ruhpolding; Akkuservice und Sofortreparaturen für Bergabenteurer.",
+    "quelle": "https://www.ruhpolding.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Chiemgau\" Reit im Winkl OR Ruhpolding Adresse site:de"
+  },
+  {
+    "name": "Gasthaus Weber Nürburgring E-Bikerast",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Wiesemscheid, Hocheifel, Rheinland-Pfalz",
+    "adresse": "Neue Straße 1, 53534 Wiesemscheid",
+    "beschreibung": "Nur 3 km von der Nordschleife entfernt; kostenfreie Akkuladung für Gäste und absperrbare Radgarage.",
+    "quelle": "https://www.rlp-tourismus.com",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Eifel\" \"Nürburgring\" Gasthaus OR Hotel Adresse site:de"
+  },
+  {
+    "name": "Restaurant & Café „Zur Nürburg“",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Nürburg, Hocheifel, Rheinland-Pfalz",
+    "adresse": "Burgplatz 2, 53520 Nürburg",
+    "beschreibung": "Panoramaterrasse direkt unterhalb der Burgruine Nürburg mit E-Bike-Akkuladung während der Rast.",
+    "quelle": "https://www.erlebnisregionnuerburgring.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Eifel\" \"Nürburgring\" Gasthaus OR Hotel Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Fahrradhof Kassel",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Kassel, Hessen",
+    "adresse": "Wilhelmshöher Allee 261, 34131 Kassel",
+    "beschreibung": "Schwalbe-Automat direkt auf der Zubringerachse zum UNESCO-Bergpark Wilhelmshöhe.",
+    "quelle": "https://www.reparadius.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Kassel\" OR \"Göttingen\" OR \"Fulda\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Fahrrad-Doc Göttingen",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Göttingen, Niedersachsen",
+    "adresse": "Petrikirchstraße 18 / Ecke Hennebergstraße, 37077 Göttingen",
+    "beschreibung": "Rund um die Uhr zugänglicher Pannen-Schlauchautomat in Göttingen-Weende am Leine-Radweg.",
+    "quelle": "https://www.fahrrad-doc.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Kassel\" OR \"Göttingen\" OR \"Fulda\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Hupfer Bike 24/7 Schlauchautomat Fulda",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Fulda, Hessen",
+    "adresse": "Heidbergsweg 4, 36041 Fulda",
+    "beschreibung": "24/7 Automat mit Bar- und EC-Kartenzahlung an der Fuldaradweg-Achse.",
+    "quelle": "https://www.hupfer-fahrradladen.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Kassel\" OR \"Göttingen\" OR \"Fulda\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Flair Hotel Deutsches Haus E-Bike Hub",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Arendsee (Altmark), Sachsen-Anhalt",
+    "adresse": "Seehäuser Straße 80, 39619 Arendsee",
+    "beschreibung": "Zertifiziertes Radler-Hotel am Uferrundweg Arendsee mit Akkuladestation und Trockenraum.",
+    "quelle": "https://www.luftkurort-arendsee.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Altmark\" Arendsee OR Salzwedel Gasthof Adresse site:de"
+  },
+  {
+    "name": "Toma Bike Shop Luft- & Ladestation",
+    "kategorie": "Werkstatt / Ladesäule",
+    "region_ort": "Salzwedel, Altmark, Sachsen-Anhalt",
+    "adresse": "Burgstraße 12, 29410 Hansestadt Salzwedel",
+    "beschreibung": "Zentrale Servicestation in der Fachwerk-Altstadt mit E-Bike-Ladesäule und Pressluft.",
+    "quelle": "https://www.tomabike.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Altmark\" Arendsee OR Salzwedel Gasthof Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Saarlouis",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Saarlouis, Saarland",
+    "adresse": "Eisenhüttenstädter Allee 2, 66740 Saarlouis",
+    "beschreibung": "Kostenfreie 24/7 Werkzeugstele für Notfall-Schraubarbeiten am Saar-Radweg.",
+    "quelle": "https://www.saar-hunsrueck-steig.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Saar\" Mettlach OR Saarlouis Adresse site:de"
+  },
+  {
+    "name": "Reparaturstation & Schlauchautomat Perl-Besch",
+    "kategorie": "Schlauchautomat / Werkstatt",
+    "region_ort": "Perl-Besch, Dreiländereck Mosel/Saarland",
+    "adresse": "Metzer Straße, 66706 Perl-Besch",
+    "beschreibung": "Direkt an der Obermosel am Grenzradweg nach Luxemburg; 24/7 Reparaturstele und Schlauchautomat.",
+    "quelle": "https://www.saarschleifenland.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Saar\" Mettlach OR Saarlouis Adresse site:de"
+  },
+  {
+    "name": "Racheldiensthütte Nationalpark E-Ladesäule",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Riedlhütte / Großer Rachel, Nationalpark Bayerischer Wald, Bayern",
+    "adresse": "Hüttenberg 3 (Diensthüttenstraße), 94556 Riedlhütte",
+    "beschreibung": "Offizielle kostenlose 8-fach-Akkuladestation der Nationalparkverwaltung an der beliebten Waldbaude am Fuße des Rachel (1.453 m).",
+    "quelle": "https://www.bayern.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Bayerischer Wald\" \"Großer Falkenstein\" OR \"Rachel\" Schutzhaus Adresse"
+  },
+  {
+    "name": "24/7 Schlauchautomat Fahrrad-Station Weiche",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Flensburg-Weiche, Schleswig-Holstein",
+    "adresse": "Ochsenweg 75, 24941 Flensburg",
+    "beschreibung": "Schlauchspender direkt am historischen Fernradweg Ochsenweg an der dänischen Grenze.",
+    "quelle": "https://www.mein-fahrradhaendler.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Flensburg\" OR \"Kiel\" OR \"Lübeck\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Alpenhotel Spitzingsee E-Bike Ladesäule",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Schliersee-Spitzingsee, Bayerische Alpen, Bayern",
+    "adresse": "Seeweg 7, 83727 Schliersee-Spitzingsee",
+    "beschreibung": "Direkt am Hochgebirgssee (1.084 m) gelegene Akkuladestation am Start von Spitzingsee-Touren.",
+    "quelle": "https://www.servus-schliersee.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Bayerische Alpen\" \"Spitzingsee\" OR \"Schliersee\" Gasthaus Adresse"
+  },
+  {
+    "name": "Forsthaus Valepp E-Bike-Kegelbahn",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Valepp (Schliersee/Tegernsee Tal), Bayern",
+    "adresse": "Valepp 1, 83737 Irschenberg / Schliersee",
+    "beschreibung": "Historisches Forsthaus im autofreien Hochtal mit kostenlosen Ladesäulen an der historischen Kegelbahn.",
+    "quelle": "https://www.komoot.com",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Bayerische Alpen\" \"Spitzingsee\" OR \"Schliersee\" Gasthaus Adresse"
+  },
+  {
+    "name": "Reparaturstation Gymnasium am Dom Havelberg",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Havelberg, Sachsen-Anhalt",
+    "adresse": "Pestalozzistraße / Domberg, 39539 Havelberg",
+    "beschreibung": "Öffentliche Pannenstation mit Werkzeugsatz und Pumpe am Dom-Areal oberhalb der Havel.",
+    "quelle": "https://www.visithavelland.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Havelradweg\" Rathenow OR Havelberg Adresse site:de"
+  },
+  {
+    "name": "ChargerCube Biosphärenzentrum Schwäbische Alb",
+    "kategorie": "Ladesäule / Werkstatt / Hotspot",
+    "region_ort": "Münsingen-Auingen, Schwäbische Alb, Baden-Württemberg",
+    "adresse": "Biosphärenallee 2, 72525 Münsingen",
+    "beschreibung": "Innovativer ChargerCube Schnellladestützpunkt und Servicestation am ehem. Truppenübungsplatz Münsingen.",
+    "quelle": "https://www.schwaebischealb.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Schwäbische Alb\" \"Biosphärengebiet\" Gasthof OR Höhle Adresse site:de"
+  },
+  {
+    "name": "HöhlenHaus Charlottenhöhle Reparatur- & Ladestation",
+    "kategorie": "Ladesäule / Werkstatt / Hotspot",
+    "region_ort": "Giengen an der Brenz (Hürben), Schwäbische Alb, BW",
+    "adresse": "Lonetalstraße 61, 89537 Giengen an der Brenz",
+    "beschreibung": "Service-Hub am Eingang zur längsten begehbaren Tropfsteinhöhle der Alb; E-Bike-Laden & Werkzeug.",
+    "quelle": "https://www.heidenheimer-brenzregion.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Schwäbische Alb\" \"Biosphärengebiet\" Gasthof OR Höhle Adresse site:de"
+  },
+  {
+    "name": "Fränkische Schweiz-Museum Tüchersfeld E-Ladesäule",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Pottenstein OT Tüchersfeld, Fränkische Schweiz, Bayern",
+    "adresse": "Am Museum 5, 91278 Pottenstein",
+    "beschreibung": "Direkt unter den markanten Felsnadeln des Judenhofs in Tüchersfeld; Ladesäule für Tourenfahrer im Püttlachtal.",
+    "quelle": "https://www.fsvf.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Fränkische Schweiz\" \"Tüchersfeld\" OR \"Pottenstein\" Höhle OR Gasthof Adresse"
+  },
+  {
+    "name": "Großparkplatz Königssee Radservice- & Ladezentrum",
+    "kategorie": "Ladesäule / Werkstatt / Hotspot",
+    "region_ort": "Schönau am Königssee, Berchtesgadener Land, Bayern",
+    "adresse": "Seestraße 3 (Fahrrad-Parkplatz), 83471 Schönau am Königssee",
+    "beschreibung": "Kostenlose E-Bike-Ladesäulen mit Leihkabeln und kompletter Reparaturstation am Eingang zum Nationalpark.",
+    "quelle": "https://www.koenigssee.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Königssee\" OR \"Berchtesgaden\" Gasthaus OR Parkplatz Adresse"
+  },
+  {
+    "name": "Gasthaus Graflhöhe „Windbeutelbaron“ Obersalzberg",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Berchtesgaden / Obersalzberg (1.000 m), Bayern",
+    "adresse": "Scharitzkehlstraße 8, 83471 Berchtesgaden",
+    "beschreibung": "Bike-Energy-Ladestation auf 1.000m Höhe mit Traumpanorama; Ladekabel für alle Motoren direkt ausleihbar.",
+    "quelle": "https://www.windbeutelbaron.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Königssee\" OR \"Berchtesgaden\" Gasthaus OR Parkplatz Adresse"
+  },
+  {
+    "name": "24/7 Schlauchautomat Fahrrad Stemper Trier",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Trier, Moseltal, Rheinland-Pfalz",
+    "adresse": "Kantstraße 19, 54294 Trier",
+    "beschreibung": "24/7 Schwalbe-Automat direkt an der Hauptradachse entlang der Mosel zur Römerbrücke.",
+    "quelle": "https://www.fahrrad-stemper.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Trier\" OR \"Saarburg\" OR \"Bitburg\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "E-Bike-Ladestation Campener Leuchtturm",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Krummhörn-Campen, Ostfriesland, Niedersachsen",
+    "adresse": "Leuchtturmstraße 5, 26736 Krummhörn",
+    "beschreibung": "Kostenlose E-Bike-Lademöglichkeit am Fuße des höchsten Leuchtturms Deutschlands (65 m) direkt am Nordseedeich.",
+    "quelle": "https://www.grenzenlos-aktiv.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Ostfriesland\" \"Krummhörn\" Pilsum OR Campen Mühle Adresse site:de"
+  },
+  {
+    "name": "Rad-Reparaturstation VitalBad Burscheid",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Burscheid, Bergisches Land, Nordrhein-Westfalen",
+    "adresse": "Im Hagen 21, 51399 Burscheid",
+    "beschreibung": "ADAC Radservice-Station mit Werkzeug und Luftpumpe direkt am Panorama-Radweg Balkantrasse.",
+    "quelle": "https://www.adac.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bergisches Land\" \"Balkantrasse\" OR \"Panorama-Radweg\" Adresse site:de"
+  },
+  {
+    "name": "Reparaturstation & Waffelpause Neuenhaus",
+    "kategorie": "Werkstatt / Imbiss / Kiosk",
+    "region_ort": "Wermelskirchen-Neuenhaus, Bergisches Land, NRW",
+    "adresse": "Neuenhaus 57, 42929 Wermelskirchen",
+    "beschreibung": "Beliebter Waffel- und Kaffeestopp mit eigener Fahrrad-Reparatursäule unmittelbar an der Bahntrasse.",
+    "quelle": "https://www.wermelskirchen.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bergisches Land\" \"Balkantrasse\" OR \"Panorama-Radweg\" Adresse site:de"
+  },
+  {
+    "name": "E-Bike Ladefächer Stadtwerke Lychen",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Lychen, Uckermark, Brandenburg",
+    "adresse": "Am Markt / Ecke Stargarder Str., 17279 Lychen",
+    "beschreibung": "Abschließbare E-Bike-Ladefächer mit Steckdosen und Handyladefunktion direkt am Marktplatz der Flößerstadt.",
+    "quelle": "https://www.tourismus-uckermark.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Uckermark\" \"Lychen\" OR \"Templin\" Gasthof OR Mühle Adresse site:de"
+  },
+  {
+    "name": "E-Bike Ladestation Historisches Rathaus Templin",
+    "kategorie": "Ladesäule / Basis",
+    "region_ort": "Templin, Uckermark, Brandenburg",
+    "adresse": "Marktplatz 1 (Tourist-Info), 17268 Templin",
+    "beschreibung": "Zentrale Ladesteckdosen für Radler im historischen Rathaus am Schnittpunkt Uckermärkischer Radrouten.",
+    "quelle": "https://www.templin.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Uckermark\" \"Lychen\" OR \"Templin\" Gasthof OR Mühle Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Radkultur Mainz",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Mainz, Rheinland-Pfalz",
+    "adresse": "An der Goldgrube 4, 55131 Mainz",
+    "beschreibung": "24/7 Schwalbe-Automat direkt an der Hauswand für Notfallschläuche am Rheinterrassen-Zubringer.",
+    "quelle": "https://www.radkultur-mainz.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Bonn\" OR \"Koblenz\" OR \"Mainz\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Moselufer Brodenbach",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Brodenbach, Untermosel, Rheinland-Pfalz",
+    "adresse": "Moselufer 18, 56332 Brodenbach",
+    "beschreibung": "Rund um die Uhr zugänglicher Automat direkt an der Uferpromenade am Mosel-Radweg.",
+    "quelle": "https://www.visitmosel.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Bonn\" OR \"Koblenz\" OR \"Mainz\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Reparaturstation & Schlauchautomat Oberwesel",
+    "kategorie": "Werkstatt / Schlauchautomat",
+    "region_ort": "Oberwesel, UNESCO-Welterbe Oberes Mittelrheintal, RLP",
+    "adresse": "Rathausstraße 6, 55430 Oberwesel",
+    "beschreibung": "Kombinierte 24/7 Pannenstele und Schlauchautomat am Rheinradweg.",
+    "quelle": "https://www.romantischer-rhein.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Bonn\" OR \"Koblenz\" OR \"Mainz\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Hotel Lahnschleife E-Bike Ladepunkt",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Weilburg, Lahntal, Hessen",
+    "adresse": "In der Lahnschleife 1, 35781 Weilburg",
+    "beschreibung": "Direkt an der Lahnschleife und am Schifffahrtstunnel Weilburg; Akkuladung für Tourenfahrer.",
+    "quelle": "https://www.daslahntal.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Lahn-Radweg\" Marburg OR Limburg Gasthaus Adresse site:de"
+  },
+  {
+    "name": "Pedal Power Werkstatt & Verleih Zingst",
+    "kategorie": "Werkstatt / Verleih",
+    "region_ort": "Ostseebad Zingst, Fischland-Darß-Zingst, Meck-Pomm",
+    "adresse": "Seestraße 55 (nahe Seebrücke), 18374 Ostseebad Zingst",
+    "beschreibung": "Werkstattservice, E-Bike-Verleih und mobiler Pannenservice direkt am Deichradweg.",
+    "quelle": "https://www.radfahrland-mv.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Fischland-Darß-Zingst Adresse"
+  },
+  {
+    "name": "Nordic Darß Bike Service Prerow",
+    "kategorie": "Werkstatt",
+    "region_ort": "Ostseebad Prerow, Darß, Mecklenburg-Vorpommern",
+    "adresse": "Waldstraße 7, 18375 Ostseebad Prerow",
+    "beschreibung": "Fahrrad- und E-Bike-Fachwerkstatt am Eingang zum urwüchsigen Darßwald Richtung Darßer Ort.",
+    "quelle": "https://www.fischland-darss-zingst.org",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Fischland-Darß-Zingst Adresse"
+  },
+  {
+    "name": "E-Bike Ladestation Tourist-Information Daun",
+    "kategorie": "Ladesäule / Basis",
+    "region_ort": "Daun, Vulkaneifel, Rheinland-Pfalz",
+    "adresse": "Leopoldstraße 5, 54550 Daun",
+    "beschreibung": "Kostenlose E-Bike-Ladesäule der GesundLand-Vulkaneifel-Initiative am Maare-Mosel-Radweg.",
+    "quelle": "https://www.meinevulkaneifel.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Vulkaneifel\" Maare OR Daun Gasthof Adresse site:de"
+  },
+  {
+    "name": "E-Bike Ladestation Holzmaar Minigolf",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Gillenfeld (Holzmaar), Vulkaneifel, Rheinland-Pfalz",
+    "adresse": "Holzmaarstraße 32a, 54558 Gillenfeld",
+    "beschreibung": "Ladesäule direkt am Holzmaar-Rastplatz mit Minigolf und Kiosk-Gastro.",
+    "quelle": "https://www.meinevulkaneifel.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Vulkaneifel\" Maare OR Daun Gasthof Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Teichwiesenweg Luckenwalde",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Luckenwalde, Fläming, Brandenburg",
+    "adresse": "Teichwiesenweg (Parkplatz Fläming-Skate), 14943 Luckenwalde",
+    "beschreibung": "Kostenfreie, 24h zugängliche Reparatursäule mit Pumpe und Werkzeugen am Startpunkt der Flaeming-Skate.",
+    "quelle": "https://www.adac.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Fläming\" OR \"Flaeming-Skate\" Jüterbog OR Dahme Adresse site:de"
+  },
+  {
+    "name": "sausetritt Spezialrad & Service",
+    "kategorie": "Werkstatt / Basis",
+    "region_ort": "Niedergörsdorf OT Oehna, Fläming, Brandenburg",
+    "adresse": "Oehna 20, 14913 Niedergörsdorf",
+    "beschreibung": "Fachwerkstatt für Spezial- und E-Bikes direkt am Rundkurs 1 der Flaeming-Skate.",
+    "quelle": "https://www.sausetritt.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Fläming\" OR \"Flaeming-Skate\" Jüterbog OR Dahme Adresse site:de"
+  },
+  {
+    "name": "Arberseehaus E-Bike Ladepunkt",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Bayerisch Eisenstein / Großer Arbersee, Bayern",
+    "adresse": "Arbersee 1, 94252 Bayerisch Eisenstein",
+    "beschreibung": "Idyllischer Rastpunkt direkt am Seeufer des Großen Arbersees mit E-Bike-Lademöglichkeit.",
+    "quelle": "https://www.koenigchalets.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Bayerischer Wald\" \"Silberberg\" OR \"Großer Arbersee\" Adresse site:de"
+  },
+  {
+    "name": "Besucherbergwerk Silberberg E-Ladesäule",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Bodenmais / Silberberg, Bayerischer Wald, Bayern",
+    "adresse": "Barbarastraße 28, 94249 Bodenmais",
+    "beschreibung": "Ladeinfrastruktur an der Talstation der Silberberg-Sesselbahn und am historischen Bergwerk.",
+    "quelle": "https://www.silberberg-online.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Bayerischer Wald\" \"Silberberg\" OR \"Großer Arbersee\" Adresse site:de"
+  },
+  {
+    "name": "Hotel-Gasthof Wolfringmühle",
+    "kategorie": "Hotel / Ladesäule / Gastro",
+    "region_ort": "Fensterbach, Oberpfälzer Wald, Bayern",
+    "adresse": "Wolfringmühle 3, 92269 Fensterbach",
+    "beschreibung": "Mühlen-Landgasthof im Fensterbachtal mit eigener E-Bike-Ladestation im Biergarten.",
+    "quelle": "https://www.oberpfaelzerwald.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Oberpfälzer Wald\" Gasthof OR Mühle Adresse site:de"
+  },
+  {
+    "name": "Schlossgaststätte Kröblitz",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Neunburg vorm Wald OT Kröblitz, Oberpfalz, Bayern",
+    "adresse": "Schlossplatz 1, 92361 Neunburg vorm Wald",
+    "beschreibung": "Zertifizierter Oberpfälzer Radl-Welt-Betrieb am Eingang des wildromantischen Murnthals.",
+    "quelle": "https://www.neunburgvormwald.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Oberpfälzer Wald\" Gasthof OR Mühle Adresse site:de"
+  },
+  {
+    "name": "Reparaturstation Marktplatz Neustadt in Holstein",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Neustadt in Holstein, Lübecker Bucht, Schleswig-Holstein",
+    "adresse": "Am Markt (Mehrzweckgebäude), 23730 Neustadt in Holstein",
+    "beschreibung": "Überdachte Selbstbedienungs-Pannenstele mit Luftpumpe direkt am Ostseeküsten-Radweg.",
+    "quelle": "https://www.ostsee-schleswig-holstein.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Lübeck OR Neustadt OR Grömitz Adresse site:de"
+  },
+  {
+    "name": "Reparaturstation Seebrücke Grömitz",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Grömitz, Lübecker Bucht, Schleswig-Holstein",
+    "adresse": "Kurpromenade / Seebrücke, 23743 Grömitz",
+    "beschreibung": "Pannenstele mit Werkzeug an Stahlseilen direkt an der Seebrücke am Ostseestrand.",
+    "quelle": "https://www.der-reporter.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Lübeck OR Neustadt OR Grömitz Adresse site:de"
+  },
+  {
+    "name": "Fahrrad-Servicestation Warthestraße Lübeck",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Lübeck, Schleswig-Holstein",
+    "adresse": "Warthestraße 5, 23554 Lübeck",
+    "beschreibung": "Frei zugängliche Pannenstation mit Manometerpumpe und Werkzeugen in Hansestadt-Lage.",
+    "quelle": "https://www.luebeck-tourismus.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Lübeck OR Neustadt OR Grömitz Adresse site:de"
+  },
+  {
+    "name": "Das Schierke Harzresort Brocken Ladestation",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Schierke am Brocken, Harz, Sachsen-Anhalt",
+    "adresse": "Alte Dorfstraße 1, 38879 Wernigerode",
+    "beschreibung": "Mountainbike-Resort am Fuße des Brockens mit E-Bike-Ladeinfrastruktur.",
+    "quelle": "https://www.harzinfo.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Harz\" \"Brocken\" OR \"Schierke\" Gasthof Adresse site:de"
+  },
+  {
+    "name": "Gasthaus Brockenhexe Schierke",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Schierke am Brocken, Harz, Sachsen-Anhalt",
+    "adresse": "Brockenstraße 12, 38879 Wernigerode",
+    "beschreibung": "Gasthaus und Café an der Brockenstraße mit E-Bike-Ladeanschluss für Brocken-Bezwinger.",
+    "quelle": "https://www.brockenhexe-schierke.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Harz\" \"Brocken\" OR \"Schierke\" Gasthof Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Alte Feuerwache Mannheim",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Mannheim (Neckarstadt-Ost), Baden-Württemberg",
+    "adresse": "Alte Feuerwache, 68169 Mannheim",
+    "beschreibung": "24/7 Schwalbe-Automat für Notfallschläuche am Neckarradweg-Knotenpunkt.",
+    "quelle": "https://www.reparadius.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Heidelberg\" OR \"Mannheim\" OR \"Heilbronn\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Radlservice Fischer Heilbronn",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Heilbronn, Neckartal, Baden-Württemberg",
+    "adresse": "Lerchenstraße 40, 74072 Heilbronn",
+    "beschreibung": "Rund um die Uhr zugänglicher Fahrradschlauchautomat an der Werkstatt.",
+    "quelle": "https://www.heilbronnerland.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Heidelberg\" OR \"Mannheim\" OR \"Heilbronn\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "LiON Box Max Tourist-Info Idar-Oberstein",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Idar-Oberstein, Nahe / Hunsrück, Rheinland-Pfalz",
+    "adresse": "Marktplatz Oberstein, 55743 Idar-Oberstein",
+    "beschreibung": "Moderne Schnellladestation (LiON Box) direkt am historischen Marktplatz unter der Felsenkirche.",
+    "quelle": "https://www.idar-oberstein.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Hunsrück\" \"Idar-Oberstein\" OR \"Herrstein\" Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Nienburg/Weser",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Nienburg/Weser, Niedersachsen",
+    "adresse": "Weserstraße 12, 31582 Nienburg/Weser",
+    "beschreibung": "Kostenfreie Werkzeug- und Pumpstele unmittelbar an der Weser-Radweg-Passage.",
+    "quelle": "https://www.nienburg.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Weser\" \"Nienburg\" OR \"Verden\" Adresse site:de"
+  },
+  {
+    "name": "Fahrradreparaturstation Bahnhof Verden",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Verden (Aller), Niedersachsen",
+    "adresse": "Bahnhofstraße 14, 27283 Verden (Aller)",
+    "beschreibung": "Öffentliche Werkzeugstele mit Standpumpe an der Schnittstelle Aller-Radweg / Bahnhof.",
+    "quelle": "https://www.entdecke-nds.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Weser\" \"Nienburg\" OR \"Verden\" Adresse site:de"
+  },
+  {
+    "name": "Ausflugsgaststätte Gondelfahrt Jonsdorf",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Kurort Jonsdorf, Zittauer Gebirge, Sachsen",
+    "adresse": "Großschönauer Straße 38, 02796 Kurort Jonsdorf",
+    "beschreibung": "Bauden-Gaststätte am Fuße der Nonnenfelsen mit E-Bike-Lademöglichkeit.",
+    "quelle": "https://www.hotel-gondelfahrt.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Oberlausitz\" \"Zittauer Gebirge\" Gasthof OR Baude Adresse site:de"
+  },
+  {
+    "name": "Landhotel Quirle-Häusl Waltersdorf",
+    "kategorie": "Hotel / Ladesäule / Gastro",
+    "region_ort": "Waltersdorf (Großschönau), Zittauer Gebirge, Sachsen",
+    "adresse": "Hauptstraße 51–52, 02799 Waltersdorf",
+    "beschreibung": "Traditionelles Umgebindehaus mit Landgasthof und E-Bike-Ladesäule am Fuße der Lausche (793 m).",
+    "quelle": "https://www.quirle.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Oberlausitz\" \"Zittauer Gebirge\" Gasthof OR Baude Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Henze das Rad Wolfenbüttel",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Wolfenbüttel / Großraum Braunschweig, Niedersachsen",
+    "adresse": "Ahlumer Straße 96, 38302 Wolfenbüttel",
+    "beschreibung": "Verlässlicher 24/7 Außenautomat für Schläuche aller gängigen Ventilarten (AV/SV/DV).",
+    "quelle": "https://www.fahrrad-henze.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Braunschweig\" OR \"Wolfsburg\" OR \"Salzgitter\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Weltcup-Hütte Ofterschwanger Horn",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Ofterschwang / Hörnerdörfer (1.300 m), Allgäu, Bayern",
+    "adresse": "Bergstation Weltcup-Express, 87527 Ofterschwang",
+    "beschreibung": "Alpine Hütte auf 1.300 m am Gipfel des Ofterschwanger Horns mit Akkuladung bei Einkehr.",
+    "quelle": "https://www.hoernerdoerfer.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Allgäu\" \"Hörnerdörfer\" Ofterschwang OR Bolsterlang Hütte Adresse site:de"
+  },
+  {
+    "name": "Sporthotel Streitberg E-Bike Lader",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Wiesenttal-Streitberg, Fränkische Schweiz, Bayern",
+    "adresse": "Am Gailing 6, 91346 Wiesenttal",
+    "beschreibung": "Sporthotel im Wiesenttal unterhalb der Burgruine Streitburg mit Akkuladestation.",
+    "quelle": "https://www.wiesenttal.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Fränkische Schweiz\" \"Wiesenttal\" Streitberg OR Muggendorf Adresse site:de"
+  },
+  {
+    "name": "Hotel Goldner Stern Muggendorf",
+    "kategorie": "Hotel / Ladesäule / Gastro",
+    "region_ort": "Wiesenttal-Muggendorf, Fränkische Schweiz, Bayern",
+    "adresse": "Marktplatz 6, 91346 Wiesenttal",
+    "beschreibung": "Traditioneller Gasthof am Marktplatz mit ChargeIT-Ladesäule für E-Biker im Tal der Wiesent.",
+    "quelle": "https://www.waldundwiesent.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Fränkische Schweiz\" \"Wiesenttal\" Streitberg OR Muggendorf Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Georgs Fahrradladen",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Mönchengladbach, Nordrhein-Westfalen",
+    "adresse": "Süchtelner Straße 30, 41066 Mönchengladbach",
+    "beschreibung": "24/7 Notfall-Automat mit Ersatzschläuchen am Flughafen-Rundweg Mönchengladbach.",
+    "quelle": "https://www.georgs-fahrradladen.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Mönchengladbach\" OR \"Krefeld\" OR \"Neuss\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Alte Schule Lohe E-Bike Rast",
+    "kategorie": "Ladesäule / Rastplatz",
+    "region_ort": "Haselünne OT Lohe, Emsland, Niedersachsen",
+    "adresse": "Im Buchenhain 6, 49740 Haselünne",
+    "beschreibung": "E-Bike-Ladepunkt am historischen Dorfschulhaus im Hasetal.",
+    "quelle": "https://www.destination.one",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Emsland\" Haselünne OR Meppen Gasthof OR Mühle Adresse site:de"
+  },
+  {
+    "name": "Wassermühle Bruneforth E-Ladesäule",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Stavern OT Bruneforth, Hümmling / Emsland, Niedersachsen",
+    "adresse": "Bruneforth 1, 49777 Stavern",
+    "beschreibung": "Ladesäule an der historischen Wassermühle Bruneforth an der Hümmlinger Pilger- und Radroute.",
+    "quelle": "https://www.moor-ohne-grenzen.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Emsland\" Haselünne OR Meppen Gasthof OR Mühle Adresse site:de"
+  },
+  {
+    "name": "Cloef-Atrium Saarschleife Ladezentrum",
+    "kategorie": "Ladesäule / Hotspot",
+    "region_ort": "Mettlach-Orscholz (Saarschleife), Saarland",
+    "adresse": "Cloef-Straße 34a (Parkplatz P2), 66693 Mettlach",
+    "beschreibung": "Zentraler Lade- und Informationspunkt direkt am weltbekannten Aussichtspunkt Cloef über der Saarschleife.",
+    "quelle": "https://www.cloef-atrium.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Saar\" Saarschleife OR Orscholz Cloef Adresse site:de"
+  },
+  {
+    "name": "Museum Bautzen E-Bike-Ladeschrank",
+    "kategorie": "Ladesäule / Schließfach",
+    "region_ort": "Bautzen, Oberlausitz, Sachsen",
+    "adresse": "Kornmarkt 1 (Museums-Innenhof), 02625 Bautzen",
+    "beschreibung": "Abschließbare Ladefächer im historischen Museumshof direkt in der Bautzener Altstadt.",
+    "quelle": "https://www.outdooractive.com",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Oberlausitz\" \"Bautzen\" Stausee OR Altstadt Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat RENT A BIKE Passau Hbf",
+    "kategorie": "Schlauchautomat / Verleih",
+    "region_ort": "Passau, Donauradweg, Bayern",
+    "adresse": "Bahnhofstraße 29, 94032 Passau",
+    "beschreibung": "24/7 Automat direkt am Fahrradverleih am Passauer Hauptbahnhof – Startpunkt des Donauradwegs nach Wien.",
+    "quelle": "https://www.donauregion.at",
+    "suchanfrage": "\"Schlauchautomat\" \"Passau\" \"Donauradweg\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "E-Bike Ladestation Am Markt Bad Wilsnack",
+    "kategorie": "Ladesäule / Basis",
+    "region_ort": "Bad Wilsnack, Prignitz, Brandenburg",
+    "adresse": "Am Markt 1 (neben Rathaus), 19366 Bad Wilsnack",
+    "beschreibung": "Öffentliche Station mit 6 Ladeanschlüssen für Akkus am historischen Marktplatz der Kurstadt.",
+    "quelle": "https://www.dieprignitz.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Prignitz\" Bad Wilsnack OR Wittenberge Gasthof Adresse site:de"
+  },
+  {
+    "name": "Fahrrad-Reparaturstation BSB-Hafen Meersburg",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Meersburg, Bodensee, Baden-Württemberg",
+    "adresse": "Uferpromenade (am Fähr- & BSB-Hafen), 88709 Meersburg",
+    "beschreibung": "Kostenfreie Selbsthilfe-Reparaturstele mit Pumpe direkt an der Schiffsanlegestelle am Bodensee-Radweg.",
+    "quelle": "https://www.palafittes-route.eu",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bodensee\" Meersburg OR Überlingen Adresse site:de"
+  },
+  {
+    "name": "2-Rad Sport Wehrle Schnellservice Nußdorf",
+    "kategorie": "Werkstatt",
+    "region_ort": "Überlingen-Nußdorf, Bodensee, Baden-Württemberg",
+    "adresse": "Zum Hecht 11, 88662 Überlingen",
+    "beschreibung": "Pannenschnellservice und Werkstatt direkt am Bodensee-Uferradweg Richtung Meersburg.",
+    "quelle": "https://www.ueberlingen-bodensee.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Bodensee\" Meersburg OR Überlingen Adresse site:de"
+  },
+  {
+    "name": "Feldberghaus Großer Feldberg E-Ladesäule",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Schmitten im Taunus / Großer Feldberg (881 m), Hessen",
+    "adresse": "Großer Feldberg 5, 61389 Schmitten im Taunus",
+    "beschreibung": "Höchster Berg des Taunus: bike-energy Ladestation mit Universal-Systemanschlüssen direkt am Berggasthof.",
+    "quelle": "https://www.destination.one",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Taunus\" \"Großer Feldberg\" Gasthof Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Bike Depot Aschaffenburg",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Aschaffenburg, Mainfranken, Bayern",
+    "adresse": "Würzburger Straße 64, 63739 Aschaffenburg",
+    "beschreibung": "Rund um die Uhr zugänglicher Schwalbe-Automat auf der Hauptradachse zum Spessart.",
+    "quelle": "https://www.onlinestreet.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Wiesbaden\" OR \"Darmstadt\" OR \"Aschaffenburg\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "E-Bike Ladesäule Sorpedamm Langscheid",
+    "kategorie": "Ladesäule / Kiosk / Rastplatz",
+    "region_ort": "Sundern-Langscheid (Sorpesee), Sauerland, NRW",
+    "adresse": "Hakenbrinkweg / Sorpedamm, 59846 Sundern",
+    "beschreibung": "Mehrfach-Ladesäule oben am Staudamm neben der Schirmbar mit direktem Seeblick.",
+    "quelle": "https://www.blickpunkt-arnsberg-sundern-meschede.de",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Sauerland\" \"Sorpesee\" OR \"Hennesee\" Strandbad OR Kiosk Adresse site:de"
+  },
+  {
+    "name": "E-Bike Ladestation Hennepark Meschede",
+    "kategorie": "Ladesäule / Rastplatz",
+    "region_ort": "Meschede (Hennesee), Sauerland, Nordrhein-Westfalen",
+    "adresse": "Steinstraße 27 (am Hennepark), 59872 Meschede",
+    "beschreibung": "Kostenfreie Ladesäule mit mehreren Dosen am Landschaftspark am Zufluss zum Hennesee.",
+    "quelle": "https://www.destination.one",
+    "suchanfrage": "\"E-Bike-Ladestation\" \"Sauerland\" \"Sorpesee\" OR \"Hennesee\" Strandbad OR Kiosk Adresse site:de"
+  },
+  {
+    "name": "Fahrradreparatur-Station CITTI-PARK Flensburg",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Flensburg, Schleswig-Holstein",
+    "adresse": "Langberger Weg 4, 24939 Flensburg",
+    "beschreibung": "24/7 Reparatursäule mit Werkzeugen und Druckluftpumpe vor dem Eingang des Einkaufszentrums.",
+    "quelle": "https://www.citti-park-flensburg.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Flensburg OR Eckernförde Adresse site:de"
+  },
+  {
+    "name": "Kompass Fahrradcenter Eckernförde",
+    "kategorie": "Werkstatt",
+    "region_ort": "Eckernförde, Eckernförder Bucht, Schleswig-Holstein",
+    "adresse": "Rendsburger Straße 124, 24340 Eckernförde",
+    "beschreibung": "Shimano Service Center und Pannenschnellhilfe am Ostseeküsten-Radweg.",
+    "quelle": "https://www.kompass98.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Ostseeküsten-Radweg\" Flensburg OR Eckernförde Adresse site:de"
+  },
+  {
+    "name": "ADAC Radservice-Station Fichtelberg Plateau",
+    "kategorie": "Werkstatt / Reparaturstation / Hotspot",
+    "region_ort": "Kurort Oberwiesenthal / Fichtelberg (1.215 m), Sachsen",
+    "adresse": "Fichtelbergstraße 1, 09484 Kurort Oberwiesenthal",
+    "beschreibung": "Höchste Radservice-Station Sachsens (1.215 m) direkt auf dem Gipfelplateau für Kamm-Tourenfahrer.",
+    "quelle": "https://www.adac.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Erzgebirge\" \"Fichtelberg\" Oberwiesenthal Adresse site:de"
+  },
+  {
+    "name": "24/7 Schlauchautomat Radwerk Karlsruhe",
+    "kategorie": "Schlauchautomat",
+    "region_ort": "Karlsruhe (Oststadt), Baden-Württemberg",
+    "adresse": "Ostring 4, 76131 Karlsruhe",
+    "beschreibung": "24/7 Schwalbe-Automat für alle Reifengrößen am Albtal- und Rheintalradweg-Knoten.",
+    "quelle": "https://www.radwerk-karlsruhe.de",
+    "suchanfrage": "\"Schlauchautomat\" \"Karlsruhe\" OR \"Pforzheim\" OR \"Baden-Baden\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Radservicestation & Schlauchautomat Ettlingen",
+    "kategorie": "Werkstatt / Schlauchautomat",
+    "region_ort": "Ettlingen, Albtal, Baden-Württemberg",
+    "adresse": "Rastatter Straße 2, 76275 Ettlingen",
+    "beschreibung": "Öffentliche Pannenstation mit Werkzeugen, Pumpe und 24/7 Schlauchautomat am Eingang zum Albtal.",
+    "quelle": "https://www.schwarzwald-tourismus.info",
+    "suchanfrage": "\"Schlauchautomat\" \"Karlsruhe\" OR \"Pforzheim\" OR \"Baden-Baden\" Adresse 24/7 site:de"
+  },
+  {
+    "name": "Strandhaus Birkach E-Bike Ladestation",
+    "kategorie": "Ladesäule / Gastro / Rastplatz",
+    "region_ort": "Roth (Rothsee), Fränkisches Seenland, Bayern",
+    "adresse": "Birkacher Uferweg 2, 91154 Roth",
+    "beschreibung": "Kostenlose E-Bike-Ladestation der Stromtreter-Initiative direkt am Uferweg des Rothsees; Leihladegeräte verfügbar.",
+    "quelle": "https://www.fraenkisches-seenland.de",
+    "suchanfrage": "\"Rothsee\" \"Strandhaus Birkach\" OR \"Seezentrum Heuberg\" E-Bike Adresse"
+  },
+  {
+    "name": "Seezentrum Heuberg Reparatur- & Ladestation",
+    "kategorie": "Ladesäule / Werkstatt / Hotspot",
+    "region_ort": "Hilpoltstein (Rothsee), Fränkisches Seenland, Bayern",
+    "adresse": "Am Rothsee 1, 91161 Hilpoltstein",
+    "beschreibung": "E-Bike-Ladestation samt Fahrradreparaturstation und Verleih am Hauptstrand des Rothsees.",
+    "quelle": "https://www.naturpark-altmuehltal.de",
+    "suchanfrage": "\"Rothsee\" \"Strandhaus Birkach\" OR \"Seezentrum Heuberg\" E-Bike Adresse"
+  },
+  {
+    "name": "Haus am See Hahnenkammsee Laderast",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Heidenheim (Hahnenkammsee), Bayern",
+    "adresse": "Hechlinger See 1, 91719 Heidenheim",
+    "beschreibung": "Ausflugsgaststätte direkt an der Freizeitanlage des Hahnenkammsees mit E-Bike-Lademöglichkeit.",
+    "quelle": "https://www.hausamsee-seenland.de",
+    "suchanfrage": "\"Heidenheim\" \"Hahnenkammsee\" \"Haus am See\" E-Bike Adresse"
+  },
+  {
+    "name": "Freizeitanlage Gern Altmühlseezuleiter",
+    "kategorie": "Ladesäule / Rastplatz / Biergarten",
+    "region_ort": "Ornbau, Fränkisches Seenland, Bayern",
+    "adresse": "Am Anger 2, 91737 Ornbau",
+    "beschreibung": "Stromtreter-Station mit Biergarten „An der Insel Gern“ direkt am Altmühltal-Radweg.",
+    "quelle": "https://www.fraenkisches-seenland.de",
+    "suchanfrage": "\"Freizeitanlage Gern\" Ornbau E-Bike Adresse"
+  },
+  {
+    "name": "Freizeitanlage Mörsach Seeladepunkt",
+    "kategorie": "Ladesäule / Rastplatz",
+    "region_ort": "Arberg OT Mörsach, Fränkisches Seenland, Bayern",
+    "adresse": "Zum Wiesmet 2, 91722 Arberg",
+    "beschreibung": "E-Bike-Ladesäulen und Biergarten an der Freizeitanlage am Altmühlseezuleiter.",
+    "quelle": "https://www.fraenkisches-seenland.de",
+    "suchanfrage": "\"Freizeitanlage Mörsach\" Arberg E-Bike Adresse"
+  },
+  {
+    "name": "Wirtshaus zum Löwen Rieneck",
+    "kategorie": "Ladesäule / Gastro",
+    "region_ort": "Rieneck, Spessart / Sinngrund, Bayern",
+    "adresse": "Hauptstraße 8, 97794 Rieneck",
+    "beschreibung": "Wald-erFahren-Ladestation mit vier Anschlüssen direkt am historischen Gasthof im Sinngrund.",
+    "quelle": "https://www.rieneck.de",
+    "suchanfrage": "\"Rieneck\" \"Wirtshaus zum Löwen\" E-Bike Adresse"
+  },
+  {
+    "name": "Marktplatz Burgsinn Wald-erFahren Ladesäule",
+    "kategorie": "Ladesäule / Basis",
+    "region_ort": "Burgsinn, Spessart, Bayern",
+    "adresse": "Marktplatz (vor Sparkasse), 97775 Burgsinn",
+    "beschreibung": "Zentrale kostenlose E-Bike-Ladesäule des Netzwerks „Wald erFahren“ im Altort Burgsinn.",
+    "quelle": "https://www.sinngrundallianz.de",
+    "suchanfrage": "\"Burgsinn\" \"Marktplatz\" E-Bike Ladestation Adresse"
+  },
+  {
+    "name": "Winzerfestplatz Klingenberg am Main",
+    "kategorie": "Ladesäule / Rastplatz",
+    "region_ort": "Klingenberg am Main, Mainviereck, Bayern",
+    "adresse": "Brückenstraße (Winzerfestplatz), 63911 Klingenberg am Main",
+    "beschreibung": "Kostenlose E-Bike-Ladestation am Main-Radweg mitten im Churfranken-Weinbaugebiet.",
+    "quelle": "https://www.mainradweg.com",
+    "suchanfrage": "\"Klingenberg\" \"Winzerfestplatz\" E-Bike Ladestation Adresse"
+  },
+  {
+    "name": "Bahnhof Stadtprozelten Ladesäule",
+    "kategorie": "Ladesäule / Basis",
+    "region_ort": "Stadtprozelten, Südspessart / Main, Bayern",
+    "adresse": "Hauptstraße 64, 97909 Stadtprozelten",
+    "beschreibung": "Wald-erFahren-Tower am Bahnhof Stadtprozelten mit Mehrfachanschlüssen für Tourenfahrer am Main.",
+    "quelle": "https://www.walderfahren.de",
+    "suchanfrage": "\"Stadtprozelten\" \"Bahnhof\" E-Bike Ladestation Adresse"
+  },
+  {
+    "name": "Berghotel Mummelsee Ladepunkt",
+    "kategorie": "Hotel / Ladesäule / Hotspot",
+    "region_ort": "Seebach (Mummelsee 1.036 m), Schwarzwaldhochstraße, Baden-Württemberg",
+    "adresse": "Schwarzwaldhochstraße 11, 77889 Seebach",
+    "beschreibung": "Legendärer Karenz-See auf 1.036 m Höhe an der Schwarzwaldhochstraße; Akkuladung für Höhenmeter-Biker.",
+    "quelle": "https://www.schwarzwald-tourismus.info",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Schwarzwald\" \"Mummelsee\" OR \"Hornisgrinde\" Adresse site:de"
+  },
+  {
+    "name": "Grinde-Hütte Hornisgrinde",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Hornisgrinde-Gipfel (1.164 m), Nordschwarzwald, Baden-Württemberg",
+    "adresse": "Hornisgrinde 12, 77889 Seebach",
+    "beschreibung": "Höchster Berg des Nordschwarzwalds; moderne Panoramahütte mit mehreren E-Bike-Stromquellen auf dem Hochmoorplateau.",
+    "quelle": "https://www.touren-schwarzwald.info",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Schwarzwald\" \"Mummelsee\" OR \"Hornisgrinde\" Adresse site:de"
+  },
+  {
+    "name": "ADAC-Radservicestation Werbellinkanal Eichhorst",
+    "kategorie": "Werkstatt / Reparaturstation",
+    "region_ort": "Schorfheide OT Eichhorst, Barnim, Brandenburg",
+    "adresse": "Am Werbellinkanal, 16244 Schorfheide",
+    "beschreibung": "24/7 Reparatursäule mit Druckpumpe und Werkzeugen direkt am Radweg Berlin-Usedom am Kanalufer.",
+    "quelle": "https://www.barnimerland.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Rund um Berlin\" OR \"Barnim\" Adresse site:de"
+  },
+  {
+    "name": "Schorfheide-Info Ladeschrank Joachimsthal",
+    "kategorie": "Ladesäule / Schließfach / Werkstatt",
+    "region_ort": "Joachimsthal, Biosphärenreservat Schorfheide-Chorin, Brandenburg",
+    "adresse": "Töpferstraße 1, 16247 Joachimsthal",
+    "beschreibung": "Kombinierte Reparaturstele und Akku-Ladeschrank an der Schnittstelle Schorfheide / Werbellinsee.",
+    "quelle": "https://www.barnimerland.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Rund um Berlin\" OR \"Barnim\" Adresse site:de"
+  },
+  {
+    "name": "Restaurant & Café Köterberg",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Lügde-Köterberg (500 m), Weserbergland, Nordrhein-Westfalen",
+    "adresse": "Köterberg 17, 32676 Lügde",
+    "beschreibung": "Höchster Punkt des Weserberglands („Brocken des Weserberglands“); Panoramarast mit Lademöglichkeit.",
+    "quelle": "https://www.motocult.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Weserbergland\" \"Köterberg\" Gasthaus Adresse site:de"
+  },
+  {
+    "name": "Schutzhaus Silberhütte Bärnau",
+    "kategorie": "Ladesäule / Gastro / Hotspot",
+    "region_ort": "Bärnau (Silberhütte), Oberpfälzer Wald, Bayern",
+    "adresse": "Silberhütte 3, 95671 Bärnau",
+    "beschreibung": "E-Bike-Ladestation am Skilanglaufzentrum / Schutzhaus Silberhütte nahe der tschechischen Grenze.",
+    "quelle": "https://www.oberpfaelzerwald.de",
+    "suchanfrage": "\"E-Bike Ladestation\" \"Bayerischer Wald\" \"Silberhütte\" Bärnau Adresse site:de"
+  },
+  {
+    "name": "Behringers Freizeit-Hotel E-Bike Station",
+    "kategorie": "Hotel / Ladesäule",
+    "region_ort": "Gößweinstein OT Behringersmühle, Fränkische Schweiz, Bayern",
+    "adresse": "Behringersmühle 23, 91327 Gößweinstein",
+    "beschreibung": "Akkuladestation und E-Bike-Stützpunkt am Zusammenfluss von Wiesent, Ailsbach und Püttlach.",
+    "quelle": "https://www.bayern-online.de",
+    "suchanfrage": "\"E-Bike\" Ladestation \"Fränkische Schweiz\" \"Gößweinstein\" Burg OR Basilika Adresse site:de"
+  },
+  {
+    "name": "Radreparatur Pforzheim Meisterwerkstatt",
+    "kategorie": "Werkstatt",
+    "region_ort": "Pforzheim, Enztal / Nordschwarzwald, Baden-Württemberg",
+    "adresse": "Julius-Moser-Straße 13, 75179 Pforzheim",
+    "beschreibung": "Spezialisierte Rad- und E-Bike-Reparaturwerkstatt direkt am Tor zum Enztal- und Nagoldtal-Radweg.",
+    "quelle": "https://www.radreparatur-pforzheim.de",
+    "suchanfrage": "\"Fahrrad-Reparaturstation\" \"Radweg\" \"Enztalradweg\" OR \"Pforzheim\" Adresse site:de"
+  }
+]
