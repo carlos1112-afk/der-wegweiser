@@ -682,7 +682,7 @@ export const MapView: React.FC<MapViewProps> = ({
         style={{
           width: '100%', height: '100%', position: 'absolute', top: 0, left: 0,
           display: isGoogleActive ? 'block' : 'none',
-          backgroundColor: '#0a0d14',
+          backgroundColor: '#181818',
         }}
       >
         {googleError && (
@@ -711,7 +711,7 @@ export const MapView: React.FC<MapViewProps> = ({
           style={{ position: 'absolute', bottom: '20px', left: '12px', right: '12px', maxWidth: '520px', margin: '0 auto',
             zIndex: 2200, padding: '12px 16px', borderRadius: '16px', border: '1px solid var(--accent-cyan)',
             boxShadow: 'var(--glow-cyan)', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            gap: '10px', backgroundColor: 'rgba(5, 10, 20, 0.96)' }}>
+            gap: '10px', backgroundColor: 'rgba(24, 24, 24, 0.96)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'rgba(0, 230, 163, 0.15)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -746,7 +746,7 @@ export const MapView: React.FC<MapViewProps> = ({
           style={{ position: 'absolute', bottom: '20px', left: '12px', right: '12px', maxWidth: '520px', margin: '0 auto',
             zIndex: 2200, padding: '12px 16px', borderRadius: '16px', border: '1px solid var(--accent-gold)',
             boxShadow: 'var(--glow-gold)', display: 'flex', flexDirection: 'column', gap: '8px',
-            backgroundColor: 'rgba(5, 10, 20, 0.96)' }}>
+            backgroundColor: 'rgba(24, 24, 24, 0.96)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'rgba(255, 183, 0, 0.15)',
@@ -801,7 +801,7 @@ export const MapView: React.FC<MapViewProps> = ({
           <div className="glass-panel" style={{
             position: 'absolute', bottom: '130px', right: '48px', padding: '10px',
             display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '200px',
-            backgroundColor: 'rgba(10, 18, 30, 0.98)', border: '1px solid var(--accent-cyan)',
+            backgroundColor: 'rgba(28, 28, 28, 0.98)', border: '1px solid var(--accent-cyan)',
             boxShadow: 'var(--glow-cyan)', zIndex: 2500,
           }}>
             {(Object.keys(THEME_META) as MapTileTheme[]).map((key) => (

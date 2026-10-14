@@ -1,9 +1,9 @@
 @import "maplibre-gl/dist/maplibre-gl.css";
 
 :root {
-  --bg-primary: #0a0d14;
-  --bg-secondary: #060812;
-  --bg-card: rgba(6, 10, 22, 0.88);
+  --bg-primary: #181818;
+  --bg-secondary: #141414;
+  --bg-card: rgba(24, 24, 24, 0.88);
   --accent-cyan: #00E6A3;
   --accent-neon-green: #00ff66;
   --accent-gold: #ffb700;
@@ -18,17 +18,17 @@
   --glow-gold: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 14px rgba(255, 183, 0, 0.35);
 
   /* ── Hintergrund-Schichten (Opacity-Stack) ────────────────────────────── */
-  --bg-overlay:           rgba(5, 8, 17, 0.82);
-  --bg-standby-shader:    rgba(6, 12, 22, 0.72);
-  --bg-surface-subtle:    rgba(5, 10, 20, 0.65);
-  --bg-surface-medium:    rgba(5, 10, 20, 0.80);
-  --bg-input:             rgba(5, 10, 20, 0.85);
-  --bg-surface-elevated:  rgba(5, 10, 20, 0.96);
-  --bg-glass-panel:       rgba(10, 18, 30, 0.95);
-  --bg-toast:             rgba(10, 20, 35, 0.94);
-  --bg-floating-control:  rgba(15, 23, 42, 0.92);
-  --bg-map-dark:          #0b0e17;
-  --text-on-accent:       #050a14;
+  --bg-overlay:           rgba(20, 20, 20, 0.82);
+  --bg-standby-shader:    rgba(24, 24, 24, 0.72);
+  --bg-surface-subtle:    rgba(24, 24, 24, 0.65);
+  --bg-surface-medium:    rgba(24, 24, 24, 0.80);
+  --bg-input:             rgba(24, 24, 24, 0.85);
+  --bg-surface-elevated:  rgba(24, 24, 24, 0.96);
+  --bg-glass-panel:       rgba(28, 28, 28, 0.95);
+  --bg-toast:             rgba(32, 32, 32, 0.94);
+  --bg-floating-control:  rgba(36, 36, 36, 0.92);
+  --bg-map-dark:          #181818;
+  --text-on-accent:       #141414;
 
   /* ── Akzent-Tints ─────────────────────────────────────────────── */
   --accent-cyan-subtle:   rgba(0, 230, 163, 0.15);
@@ -88,7 +88,7 @@ body {
 
 /* Glassmorphism Panels */
 .glass-panel {
-  background: rgba(10, 16, 28, 0.82);
+  background: rgba(28, 28, 28, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1.5px solid var(--border-glass);
@@ -97,7 +97,7 @@ body {
 }
 
 .glass-pill {
-  background: rgba(10, 16, 28, 0.88);
+  background: rgba(28, 28, 28, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1.5px solid rgba(0, 230, 163, 0.38);
@@ -432,7 +432,7 @@ body.sunlight-mode {
   --accent-pink: #be123c;
   --text-primary: #0f172a;
   --text-muted: #334155;
-  --border-glass: rgba(15, 23, 42, 0.25);
+  --border-glass: rgba(36, 36, 36, 0.25);
   --glow-cyan: none;
   --glow-green: none;
   --glow-gold: none;

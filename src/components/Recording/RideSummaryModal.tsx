@@ -69,7 +69,7 @@ export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.9)',
+        backgroundColor: 'rgba(24, 24, 24, 0.9)',
         backdropFilter: 'blur(16px)',
         zIndex: 2300,
         display: 'flex',

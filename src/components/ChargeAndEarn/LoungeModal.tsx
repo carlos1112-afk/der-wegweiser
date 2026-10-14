@@ -684,7 +684,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 8, 15, 0.88)',
+        backgroundColor: 'rgba(20, 20, 20, 0.88)',
         backdropFilter: 'blur(16px)',
         zIndex: 2000,
         display: 'flex',
@@ -1136,7 +1136,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                           padding: '14px',
                           borderRadius: '14px',
                           border: isDone ? '1px solid rgba(0, 255, 102, 0.3)' : '1px solid var(--accent-gold)',
-                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(15, 22, 36, 0.6)',
+                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(32, 32, 32, 0.6)',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
@@ -1279,7 +1279,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                           padding: '14px',
                           borderRadius: '14px',
                           border: isDone ? '1px solid rgba(0, 255, 102, 0.3)' : '1px solid var(--border-glass)',
-                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(15, 22, 36, 0.6)',
+                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(32, 32, 32, 0.6)',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
@@ -1357,7 +1357,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     position: 'relative',
                     width: '100%',
                     height: '240px',
-                    backgroundColor: 'rgba(5, 12, 24, 0.9)',
+                    backgroundColor: 'rgba(24, 24, 24, 0.9)',
                     borderRadius: '16px',
                     border: '1px solid var(--accent-cyan)',
                     overflow: 'hidden',
@@ -1426,7 +1426,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     const showCorrect = quizAnswered && opt.isCorrect;
                     const showWrong = quizAnswered && isSelected && !opt.isCorrect;
 
-                    let buttonBg = 'rgba(10, 15, 25, 0.8)';
+                    let buttonBg = 'rgba(28, 28, 28, 0.8)';
                     let buttonBorder = '1px solid var(--border-glass)';
                     let buttonColor = '#fff';
 
@@ -1555,7 +1555,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                       flexDirection: 'column',
                       justifyContent: 'space-between',
                       gap: '10px',
-                      backgroundColor: 'rgba(15, 22, 36, 0.6)',
+                      backgroundColor: 'rgba(32, 32, 32, 0.6)',
                     }}
                   >
                     <div>
@@ -1656,7 +1656,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     justifyContent: 'space-between',
                     padding: '10px 14px',
                     borderRadius: '12px',
-                    backgroundColor: entry.isUser ? 'rgba(0, 230, 163, 0.15)' : 'rgba(15, 22, 36, 0.5)',
+                    backgroundColor: entry.isUser ? 'rgba(0, 230, 163, 0.15)' : 'rgba(32, 32, 32, 0.5)',
                     border: entry.isUser ? '1px solid var(--accent-cyan)' : '1px solid var(--border-glass)',
                   }}
                 >
@@ -1787,7 +1787,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(5, 10, 20, 0.94)',
+            backgroundColor: 'rgba(24, 24, 24, 0.94)',
             backdropFilter: 'blur(16px)',
             zIndex: 3500,
             display: 'flex',

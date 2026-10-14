@@ -128,7 +128,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.85)',
+        backgroundColor: 'rgba(24, 24, 24, 0.85)',
         backdropFilter: 'blur(16px)',
         zIndex: 3000,
         display: 'flex',

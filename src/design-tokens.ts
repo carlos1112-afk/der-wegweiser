@@ -22,14 +22,14 @@ export const designTokens = {
     accentRedBright:   '#FF3B3B',  // --accent-red-bright (Standard-Buttons)
 
     // Hintergrund-Basis
-    bgPrimary:         '#0a0d14',  // --bg-primary
-    bgSecondary:       '#060812',  // --bg-secondary
-    bgMapDark:         '#0b0e17',  // --bg-map-dark
+    bgPrimary:         '#181818',  // --bg-primary
+    bgSecondary:       '#141414',  // --bg-secondary
+    bgMapDark:         '#181818',  // --bg-map-dark
 
     // Text
     textPrimary:       '#f0f4f8',  // --text-primary
     textMuted:         '#94a3b8',  // --text-muted
-    textOnAccent:      '#050a14',  // --text-on-accent
+    textOnAccent:      '#141414',  // --text-on-accent
   },
 
   /** Semitransparente Tints (Glassmorphism) */
@@ -43,14 +43,14 @@ export const designTokens = {
 
   /** Hintergrund-Schichten */
   surface: {
-    overlay:    'rgba(5, 8, 17, 0.82)',    // --bg-overlay
-    subtle:     'rgba(5, 10, 20, 0.65)',   // --bg-surface-subtle
-    medium:     'rgba(5, 10, 20, 0.80)',   // --bg-surface-medium
-    input:      'rgba(5, 10, 20, 0.85)',   // --bg-input
-    elevated:   'rgba(5, 10, 20, 0.96)',   // --bg-surface-elevated
-    glassPanel: 'rgba(10, 18, 30, 0.95)', // --bg-glass-panel
-    toast:      'rgba(10, 20, 35, 0.94)', // --bg-toast
-    floating:   'rgba(15, 23, 42, 0.92)', // --bg-floating-control
+    overlay:    'rgba(20, 20, 20, 0.82)',    // --bg-overlay
+    subtle:     'rgba(24, 24, 24, 0.65)',   // --bg-surface-subtle
+    medium:     'rgba(24, 24, 24, 0.80)',   // --bg-surface-medium
+    input:      'rgba(24, 24, 24, 0.85)',   // --bg-input
+    elevated:   'rgba(24, 24, 24, 0.96)',   // --bg-surface-elevated
+    glassPanel: 'rgba(28, 28, 28, 0.95)', // --bg-glass-panel
+    toast:      'rgba(32, 32, 32, 0.94)', // --bg-toast
+    floating:   'rgba(36, 36, 36, 0.92)', // --bg-floating-control
   },
 
   /** Typografie & Font-Familien */
@@ -120,9 +120,9 @@ export const designTokens = {
 
   /** CSS-Custom-Property Mapping (:root) */
   cssVars: {
-    '--bg-primary':           '#0a0d14',
-    '--bg-secondary':         '#060812',
-    '--bg-card':              'rgba(6, 10, 22, 0.88)',
+    '--bg-primary':           '#181818',
+    '--bg-secondary':         '#141414',
+    '--bg-card':              'rgba(24, 24, 24, 0.88)',
     '--accent-cyan':          '#00E6A3',
     '--accent-neon-green':    '#00ff66',
     '--accent-gold':          '#ffb700',
@@ -139,17 +139,17 @@ export const designTokens = {
     '--border-cyan-hot':      'rgba(0, 230, 163, 0.45)',
     '--border-gold':          'rgba(255, 183, 0, 0.35)',
     '--border-gold-hot':      'rgba(255, 183, 0, 0.55)',
-    '--bg-overlay':           'rgba(5, 8, 17, 0.82)',
-    '--bg-standby-shader':    'rgba(6, 12, 22, 0.72)',
-    '--bg-surface-subtle':    'rgba(5, 10, 20, 0.65)',
-    '--bg-surface-medium':    'rgba(5, 10, 20, 0.80)',
-    '--bg-input':             'rgba(5, 10, 20, 0.85)',
-    '--bg-surface-elevated':  'rgba(5, 10, 20, 0.96)',
-    '--bg-glass-panel':       'rgba(10, 18, 30, 0.95)',
-    '--bg-toast':             'rgba(10, 20, 35, 0.94)',
-    '--bg-floating-control':  'rgba(15, 23, 42, 0.92)',
-    '--bg-map-dark':          '#0b0e17',
-    '--text-on-accent':       '#050a14',
+    '--bg-overlay':           'rgba(20, 20, 20, 0.82)',
+    '--bg-standby-shader':    'rgba(24, 24, 24, 0.72)',
+    '--bg-surface-subtle':    'rgba(24, 24, 24, 0.65)',
+    '--bg-surface-medium':    'rgba(24, 24, 24, 0.80)',
+    '--bg-input':             'rgba(24, 24, 24, 0.85)',
+    '--bg-surface-elevated':  'rgba(24, 24, 24, 0.96)',
+    '--bg-glass-panel':       'rgba(28, 28, 28, 0.95)',
+    '--bg-toast':             'rgba(32, 32, 32, 0.94)',
+    '--bg-floating-control':  'rgba(36, 36, 36, 0.92)',
+    '--bg-map-dark':          '#181818',
+    '--text-on-accent':       '#141414',
     '--accent-cyan-subtle':   'rgba(0, 230, 163, 0.15)',
     '--accent-cyan-dark':     '#00B37D',
     '--accent-gold-subtle':   'rgba(255, 183, 0, 0.15)',

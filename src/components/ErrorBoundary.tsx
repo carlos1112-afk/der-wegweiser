@@ -35,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: '#050a14',
+            backgroundColor: '#141414',
             color: '#fff',
             display: 'flex',
             flexDirection: 'column',

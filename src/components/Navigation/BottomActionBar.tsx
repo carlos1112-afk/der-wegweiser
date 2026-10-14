@@ -32,7 +32,7 @@ export const BottomActionBar: React.FC<BottomActionBarProps> = ({
         alignItems: 'center',
         gap: '12px',
         padding: isFocused ? '12px 20px' : '8px 16px',
-        backgroundColor: 'rgba(10, 16, 28, 0.95)',
+        backgroundColor: 'rgba(28, 28, 28, 0.95)',
         backdropFilter: 'blur(12px)',
         borderRadius: '40px',
         border: '1px solid rgba(0, 255, 255, 0.3)',

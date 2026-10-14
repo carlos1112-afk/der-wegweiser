@@ -201,7 +201,7 @@ export const BleConnectModal: React.FC<BleConnectModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.88)',
+        backgroundColor: 'rgba(24, 24, 24, 0.88)',
         backdropFilter: 'blur(16px)',
         zIndex: 2200,
         display: 'flex',

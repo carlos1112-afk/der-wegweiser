@@ -108,7 +108,7 @@ export const TurnByTurnBanner: React.FC<TurnByTurnBannerProps> = ({
         borderRadius: '14px',
         boxShadow: 'var(--glow-cyan)',
         border: '1px solid var(--accent-cyan)',
-        backgroundColor: 'rgba(10, 18, 30, 0.88)',
+        backgroundColor: 'rgba(28, 28, 28, 0.88)',
         backdropFilter: 'blur(16px)',
         userSelect: 'none',
       }}

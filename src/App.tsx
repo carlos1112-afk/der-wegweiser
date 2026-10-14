@@ -558,7 +558,7 @@ export function App() {
                 display: 'flex',
                 alignItems: 'center',
                 padding: '8px 12px',
-                backgroundColor: 'rgba(5, 10, 20, 0.6)',
+                backgroundColor: 'rgba(24, 24, 24, 0.6)',
                 cursor: 'default',
               }}
             >

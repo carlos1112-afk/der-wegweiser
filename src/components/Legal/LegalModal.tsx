@@ -127,7 +127,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.92)',
+        backgroundColor: 'rgba(24, 24, 24, 0.92)',
         backdropFilter: 'blur(16px)',
         zIndex: 2500,
         display: 'flex',

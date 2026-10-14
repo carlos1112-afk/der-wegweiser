@@ -61,7 +61,7 @@ export const BurgerMenu: React.FC<BurgerMenuProps> = ({
           padding: '20px',
           overflowY: 'auto',
           animation: 'slideInLeft 0.3s ease',
-          backgroundColor: 'rgba(10, 16, 28, 0.95)',
+          backgroundColor: 'rgba(28, 28, 28, 0.95)',
           borderRight: '1px solid var(--accent-cyan)'
         }}
       >

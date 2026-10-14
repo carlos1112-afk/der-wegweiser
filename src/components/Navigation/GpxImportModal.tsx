@@ -63,7 +63,7 @@ export const GpxImportModal: React.FC<GpxImportModalProps> = ({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(5, 10, 20, 0.88)',
+        backgroundColor: 'rgba(24, 24, 24, 0.88)',
         backdropFilter: 'blur(16px)',
         zIndex: 2200,
         display: 'flex',
@@ -119,7 +119,7 @@ export const GpxImportModal: React.FC<GpxImportModalProps> = ({
               borderRadius: '16px',
               padding: '32px 16px',
               textAlign: 'center',
-              backgroundColor: isDragging ? 'rgba(0, 230, 163, 0.1)' : 'rgba(10, 15, 25, 0.6)',
+              backgroundColor: isDragging ? 'rgba(0, 230, 163, 0.1)' : 'rgba(28, 28, 28, 0.6)',
               cursor: 'pointer',
               display: 'flex',
               flexDirection: 'column',
