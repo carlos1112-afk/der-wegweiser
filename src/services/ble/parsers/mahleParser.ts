@@ -2,6 +2,13 @@ import type { LiveBikeTelemetry } from '../../../types/navigation';
 
 /**
  * Mahle SmartBike Systems (Ebikemotion X35, X20, Pulsar ONE) BLE GATT & ANT+ LEV Parser
+ *
+ * [FAKT, Quelle: Grok-Recherchebericht 2026-10, Referenzprojekt ReneNulschDE/ha-mysmartbike_ble, MIT]
+ * Beworbene BLE-Gerätenamen sind in der Praxis nicht "Mahle"/"ebikemotion", sondern "iWoc" bzw. Namen
+ * mit "HUS"-Präfix (getestet an Orbea Vibe, Schindelhauer Arthur IX). Das Community-Projekt parst ohne
+ * Cloud-Zwang zusätzlich: Batterietemperatur, Restenergie (Wh), Motortemperatur, Trip A, Kilometerstand,
+ * Licht-Status und EBM-Status (~14 Sensoren insgesamt). Nicht alle davon sind hier bereits umgesetzt —
+ * nur was unten tatsächlich dekodiert wird.
  */
 
 export const MAHLE_SERVICE_UUID = '0000a000-0000-1000-8000-00805f9b34fb';

@@ -4,6 +4,12 @@ import type { LiveBikeTelemetry } from '../../../types/navigation';
  * Specialized Turbo (MasterMind TCU) BLE GATT Parser
  * Custom Service UUID: 00000000-3dd4-425e-8d3e-3ff16a611bda
  * Requires PIN pairing (printed on TCU unit)
+ *
+ * [RISIKO, Quelle: Grok-Recherchebericht 2026-10, Referenzprojekt JamieMagee/specialized-turbo, MIT]
+ * Nur TCU1/TCX1-Rahmen sind unverschlüsselt und werden unten geparst. Ab TCX2 (neuere Räder) ist der
+ * Payload optional mit AES-128-CTR verschlüsselt; der dafür nötige Sitzungsschlüssel läuft über
+ * Specializeds Cloud-Key-Mechanismus und ist für diese App nicht beschaffbar. Auf solchen Rädern liefert
+ * dieser Parser entweder keine oder unbrauchbare (verschlüsselte) Werte — kein Workaround vorgesehen.
  */
 
 export const SPECIALIZED_SERVICE_UUID = '00000000-3dd4-425e-8d3e-3ff16a611bda';

@@ -50,7 +50,7 @@ export class BleManager {
     if (name.includes('bosch') || name.includes('kiox') || name.includes('nyon')) return 'bosch';
     if (name.includes('specialized') || name.includes('levo') || name.includes('tcu') || name.includes('turbo')) return 'specialized';
     if (name.includes('shimano') || name.includes('steps') || name.includes('d-fly') || name.includes('ep8')) return 'shimano';
-    if (name.includes('mahle') || name.includes('ebikemotion') || name.includes('x35') || name.includes('x20')) return 'mahle';
+    if (name.includes('mahle') || name.includes('ebikemotion') || name.includes('x35') || name.includes('x20') || name.includes('iwoc') || name.includes('hus')) return 'mahle';
     if (name.includes('fazua') || name.includes('ride 50') || name.includes('ride 60')) return 'fazua';
     if (name.includes('bafang') || name.includes('can') || name.includes('m400') || name.includes('m500')) return 'bafang';
     return 'generic';
@@ -260,7 +260,7 @@ export class BleManager {
           filters.push({ services: [SHIMANO_DFLY_SERVICE_UUID] }, { namePrefix: 'Shimano' }, { namePrefix: 'STEPS' }, { namePrefix: 'D-Fly' });
         }
         if (!targetManufacturer || targetManufacturer === 'mahle') {
-          filters.push({ services: [MAHLE_SERVICE_UUID] }, { namePrefix: 'Mahle' }, { namePrefix: 'ebikemotion' }, { namePrefix: 'X35' });
+          filters.push({ services: [MAHLE_SERVICE_UUID] }, { namePrefix: 'Mahle' }, { namePrefix: 'ebikemotion' }, { namePrefix: 'X35' }, { namePrefix: 'iWoc' }, { namePrefix: 'HUS' });
         }
         if (!targetManufacturer || targetManufacturer === 'bafang') {
           filters.push({ services: [BAFANG_UART_SERVICE_UUID] }, { namePrefix: 'Bafang' });
