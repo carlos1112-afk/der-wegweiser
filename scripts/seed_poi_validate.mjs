@@ -29,6 +29,18 @@ const VALID_CATEGORIES = new Set([
   "Rastplatz",
   "Schutzhütte",
   "Picknickplatz",
+  // Ergänzt für die "Operation E-Bike Scout"-Recherchebatches zu Lade-/
+  // Service-Infrastruktur (z.B. ebike_poi_database_initial.json): Ein Eintrag
+  // bekommt genau EINE dieser Kategorien zugewiesen, auch wenn die Rohdaten
+  // mehrere Tags kombinieren (z.B. "Ladesäule / Gastro / Hotspot" -> "Ladesäule"
+  // als Hauptkategorie wählen, Rest in description belassen).
+  "Ladesäule",
+  "Schlauchautomat",
+  "Hotel",
+  "Gastro",
+  "Camping",
+  "Kiosk",
+  "Schließfach",
   "Sonstiges",
 ]);
 
