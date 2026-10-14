@@ -146,16 +146,16 @@ export const LegalModal: React.FC<LegalModalProps> = ({
           overflowY: 'auto',
           padding: '24px',
           borderRadius: '24px',
-          border: '1px solid var(--accent-cyan)',
-          boxShadow: 'var(--glow-cyan)',
+          border: '1px solid rgba(148, 163, 184, 0.4)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
         }}
       >
         {/* Header with Tabs */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(0, 230, 163, 0.2)', paddingBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="glow-text-cyan">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(148, 163, 184, 0.25)', paddingBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ffffff' }}>
             <ShieldCheck size={24} />
             <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>
               RECHT &amp; DATENSCHUTZ

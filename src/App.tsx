@@ -524,7 +524,7 @@ export function App() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '10px',
+          gap: '16px',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
