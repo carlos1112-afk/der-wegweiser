@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     include: [
+      'src/services/accountDeletionService.test.ts',
       'src/services/coPilotService.test.ts',
       'src/services/PremiumKeyService.test.ts',
       'src/services/PremiumKeyService.mutation.test.ts',

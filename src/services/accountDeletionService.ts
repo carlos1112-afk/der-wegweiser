@@ -13,13 +13,13 @@ export interface DeletionResult {
 
 export class AccountDeletionService {
   /**
-   * Performs complete end-to-end deletion of user account and all associated data across:
+   * Permanently deletes the user's account and all associated data.
    * 1. Firestore collections (users, user_tokens, user_preferences, user_memory_patterns, routes, charging_stations, scout_reports)
    * 2. Cloud Storage (user uploads and photos)
    * 3. Firebase Authentication account (auth.currentUser) - executed ONLY AFTER cloud data wipe
    * 4. Local device storage (localStorage, sessionStorage, IndexedDB)
    */
-  public static async executeFullAccountDeletion(): Promise<DeletionResult> {
+  public static async deleteAccount(): Promise<void> {
     let authDeleted = false;
     let cloudDataDeleted = false;
     let localDataDeleted = false;
@@ -91,13 +91,7 @@ export class AccountDeletionService {
       } catch (e: any) {
         console.warn('[AccountDeletionService] Auth deletion error (requires re-auth if stale):', e);
         if (e.code === 'auth/requires-recent-login') {
-          return {
-            success: false,
-            message: 'Bitte melde dich kurz erneut an, um die Kontolöschung aus Sicherheitsgründen zu bestätigen.',
-            authDeleted: false,
-            cloudDataDeleted,
-            localDataDeleted: false,
-          };
+          throw new Error('Bitte melde dich kurz erneut an, um die Kontolöschung aus Sicherheitsgründen zu bestätigen.');
         }
       }
     } else {
@@ -148,13 +142,5 @@ export class AccountDeletionService {
     } catch (e) {
       console.warn('[AccountDeletionService] Local storage clear error:', e);
     }
-
-    return {
-      success: true,
-      message: 'Konto und alle zugehörigen Daten wurden erfolgreich und unwiderruflich gelöscht.',
-      authDeleted,
-      cloudDataDeleted,
-      localDataDeleted,
-    };
   }
 }

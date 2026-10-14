@@ -202,9 +202,9 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
     localStorage.setItem('wegweiser_auth_token', 't');
     localStorage.setItem('wegweiser_saved_routes', '[]');
     sessionStorage.setItem('x', 'y');
-    const r = await AccountDeletionService.executeFullAccountDeletion();
-    expect(r.success).toBe(true);
-    expect(r.localDataDeleted).toBe(true);
+    await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
+
+
     expect(localStorage.length).toBe(0);
     expect(sessionStorage.length).toBe(0);
     expect(fb.deleteUser).not.toHaveBeenCalled();
@@ -212,15 +212,15 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
 
   it('räumt auch Schlüssel anderer Herkunft ab (localStorage.clear, kein Präfix-Filter)', async () => {
     localStorage.setItem('third_party_cookie', 'allowed');
-    await AccountDeletionService.executeFullAccountDeletion();
+    await AccountDeletionService.deleteAccount();
     expect(localStorage.getItem('third_party_cookie')).toBeNull();
   });
 
   it('angemeldeter Nutzer: Cloud-Dokumente werden vor dem Auth-Konto gelöscht', async () => {
     fb.auth.currentUser = { uid: 'u1' };
     fb.deleteUser.mockResolvedValue(undefined);
-    const r = await AccountDeletionService.executeFullAccountDeletion();
-    expect(r).toMatchObject({ success: true, authDeleted: true, cloudDataDeleted: true, localDataDeleted: true });
+    await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
+
     expect(fb.deleteDoc).toHaveBeenCalled();
     const lastDocDelete = Math.max(...fb.deleteDoc.mock.invocationCallOrder);
     expect(lastDocDelete).toBeLessThan(fb.deleteUser.mock.invocationCallOrder[0]);
@@ -230,11 +230,10 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
     fb.auth.currentUser = { uid: 'u1' };
     fb.deleteUser.mockRejectedValue({ code: 'auth/requires-recent-login' });
     localStorage.setItem('wegweiser_saved_routes', '[1]');
-    const r = await AccountDeletionService.executeFullAccountDeletion();
-    expect(r.success).toBe(false);
-    expect(r.authDeleted).toBe(false);
-    expect(r.localDataDeleted).toBe(false);
-    expect(r.message).toContain('erneut an');
+    await expect(AccountDeletionService.deleteAccount()).rejects.toThrow("erneut an");
+
+
+
     expect(localStorage.getItem('wegweiser_saved_routes')).toBe('[1]');
   });
 });

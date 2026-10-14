@@ -1,0 +1,20 @@
+--- tests/scenarios/resilience-privacy.test.ts
++++ tests/scenarios/resilience-privacy.test.ts
+@@ -202,7 +202,7 @@
+     fb.auth.currentUser = null;
+     localStorage.setItem('wegweiser_saved_routes', '[]');
+     sessionStorage.setItem('x', 'y');
+-    await expect(AccountDeletionService.deleteAccount()).rejects.toThrow("erneut an");
++    await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
+
+
+     expect(localStorage.getItem('wegweiser_saved_routes')).toBeNull();
+@@ -219,7 +219,7 @@
+   it('angemeldeter Nutzer: Cloud-Dokumente werden vor dem Auth-Konto gelöscht', async () => {
+     fb.auth.currentUser = { uid: 'u1' };
+     fb.deleteUser.mockResolvedValue(undefined);
+-    await expect(AccountDeletionService.deleteAccount()).rejects.toThrow("erneut an");
++    await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
+
+     expect(fb.deleteDoc).toHaveBeenCalled();
+   });

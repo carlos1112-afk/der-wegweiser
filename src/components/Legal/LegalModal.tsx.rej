@@ -1,0 +1,12 @@
+--- src/components/Legal/LegalModal.tsx
++++ src/components/Legal/LegalModal.tsx
+@@ -110,7 +110,7 @@
+   };
+
+   const handleDeleteAllUserData = async () => {
+-    if (window.confirm('Möchtest du wirklich alle lokalen Daten (inkl. Routen und Tokens) unwiderruflich von diesem Gerät löschen? (Für Cloud-Löschung bitte im Profil verwalten)')) {
+-      const result = await AccountDeletionService.executeFullAccountDeletion();
++    if (window.confirm('Möchtest du wirklich alle Daten (inkl. Routen und Tokens) unwiderruflich löschen?')) {
++      await AccountDeletionService.deleteAccount();
+       setIsDataDeleted(true);
+       setTimeout(() => {

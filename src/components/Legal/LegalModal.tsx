@@ -110,7 +110,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
 
     if (confirmWipe) {
       SoundFxService.playWarningTone();
-      const result = await AccountDeletionService.executeFullAccountDeletion();
+      const result = await AccountDeletionService.deleteAccount();
       if (result.success) {
         setIsDataDeleted(true);
         setTimeout(() => {
