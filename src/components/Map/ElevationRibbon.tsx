@@ -142,7 +142,7 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({
       <div
         style={{
           display: 'flex',
-          justify: 'space-between',
+          justifyContent: 'space-between',
           alignItems: 'center',
           gap: '8px',
           cursor: 'pointer',
@@ -197,7 +197,7 @@ export const ElevationRibbon: React.FC<ElevationRibbonProps> = ({
           <div
             style={{
               display: 'flex',
-              justify: 'space-between',
+              justifyContent: 'space-between',
               alignItems: 'center',
               fontSize: '0.72rem',
               color: 'var(--text-muted)',

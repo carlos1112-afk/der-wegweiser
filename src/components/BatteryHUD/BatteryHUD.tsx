@@ -261,7 +261,7 @@ export const BatteryHUD: React.FC<BatteryHUDProps> = ({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                justify: 'space-between',
+                justifyContent: 'space-between',
                 fontSize: '0.8rem',
                 color: 'var(--text-muted)',
               }}
