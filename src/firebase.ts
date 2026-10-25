@@ -4,6 +4,7 @@ import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
 import { initAppCheck } from './appCheck';
+import { logger } from './utils/logger';
 
 // Firebase configuration for project der-wegweiser
 const env = (import.meta as any).env || {};
@@ -29,7 +30,7 @@ try {
     safeAuth = getAuth(app);
   }
 } catch (e) {
-  console.warn('[Firebase] Safe fallback: Auth initialization deferred:', e);
+  logger.warn('[Firebase] Safe fallback: Auth initialization deferred:', e);
 }
 export const auth = safeAuth;
 
@@ -38,7 +39,7 @@ let safeStorage: any = null;
 try {
   safeStorage = getStorage(app);
 } catch (e) {
-  console.warn('[Firebase] Safe fallback: Storage initialization deferred:', e);
+  logger.warn('[Firebase] Safe fallback: Storage initialization deferred:', e);
 }
 export const storage = safeStorage;
 // Resilient Functions initialization
@@ -46,6 +47,6 @@ let safeFunctions: any = null;
 try {
   safeFunctions = getFunctions(app, 'europe-west3');
 } catch (e) {
-  console.warn('[Firebase] Safe fallback: Functions initialization deferred:', e);
+  logger.warn('[Firebase] Safe fallback: Functions initialization deferred:', e);
 }
 export const functions = safeFunctions;

@@ -5,6 +5,7 @@ import './index.css';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { UILayoutProvider } from './contexts/UILayoutContext';
+import { logger } from './utils/logger';
 
 // Register Service Worker only for browser PWA mode, NEVER in native Capacitor mobile apps!
 // In native Android/iOS, Capacitor serves local assets directly from the APK/IPA container.
@@ -21,8 +22,8 @@ if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')
-        .then((reg) => console.log('[PWA] Service Worker registered:', reg.scope))
-        .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
+        .then((reg) => logger.log('[PWA] Service Worker registered:', reg.scope))
+        .catch((err) => logger.warn('[PWA] Service Worker registration failed:', err));
     });
   }
 }

@@ -4,6 +4,7 @@ import type { ChargingStation } from '../../types/navigation';
 import { SoundFxService } from '../../services/soundFxService';
 import { dataRepository, filterUgcText } from '../../services/dataRepository';
 import confetti from 'canvas-confetti';
+import { stationReviewSchema } from '../../utils/validation';
 
 interface StationReviewModalProps {
   isOpen: boolean;
@@ -50,8 +51,18 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFilterError(null);
-    if (comment) {
-      const check = filterUgcText(comment);
+    if (rating === 0) return;
+    const parsed = stationReviewSchema.safeParse({
+      rating,
+      comment: comment.trim(),
+      stationId: station.id,
+    });
+    if (!parsed.success) {
+      setFilterError(parsed.error.errors?.[0]?.message || 'Ungültige Eingabe');
+      return;
+    }
+    if (parsed.data.comment) {
+      const check = filterUgcText(parsed.data.comment);
       if (!check.isClean) {
         setFilterError(check.reason || 'Beitrag enthält unzulässige Begriffe.');
         return;
@@ -59,7 +70,7 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
     }
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 70, spread: 70 });
-    onAddReview({ rating, comment, tags: selectedTags });
+    onAddReview({ rating: parsed.data.rating, comment: parsed.data.comment || '', tags: selectedTags });
     setIsSubmitted(true);
   };
 

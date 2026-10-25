@@ -1,5 +1,6 @@
 import type { Route, Waypoint, UserPreferences } from '../types/navigation';
 import { ElevationService } from './elevationService';
+import { logger } from '../utils/logger';
 
 export interface RouteGenerationParams {
   startLat: number;
@@ -58,7 +59,7 @@ export class RoutingService {
         }
       }
     } catch (err) {
-      console.warn('[RoutingService] BRouter API unavailable:', err);
+      logger.warn('[RoutingService] BRouter API unavailable:', err);
     }
 
     // OSRM fallback when BRouter is unreachable
@@ -78,7 +79,7 @@ export class RoutingService {
           }
         }
       } catch (err) {
-        console.warn('[RoutingService] OSRM fallback unavailable:', err);
+        logger.warn('[RoutingService] OSRM fallback unavailable:', err);
       }
     }
 

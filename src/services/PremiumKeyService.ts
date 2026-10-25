@@ -1,3 +1,4 @@
+import { logger } from './utils/logger';
 // Key broker for premium map features.
 // Production: calls a Firebase Function that verifies subscription and issues
 // a short-lived Google Maps key (hours TTL, instance-bound, rate-limited).
@@ -80,7 +81,7 @@ async function issueGoogleMapsKey(): Promise<string> {
   try {
     idToken = (await auth?.currentUser?.getIdToken()) ?? null;
   } catch (e) {
-    console.warn('[PremiumKeyService] ID-Token nicht verfügbar:', e);
+    logger.warn('[PremiumKeyService] ID-Token nicht verfügbar:', e);
   }
   if (!idToken) {
     throw new UserFacingError(
@@ -97,7 +98,7 @@ async function issueGoogleMapsKey(): Promise<string> {
       appCheckToken = tokenResult.token;
     } catch (e) {
       // Non-fatal: proceed without token; server enforces App Check and rejects.
-      console.warn('[PremiumKeyService] App Check token nicht verfügbar:', e);
+      logger.warn('[PremiumKeyService] App Check token nicht verfügbar:', e);
     }
   }
 

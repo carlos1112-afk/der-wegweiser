@@ -6,6 +6,7 @@ import {
   type AppCheck,
 } from 'firebase/app-check';
 import { setAppCheckInstance } from './services/PremiumKeyService';
+import { logger } from './utils/logger';
 
 type Env = Record<string, string | undefined>;
 
@@ -26,7 +27,7 @@ export function initAppCheck(app: FirebaseApp, env: Env, isDev: boolean): AppChe
     setAppCheckInstance(instance);
     return instance;
   } catch (e) {
-    console.warn('[AppCheck] Initialisierung fehlgeschlagen:', e);
+    logger.warn('[AppCheck] Initialisierung fehlgeschlagen:', e);
     return null;
   }
 }

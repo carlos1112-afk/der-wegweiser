@@ -14,6 +14,7 @@
 import type { FunctionsError } from 'firebase/functions';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase';
+import { logger } from '../utils/logger';
 
 /** Error surfaced directly to the user (localised message, no stack trace). */
 export class UserFacingError extends Error {
