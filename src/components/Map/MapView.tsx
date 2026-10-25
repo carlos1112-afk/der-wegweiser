@@ -6,7 +6,10 @@ import { Compass, Box, Layers, Plus, Minus, Crosshair, Navigation, MapPin, Zap, 
 import { TurnByTurnBanner } from './TurnByTurnBanner';
 import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
-import { CesiumPremiumCanvas, type CesiumPremiumCanvasHandle, type CesiumPremiumTheme } from './CesiumPremiumCanvas';
+import { lazy, Suspense } from 'react';
+import type { CesiumPremiumCanvasHandle, CesiumPremiumTheme } from './CesiumPremiumCanvas';
+const CesiumPremiumCanvas = lazy(() => import('./CesiumPremiumCanvas').then((m) => ({ default: m.default })));
+
 import { readMapKeys, demSource, cycleSource, topoSource, satelliteSource } from './mapSources';
 
 export type MapTileTheme = 'topo' | 'cycle' | 'satellite' | 'satellite-3d' | 'topo-premium' | 'cycle-premium';
@@ -564,6 +567,7 @@ export const MapView: React.FC<MapViewProps> = ({
               <div style={{ fontSize: '0.8rem' }}>{cesiumError}</div>
             </div>
           ) : (
+            <Suspense fallback={null}>
             <CesiumPremiumCanvas
               key={tileTheme}
               ref={cesiumRef}
@@ -575,6 +579,7 @@ export const MapView: React.FC<MapViewProps> = ({
               onSelectStation={handleStationClick}
               onError={setCesiumError}
             />
+            </Suspense>
           )}
         </div>
       )}

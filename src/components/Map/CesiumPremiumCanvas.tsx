@@ -87,7 +87,13 @@ export const CesiumPremiumCanvas = forwardRef<CesiumPremiumCanvasHandle, CesiumP
             selectionIndicator: false,
             fullscreenButton: false,
             baseLayerPicker: false,
+            requestRenderMode: true,
+            maximumRenderTimeChange: Infinity,
+            msaaSamples: 1,
           });
+          if (viewer?.scene?.globe) {
+            viewer.scene.globe.maximumScreenSpaceError = 2.5;
+          }
         } catch (e) {
           if (cancelled) return;
           const message =
@@ -251,3 +257,5 @@ function addOrUpdateStationEntities(
     existing.set(station.id, entity);
   });
 }
+
+export default CesiumPremiumCanvas;
