@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import type { Feature, FeatureCollection, LineString, Polygon } from 'geojson';
 import type { Route, ChargingStation } from '../../types/navigation';
-import { Compass, Box, Layers, Plus, Minus, Crosshair, MapPin, Zap, X, Lock } from 'lucide-react';
+import { Compass, Box, Layers, Plus, Minus, Crosshair, Navigation, MapPin, Zap, X, Lock } from 'lucide-react';
 import { TurnByTurnBanner } from './TurnByTurnBanner';
 import { ElevationRibbon } from './ElevationRibbon';
 import { useRouteTracker } from '../../hooks/useRouteTracker';
@@ -497,9 +497,10 @@ export const MapView: React.FC<MapViewProps> = ({
   }, [userLocation]);
 
   /**
-   * Standort-Button (Zielkreuz + Kompass zusammengelegt, wie bei Google Maps' eigenem
-   * Standort-Button): 1. Tap zentriert (falls nicht zentriert), 2. Tap schaltet
-   * Course-Up ein, 3. Tap schaltet zurück auf Nordausrichtung (bleibt zentriert).
+   * Kombinierter Standort- & Ausrichtungs-Button (Zentrieren + Drehen / Course-Up vereint):
+   * State 0 (!isAutoFollow): Tap -> Zentriert auf GPS-Standort (North-Up)
+   * State 1 (isAutoFollow && !isCourseUp): Tap -> Schaltet Course-Up (In Fahrtrichtung drehen) ein
+   * State 2 (isAutoFollow && isCourseUp): Tap -> Schaltet zurück auf Norden (North-Up)
    */
   const handleLocationButton = useCallback(() => {
     if (!isAutoFollow) {
@@ -508,12 +509,15 @@ export const MapView: React.FC<MapViewProps> = ({
     }
     if (!isCourseUp) {
       setIsCourseUp(true);
+      if (mapRef.current) {
+        mapRef.current.easeTo({ bearing: -(heading ?? 0), duration: 400 });
+      }
       return;
     }
     setIsCourseUp(false);
     mapRef.current?.easeTo({ bearing: 0, duration: 400 });
     cesiumRef.current?.recenter();
-  }, [isAutoFollow, isCourseUp, handleRecenter]);
+  }, [isAutoFollow, isCourseUp, handleRecenter, heading]);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     if (currentRoute) return;
@@ -718,18 +722,31 @@ export const MapView: React.FC<MapViewProps> = ({
           </button>
         </div>
 
-        {/* Standort & Ausrichtung (Neu zentrieren + Course-Up, zusammengelegt) */}
-        <button className="glass-panel"
+        {/* Kombinierter Standort & Ausrichtung Button (Zentrieren & Drehen) */}
+        <button
+          className="glass-panel"
           onClick={(e) => { e.stopPropagation(); handleLocationButton(); }}
-          style={{ width: '38px', height: '38px', borderRadius: '10px', display: 'flex',
+          style={{
+            width: '42px', height: '42px', borderRadius: '12px', display: 'flex',
             alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-            color: isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)',
-            border: `1.5px solid ${isCourseUp ? 'var(--accent-neon-green)' : 'var(--accent-cyan)'}`,
-            boxShadow: isCourseUp ? 'var(--glow-green)' : 'var(--glow-cyan)' }}
-          title={!isAutoFollow ? 'Auf GPS-Standort zentrieren' : isCourseUp ? 'Auf Norden fixieren' : 'In Fahrtrichtung drehen (Course-Up)'}>
-          {isCourseUp
-            ? <Compass size={18} style={{ transform: `rotate(${currentHeadingDeg}deg)`, transition: 'transform 0.3s ease' }} />
-            : <Crosshair size={18} />}
+            color: isCourseUp ? 'var(--accent-neon-green)' : isAutoFollow ? 'var(--accent-cyan)' : 'var(--text-muted)',
+            border: `1.5px solid ${isCourseUp ? 'var(--accent-neon-green)' : isAutoFollow ? 'var(--accent-cyan)' : 'var(--border-glass)'}`,
+            boxShadow: isCourseUp ? 'var(--glow-green)' : isAutoFollow ? 'var(--glow-cyan)' : '0 4px 16px rgba(0,0,0,0.5)',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          title={!isAutoFollow ? 'Auf GPS-Standort zentrieren' : isCourseUp ? 'Auf Norden fixieren' : 'In Fahrtrichtung drehen (Course-Up)'}
+        >
+          {isCourseUp ? (
+            <Compass
+              size={20}
+              className="glow-text-green"
+              style={{ transform: `rotate(${currentHeadingDeg}deg)`, transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)' }}
+            />
+          ) : isAutoFollow ? (
+            <Navigation size={18} className="glow-text-cyan" style={{ transform: 'rotate(-45deg)' }} />
+          ) : (
+            <Crosshair size={20} style={{ opacity: 0.8 }} />
+          )}
         </button>
 
         {/* Layer picker button */}

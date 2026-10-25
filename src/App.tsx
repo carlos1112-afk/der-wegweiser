@@ -629,25 +629,23 @@ export function App() {
         onOpenSearch={() => setSearchActive(true)}
       />
 
-      {/* Battery HUD - Relocated to Bottom, above BottomActionBar. Nur sichtbar,
-          wenn tatsächlich ein E-Bike verbunden ist — sonst stand hier dauerhaft
-          eine bedeutungslose "--% / AUTO"-Pille über dem Mic-Button. */}
-      {telemetry.isConnected && (
-        <div style={{
+      {/* Integrated E-Bike Telemetry & Bluetooth Pairing Widget */}
+      <div
+        style={{
           position: 'absolute',
-          bottom: '80px',
+          bottom: '88px',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 1900
-        }}>
-          <BatteryHUD
-            telemetry={telemetry}
-            currentRoute={currentRoute}
-            onConnectBLE={handleConnectBLE}
-            onOpenBoschModal={() => setShowBoschModal(true)}
-          />
-        </div>
-      )}
+          zIndex: 1900,
+        }}
+      >
+        <BatteryHUD
+          telemetry={telemetry}
+          currentRoute={currentRoute}
+          onConnectBLE={handleConnectBLE}
+          onOpenBoschModal={() => setShowBoschModal(true)}
+        />
+      </div>
 
       {/* GPX Track Recorder Pill - Relocated right side above right controls */}
       {!currentRoute && (
