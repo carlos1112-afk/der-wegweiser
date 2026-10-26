@@ -30,6 +30,7 @@ import { ElevationService } from '../../src/services/elevationService';
 import { GpxExportService } from '../../src/services/gpxExportService';
 import { GpxImportService } from '../../src/services/gpxImportService';
 import { AccountDeletionService } from '../../src/services/accountDeletionService';
+import { ConsentService, CONSENT_VERSION } from '../../src/services/consentService';
 import { filterUgcText } from '../../src/services/dataRepository';
 import type { Route } from '../../src/types/navigation';
 
@@ -44,6 +45,14 @@ function geojsonRoute(n = 12) {
 describe('Szenario 13: Offline-Resilienz (echter RoutingService, Höhendienst ersetzt)', () => {
   let elevation: ReturnType<typeof vi.spyOn>;
   beforeEach(() => {
+    localStorage.setItem('der_wegweiser_legal_consent', JSON.stringify({
+      essential: true,
+      analytics: false,
+      surveys: false,
+      personalizedAds: false,
+      acceptedAt: '2026-01-01T00:00:00.000Z',
+      version: CONSENT_VERSION,
+    }));
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     elevation = vi.spyOn(ElevationService, 'getElevations').mockImplementation(async (c) => c.map(() => 0));
@@ -62,6 +71,15 @@ describe('Szenario 13: Offline-Resilienz (echter RoutingService, Höhendienst er
     expect(route.pathCoordinates.length).toBeGreaterThan(10);
     expect(route.title).toContain('Ungeprüfter');
     expect(offline).toHaveBeenCalledTimes(2);
+  });
+
+  it('sendet nach Consent-Widerruf keine Standortkoordinaten an Routing-Anbieter', async () => {
+    ConsentService.withdraw();
+    const fetchFn = vi.fn();
+
+    await expect(RoutingService.generateBikeRoute(params, prefs, fetchFn as never))
+      .rejects.toThrow('Consent required');
+    expect(fetchFn).not.toHaveBeenCalled();
   });
 
   it('BRouter erreichbar: straßengenaue Route mit unterstütztem Profil', async () => {

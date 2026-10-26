@@ -1,5 +1,6 @@
 import type { Route, Waypoint, UserPreferences } from '../types/navigation';
 import { ElevationService } from './elevationService';
+import { ConsentService } from './consentService';
 import { logger } from '../utils/logger';
 
 export interface RouteGenerationParams {
@@ -14,6 +15,20 @@ export interface RouteGenerationParams {
   isMapScoutMode?: boolean; // Karten-Scout Modus: Bevorzugt veraltete Sektoren für Bonus-Tokens
 }
 
+export class RouteGenerationCancelledError extends Error {
+  public constructor(message = 'Route generation was cancelled.') {
+    super(message);
+    this.name = 'AbortError';
+  }
+}
+
+function assertRouteGenerationAllowed(signal?: AbortSignal): void {
+  if (signal?.aborted) throw new RouteGenerationCancelledError();
+  if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
+    throw new Error('[RoutingService] Consent required before sending coordinates.');
+  }
+}
+
 export class RoutingService {
   /**
    * Generates a road-snapped bike loop using the BRouter bike routing API.
@@ -23,7 +38,8 @@ export class RoutingService {
   public static async generateBikeRoute(
     params: RouteGenerationParams,
     userPrefs: UserPreferences,
-    fetchFn: typeof fetch = typeof globalThis !== 'undefined' ? globalThis.fetch : fetch
+    fetchFn: typeof fetch = typeof globalThis !== 'undefined' ? globalThis.fetch : fetch,
+    signal?: AbortSignal
   ): Promise<Route> {
     const distance = params.targetDistanceKm || 28;
     const isScout = !!params.isMapScoutMode;
@@ -41,8 +57,9 @@ export class RoutingService {
 
     try {
       // BRouter API call: start -> via -> start
+      assertRouteGenerationAllowed(signal);
       const brouterUrl = `https://brouter.de/brouter?lonlats=${params.startLng},${params.startLat}|${viaLng},${viaLat}|${params.startLng},${params.startLat}&profile=trekking&alternativeidx=0&format=geojson`;
-      const res = await fetchFn(brouterUrl);
+      const res = await fetchFn(brouterUrl, { signal });
 
       if (res.ok) {
         const geojson = await res.json();
@@ -59,14 +76,16 @@ export class RoutingService {
         }
       }
     } catch (err) {
+      if (signal?.aborted) throw err;
       logger.warn('[RoutingService] BRouter API unavailable:', err);
     }
 
     // OSRM fallback when BRouter is unreachable
     if (pathCoordinates.length === 0) {
       try {
+        assertRouteGenerationAllowed(signal);
         const osrmUrl = `https://router.project-osrm.org/route/v1/bike/${params.startLng},${params.startLat};${viaLng},${viaLat};${params.startLng},${params.startLat}?overview=full&geometries=geojson`;
-        const res = await fetchFn(osrmUrl);
+        const res = await fetchFn(osrmUrl, { signal });
         if (res.ok) {
           const data = await res.json();
           const coords = data.routes?.[0]?.geometry?.coordinates;
@@ -79,6 +98,7 @@ export class RoutingService {
           }
         }
       } catch (err) {
+        if (signal?.aborted) throw err;
         logger.warn('[RoutingService] OSRM fallback unavailable:', err);
       }
     }
@@ -98,8 +118,9 @@ export class RoutingService {
 
     // Calculate elevation profiles if we have coordinates
     if (pathCoordinates.length > 0) {
+      assertRouteGenerationAllowed(signal);
       const sampleCoords = pathCoordinates.filter((_, idx) => idx % Math.ceil(pathCoordinates.length / 20) === 0);
-      const elevations = await ElevationService.getElevations(sampleCoords);
+      const elevations = await ElevationService.getElevations(sampleCoords, signal);
       let calculatedGain = 0;
       for (let i = 1; i < elevations.length; i++) {
         const diff = elevations[i] - elevations[i - 1];

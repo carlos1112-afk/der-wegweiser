@@ -1,6 +1,7 @@
 import type { Route, UserPreferences, UserMemoryPattern, PlugType } from '../types/navigation';
 import { RoutingService } from './routingService';
 import { AiGatewayService } from './ai/aiGatewayService';
+import { ConsentService } from './consentService';
 
 // =============================================================================
 // Agent / Model Registry — Official Google Gemini Suite (AGENTS.md Compliance)
@@ -134,8 +135,13 @@ export class AiAssistantService {
     userLng: number,
     userPrefs: UserPreferences,
     memory: UserMemoryPattern,
-    _modelId: ModelId = DEFAULT_MODEL
+    _modelId: ModelId = DEFAULT_MODEL,
+    signal?: AbortSignal
   ): Promise<Route> {
+    if (signal?.aborted) throw new DOMException('Route generation was cancelled.', 'AbortError');
+    if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
+      throw new Error('[AiAssistantService] Consent required before generating a route.');
+    }
     const targetDistanceKm = memory.preferredDistanceKm || 28;
     const mainTheme = memory.frequentDestinations?.[0] || 'Badesee';
 
@@ -152,8 +158,14 @@ export class AiAssistantService {
           : 150,
         surfacePreference: userPrefs.preferredSurface === 'asphalt' ? 'asphalt' : 'any',
       },
-      userPrefs
+      userPrefs,
+      undefined,
+      signal
     );
+
+    if (signal?.aborted || (typeof window !== 'undefined' && !ConsentService.allowsEssential)) {
+      throw new DOMException('Route generation was cancelled.', 'AbortError');
+    }
 
     // Route through vendor-neutral AI Gateway
     const storyText = await AiGatewayService.planRoute({

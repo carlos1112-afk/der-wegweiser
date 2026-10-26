@@ -38,7 +38,7 @@ export const CONSENT_VERSION = 2;
 
 const STORAGE_KEY = 'der_wegweiser_legal_consent';
 
-type ConsentListener = (flags: ConsentFlags) => void;
+type ConsentListener = (flags: ConsentFlags | null) => void;
 
 export class ConsentService {
   private static listeners: ConsentListener[] = [];
@@ -127,13 +127,16 @@ export class ConsentService {
    * erneut zur Zustimmung auffordert und die Verarbeitung einstellt.
    */
   public static withdraw(): void {
-    localStorage.removeItem(STORAGE_KEY);
-    // Alle lokal abgelegten personenbezogenen Daten verwerfen.
     try {
+      localStorage.removeItem(STORAGE_KEY);
+      // Alle lokal abgelegten personenbezogenen Daten verwerfen.
       localStorage.clear();
       sessionStorage.clear();
     } catch (e) {
       console.warn('[Consent] Lokale Daten beim Widerruf nicht vollständig löschbar:', e);
+    } finally {
+      // Der Widerruf muss auch bereits gemountete Verbraucher sofort erreichen.
+      this.listeners.slice().forEach((cb) => cb(null));
     }
   }
 
