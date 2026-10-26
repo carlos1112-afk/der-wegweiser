@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { LoungeModal } from './LoungeModal';
 
 vi.mock('canvas-confetti', () => ({
@@ -54,13 +54,16 @@ vi.mock('../../firebase', () => ({
 
 vi.mock('firebase/functions', () => ({
   httpsCallable: vi.fn(() => vi.fn(async () => ({
-    data: { success: true, code: 'WEGWEISER-KAFFEE-2026' },
+    data: { success: true, code: 'server-issued-test-code' },
   }))),
 }));
 
 describe('LoungeModal - Redemption Flow', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+  afterEach(() => {
+    cleanup();
   });
 
   const renderModalAndGoToShop = (tokenBalance: number, onAddTokens = vi.fn()) => {
@@ -116,7 +119,7 @@ describe('LoungeModal - Redemption Flow', () => {
       expect(onAddTokens).toHaveBeenCalledWith(-40);
     });
 
-    const codeContainer = await screen.findByText('WEGWEISER-KAFFEE-2026');
+    const codeContainer = await screen.findByText('server-issued-test-code');
     expect(codeContainer).toBeTruthy();
   });
 });
