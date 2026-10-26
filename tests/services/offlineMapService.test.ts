@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { OfflineMapService, DownloadedRegionInfo, OfflineRegionBounds } from '../../src/services/offlineMapService.js';
+import { OfflineMapService, DownloadedRegionInfo, MAX_TILE_REQUESTS, OfflineRegionBounds } from '../../src/services/offlineMapService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -174,38 +174,35 @@ describe('OfflineMapService', () => {
     expect(success).toBe(false);
   });
 
+  it('rejects excessive bounding boxes before allocating or fetching tile URLs', async () => {
+    const success = await OfflineMapService.downloadOfflineRegion('TooLarge', {
+      minLat: -80,
+      maxLat: 80,
+      minLng: -170,
+      maxLng: 170,
+    }, () => {});
+
+    expect(success).toBe(false);
+    expect(fetchedUrls).toHaveLength(0);
+    expect(MAX_TILE_REQUESTS).toBeGreaterThan(0);
+  });
+
+  it('rejects non-finite route coordinates without starting a prefetch', async () => {
+    const success = await OfflineMapService.prefetchRouteCorridor([[52.5, Number.NaN]]);
+    expect(success).toBe(false);
+    expect(fetchedUrls).toHaveLength(0);
+  });
+
   it('prefetches a route corridor successfully', async () => {
     const coordinates: [number, number][] = [
       [52.5, 13.4],
       [52.51, 13.41],
     ];
-    let progressCalls = 0;
-    const originalDownload = OfflineMapService.downloadOfflineRegion;
-    let boundsPassed: any = null;
-    let regionNamePassed: any = null;
-    (OfflineMapService as any).downloadOfflineRegion = async (
-      regionName: string,
-      bounds: OfflineRegionBounds,
-      onProgress: (percent: number) => void
-    ) => {
-      boundsPassed = bounds;
-      regionNamePassed = regionName;
-      onProgress(100);
-      return true;
-    };
-
-    try {
-      const success = await OfflineMapService.prefetchRouteCorridor(coordinates);
-      expect(success).toBe(true);
-      expect(regionNamePassed).toBe('Aktive Route Korridor');
-      expect(boundsPassed).toBeTruthy();
-      expect(boundsPassed.minLat).toBeLessThan(52.5);
-      expect(boundsPassed.maxLat).toBeGreaterThan(52.51);
-      expect(boundsPassed.minLng).toBeLessThan(13.4);
-      expect(boundsPassed.maxLng).toBeGreaterThan(13.41);
-    } finally {
-      OfflineMapService.downloadOfflineRegion = originalDownload;
-    }
+    const success = await OfflineMapService.prefetchRouteCorridor(coordinates);
+    expect(success).toBe(true);
+    expect(fetchedUrls.length).toBeGreaterThan(0);
+    expect(fetchedUrls.length).toBeLessThanOrEqual(MAX_TILE_REQUESTS);
+    expect(localStorageStore['der_wegweiser_offline_regions']).toContain('Aktive Route Korridor');
   });
 
   it('retrieves and parses existing regions from localStorage', async () => {

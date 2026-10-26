@@ -349,9 +349,10 @@ export function App() {
 
   // Background Corridor Offline Cache
   useEffect(() => {
-    if (currentRoute && currentRoute.pathCoordinates && currentRoute.pathCoordinates.length > 0) {
-      OfflineMapService.prefetchRouteCorridor(currentRoute.pathCoordinates);
-    }
+    if (!currentRoute?.pathCoordinates?.length) return;
+    const controller = new AbortController();
+    OfflineMapService.prefetchRouteCorridor(currentRoute.pathCoordinates, controller.signal);
+    return () => controller.abort();
   }, [currentRoute]);
 
   // Rapid Battery Drop Detection (FCM Trigger)
