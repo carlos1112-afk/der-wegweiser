@@ -7,8 +7,11 @@ export ANDROID_AVD_HOME=/home/carlos/.config/.android/avd
 ADB="/opt/android-sdk/platform-tools/adb"
 EMULATOR="/opt/android-sdk/emulator/emulator"
 
+LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/emulator_log.XXXXXX")"
+LOG_FILE="${LOG_DIR}/emulator.log"
+
 echo "🚀 [EMULATOR] Launching Android Emulator (Wegweiser_Test_AVD) as permanent desktop process..."
-nohup $EMULATOR -avd Wegweiser_Test_AVD -gpu auto -netdelay none -netspeed full </dev/null >/tmp/emulator.log 2>&1 &
+nohup $EMULATOR -avd Wegweiser_Test_AVD -gpu auto -netdelay none -netspeed full </dev/null >"$LOG_FILE" 2>&1 &
 disown
 
 echo "⏳ [ADB] Waiting for device connection..."
