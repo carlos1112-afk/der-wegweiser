@@ -45,6 +45,9 @@ const VALID_CATEGORIES = new Set([
 ]);
 
 const VALID_CONFIDENCE = new Set(["high", "medium", "low"]);
+const MAX_BATCH_ENTRIES = 10_000;
+const GRID_CELL_METRES = 50;
+const GRID_NEIGHBOUR_RADIUS = 2;
 
 // Germany rough bounding box (generous)
 const BBOX = { latMin: 47.0, latMax: 55.2, lngMin: 5.5, lngMax: 15.5 };
@@ -88,10 +91,36 @@ if (!Array.isArray(raw)) {
   console.error("Input must be a JSON array.");
   process.exit(1);
 }
+if (raw.length > MAX_BATCH_ENTRIES) {
+  console.error(`Input contains ${raw.length} entries; maximum supported batch size is ${MAX_BATCH_ENTRIES}.`);
+  process.exit(1);
+}
 
 const accepted = [];
 const rejected = [];
 const seenNames = new Set();
+const coordinateGrid = new Map();
+
+function gridCell(lat, lng) {
+  const metresPerDegreeLat = 111320;
+  const metresPerDegreeLng = metresPerDegreeLat * Math.cos((lat * Math.PI) / 180);
+  return [
+    Math.floor((lat * metresPerDegreeLat) / GRID_CELL_METRES),
+    Math.floor((lng * metresPerDegreeLng) / GRID_CELL_METRES),
+  ];
+}
+
+function nearbyAccepted(lat, lng) {
+  const [cellLat, cellLng] = gridCell(lat, lng);
+  const candidates = [];
+  for (let dLat = -GRID_NEIGHBOUR_RADIUS; dLat <= GRID_NEIGHBOUR_RADIUS; dLat++) {
+    for (let dLng = -GRID_NEIGHBOUR_RADIUS; dLng <= GRID_NEIGHBOUR_RADIUS; dLng++) {
+      const bucket = coordinateGrid.get(`${cellLat + dLat}:${cellLng + dLng}`);
+      if (bucket) candidates.push(...bucket);
+    }
+  }
+  return candidates;
+}
 
 for (const entry of raw) {
   const errors = [];
@@ -135,7 +164,7 @@ for (const entry of raw) {
   }
 
   // Coordinate proximity check (50m)
-  const tooClose = accepted.find(
+  const tooClose = nearbyAccepted(lat, lng).find(
     (a) => distanceM(a.lat, a.lng, lat, lng) < 50
   );
   if (tooClose) {
@@ -147,7 +176,7 @@ for (const entry of raw) {
   }
 
   seenNames.add(nameLower);
-  accepted.push({
+  const acceptedEntry = {
     id: randomUUID(),
     name: entry.name.trim(),
     lat,
@@ -164,7 +193,13 @@ for (const entry of raw) {
     createdByUserId: null,
     createdAt: new Date().toISOString(),
     schemaVersion: 2,
-  });
+  };
+  accepted.push(acceptedEntry);
+  const [cellLat, cellLng] = gridCell(lat, lng);
+  const cellKey = `${cellLat}:${cellLng}`;
+  const bucket = coordinateGrid.get(cellKey);
+  if (bucket) bucket.push(acceptedEntry);
+  else coordinateGrid.set(cellKey, [acceptedEntry]);
 }
 
 writeFileSync(outputFile, JSON.stringify(accepted, null, 2) + "\n");
