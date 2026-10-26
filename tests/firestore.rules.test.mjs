@@ -156,10 +156,15 @@ test('Fremde Konten sind strikt isoliert', async () => {
   await assertFails(deleteDoc(doc(mallory, 'users', 'alice')));
   await assertSucceeds(deleteDoc(doc(alice, 'users', 'alice')));
 
-  // user_tokens collection isolation
-  await assertSucceeds(setDoc(doc(alice, 'user_tokens', 'alice'), { token: 'abc' }));
+  // user_tokens collection isolation (Direct client creation/modification is denied; reading and deletion are allowed for owner)
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const { doc: adminDoc, setDoc: adminSetDoc } = await import('firebase/firestore');
+    await adminSetDoc(adminDoc(context.firestore(), 'user_tokens', 'alice'), { balance: 100, unlimitedOnDemand: false });
+  });
+
+  await assertFails(setDoc(doc(alice, 'user_tokens', 'alice'), { balance: 999999 }));
   await assertSucceeds(getDoc(doc(alice, 'user_tokens', 'alice')));
-  await assertSucceeds(updateDoc(doc(alice, 'user_tokens', 'alice'), { token: 'def' }));
+  await assertFails(updateDoc(doc(alice, 'user_tokens', 'alice'), { balance: 999999 }));
 
   await assertFails(setDoc(doc(mallory, 'user_tokens', 'alice'), { token: 'xyz' }));
   await assertFails(getDoc(doc(mallory, 'user_tokens', 'alice')));
