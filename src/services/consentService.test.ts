@@ -243,6 +243,16 @@ describe('onChange', () => {
 });
 
 describe('withdraw (Art. 7 Abs. 3 DSGVO)', () => {
+  it('benachrichtigt gemountete Verbraucher über den widerrufenen Zustand', () => {
+    stored(valid());
+    const listener = vi.fn();
+    ConsentService.onChange(listener);
+
+    ConsentService.withdraw();
+
+    expect(listener).toHaveBeenCalledWith(null);
+  });
+
   it('entfernt die Einwilligung und leert local- und sessionStorage', () => {
     stored(valid());
     ls.setItem('anderes', 'x');

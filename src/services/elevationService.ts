@@ -1,3 +1,5 @@
+import { ConsentService } from './consentService';
+
 export class ElevationService {
 
   /**
@@ -6,9 +8,14 @@ export class ElevationService {
    * Client calls backend proxy (/api/elevation) or direct standard/custom endpoint.
    */
   public static async getElevations(
-    coords: [number, number][]
+    coords: [number, number][],
+    signal?: AbortSignal
   ): Promise<number[]> {
     if (!coords || coords.length === 0) return [];
+    if (signal?.aborted) throw new DOMException('Route generation was cancelled.', 'AbortError');
+    if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
+      throw new Error('[ElevationService] Consent required before sending coordinates.');
+    }
 
     const customEndpoint = import.meta.env.VITE_ELEVATION_PROVIDER_URL;
     const lats = coords.map((c) => c[0]).join(',');
@@ -20,9 +27,13 @@ export class ElevationService {
     const urlToTry = customEndpoint ? `${customEndpoint}?latitude=${lats}&longitude=${lngs}` : (proxyUrl || directUrl);
 
     try {
-      let res = await fetch(urlToTry).catch(() => null);
+      let res = await fetch(urlToTry, { signal }).catch(() => null);
       if (!res || !res.ok) {
-        res = await fetch(directUrl);
+        if (signal?.aborted) throw new DOMException('Route generation was cancelled.', 'AbortError');
+        if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
+          throw new Error('[ElevationService] Consent required before sending coordinates.');
+        }
+        res = await fetch(directUrl, { signal });
       }
 
       if (res && res.ok) {
@@ -32,6 +43,7 @@ export class ElevationService {
         }
       }
     } catch (err) {
+      if (signal?.aborted) throw err;
       console.warn('[ElevationService] Elevation fetch failed:', err);
     }
 
