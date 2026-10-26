@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as maplibregl from 'maplibre-gl';
 import type { Feature, FeatureCollection, LineString, Polygon } from 'geojson';
 import type { Route, ChargingStation } from '../../types/navigation';

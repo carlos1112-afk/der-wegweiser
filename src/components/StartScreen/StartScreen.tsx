@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Settings, LogIn, LogOut, Bluetooth, Battery, Trophy, Play } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import type { LiveBikeTelemetry } from '../../types/navigation';
@@ -20,6 +21,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   telemetry,
   currentUser,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -39,7 +41,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           className="btn-cyberpunk btn-icon-ghost"
           onClick={onOpenLogin}
           style={{ padding: '8px', borderRadius: '50%' }}
-          title={currentUser ? `Angemeldet als ${currentUser.email ?? currentUser.displayName ?? 'Nutzer'}` : 'Einloggen'}
+          title={currentUser ? t('start.loggedInAs', { name: currentUser.email ?? currentUser.displayName ?? 'Nutzer' }) : t('start.login')}
         >
           {currentUser ? <LogOut size={18} /> : <LogIn size={18} />}
         </button>
@@ -47,7 +49,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           className="btn-cyberpunk btn-icon-ghost"
           onClick={onOpenSettings}
           style={{ padding: '8px', borderRadius: '50%' }}
-          title="Einstellungen"
+          title={t('start.settings')}
         >
           <Settings size={18} />
         </button>
@@ -55,7 +57,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
 
       {/* Branding */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10vh', marginBottom: '32px' }}>
-        <img src="/icon-192.png" alt="Der Wegweiser" width={88} height={88} style={{ borderRadius: '22px', boxShadow: 'var(--glow-cyan)' }} />
+        <img src="/icon-192.png" alt={t('app.title')} width={88} height={88} style={{ borderRadius: '22px', boxShadow: 'var(--glow-cyan)' }} />
         <h1
           style={{
             marginTop: '16px',
@@ -67,10 +69,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             textAlign: 'center',
           }}
         >
-          Der Wegweiser
+          {t('app.title')}
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px', textAlign: 'center' }}>
-          Markenoffener E-Bike Co-Pilot
+          {t('app.tagline')}
         </p>
       </div>
 
@@ -89,7 +91,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Bluetooth size={18} className={telemetry.isConnected ? 'glow-text-green' : undefined} style={!telemetry.isConnected ? { color: 'var(--text-muted)' } : undefined} />
             <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: telemetry.isConnected ? undefined : 'var(--text-muted)' }} className={telemetry.isConnected ? 'glow-text-green' : undefined}>
-              {telemetry.isConnected ? 'E-Bike verbunden' : 'Kein E-Bike verbunden'}
+              {telemetry.isConnected ? t('start.ebikeConnected') : t('start.ebikeDisconnected')}
             </span>
           </div>
           {telemetry.isConnected && typeof telemetry.batteryPercent === 'number' && (
@@ -108,11 +110,11 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Trophy size={18} className="glow-text-gold" />
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Rang: <strong style={{ color: '#ffffff' }}>E-Bike Scout</strong>
+              {t('start.rank')}: <strong style={{ color: '#ffffff' }}>E-Bike Scout</strong>
             </span>
           </div>
           <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }} className="glow-text-gold">
-            🪙 {tokenBalance} Tokens
+            🪙 {tokenBalance} {t('start.tokens')}
           </span>
         </div>
       </div>
@@ -132,7 +134,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           marginBottom: '8px',
         }}
       >
-        <Play size={20} /> Los geht's
+        <Play size={20} /> {t('start.start')}
       </button>
     </div>
   );

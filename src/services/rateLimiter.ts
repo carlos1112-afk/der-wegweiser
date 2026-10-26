@@ -9,8 +9,11 @@ export interface RateLimitConfig {
 
 export class RateLimiter {
   private timestamps: number[] = [];
+  private config: RateLimitConfig;
 
-  constructor(private config: RateLimitConfig) {}
+  constructor(config: RateLimitConfig) {
+    this.config = config;
+  }
 
   check(): void {
     const now = Date.now();

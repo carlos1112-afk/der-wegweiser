@@ -58,7 +58,7 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
       stationId: station.id,
     });
     if (!parsed.success) {
-      setFilterError(parsed.error.errors?.[0]?.message || 'Ungültige Eingabe');
+      setFilterError(parsed.error.issues?.[0]?.message || 'Ungültige Eingabe');
       return;
     }
     if (parsed.data.comment) {

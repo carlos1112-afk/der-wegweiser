@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './SearchInput.module.css';
+import { searchQuerySchema } from '../../utils/validation';
 
 export interface SearchResult {
   lat: number;
@@ -36,6 +37,15 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       setResults([]);
       setIsOpen(false);
       setError(null);
+      return;
+    }
+
+    const parsedQuery = searchQuerySchema.safeParse(q);
+    if (!parsedQuery.success) {
+      setResults([]);
+      setIsOpen(true);
+      setError(parsedQuery.error.issues?.[0]?.message ?? 'Ungültiger Suchbegriff.');
+      setIsLoading(false);
       return;
     }
 

@@ -1,0 +1,67 @@
+{
+  "app": {
+    "title": "Der Wegweiser",
+    "tagline": "Markenoffener E-Bike Co-Pilot"
+  },
+  "start": {
+    "login": "Einloggen",
+    "logout": "Abmelden",
+    "settings": "Einstellungen",
+    "loggedInAs": "Angemeldet als {{name}}",
+    "ebikeConnected": "E-Bike verbunden",
+    "ebikeDisconnected": "Kein E-Bike verbunden",
+    "rank": "Rang",
+    "tokens": "Tokens",
+    "start": "Los geht's"
+  },
+  "nav": {
+    "menu": "Menü",
+    "search": "Suchen",
+    "route": "Route",
+    "navigate": "Navigieren"
+  },
+  "menu": {
+    "title": "Menü",
+    "settings": "Einstellungen",
+    "analytics": "Analysen",
+    "charging": "Laden & Verdienen",
+    "scanner": "Ladestation scannen",
+    "gpx": "GPX importieren",
+    "voice": "Sprachassistent",
+    "bosch": "Bosch eBike Connect",
+    "rideSummary": "Fahrtzusammenfassung",
+    "legal": "Rechtliches & Datenschutz",
+    "logout": "Abmelden",
+    "login": "Anmelden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "german": "Deutsch",
+    "english": "Englisch",
+    "appearance": "Darstellung",
+    "oledMode": "OLED-Schwarzmodus",
+    "sunlightMode": "Sonnenlichtmodus",
+    "close": "Schließen"
+  },
+  "buttons": {
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "ok": "OK",
+    "back": "Zurück",
+    "continue": "Weiter"
+  },
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten",
+    "network": "Netzwerkfehler",
+    "location": "Standort konnte nicht ermittelt werden"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "logout": "Abmelden"
+  }
+}

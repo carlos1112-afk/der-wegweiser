@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Capacitor } from '@capacitor/core';
 import './index.css';
+import './i18n/config';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { UILayoutProvider } from './contexts/UILayoutContext';
@@ -37,3 +38,4 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 );
+import './i18n/config';

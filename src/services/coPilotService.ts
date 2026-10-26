@@ -13,6 +13,7 @@
 import { AiGatewayService } from './ai/aiGatewayService';
 import { VoiceGuidanceService } from './voiceGuidanceService';
 import type { LiveBikeTelemetry } from '../types/navigation';
+import type { TurnManeuver } from '../hooks/useRouteTracker';
 
 type WarnLevel = 'battery_20' | 'battery_10' | 'range_caution' | 'range_critical';
 
@@ -21,6 +22,8 @@ const GEMINI_RATE_LIMIT_MS = 60 * 1000; // max 1 Gemini-Anfrage pro 60 s
 
 let lastWarnAt: Partial<Record<WarnLevel, number>> = {};
 let lastGeminiAt = 0;
+let lastTurnAnnouncedAt = 0;
+let lastAnnouncedTurnKey = '';
 let isActive = false;
 
 function canWarn(level: WarnLevel): boolean {
@@ -64,11 +67,28 @@ async function buildRangeAdvice(telemetry: LiveBikeTelemetry): Promise<string> {
   }
 }
 
+/**
+ * Navigation-Kontext für Sprachdialog und Co-Pilot.
+ */
+export interface NavigationContext {
+  currentStreet?: string;
+  nextTurn?: TurnManeuver;
+  routeProgressPct?: number;
+}
+
+const TURN_COOLDOWN_MS = 30 * 1000; // gleiche Turn-Ansage nicht innerhalb von 30 s wiederholen
+
+function turnAnnouncementKey(maneuver: TurnManeuver): string {
+  return `${maneuver.action}-${maneuver.distanceM}-${maneuver.nextStreet}`;
+}
+
 export const CoPilotService = {
   start(): void {
     isActive = true;
     lastWarnAt = {};
     lastGeminiAt = 0;
+    lastTurnAnnouncedAt = 0;
+    lastAnnouncedTurnKey = '';
   },
 
   stop(): void {
@@ -106,5 +126,43 @@ export const CoPilotService = {
         speak(`Reichweite noch circa ${Math.round(telemetry.rangeRemainingKm)} Kilometer. Nächste Ladestation prüfen.`);
       }
     }
+  },
+
+  /**
+   * KI-generierte Turn-by-Turn-Ansage für eine bevorstehende Abbiegung.
+   * Cooldown-gated, damit wiederholte Telemetrie-Updates nicht doppelt ansagen.
+   */
+  async onTurnApproaching(maneuver: TurnManeuver, telemetry: LiveBikeTelemetry): Promise<void> {
+    if (!isActive) return;
+    const now = Date.now();
+    const key = turnAnnouncementKey(maneuver);
+    if (key === lastAnnouncedTurnKey && now - lastTurnAnnouncedAt < TURN_COOLDOWN_MS) return;
+
+    const text = await AiGatewayService.generateTurnByTurnDescription({
+      maneuver: { action: maneuver.action, distanceM: maneuver.distanceM, instruction: maneuver.instruction, nextStreet: maneuver.nextStreet },
+      batteryPercent: telemetry.batteryPercent,
+      speedKmH: telemetry.speedKmH,
+    });
+
+    lastTurnAnnouncedAt = now;
+    lastAnnouncedTurnKey = key;
+    speak(text);
+  },
+
+  /**
+   * Sprachdialog mit Navigation-Kontext (aktuelle Straße, nächste Abbiegung, Fortschritt).
+   */
+  async voiceDialogueWithNavigation(userQuery: string, telemetry: LiveBikeTelemetry, context: NavigationContext = {}): Promise<string> {
+    const reply = await AiGatewayService.voiceDialogue({
+      userQuery,
+      batteryPercent: telemetry.batteryPercent,
+      speedKmH: telemetry.speedKmH,
+      currentStreet: context.currentStreet,
+      nextTurnDistanceM: context.nextTurn?.distanceM,
+      nextTurnInstruction: context.nextTurn?.instruction,
+      routeProgressPct: context.routeProgressPct,
+    });
+    speak(reply);
+    return reply;
   },
 };

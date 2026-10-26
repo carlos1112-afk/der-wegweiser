@@ -35,6 +35,7 @@ export interface CanonicalAiRequest {
   userPrompt: string;
   temperature?: number;
   maxTokens?: number;
+  modelId?: string;
 }
 
 export interface CanonicalAiResponse {
@@ -76,7 +77,7 @@ export class FirebaseAiLogicAdapter implements AiProviderAdapter {
 
     const { getAI, getGenerativeModel, GoogleAIBackend, VertexAIBackend } = await import('firebase/ai');
     const env = aiEnv();
-    const modelName = env.VITE_AI_MODEL || DEFAULT_FIREBASE_AI_MODEL;
+    const modelName = request.modelId ?? (env.VITE_AI_MODEL || DEFAULT_FIREBASE_AI_MODEL);
     const backend = env.VITE_AI_BACKEND === 'vertex'
       ? new VertexAIBackend(env.VITE_AI_VERTEX_LOCATION || DEFAULT_VERTEX_LOCATION)
       : new GoogleAIBackend();
@@ -301,6 +302,9 @@ export interface VoiceDialogueParams {
   batteryPercent: number | null;
   speedKmH: number;
   currentStreet?: string;
+  nextTurnDistanceM?: number;
+  nextTurnInstruction?: string;
+  routeProgressPct?: number;
 }
 
 export interface SummarizeRideParams {
@@ -324,6 +328,12 @@ export interface InterpretWeatherParams {
   windSpeedKmH: number;
   gustSpeedKmH: number;
   precipitationMm: number;
+}
+
+export interface TurnAnnouncementParams {
+  maneuver: { action: string; distanceM: number; instruction: string; nextStreet: string };
+  batteryPercent: number | null;
+  speedKmH: number;
 }
 
 export class AiGatewayService {
@@ -395,7 +405,14 @@ export class AiGatewayService {
   // ===========================================================================
   public static async voiceDialogue(params: VoiceDialogueParams): Promise<string> {
     const batteryText = params.batteryPercent !== null ? `${params.batteryPercent}%` : 'unbekannt (kein BLE Akkustand)';
-    const prompt = `Nutzer fragt: "${params.userQuery}". Status: E-Bike Akku ${batteryText}, Tempo ${params.speedKmH} km/h, Ort: ${params.currentStreet || 'Unterwegs'}. Antworte kurz, prägnant und fahrradtauglich in maximal 1 Satz.`;
+    const navContext = [
+      params.currentStreet ? `Aktuelle Straße: ${params.currentStreet}` : null,
+      params.nextTurnInstruction && params.nextTurnDistanceM !== undefined
+        ? `Nächste Abbiegung: ${params.nextTurnInstruction} in ${params.nextTurnDistanceM} Metern`
+        : null,
+      params.routeProgressPct !== undefined ? `Tourfortschritt: ${Math.round(params.routeProgressPct)} Prozent` : null,
+    ].filter((x): x is string => !!x).join('; ');
+    const prompt = `Nutzer fragt: "${params.userQuery}". Status: E-Bike Akku ${batteryText}, Tempo ${params.speedKmH} km/h.${navContext ? ' ' + navContext : ''} Antworte kurz, prägnant und fahrradtauglich in maximal 1 Satz.`;
 
     try {
       if (this.activeProvider !== 'heuristic_offline') {
@@ -422,6 +439,31 @@ export class AiGatewayService {
       return `Du befindest dich auf: ${params.currentStreet || 'deiner Route'}.`;
     }
     return `Alles klar, ich behalte deine Tour und deinen Akku im Auge.`;
+  }
+
+  // ===========================================================================
+  // FÄHIGKEIT 6: KI-generierte Turn-by-Turn-Ansagen (generateTurnByTurnDescription)
+  // ===========================================================================
+  public static async generateTurnByTurnDescription(params: TurnAnnouncementParams): Promise<string> {
+    const { maneuver, batteryPercent, speedKmH } = params;
+    const batteryText = batteryPercent !== null ? `${batteryPercent}%` : 'unbekannt';
+    const prompt = `Du bist ein E-Bike-Navigations-Co-Pilot. Generiere eine kurze, klare, fahrradtaugliche Durchsage (maximal 2 Sätze auf Deutsch) für die nächste Abbiegung.
+Manöver: ${maneuver.instruction} in ${maneuver.distanceM} Metern, nächste Straße: ${maneuver.nextStreet || 'unbekannt'}. Tempo: ${speedKmH} km/h, Akku: ${batteryText}.
+Sprich sicherheitsorientiert, präzise und ohne Füllwörter.`;
+
+    try {
+      if (this.activeProvider !== 'heuristic_offline') {
+        const res = await this.dispatch({
+          systemPrompt: 'Du bist der Sprachassistent am Fahrradlenker.',
+          userPrompt: prompt,
+        });
+        if (res.text) return res.text;
+      }
+    } catch (e) {
+      console.warn('⚠️ [AI Gateway] generateTurnByTurnDescription Fallback:', e);
+    }
+
+    return `In ${maneuver.distanceM} Metern ${maneuver.instruction}, dann ${maneuver.nextStreet ? `auf ${maneuver.nextStreet} weiterfahren` : 'der Straßenverlauf folgen'}.`;
   }
 
   // ===========================================================================

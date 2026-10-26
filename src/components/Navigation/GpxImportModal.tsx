@@ -3,6 +3,7 @@ import { UploadCloud, FileText, AlertTriangle, Sparkles, X } from 'lucide-react'
 import { GpxImportService } from '../../services/gpxImportService';
 import { SoundFxService } from '../../services/soundFxService';
 import type { Route } from '../../types/navigation';
+import { gpxFileSchema } from '../../utils/validation';
 import confetti from 'canvas-confetti';
 
 interface GpxImportModalProps {
@@ -25,8 +26,10 @@ export const GpxImportModal: React.FC<GpxImportModalProps> = ({
 
   const handleFileProcess = async (file: File) => {
     setErrorMsg(null);
-    if (!file.name.toLowerCase().endsWith('.gpx')) {
-      setErrorMsg('Bitte wähle eine gültige .gpx Datei aus.');
+
+    const parsedFile = gpxFileSchema.safeParse({ name: file.name, size: file.size });
+    if (!parsedFile.success) {
+      setErrorMsg(parsedFile.error.issues?.[0]?.message || 'Ungültige Datei.');
       SoundFxService.playWarningTone();
       return;
     }

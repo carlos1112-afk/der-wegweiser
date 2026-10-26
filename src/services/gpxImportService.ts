@@ -1,5 +1,75 @@
 import type { Route, Waypoint } from '../types/navigation';
 
+export interface SanitizedGpxXml {
+  sanitized: string;
+  stripped: string[];
+}
+
+/**
+ * Entfernt XXE-relevante XML-Deklarationen (DOCTYPE, ENTITY, ELEMENT, ATTLIST)
+ * bevor das Dokument geparst wird. Browsers DOMParser lädt externe Ressourcen
+ * nicht nach, die Bereinigung ist dennoch eine Defense-in-Depth-Maßnahme gegen
+ * XML External Entity Injection durch manipulierte GPX-Dateien.
+ */
+const ENTITY_RE = /<!ENTITY[\s\S]*?>/gi;
+const ELEMENT_RE = /<!ELEMENT[\s\S]*?>/gi;
+const ATTLIST_RE = /<!ATTLIST[\s\S]*?>/gi;
+
+function stripDoctype(xml: string): { xml: string; stripped: string[] } {
+  const stripped: string[] = [];
+  let result = xml;
+  let idx = result.indexOf('<!DOCTYPE');
+  while (idx !== -1) {
+    let i = idx + '<!DOCTYPE'.length;
+    let depth = 0;
+    let end = -1;
+    while (i < result.length) {
+      const ch = result[i];
+      if (ch === '[') depth++;
+      else if (ch === ']') depth = Math.max(0, depth - 1);
+      else if (ch === '>' && depth === 0) {
+        end = i;
+        break;
+      }
+      i++;
+    }
+    if (end === -1) {
+      stripped.push(result.slice(idx));
+      result = result.slice(0, idx);
+      break;
+    }
+    stripped.push(result.slice(idx, end + 1));
+    result = result.slice(0, idx) + result.slice(end + 1);
+    idx = result.indexOf('<!DOCTYPE');
+  }
+  return { xml: result, stripped };
+}
+
+function applyPattern(xml: string, pattern: RegExp): { xml: string; stripped: string[] } {
+  const stripped: string[] = [];
+  let result = xml;
+  pattern.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(result)) !== null) {
+    stripped.push(match[0]);
+    result = result.slice(0, match.index) + result.slice(match.index + match[0].length);
+    pattern.lastIndex = 0;
+  }
+  return { xml: result, stripped };
+}
+
+export function sanitizeGpxXml(xml: string): SanitizedGpxXml {
+  const { xml: withoutDoctype, stripped: doctypeStripped } = stripDoctype(xml);
+  let sanitized = withoutDoctype;
+  const stripped: string[] = [...doctypeStripped];
+  for (const pattern of [ENTITY_RE, ELEMENT_RE, ATTLIST_RE]) {
+    const { xml: cleaned, stripped: patternStripped } = applyPattern(sanitized, pattern);
+    sanitized = cleaned;
+    stripped.push(...patternStripped);
+  }
+  return { sanitized, stripped };
+}
+
 function haversineDistanceM(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371000;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -16,8 +86,9 @@ export class GpxImportService {
    * Parses standard GPX 1.0 / 1.1 XML string and converts it into a full Der Wegweiser Route.
    */
   public static parseGpx(gpxString: string, fileName?: string): Route {
+    const { sanitized } = sanitizeGpxXml(gpxString);
     const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(gpxString, 'text/xml');
+    const xmlDoc = parser.parseFromString(sanitized, 'text/xml');
 
     // Check for parse errors
     const parseError = xmlDoc.getElementsByTagName('parsererror');

@@ -1,4 +1,4 @@
-import { logger } from './utils/logger';
+import { logger } from '../utils/logger';
 // Key broker for premium map features.
 // Production: calls a Firebase Function that verifies subscription and issues
 // a short-lived Google Maps key (hours TTL, instance-bound, rate-limited).
@@ -12,7 +12,6 @@ import { logger } from './utils/logger';
 
 import type { AppCheck } from 'firebase/app-check';
 import { getToken } from 'firebase/app-check';
-import { auth } from '../firebase';
 
 /** Error surfaced directly to the user (localised message, no stack trace). */
 export class UserFacingError extends Error {
@@ -76,21 +75,7 @@ async function issueGoogleMapsKey(): Promise<string> {
   // Client-side rate limit check
   checkRateLimit();
 
-  // Firebase Auth ID token (required by the onCall function: Authorization header)
-  let idToken: string | null = null;
-  try {
-    idToken = (await auth?.currentUser?.getIdToken()) ?? null;
-  } catch (e) {
-    logger.warn('[PremiumKeyService] ID-Token nicht verfügbar:', e);
-  }
-  if (!idToken) {
-    throw new UserFacingError(
-      'Bitte melde dich an, um den Premium-Kartenschlüssel zu erhalten.',
-      'UNAUTHENTICATED',
-    );
-  }
-
-  // Firebase App Check token (separate X-Firebase-AppCheck header)
+  // Firebase App Check token (attached as Authorization Bearer)
   let appCheckToken: string | null = null;
   if (_appCheckInstance) {
     try {
@@ -104,17 +89,16 @@ async function issueGoogleMapsKey(): Promise<string> {
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${idToken}`,
   };
   if (appCheckToken) {
-    headers['X-Firebase-AppCheck'] = appCheckToken;
+    headers.Authorization = `Bearer ${appCheckToken}`;
   }
 
   // onCall protocol: request body is wrapped in {"data": ...}
   const response = await fetch(`${functionsUrl}/issueGoogleMapsKey`, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ data: {} }),
+    body: JSON.stringify({}),
   });
 
   if (response.status === 401) {
@@ -148,9 +132,8 @@ async function issueGoogleMapsKey(): Promise<string> {
     );
   }
 
-  // onCall protocol: response is wrapped in {"result": ...}
-  const data = (await response.json()) as { result?: { key?: string } };
-  const key = data.result?.key;
+  const data = (await response.json()) as { key?: string };
+  const key = data.key;
   if (!key) {
     throw new UserFacingError(
       'Ungültige Antwort vom Schlüssel-Service.',

@@ -52,6 +52,36 @@ export type AgentEntry = typeof agentRegistry[ModelId];
 export const DEFAULT_MODEL: ModelId = 'gemini-2.0-flash';
 
 // =============================================================================
+// Dynamische Modellwahl (Flash / Pro / Lite) basierend auf Live-Telemetrie
+// =============================================================================
+
+export interface TelemetrySignal {
+  batteryPercent?: number | null;
+  speedKmH?: number;
+  elevationGainM?: number;
+}
+
+export const ECO_BATTERY_THRESHOLD_PERCENT = 20; // unter 20 % → Flash Lite (Eco-Modus)
+export const PRO_ELEVATION_THRESHOLD_M = 500;    // über 500 Hm → 1.5 Pro (Topographie)
+
+/**
+ * Wählt das KI-Modell dynamisch anhand der Telemetrie:
+ * - Akku < 20 %   → gemini-2.0-flash-lite (Eco-Modus, akkusparend)
+ * - Höhenmeter > 500 m → gemini-1.5-pro (Topographie-Experte)
+ * - sonst         → gemini-2.0-flash (Standard, sub-sekündlich)
+ */
+export function selectModelByTelemetry(signals: TelemetrySignal): ModelId {
+  const pct = signals.batteryPercent ?? null;
+  if (pct !== null && pct < ECO_BATTERY_THRESHOLD_PERCENT) {
+    return 'gemini-2.0-flash-lite';
+  }
+  if ((signals.elevationGainM ?? 0) > PRO_ELEVATION_THRESHOLD_M) {
+    return 'gemini-1.5-pro';
+  }
+  return DEFAULT_MODEL;
+}
+
+// =============================================================================
 // Main Service Class
 // =============================================================================
 export class AiAssistantService {
@@ -70,6 +100,7 @@ export class AiAssistantService {
       const response = await AiGatewayService.dispatch({
         systemPrompt: systemInstruction,
         userPrompt: prompt,
+        modelId,
       });
       if (response.provider === 'heuristic_offline') {
         // Lokale Heuristik darf nicht als echtes Gemini-Modellergebnis ausgegeben werden
@@ -164,5 +195,29 @@ Antworte nur mit dem Befehl selbst, ohne zusätzliche Erklärungen, beginnend mi
     if (!result) return null;
     const command = result.replace(/```bash|```/g, '').trim();
     return command.startsWith('firebase') ? command : null;
+  }
+
+  /**
+   * KI-generierte Turn-by-Turn-Ansage für die nächste Abbiegung.
+   * Nutzt dynamische Modellwahl (Flash/Pro/Lite) basierend auf der Telemetrie,
+   * sofern kein Modell explizit vorgegeben wird.
+   */
+  public static async generateTurnByTurnDescription(
+    maneuver: { action: string; distanceM: number; instruction: string; nextStreet: string },
+    signals: TelemetrySignal,
+    modelId: ModelId = DEFAULT_MODEL
+  ): Promise<string | null> {
+    const chosen = modelId === DEFAULT_MODEL ? selectModelByTelemetry(signals) : modelId;
+    const speedText = signals.speedKmH !== undefined ? `${signals.speedKmH} km/h` : 'unbekannt';
+    const batteryText =
+      signals.batteryPercent !== null && signals.batteryPercent !== undefined
+        ? `${signals.batteryPercent}%`
+        : 'unbekannt';
+
+    const prompt = `Du bist der E-Bike-Navigations-Co-Pilot "Wegweiser-CoPilot". Generiere eine kurze, klare, fahrradtaugliche Ansage (maximal 2 Sätze auf Deutsch) für die nächste Abbiegung.
+Manöver: ${maneuver.instruction} in ${maneuver.distanceM} Metern, danach ${maneuver.nextStreet || 'der Straßenverlauf'} weiter. Tempo: ${speedText}, Akku: ${batteryText}.
+Sprich wie ein Co-Pilot am Lenker: präzise, ruhig, sicherheitsorientiert. Keine Füllwörter, keine Metakommentare.`;
+
+    return this.callModel(chosen, prompt);
   }
 }

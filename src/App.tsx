@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import { SearchInput } from './components/Search/SearchInput';
 import type { SearchResult } from './components/Search/SearchInput';
 import { MapView } from './components/Map/MapView';
@@ -87,6 +88,7 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
 }
 
 export function App() {
+  const { t } = useTranslation();
   const { isMainMenuOpen, setMainMenuOpen, isSearchActive, setSearchActive } = useUILayout();
 
   // Modal States (Declared first to supply active modal context to lifecycle)

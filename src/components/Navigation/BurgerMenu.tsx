@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   X, Route, UploadCloud, Play, Sun, Moon, Volume2,
   BarChart3, Camera, Gamepad2, Sparkles, ShieldCheck, Bluetooth
@@ -37,6 +38,7 @@ export const BurgerMenu: React.FC<BurgerMenuProps> = ({
   onOpenBle,
   isBleConnected = false,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -104,7 +106,7 @@ export const BurgerMenu: React.FC<BurgerMenuProps> = ({
           )}
 
           {/* Settings & Tools */}
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '16px', marginBottom: '4px' }}>Einstellungen & Tools</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '16px', marginBottom: '4px' }}>{t('menu.settings')} & Tools</div>
           
           <button className="btn-cyberpunk" style={{ justifyContent: 'flex-start' }} onClick={() => { onClose(); onToggleSunlightMode(); }}>
             {isSunlightMode ? <Moon size={18} /> : <Sun size={18} />} Sonnenlicht Modus

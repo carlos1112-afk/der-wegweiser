@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Mic, Camera, Plus } from 'lucide-react';
 
 interface BottomActionBarProps {
@@ -14,6 +15,7 @@ export const BottomActionBar: React.FC<BottomActionBarProps> = ({
   onOpenSearch,
   isNavigating
 }) => {
+  const { t } = useTranslation();
   const [isFocused, setIsFocused] = useState(false);
 
   // If navigating, we might want to hide it or keep it depending on requirements.

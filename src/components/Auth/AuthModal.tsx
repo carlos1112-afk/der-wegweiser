@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, ShieldCheck, Sparkles, LogOut, CheckCircle2, User as UserIcon, AlertCircle } from 'lucide-react';
 import { AuthService } from '../../services/authService';
 import { SoundFxService } from '../../services/soundFxService';
@@ -10,6 +11,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<User | null>(AuthService.getCurrentUser());
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

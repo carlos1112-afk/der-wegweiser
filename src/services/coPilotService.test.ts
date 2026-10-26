@@ -4,6 +4,7 @@
  */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import type { LiveBikeTelemetry } from '../types/navigation';
+import type { TurnManeuver } from '../hooks/useRouteTracker';
 
 vi.mock('./voiceGuidanceService', () => ({
   VoiceGuidanceService: { speak: vi.fn() },
@@ -15,6 +16,10 @@ vi.mock('./ai/aiGatewayService', () => ({
       riskLevel: 'caution',
       advice: 'Eco-Modus empfohlen.',
     }),
+    generateTurnByTurnDescription: vi.fn().mockResolvedValue(
+      'In 100 Metern rechts abbiegen, dann die Hauptstraße entlang.'
+    ),
+    voiceDialogue: vi.fn().mockResolvedValue('Alles klar, ich habe die Route im Blick.'),
   },
 }));
 
@@ -220,5 +225,90 @@ describe('CoPilotService — Gemini rate limit (1/60s)', () => {
     // battery_10 fires (fresh level) → Gemini rate expired → analyzeRange called
     await CoPilotService.onTelemetryUpdate({ ...BASE_TELEMETRY, batteryPercent: 10 });
     expect(AiGatewayService.analyzeRange).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('CoPilotService — KI-Navigation (Phase D)', () => {
+  it('spricht KI-generierte Turn-by-Turn-Ansage bei bevorstehender Abbiegung', async () => {
+    await CoPilotService.onTurnApproaching(
+      { action: 'turn-right', distanceM: 100, instruction: 'Rechts abbiegen', nextStreet: 'Hauptstraße' } as TurnManeuver,
+      { ...BASE_TELEMETRY, batteryPercent: 55, speedKmH: 18 }
+    );
+    expect(VoiceGuidanceService.speak).toHaveBeenCalledTimes(1);
+    const msg: string = (VoiceGuidanceService.speak as any).mock.calls[0][0];
+    expect(msg).toBe('In 100 Metern rechts abbiegen, dann die Hauptstraße entlang.');
+    expect(AiGatewayService.generateTurnByTurnDescription).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maneuver: expect.objectContaining({ distanceM: 100, instruction: 'Rechts abbiegen' }),
+        batteryPercent: 55,
+        speedKmH: 18,
+      })
+    );
+  });
+
+  it('spricht nicht, wenn der CoPilot gestoppt ist', async () => {
+    CoPilotService.stop();
+    await CoPilotService.onTurnApproaching(
+      { action: 'turn-left', distanceM: 50, instruction: 'Links abbiegen', nextStreet: 'Weg' } as TurnManeuver,
+      BASE_TELEMETRY
+    );
+    expect(VoiceGuidanceService.speak).not.toHaveBeenCalled();
+    expect(AiGatewayService.generateTurnByTurnDescription).not.toHaveBeenCalled();
+  });
+
+  it('wiederholt die gleiche Turn-Ansage nicht innerhalb des 30-s-Cooldowns', async () => {
+    const maneuver = { action: 'turn-right', distanceM: 100, instruction: 'Rechts abbiegen', nextStreet: 'Hauptstraße' } as TurnManeuver;
+    await CoPilotService.onTurnApproaching(maneuver, BASE_TELEMETRY);
+    await CoPilotService.onTurnApproaching(maneuver, BASE_TELEMETRY);
+    expect(VoiceGuidanceService.speak).toHaveBeenCalledTimes(1);
+    expect(AiGatewayService.generateTurnByTurnDescription).toHaveBeenCalledTimes(1);
+  });
+
+  it('spricht die gleiche Turn-Ansage nach Ablauf des Cooldowns erneut', async () => {
+    const maneuver = { action: 'turn-right', distanceM: 100, instruction: 'Rechts abbiegen', nextStreet: 'Hauptstraße' } as TurnManeuver;
+    await CoPilotService.onTurnApproaching(maneuver, BASE_TELEMETRY);
+    vi.advanceTimersByTime(30_001);
+    await CoPilotService.onTurnApproaching(maneuver, BASE_TELEMETRY);
+    expect(VoiceGuidanceService.speak).toHaveBeenCalledTimes(2);
+    expect(AiGatewayService.generateTurnByTurnDescription).toHaveBeenCalledTimes(2);
+  });
+
+  it('behandelt verschiedene Manöver als unabhängig vom Cooldown', async () => {
+    await CoPilotService.onTurnApproaching(
+      { action: 'turn-right', distanceM: 100, instruction: 'Rechts abbiegen', nextStreet: 'A' } as TurnManeuver,
+      BASE_TELEMETRY
+    );
+    await CoPilotService.onTurnApproaching(
+      { action: 'turn-left', distanceM: 50, instruction: 'Links abbiegen', nextStreet: 'B' } as TurnManeuver,
+      BASE_TELEMETRY
+    );
+    expect(VoiceGuidanceService.speak).toHaveBeenCalledTimes(2);
+    expect(AiGatewayService.generateTurnByTurnDescription).toHaveBeenCalledTimes(2);
+  });
+
+  it('voiceDialogueWithNavigation übergibt den Navigation-Kontext an das Gateway und spricht die Antwort', async () => {
+    (AiGatewayService.voiceDialogue as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
+      'Du befindest dich auf der Hauptstraße.'
+    );
+    const reply = await CoPilotService.voiceDialogueWithNavigation(
+      'Wo bin ich?',
+      { ...BASE_TELEMETRY, batteryPercent: 70, speedKmH: 20 },
+      {
+        currentStreet: 'Hauptstraße',
+        nextTurn: { action: 'turn-left', distanceM: 200, instruction: 'Links abbiegen', nextStreet: 'Seitenweg' } as TurnManeuver,
+        routeProgressPct: 40,
+      }
+    );
+    expect(reply).toBe('Du befindest dich auf der Hauptstraße.');
+    expect(AiGatewayService.voiceDialogue).toHaveBeenCalledWith({
+      userQuery: 'Wo bin ich?',
+      batteryPercent: 70,
+      speedKmH: 20,
+      currentStreet: 'Hauptstraße',
+      nextTurnDistanceM: 200,
+      nextTurnInstruction: 'Links abbiegen',
+      routeProgressPct: 40,
+    });
+    expect(VoiceGuidanceService.speak).toHaveBeenCalledWith('Du befindest dich auf der Hauptstraße.');
   });
 });
