@@ -180,7 +180,6 @@ interface ShopItem {
   category: 'voucher' | 'style' | 'perk';
   icon: string;
   description: string;
-  code?: string;
 }
 
 interface LeaderboardEntry {
@@ -253,7 +252,6 @@ const SHOP_ITEMS: ShopItem[] = [
     category: 'voucher',
     icon: '☕',
     description: 'Gültig bei über 45 Partner-Cafés und E-Bike Ladestationen entlang der Hauptradwege.',
-    code: 'WEGWEISER-KAFFEE-2026',
   },
   {
     id: 'cyber-skin',
@@ -262,7 +260,6 @@ const SHOP_ITEMS: ShopItem[] = [
     category: 'style',
     icon: '🗺️',
     description: 'Schaltet den ultra-kontrastreichen Cyber-Glow Vektorkartenstil für Nachtfahrten frei.',
-    code: 'SKIN-HOLO-CYBER',
   },
   {
     id: 'service-discount',
@@ -271,7 +268,6 @@ const SHOP_ITEMS: ShopItem[] = [
     category: 'voucher',
     icon: '🔧',
     description: '15% Preisnachlass auf Inspektion, Bremsenservice oder Akku-Check bei Partnerwerkstätten.',
-    code: 'WERKSTATT-15-PRO',
   },
   {
     id: 'super-cloud-pass',
@@ -280,7 +276,6 @@ const SHOP_ITEMS: ShopItem[] = [
     category: 'perk',
     icon: '⚡',
     description: 'Priorisierte KI-Routenberechnung mit Windwiderstands- und Steigungssimulation.',
-    code: 'VERTEX-VIP-BURST',
   },
 ];
 
@@ -604,16 +599,17 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     }
 
     try {
-      let returnedCode = item.code || 'REDEEMED-2026';
-
-      if (functions) {
-        const redeemVoucher = httpsCallable(functions, 'redeemVoucher');
-        const response = await redeemVoucher({ itemId: item.id });
-        const data = response.data as any;
-        if (data.success && data.code) {
-          returnedCode = data.code;
-        }
+      if (!functions) {
+        throw new Error('Redemption-Dienst ist nicht verfügbar.');
       }
+
+      const redeemVoucher = httpsCallable(functions, 'redeemVoucher');
+      const response = await redeemVoucher({ itemId: item.id });
+      const data = response.data as { success?: boolean; code?: unknown };
+      if (!data.success || typeof data.code !== 'string' || data.code.length === 0) {
+        throw new Error('Der Server hat keinen gültigen Redemption-Code zurückgegeben.');
+      }
+      const returnedCode = data.code;
 
       // Optimistically update client token UI state
       onAddTokens(-item.cost);
