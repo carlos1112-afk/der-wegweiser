@@ -38,7 +38,8 @@ function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number)
 
 export class GpxRecorderService {
   private static isRecording = false;
-  private static isPaused = false;
+  private static manualPaused = false;
+  private static autoPaused = false;
   private static elapsedSeconds = 0;
   private static totalDistanceM = 0;
   private static recordedPoints: GpxTrackPoint[] = [];
@@ -47,7 +48,8 @@ export class GpxRecorderService {
 
   public static startRecording(initialBatteryPercent: number | null = null): void {
     this.isRecording = true;
-    this.isPaused = false;
+    this.manualPaused = false;
+    this.autoPaused = false;
     this.elapsedSeconds = 0;
     this.totalDistanceM = 0;
     this.recordedPoints = [];
@@ -56,22 +58,32 @@ export class GpxRecorderService {
   }
 
   public static pauseRecording(): void {
-    this.isPaused = true;
+    this.manualPaused = true;
   }
 
   public static resumeRecording(): void {
-    this.isPaused = false;
+    this.manualPaused = false;
+    this.autoPaused = false;
+    this.idleSecondsCount = 0;
   }
 
   public static togglePause(): boolean {
-    this.isPaused = !this.isPaused;
-    return this.isPaused;
+    if (this.manualPaused || this.autoPaused) {
+      this.manualPaused = false;
+      this.autoPaused = false;
+      this.idleSecondsCount = 0;
+    } else {
+      this.manualPaused = true;
+    }
+    return this.manualPaused || this.autoPaused;
   }
 
   public static getStatus() {
     return {
       isRecording: this.isRecording,
-      isPaused: this.isPaused,
+      isPaused: this.manualPaused || this.autoPaused,
+      isManualPaused: this.manualPaused,
+      isAutoPaused: this.autoPaused,
       elapsedSeconds: this.elapsedSeconds,
       distanceKm: +(this.totalDistanceM / 1000).toFixed(2),
       pointsCount: this.recordedPoints.length,
@@ -94,17 +106,13 @@ export class GpxRecorderService {
     // Auto-Pause check: If standing still (< 1.5 km/h) for > 5 seconds
     if (speedKmH < 1.5) {
       this.idleSecondsCount += 1;
-      if (this.idleSecondsCount >= 5 && !this.isPaused) {
-        this.isPaused = true;
-      }
+      if (this.idleSecondsCount >= 5) this.autoPaused = true;
     } else {
       this.idleSecondsCount = 0;
-      if (this.isPaused) {
-        this.isPaused = false;
-      }
+      this.autoPaused = false;
     }
 
-    if (this.isPaused) return;
+    if (this.manualPaused || this.autoPaused) return;
 
     this.elapsedSeconds += 1;
 
@@ -137,7 +145,8 @@ export class GpxRecorderService {
    */
   public static stopRecording(): RideSummary {
     this.isRecording = false;
-    this.isPaused = false;
+    this.manualPaused = false;
+    this.autoPaused = false;
 
     const distanceKm = +(this.totalDistanceM / 1000).toFixed(2);
     const durationSeconds = this.elapsedSeconds;
