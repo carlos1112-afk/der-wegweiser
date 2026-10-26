@@ -52,19 +52,55 @@ jobs:
     steps:
       - name: Resolve Execution Inputs
         id: resolve-params
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_PHASE: ${{ github.event.inputs.phase }}
+          DISPATCH_MODEL: ${{ github.event.inputs.model }}
+          DISPATCH_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            PHASE="${{ github.event.inputs.phase }}"
-            MODEL_REQ="${{ github.event.inputs.model }}"
-            DRY_RUN="${{ github.event.inputs.dry_run }}"
+          set -euo pipefail
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            PHASE="$DISPATCH_PHASE"
+            MODEL_REQ="${DISPATCH_MODEL:-auto}"
+            DRY_RUN="${DISPATCH_DRY_RUN:-false}"
+
+            case "$PHASE" in
+              bundle-optimization|lint-and-tokens|backend-functions|native-android) ;;
+              *)
+                echo "Unsupported phase: $PHASE" >&2
+                exit 1
+                ;;
+            esac
           else
-            # Extract phase from comment: '/claude finalize <phase>'
-            COMMENT="${{ github.event.comment.body }}"
-            PHASE=$(echo "$COMMENT" | awk '{print $3}')
-            PHASE="${PHASE:-bundle-optimization}"
+            # Accept only the complete, fixed command: '/claude finalize <phase>'.
+            # Keep the comment in an environment variable so its contents are
+            # data, never part of the generated shell source.
+            if [[ ! "$COMMENT_BODY" =~ ^/claude[[:space:]]+finalize[[:space:]]+(bundle-optimization|lint-and-tokens|backend-functions|native-android)[[:space:]]*$ ]]; then
+              echo "Invalid finalize command; expected /claude finalize <supported-phase>." >&2
+              exit 1
+            fi
+            PHASE="${BASH_REMATCH[1]}"
             MODEL_REQ="auto"
             DRY_RUN="false"
           fi
+
+          case "$MODEL_REQ" in
+            auto|claude-3-7-sonnet-20250219|claude-3-5-haiku-20241022) ;;
+            *)
+              echo "Unsupported model: $MODEL_REQ" >&2
+              exit 1
+              ;;
+          esac
+
+          case "$DRY_RUN" in
+            true|false) ;;
+            *)
+              echo "Invalid dry_run value: $DRY_RUN" >&2
+              exit 1
+              ;;
+          esac
 
           # Routing: Haiku for lint/tokens, Sonnet 3.7 with Thinking for Architecture/Backend/Android
           if [ "$MODEL_REQ" = "auto" ]; then
@@ -77,13 +113,31 @@ jobs:
             ACTIVE_MODEL="$MODEL_REQ"
           fi
 
-          echo "phase=$PHASE" >> $GITHUB_OUTPUT
-          echo "model=$ACTIVE_MODEL" >> $GITHUB_OUTPUT
-          echo "dry_run=$DRY_RUN" >> $GITHUB_OUTPUT
+          printf '%s\n' "phase=$PHASE" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "model=$ACTIVE_MODEL" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
 
           echo "🚀 V2 Finalization Phase: $PHASE"
           echo "🧠 Claude Model: $ACTIVE_MODEL"
           echo "🧪 Dry Run: $DRY_RUN"
+
+      - name: Verify Comment Author Repository Permission
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+        run: |
+          set -euo pipefail
+          permission="$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${COMMENT_AUTHOR}/permission" --jq '.permission')"
+          case "$permission" in
+            admin|maintain|push)
+              echo "Comment author has repository permission: $permission"
+              ;;
+            *)
+              echo "Comment author lacks write-level repository permission (found: $permission)." >&2
+              exit 1
+              ;;
+          esac
 
       - name: Checkout Code
         uses: actions/checkout@v4
