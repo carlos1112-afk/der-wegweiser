@@ -35,6 +35,7 @@ const ACCOUNT_DATA_COLLECTIONS = [
   'routes',
   'charging_stations',
   'charging_stations_v2',
+  'points_of_interest',
   'scout_reports',
   'station_reviews',
 ];
