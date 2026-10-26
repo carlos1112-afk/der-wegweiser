@@ -1,107 +1,58 @@
-import { auth, db, storage } from '../firebase';
-import { deleteUser } from 'firebase/auth';
-import { doc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { ref, listAll, deleteObject } from 'firebase/storage';
+import { auth, functions } from '../firebase';
+import { httpsCallable } from 'firebase/functions';
+
+interface DeleteAccountResult {
+  success: boolean;
+  status: 'completed';
+  jobId: string;
+}
 
 export class AccountDeletionService {
   /**
-   * Permanently deletes the user's account and all associated data.
-   * 1. Firestore collections (users, user_tokens, user_preferences, user_memory_patterns, routes, charging_stations, scout_reports)
-   * 2. Cloud Storage (user uploads and photos)
-   * 3. Firebase Authentication account (auth.currentUser) - executed ONLY AFTER cloud data wipe
-   * 4. Local device storage (localStorage, sessionStorage, IndexedDB)
+   * Deletes the account only after the privileged server workflow confirms that
+   * all user-owned cloud data and uploads were removed. Suspended users are
+   * handled by the Admin SDK on the server, not by client Firestore rules.
    */
   public static async deleteAccount(): Promise<void> {
     const currentUser = auth.currentUser;
 
     if (currentUser) {
-      const uid = currentUser.uid;
-
-      // ── 1. Delete Cloud Firestore documents across ALL collections ──
-      try {
-        // Direct UID documents
-        await deleteDoc(doc(db, 'users', uid)).catch(() => {});
-        await deleteDoc(doc(db, 'user_tokens', uid)).catch(() => {});
-        await deleteDoc(doc(db, 'user_preferences', uid)).catch(() => {});
-        await deleteDoc(doc(db, 'user_memory_patterns', uid)).catch(() => {});
-
-        // Query-based documents created by this user.
-        //
-        // Hinweis: Je nach Schreibpfad setzt die App unterschiedliche
-        // Eigentümerfelder — `userId` (dataRepository.saveRoute) bzw.
-        // `createdByUserId` (ScannerModal). Die vorherige Fassung löschte
-        // jeweils nur nach `createdByUserId` und ließ daher gespeicherte
-        // Routen sowie Bewertungen des Nutzers dauerhaft zurück.
-        const deleteByQuery = async (collName: string, fieldName: string) => {
-          try {
-            const q = query(collection(db, collName), where(fieldName, '==', uid));
-            const snapshot = await getDocs(q);
-            await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
-          } catch (e) {
-            // Fehlender Index oder nicht existente Collection ist kein Fehler.
-            console.warn(`[AccountDeletionService] Query deletion warning on ${collName}.${fieldName}:`, e);
-          }
-        };
-
-        const collections = [
-          'routes',
-          'charging_stations',
-          'charging_stations_v2',
-          'scout_reports',
-          'station_reviews',
-        ];
-
-        await Promise.all(
-          collections.flatMap((coll) => [
-            deleteByQuery(coll, 'createdByUserId'),
-            deleteByQuery(coll, 'userId'),
-          ])
-        );
-
-        // ── 2. Delete Cloud Storage uploads ──
-        try {
-          const userStorageRef = ref(storage, `users/${uid}`);
-          const listRes = await listAll(userStorageRef);
-          await Promise.all(listRes.items.map((itemRef) => deleteObject(itemRef)));
-        } catch (e) {
-          // Ignore if directory doesn't exist
-        }
-      } catch (e) {
-        console.warn('[AccountDeletionService] Cloud data deletion warning:', e);
+      if (!functions) {
+        throw new Error('Kontolöschung ist derzeit nicht verfügbar. Bitte versuche es später erneut.');
       }
 
-      // ── 3. Delete Firebase Authentication account (ONLY AFTER cloud data is wiped) ──
       try {
-        await deleteUser(currentUser);
-      } catch (e: any) {
-        console.warn('[AccountDeletionService] Auth deletion error (requires re-auth if stale):', e);
-        if (e.code === 'auth/requires-recent-login') {
-          throw new Error('Bitte melde dich kurz erneut an, um die Kontolöschung aus Sicherheitsgründen zu bestätigen.');
+        const deleteAccountData = httpsCallable<unknown, DeleteAccountResult>(functions, 'deleteAccountData');
+        const result = await deleteAccountData({});
+        if (!result.data?.success || result.data.status !== 'completed') {
+          throw new Error('Die Kontodaten konnten noch nicht vollständig gelöscht werden.');
         }
+      } catch (error: any) {
+        if (error?.code === 'functions/unauthenticated') {
+          throw new Error('Bitte melde dich erneut an, um die Kontolöschung zu bestätigen.');
+        }
+        if (error instanceof Error && error.message.includes('nicht vollständig')) throw error;
+        throw new Error('Die Kontolöschung konnte nicht abgeschlossen werden. Bitte versuche es erneut.');
       }
     }
 
-    // ── 4. Clear all local storage & caches ──
+    await this.clearLocalData();
+  }
+
+  private static async clearLocalData(): Promise<void> {
     try {
       localStorage.clear();
       sessionStorage.clear();
 
-      // CacheStorage: Die Kartenkacheln des Routen-Korridors (Cache-Name
-      // 'der-wegweiser-map-tiles') werden automatisch aus dem aktuellen
-      // Routenverlauf befüllt und geben den gefahrenen Weg preis. Sie waren
-      // von der Kontolöschung bislang nicht erfasst.
-      if ('caches' in window) {
-        const cacheNames = await caches.keys();
-        await Promise.all(
-          cacheNames.map((name) => caches.delete(name))
-        );
+      if (typeof window !== 'undefined' && 'caches' in window && window.caches) {
+        const cacheStorage = window.caches;
+        const cacheNames = await cacheStorage.keys();
+        await Promise.all(cacheNames.map((name) => cacheStorage.delete(name)));
       }
 
       if ('indexedDB' in window) {
         const dbs = await window.indexedDB.databases?.();
         if (dbs) {
-          // Bislang fire-and-forget: `localDataDeleted` wurde gesetzt, bevor
-          // die Löschung abgeschlossen (oder blockiert) war.
           await Promise.all(
             dbs
               .filter((dbInfo) => !!dbInfo.name)
@@ -111,16 +62,14 @@ export class AccountDeletionService {
                     const req = window.indexedDB.deleteDatabase(dbInfo.name!);
                     req.onsuccess = () => resolve();
                     req.onerror = () => resolve();
-                    // Blockierte Verbindung (offene Tabs) darf die Meldung
-                    // "erfolgreich gelöscht" nicht blockieren.
                     req.onblocked = () => resolve();
                   })
               )
           );
         }
       }
-    } catch (e) {
-      console.warn('[AccountDeletionService] Local storage clear error:', e);
+    } catch (error) {
+      console.warn('[AccountDeletionService] Local storage clear error:', error);
     }
   }
 }

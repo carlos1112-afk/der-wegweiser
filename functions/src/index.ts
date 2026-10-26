@@ -1,5 +1,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getFirestore, FieldValue, type DocumentReference } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
+import { getStorage } from "firebase-admin/storage";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
@@ -28,6 +30,84 @@ const SHOP_ITEMS: Record<string, { cost: number; code: string; category: string 
     code: 'VERTEX-VIP-BURST',
   },
 };
+
+const ACCOUNT_DATA_COLLECTIONS = [
+  'routes',
+  'charging_stations',
+  'charging_stations_v2',
+  'scout_reports',
+  'station_reviews',
+];
+
+async function deleteAccountDocuments(uid: string): Promise<void> {
+  const documentRefs = new Map<string, DocumentReference>();
+  for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns']) {
+    documentRefs.set(`${path}/${uid}`, db.collection(path).doc(uid));
+  }
+
+  for (const collectionName of ACCOUNT_DATA_COLLECTIONS) {
+    for (const ownerField of ['createdByUserId', 'userId']) {
+      const snapshot = await db.collection(collectionName).where(ownerField, '==', uid).get();
+      snapshot.docs.forEach((document) => documentRefs.set(document.ref.path, document.ref));
+    }
+  }
+
+  const refs = [...documentRefs.values()];
+  for (let offset = 0; offset < refs.length; offset += 400) {
+    const batch = db.batch();
+    refs.slice(offset, offset + 400).forEach((documentRef) => batch.delete(documentRef));
+    await batch.commit();
+  }
+}
+
+export const deleteAccountData = onCall({ region: "europe-west3" }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "User must be authenticated to delete an account.");
+  }
+
+  const uid = request.auth.uid;
+  const jobRef = db.collection('account_deletion_jobs').doc(uid);
+  const existingJob = await jobRef.get();
+  if (existingJob.data()?.status === 'completed') {
+    return { success: true, status: 'completed', jobId: uid };
+  }
+
+  await jobRef.set({
+    uid,
+    status: 'running',
+    startedAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  }, { merge: true });
+
+  try {
+    await deleteAccountDocuments(uid);
+    const bucket = getStorage().bucket();
+    const [files] = await bucket.getFiles({ prefix: `users/${uid}/` });
+    await Promise.all(files.map((file) => file.delete()));
+
+    try {
+      await getAuth().deleteUser(uid);
+    } catch (error: any) {
+      if (error?.code !== 'auth/user-not-found') throw error;
+    }
+
+    await jobRef.set({
+      uid,
+      status: 'completed',
+      completedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+    return { success: true, status: 'completed', jobId: uid };
+  } catch (error: any) {
+    await jobRef.set({
+      uid,
+      status: 'failed',
+      error: String(error?.message || error),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+    throw new HttpsError('failed-precondition', 'Account cleanup did not complete; retry the deletion.', { jobId: uid });
+  }
+});
 
 export const redeemVoucher = onCall({ region: "europe-west3" }, async (request) => {
   const { data, auth } = request;
