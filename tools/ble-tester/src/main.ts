@@ -30,6 +30,66 @@ let activeDeviceName: string = '';
 let packetCount = 0;
 let bleInitialized = false;
 let pollingInterval: any = null;
+let connectionSession = 0;
+const activeSubscriptions: Array<{ deviceId: string; serviceUuid: string; characteristicUuid: string }> = [];
+
+function isCurrentSession(sessionId: number, deviceId: string): boolean {
+  return connectionSession === sessionId && activeDeviceId === deviceId;
+}
+
+async function retireActiveConnection(): Promise<void> {
+  connectionSession += 1;
+  const previousDeviceId = activeDeviceId;
+  activeDeviceId = null;
+  activeDeviceName = '';
+
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+
+  const subscriptions = activeSubscriptions.splice(0);
+  await Promise.all(subscriptions.map(async ({ deviceId, serviceUuid, characteristicUuid }) => {
+    try {
+      await BleClient.stopNotifications(deviceId, serviceUuid, characteristicUuid);
+    } catch {
+      // The device may already have disconnected; the callback guard still retires the session.
+    }
+  }));
+
+  if (previousDeviceId) {
+    try {
+      await BleClient.disconnect(previousDeviceId);
+    } catch {
+      // The device may already have disconnected.
+    }
+  }
+}
+
+async function beginConnectionSession(): Promise<number> {
+  await retireActiveConnection();
+  return connectionSession;
+}
+
+async function startSessionNotifications(
+  sessionId: number,
+  deviceId: string,
+  serviceUuid: string,
+  characteristicUuid: string,
+  callback: (value: DataView) => void
+): Promise<boolean> {
+  await BleClient.startNotifications(deviceId, serviceUuid, characteristicUuid, callback);
+  if (!isCurrentSession(sessionId, deviceId)) {
+    try {
+      await BleClient.stopNotifications(deviceId, serviceUuid, characteristicUuid);
+    } catch {
+      // Best effort cleanup for a superseded connection.
+    }
+    return false;
+  }
+  activeSubscriptions.push({ deviceId, serviceUuid, characteristicUuid });
+  return true;
+}
 
 const app = document.getElementById('app')!;
 app.innerHTML = `
@@ -258,6 +318,7 @@ standardBleBtn.addEventListener('click', () => connectStandardBle());
 
 async function connectBafang() {
   if (!bleInitialized) await initBle();
+  const sessionId = await beginConnectionSession();
 
   bafangBtn.disabled = true;
   standardBleBtn.disabled = true;
@@ -289,6 +350,10 @@ async function connectBafang() {
       device = await BleClient.requestDevice({});
     }
 
+    if (connectionSession !== sessionId) {
+      await BleClient.disconnect(device.deviceId).catch(() => undefined);
+      return;
+    }
     activeDeviceId = device.deviceId;
     activeDeviceName = device.name || 'Bafang E-Bike';
     const subBrand = detectBafangSubBrand(device.name);
@@ -297,6 +362,7 @@ async function connectBafang() {
 
     setStatus(false, `Verbinde mit ${activeDeviceName} (${subBrand})...`);
     await BleClient.connect(device.deviceId, (disconnectedDeviceId) => {
+      if (!isCurrentSession(sessionId, device.deviceId)) return;
       log(`GATT-Verbindung getrennt von Gerät ${disconnectedDeviceId}`, 'err');
       setStatus(false, 'Verbindung getrennt.');
       activeDeviceId = null;
@@ -310,8 +376,9 @@ async function connectBafang() {
 
     // Packet handler for both Nordic UART and Classic Bafang UART
     const onPacket = (value: DataView) => {
+      if (!isCurrentSession(sessionId, device.deviceId)) return;
       packetCount += 1;
-      setStatus(true, `Verbunden: ${activeDeviceName} (${subBrand}) — ${packetCount} Pakete`);
+      setStatus(true, `Verbunden: ${device.name || 'Bafang E-Bike'} (${subBrand}) — ${packetCount} Pakete`);
       log(`RAW (${value.byteLength} B): ${bytesToHex(value)}`, 'raw');
 
       try {
@@ -350,7 +417,8 @@ async function connectBafang() {
 
           if (isDataChar && (c.properties.notify || c.properties.indicate)) {
             try {
-              await BleClient.startNotifications(device.deviceId, s.uuid, c.uuid, onPacket);
+              const started = await startSessionNotifications(sessionId, device.deviceId, s.uuid, c.uuid, onPacket);
+              if (!started) return;
               log(`✓ Telemetrie-Stream aktiv auf ${s.uuid.substring(0,8)}... / ${c.uuid.substring(0,8)}...`, 'ok');
               subscribed = true;
             } catch (notifyErr) {
@@ -366,14 +434,12 @@ async function connectBafang() {
     // 1. Nur als Fallback wenn Auto-Discovery keinen Notify-Kanal gefunden hat:
     if (!subscribed) {
       try {
-        await BleClient.startNotifications(device.deviceId, NORDIC_UART_SERVICE_UUID, NORDIC_TX_CHAR, onPacket);
-        subscribed = true;
+        subscribed = await startSessionNotifications(sessionId, device.deviceId, NORDIC_UART_SERVICE_UUID, NORDIC_TX_CHAR, onPacket);
       } catch {}
     }
     if (!subscribed) {
       try {
-        await BleClient.startNotifications(device.deviceId, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, onPacket);
-        subscribed = true;
+        subscribed = await startSessionNotifications(sessionId, device.deviceId, BAFANG_UART_SERVICE_UUID, BAFANG_TX_CHAR, onPacket);
       } catch {}
     }
 
@@ -412,22 +478,25 @@ async function connectBafang() {
       // Standard Bafang Telemetrie-Request: [0x11, 0x01, 0x12] oder Ping [0x11]
       const pingData = new DataView(new Uint8Array([0x11, 0x01, 0x12]).buffer);
       pollingInterval = setInterval(async () => {
-        if (!activeDeviceId) {
+        if (!isCurrentSession(sessionId, device.deviceId)) {
           if (pollingInterval) clearInterval(pollingInterval);
+          pollingInterval = null;
           return;
         }
         try {
-          await BleClient.writeWithoutResponse(activeDeviceId, writeServiceUuid!, writeCharUuid!, pingData);
+          await BleClient.writeWithoutResponse(device.deviceId, writeServiceUuid!, writeCharUuid!, pingData);
         } catch {
           try {
-            await BleClient.write(activeDeviceId, writeServiceUuid!, writeCharUuid!, pingData);
+            await BleClient.write(device.deviceId, writeServiceUuid!, writeCharUuid!, pingData);
           } catch {}
         }
       }, 800);
     }
 
-    setStatus(true, `Verbunden: ${activeDeviceName} (${subBrand}) — Warte auf Telemetrie`);
+    if (!isCurrentSession(sessionId, device.deviceId)) return;
+    setStatus(true, `Verbunden: ${device.name || 'Bafang E-Bike'} (${subBrand}) — Warte auf Telemetrie`);
   } catch (err) {
+    if (connectionSession === sessionId) await retireActiveConnection();
     if (pollingInterval) {
       clearInterval(pollingInterval);
       pollingInterval = null;
@@ -443,6 +512,7 @@ async function connectBafang() {
 
 async function connectStandardBle() {
   if (!bleInitialized) await initBle();
+  const sessionId = await beginConnectionSession();
   resetStandardSigState();
 
   bafangBtn.disabled = true;
@@ -458,16 +528,22 @@ async function connectStandardBle() {
       optionalServices: ['cycling_power', 'cycling_speed_and_cadence', 'battery_service', 'device_information'],
     });
 
+    if (connectionSession !== sessionId) {
+      await BleClient.disconnect(device.deviceId).catch(() => undefined);
+      return;
+    }
     activeDeviceId = device.deviceId;
     activeDeviceName = device.name || 'BLE Sensor';
     log(`Sensor gewählt: ${activeDeviceName} [${device.deviceId}]`, 'ok');
 
     await BleClient.connect(device.deviceId, () => {
+      if (!isCurrentSession(sessionId, device.deviceId)) return;
       log('Sensor getrennt.', 'err');
       setStatus(false, 'Verbindung getrennt.');
       disconnectBtn.disabled = true;
     });
 
+    if (!isCurrentSession(sessionId, device.deviceId)) return;
     disconnectBtn.disabled = false;
     setStatus(true, `Verbunden mit ${activeDeviceName}`);
     log(`GATT verbunden zu ${activeDeviceName}. Registriere Standard-Services...`, 'ok');
@@ -477,6 +553,7 @@ async function connectStandardBle() {
     // Standard Battery
     try {
       const battVal = await BleClient.read(device.deviceId, 'battery_service', 'battery_level');
+      if (!isCurrentSession(sessionId, device.deviceId)) return;
       const batt = parseBatteryLevel(battVal);
       currentTelemetry = { ...currentTelemetry, ...batt };
       renderTelemetry(currentTelemetry);
@@ -487,22 +564,25 @@ async function connectStandardBle() {
 
     // Standard Power
     try {
-      await BleClient.startNotifications(
+      await startSessionNotifications(
+        sessionId,
         device.deviceId,
         'cycling_power',
         '00002a63-0000-1000-8000-00805f9b34fb',
         (val: DataView) => {
+          if (!isCurrentSession(sessionId, device.deviceId)) return;
           const power = parsePowerMeasurement(val);
           currentTelemetry = { ...currentTelemetry, ...power };
           renderTelemetry(currentTelemetry);
           log(`Power: ${power.riderPowerWatts} W (Trittfrequenz: ${power.cadenceRpm} RPM)`, 'raw');
         }
       );
-      log('Cycling Power Notifications aktiv.', 'ok');
+      if (isCurrentSession(sessionId, device.deviceId)) log('Cycling Power Notifications aktiv.', 'ok');
     } catch {
       // optional
     }
   } catch (err) {
+    if (connectionSession === sessionId) await retireActiveConnection();
     const msg = err instanceof Error ? err.message : String(err);
     log(`BLE-Sensor Fehler: ${msg}`, 'err');
     setStatus(false, `Fehler: ${msg}`);
@@ -513,19 +593,14 @@ async function connectStandardBle() {
 }
 
 disconnectBtn.addEventListener('click', async () => {
-  if (pollingInterval) {
-    clearInterval(pollingInterval);
-    pollingInterval = null;
-  }
-  if (activeDeviceId) {
+  if (activeDeviceId || activeSubscriptions.length > 0 || pollingInterval) {
     try {
       log(`Trenne Gerät ${activeDeviceName}...`);
-      await BleClient.disconnect(activeDeviceId);
+      await retireActiveConnection();
       log('Erfolgreich getrennt.', 'ok');
     } catch (err) {
       log(`Fehler beim Trennen: ${err}`, 'err');
     }
-    activeDeviceId = null;
     disconnectBtn.disabled = true;
     setStatus(false, 'Getrennt.');
   }
