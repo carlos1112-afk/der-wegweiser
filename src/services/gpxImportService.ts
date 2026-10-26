@@ -5,69 +5,89 @@ export interface SanitizedGpxXml {
   stripped: string[];
 }
 
+export const MAX_GPX_XML_LENGTH = 5_000_000;
+const MAX_DECLARATIONS = 256;
+const MAX_DECLARATION_LENGTH = 1_000_000;
+
 /**
  * Entfernt XXE-relevante XML-Deklarationen (DOCTYPE, ENTITY, ELEMENT, ATTLIST)
  * bevor das Dokument geparst wird. Browsers DOMParser lädt externe Ressourcen
  * nicht nach, die Bereinigung ist dennoch eine Defense-in-Depth-Maßnahme gegen
  * XML External Entity Injection durch manipulierte GPX-Dateien.
  */
-const ENTITY_RE = /<!ENTITY[\s\S]*?>/gi;
-const ELEMENT_RE = /<!ELEMENT[\s\S]*?>/gi;
-const ATTLIST_RE = /<!ATTLIST[\s\S]*?>/gi;
-
-function stripDoctype(xml: string): { xml: string; stripped: string[] } {
-  const stripped: string[] = [];
-  let result = xml;
-  let idx = result.indexOf('<!DOCTYPE');
-  while (idx !== -1) {
-    let i = idx + '<!DOCTYPE'.length;
-    let depth = 0;
-    let end = -1;
-    while (i < result.length) {
-      const ch = result[i];
-      if (ch === '[') depth++;
-      else if (ch === ']') depth = Math.max(0, depth - 1);
-      else if (ch === '>' && depth === 0) {
-        end = i;
-        break;
-      }
-      i++;
-    }
-    if (end === -1) {
-      stripped.push(result.slice(idx));
-      result = result.slice(0, idx);
-      break;
-    }
-    stripped.push(result.slice(idx, end + 1));
-    result = result.slice(0, idx) + result.slice(end + 1);
-    idx = result.indexOf('<!DOCTYPE');
-  }
-  return { xml: result, stripped };
-}
-
-function applyPattern(xml: string, pattern: RegExp): { xml: string; stripped: string[] } {
-  const stripped: string[] = [];
-  let result = xml;
-  pattern.lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = pattern.exec(result)) !== null) {
-    stripped.push(match[0]);
-    result = result.slice(0, match.index) + result.slice(match.index + match[0].length);
-    pattern.lastIndex = 0;
-  }
-  return { xml: result, stripped };
-}
-
 export function sanitizeGpxXml(xml: string): SanitizedGpxXml {
-  const { xml: withoutDoctype, stripped: doctypeStripped } = stripDoctype(xml);
-  let sanitized = withoutDoctype;
-  const stripped: string[] = [...doctypeStripped];
-  for (const pattern of [ENTITY_RE, ELEMENT_RE, ATTLIST_RE]) {
-    const { xml: cleaned, stripped: patternStripped } = applyPattern(sanitized, pattern);
-    sanitized = cleaned;
-    stripped.push(...patternStripped);
+  if (xml.length > MAX_GPX_XML_LENGTH) {
+    throw new Error(`GPX-Datei ist zu groß (maximal ${MAX_GPX_XML_LENGTH} Zeichen)`);
   }
-  return { sanitized, stripped };
+
+  const stripped: string[] = [];
+  const chunks: string[] = [];
+  let outputStart = 0;
+  let cursor = 0;
+
+  while (cursor < xml.length - 1) {
+    if (xml[cursor] !== '<' || xml[cursor + 1] !== '!') {
+      cursor++;
+      continue;
+    }
+
+    const declaration = readDeclaration(xml, cursor);
+    if (!declaration) {
+      cursor++;
+      continue;
+    }
+    if (declaration.end - cursor > MAX_DECLARATION_LENGTH) {
+      throw new Error('GPX-Deklaration ist zu lang');
+    }
+    if (stripped.length >= MAX_DECLARATIONS) {
+      throw new Error(`GPX-Datei enthält zu viele Deklarationen (maximal ${MAX_DECLARATIONS})`);
+    }
+
+    chunks.push(xml.slice(outputStart, cursor));
+    stripped.push(xml.slice(cursor, declaration.end));
+    cursor = declaration.end;
+    outputStart = cursor;
+  }
+
+  if (stripped.length === 0) return { sanitized: xml, stripped };
+  chunks.push(xml.slice(outputStart));
+  return { sanitized: chunks.join(''), stripped };
+}
+
+function startsWithIgnoreCase(value: string, start: number, expected: string): boolean {
+  if (start + expected.length > value.length) return false;
+  for (let i = 0; i < expected.length; i++) {
+    const actual = value.charCodeAt(start + i);
+    const wanted = expected.charCodeAt(i);
+    if ((actual | 32) !== (wanted | 32)) return false;
+  }
+  return true;
+}
+
+function readDeclaration(xml: string, start: number): { end: number } | null {
+  const keywords = ['<!DOCTYPE', '<!ENTITY', '<!ELEMENT', '<!ATTLIST'];
+  const keyword = keywords.find((candidate) => startsWithIgnoreCase(xml, start, candidate));
+  if (!keyword) return null;
+
+  let bracketDepth = 0;
+  let quote: string | null = null;
+  for (let cursor = start + keyword.length; cursor < xml.length; cursor++) {
+    const ch = xml[cursor];
+    if (quote) {
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (keyword === '<!DOCTYPE' && ch === '[') {
+      bracketDepth++;
+    } else if (keyword === '<!DOCTYPE' && ch === ']') {
+      bracketDepth = Math.max(0, bracketDepth - 1);
+    } else if (ch === '>' && bracketDepth === 0) {
+      return { end: cursor + 1 };
+    }
+  }
+  return { end: xml.length };
 }
 
 function haversineDistanceM(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -199,9 +219,12 @@ export class GpxImportService {
   }
 
   /**
-   * Reads a File object from file picker / drag & drop and returns a Route.
-   */
+  * Reads a File object from file picker / drag & drop and returns a Route.
+  */
   public static async parseGpxFile(file: File): Promise<Route> {
+    if (file.size > MAX_GPX_XML_LENGTH) {
+      throw new Error(`GPX-Datei ist zu groß (maximal ${MAX_GPX_XML_LENGTH} Zeichen)`);
+    }
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (event) => {

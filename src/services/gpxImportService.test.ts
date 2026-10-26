@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { GpxImportService, sanitizeGpxXml, type SanitizedGpxXml } from './gpxImportService';
+import { GpxImportService, MAX_GPX_XML_LENGTH, sanitizeGpxXml, type SanitizedGpxXml } from './gpxImportService';
 
 const VALID_GPX = `<?xml version="1.0" encoding="UTF-8"?>
 <gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1" creator="Test">
@@ -48,6 +48,19 @@ describe('sanitizeGpxXml (XXE-Schutz)', () => {
     const result: SanitizedGpxXml = sanitizeGpxXml('<gpx/>');
     expect(typeof result.sanitized).toBe('string');
     expect(Array.isArray(result.stripped)).toBe(true);
+  });
+
+  it('verarbeitet viele Deklarationen in einem Durchlauf und begrenzt die Anzahl', () => {
+    const xml = `${Array.from({ length: 256 }, (_, i) => `<!ENTITY e${i} "value">`).join('')}<gpx/>`;
+    const result = sanitizeGpxXml(xml);
+    expect(result.stripped).toHaveLength(256);
+    expect(result.sanitized).toBe('<gpx/>');
+    expect(() => sanitizeGpxXml(`${xml}<!ENTITY overflow "value">`)).toThrow(/zu viele Deklarationen/);
+  });
+
+  it('lehnt übergroße GPX-Eingaben und einzelne überlange Deklarationen ab', () => {
+    expect(() => sanitizeGpxXml('x'.repeat(MAX_GPX_XML_LENGTH + 1))).toThrow(/zu groß/);
+    expect(() => sanitizeGpxXml(`<!DOCTYPE foo [${'x'.repeat(1_000_001)}]>`)).toThrow(/Deklaration ist zu lang/);
   });
 });
 
