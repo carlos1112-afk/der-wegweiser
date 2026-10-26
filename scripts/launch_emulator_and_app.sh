@@ -8,7 +8,10 @@ ADB="/opt/android-sdk/platform-tools/adb"
 EMULATOR="/opt/android-sdk/emulator/emulator"
 
 LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/emulator_log.XXXXXX")"
+chmod 700 "$LOG_DIR"
 LOG_FILE="${LOG_DIR}/emulator.log"
+touch "$LOG_FILE"
+chmod 600 "$LOG_FILE"
 
 echo "🚀 [EMULATOR] Launching Android Emulator (Wegweiser_Test_AVD) as permanent desktop process..."
 nohup $EMULATOR -avd Wegweiser_Test_AVD -gpu auto -netdelay none -netspeed full </dev/null >"$LOG_FILE" 2>&1 &
