@@ -4,11 +4,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const fb = vi.hoisted(() => ({
   auth: { currentUser: null as null | { uid: string } },
   deleteUser: vi.fn(),
+  deleteAccountData: vi.fn(),
   deleteDoc: vi.fn(),
 }));
 
-vi.mock('../../src/firebase', () => ({ auth: fb.auth, db: {}, storage: {} }));
+vi.mock('../../src/firebase', () => ({ auth: fb.auth, db: {}, storage: {}, functions: {} }));
 vi.mock('firebase/auth', () => ({ deleteUser: fb.deleteUser }));
+vi.mock('firebase/functions', () => ({ httpsCallable: vi.fn(() => fb.deleteAccountData) }));
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn(() => ({})),
   deleteDoc: fb.deleteDoc,
@@ -209,6 +211,7 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
   beforeEach(() => {
     fb.auth.currentUser = null;
     fb.deleteUser.mockReset();
+    fb.deleteAccountData.mockReset().mockResolvedValue({ data: { success: true, status: 'completed', jobId: 'u1' } });
     fb.deleteDoc.mockReset().mockResolvedValue(undefined);
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     localStorage.clear();
@@ -236,17 +239,15 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
 
   it('angemeldeter Nutzer: Cloud-Dokumente werden vor dem Auth-Konto gelöscht', async () => {
     fb.auth.currentUser = { uid: 'u1' };
-    fb.deleteUser.mockResolvedValue(undefined);
     await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
 
-    expect(fb.deleteDoc).toHaveBeenCalled();
-    const lastDocDelete = Math.max(...fb.deleteDoc.mock.invocationCallOrder);
-    expect(lastDocDelete).toBeLessThan(fb.deleteUser.mock.invocationCallOrder[0]);
+    expect(fb.deleteAccountData).toHaveBeenCalledWith({});
+    expect(fb.deleteUser).not.toHaveBeenCalled();
   });
 
   it('veraltete Anmeldung: Abbruch mit Hinweis, lokale Daten bleiben erhalten', async () => {
     fb.auth.currentUser = { uid: 'u1' };
-    fb.deleteUser.mockRejectedValue({ code: 'auth/requires-recent-login' });
+    fb.deleteAccountData.mockRejectedValue({ code: 'functions/unauthenticated' });
     localStorage.setItem('wegweiser_saved_routes', '[1]');
     await expect(AccountDeletionService.deleteAccount()).rejects.toThrow("erneut an");
 
