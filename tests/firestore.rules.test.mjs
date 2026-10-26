@@ -168,6 +168,49 @@ test('Fremde Konten sind strikt isoliert', async () => {
   await assertSucceeds(deleteDoc(doc(alice, 'user_tokens', 'alice')));
 });
 
+test('Abonnement-Status (subscriptionStatus) kann nicht vom Client gesetzt oder geändert werden', async () => {
+  const user = ctx({ uid: 'sub-user-1' });
+
+  // 1. Client darf bei Erstellung kein subscriptionStatus setzen
+  await assertFails(
+    setDoc(doc(user, 'users', 'sub-user-1'), { name: 'Sub User', subscriptionStatus: 'active' })
+  );
+
+  // 2. Client darf normales Profil anlegen
+  await assertSucceeds(
+    setDoc(doc(user, 'users', 'sub-user-1'), { name: 'Sub User' })
+  );
+
+  // 3. Client darf subscriptionStatus nicht über Update hinzufügen oder ändern
+  await assertFails(
+    updateDoc(doc(user, 'users', 'sub-user-1'), { subscriptionStatus: 'active' })
+  );
+
+  // 4. Client darf andere Profilfelder aktualisieren
+  await assertSucceeds(
+    updateDoc(doc(user, 'users', 'sub-user-1'), { name: 'Sub User Updated' })
+  );
+
+  // 5. Vertrauenswürdiger Backend-Kontext (Admin SDK) darf subscriptionStatus setzen & ändern
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const { doc: adminDoc, setDoc: adminSetDoc } = await import('firebase/firestore');
+    await adminSetDoc(
+      adminDoc(context.firestore(), 'users', 'sub-user-1'),
+      { name: 'Sub User Updated', subscriptionStatus: 'active' }
+    );
+  });
+
+  // 6. Client darf bestehendes Dokument mit subscriptionStatus verändern, solange subscriptionStatus unberührt bleibt
+  await assertSucceeds(
+    updateDoc(doc(user, 'users', 'sub-user-1'), { name: 'Sub User Name 3' })
+  );
+
+  // 7. Client darf subscriptionStatus auch auf ein geladenes/aktives Dokument nicht ändern
+  await assertFails(
+    updateDoc(doc(user, 'users', 'sub-user-1'), { subscriptionStatus: 'canceled' })
+  );
+});
+
 test('Ladesäulen bleiben öffentlich lesbar (gemeinnützige Infrastruktur)', async () => {
   const db = ctx();
   const owner = ctx({ uid: 'owner-2' });

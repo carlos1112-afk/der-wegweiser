@@ -62,7 +62,10 @@ service cloud.firestore {
 
     // --- 1. User Profiles & Cloud Token States (Art. 17 DSGVO, strikte Isolation) ---
     match /users/{userId} {
-      allow read, write, delete: if isOwner(userId);
+      allow read, delete: if isOwner(userId);
+      allow create: if isOwner(userId) && !('subscriptionStatus' in request.resource.data);
+      allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['subscriptionStatus']);
     }
     match /user_preferences/{userId} {
       allow read, write, delete: if isOwner(userId);
