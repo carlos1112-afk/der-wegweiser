@@ -115,6 +115,12 @@ export function App() {
       // Bei An-/Abmeldung muss die anonyme Kennung verworfen werden,
       // damit die echte Firebase-UID für Cloud-Pfade verwendet wird.
       UserIdentity.clearCache();
+      if (!user) {
+        activeRouteRequestId.current++;
+        setCurrentRoute(null);
+        setIsSimulatingRoute(false);
+        setTokenBalance(60);
+      }
     });
 
     // Initialize FCM Push Notifications pipeline

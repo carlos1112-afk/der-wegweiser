@@ -4,6 +4,16 @@ import { VertexAI } from "@google-cloud/vertexai";
 export const computeRoute = onCall({
   region: "europe-west3"
 }, async (request) => {
+  const { auth, app } = request;
+
+  if (!app) {
+    throw new HttpsError("unauthenticated", "Invalid App Check token.");
+  }
+
+  if (!auth || !auth.uid) {
+    throw new HttpsError("unauthenticated", "User must be authenticated.");
+  }
+
   const { startLat, startLng, destLat, destLng, batteryPercent, rangeKm } = request.data;
   
   try {
