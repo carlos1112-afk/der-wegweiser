@@ -1,3 +1,5 @@
+import { ConsentService } from './consentService.ts';
+
 export interface WeatherData {
   temperatureC?: number;
   windSpeedKmH?: number;
@@ -22,6 +24,9 @@ export class WeatherService {
     lng: number,
     fetchFn: typeof fetch = typeof globalThis !== 'undefined' ? globalThis.fetch : fetch
   ): Promise<WeatherData> {
+    if (!ConsentService.allowsAnalytics && !ConsentService.hasValidConsent()) {
+      throw new Error('Einwilligung zur Standortverarbeitung liegt nicht vor (Art. 6/7 DSGVO).');
+    }
     const customEndpoint = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process.env
       ? (globalThis as any).process.env.VITE_WEATHER_PROVIDER_URL
       : (import.meta as any).env?.VITE_WEATHER_PROVIDER_URL;

@@ -1,6 +1,6 @@
 import type { Route, Waypoint, UserPreferences } from '../types/navigation';
-import { ElevationService } from './elevationService';
-import { ConsentService } from './consentService';
+import { ElevationService } from './elevationService.ts';
+import { ConsentService } from './consentService.ts';
 import { logger } from '../utils/logger';
 
 export interface RouteGenerationParams {
@@ -27,6 +27,9 @@ function assertRouteGenerationAllowed(signal?: AbortSignal): void {
   if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
     throw new Error('[RoutingService] Consent required before sending coordinates.');
   }
+  if (!ConsentService.hasValidConsent()) {
+    throw new Error('Einwilligung zur Standortverarbeitung liegt nicht vor (Art. 6/7 DSGVO).');
+  }
 }
 
 export class RoutingService {
@@ -41,6 +44,8 @@ export class RoutingService {
     fetchFn: typeof fetch = typeof globalThis !== 'undefined' ? globalThis.fetch : fetch,
     signal?: AbortSignal
   ): Promise<Route> {
+    assertRouteGenerationAllowed(signal);
+
     const distance = params.targetDistanceKm || 28;
     const isScout = !!params.isMapScoutMode;
     const radius = (distance / (2 * Math.PI)) * 0.009; // approx degree delta
@@ -56,10 +61,10 @@ export class RoutingService {
     let routingEngineStatus: 'online_brouter' | 'offline_cached' | 'offline_corridor_unverified' = 'offline_corridor_unverified';
 
     try {
-      // BRouter API call: start -> via -> start
       assertRouteGenerationAllowed(signal);
+      // BRouter API call: start -> via -> start
       const brouterUrl = `https://brouter.de/brouter?lonlats=${params.startLng},${params.startLat}|${viaLng},${viaLat}|${params.startLng},${params.startLat}&profile=trekking&alternativeidx=0&format=geojson`;
-      const res = await fetchFn(brouterUrl, { signal });
+      const res = await fetchFn(brouterUrl, { signal } as RequestInit);
 
       if (res.ok) {
         const geojson = await res.json();
@@ -75,8 +80,9 @@ export class RoutingService {
           routingEngineStatus = 'online_brouter';
         }
       }
-    } catch (err) {
-      if (signal?.aborted) throw err;
+    } catch (err: any) {
+      if (signal?.aborted || err?.name === 'AbortError') throw new RouteGenerationCancelledError();
+      if (err?.message?.includes('Einwilligung') || err?.message?.includes('Consent')) throw err;
       logger.warn('[RoutingService] BRouter API unavailable:', err);
     }
 
@@ -85,7 +91,7 @@ export class RoutingService {
       try {
         assertRouteGenerationAllowed(signal);
         const osrmUrl = `https://router.project-osrm.org/route/v1/bike/${params.startLng},${params.startLat};${viaLng},${viaLat};${params.startLng},${params.startLat}?overview=full&geometries=geojson`;
-        const res = await fetchFn(osrmUrl, { signal });
+        const res = await fetchFn(osrmUrl, { signal } as RequestInit);
         if (res.ok) {
           const data = await res.json();
           const coords = data.routes?.[0]?.geometry?.coordinates;
@@ -97,11 +103,14 @@ export class RoutingService {
             routingEngineStatus = 'online_brouter'; // road-snapped via OSRM
           }
         }
-      } catch (err) {
-        if (signal?.aborted) throw err;
+      } catch (err: any) {
+        if (signal?.aborted || err?.name === 'AbortError') throw new RouteGenerationCancelledError();
+        if (err?.message?.includes('Einwilligung') || err?.message?.includes('Consent')) throw err;
         logger.warn('[RoutingService] OSRM fallback unavailable:', err);
       }
     }
+
+    assertRouteGenerationAllowed(signal);
 
     // Geometric circle fallback — clearly marked as unverified corridor
     if (pathCoordinates.length === 0) {
@@ -118,7 +127,6 @@ export class RoutingService {
 
     // Calculate elevation profiles if we have coordinates
     if (pathCoordinates.length > 0) {
-      assertRouteGenerationAllowed(signal);
       const sampleCoords = pathCoordinates.filter((_, idx) => idx % Math.ceil(pathCoordinates.length / 20) === 0);
       const elevations = await ElevationService.getElevations(sampleCoords, signal);
       let calculatedGain = 0;

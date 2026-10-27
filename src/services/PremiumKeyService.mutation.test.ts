@@ -10,6 +10,9 @@ const getTokenMock = vi.fn();
 vi.mock('firebase/app-check', () => ({
   getToken: (...args: unknown[]) => getTokenMock(...args),
 }));
+vi.mock('../firebase', () => ({
+  auth: { currentUser: { getIdToken: vi.fn().mockResolvedValue('ID_TOKEN') } },
+}));
 
 import {
   getGoogleMapsKey,
@@ -25,7 +28,7 @@ beforeEach(() => {
   getTokenMock.mockReset();
   vi.stubEnv('VITE_GOOGLE_MAPS_API_KEY', '');
   vi.stubEnv('VITE_FIREBASE_FUNCTIONS_URL', 'https://fake.functions.url');
-  mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ key: 'K' }) });
+  mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ result: { key: 'K' } }) });
   globalThis.fetch = mockFetch as unknown as typeof fetch;
 });
 
@@ -45,8 +48,8 @@ describe('Request-Form', () => {
     const [url, init] = mockFetch.mock.calls[0];
     expect(url).toBe('https://fake.functions.url/issueGoogleMapsKey');
     expect(init.method).toBe('POST');
-    expect(init.headers).toEqual({ 'Content-Type': 'application/json' });
-    expect(init.body).toBe('{}');
+    expect(init.headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer ID_TOKEN' });
+    expect(init.body).toBe('{"data":{}}');
   });
 });
 
@@ -60,7 +63,8 @@ describe('App-Check-Instanzbindung', () => {
     const init = mockFetch.mock.calls[0][1];
     expect(init.headers).toEqual({
       'Content-Type': 'application/json',
-      Authorization: 'Bearer TOK123',
+      Authorization: 'Bearer ID_TOKEN',
+      'X-Firebase-AppCheck': 'TOK123',
     });
   });
 
@@ -68,7 +72,7 @@ describe('App-Check-Instanzbindung', () => {
     setAppCheckInstance({} as any);
     getTokenMock.mockResolvedValue({ token: '' });
     await getGoogleMapsKey();
-    expect(mockFetch.mock.calls[0][1].headers).toEqual({ 'Content-Type': 'application/json' });
+    expect(mockFetch.mock.calls[0][1].headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer ID_TOKEN' });
   });
 
   it('läuft ohne Token weiter, wenn getToken fehlschlägt, und warnt exakt', async () => {
@@ -78,7 +82,7 @@ describe('App-Check-Instanzbindung', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     await expect(getGoogleMapsKey()).resolves.toBe('K');
     expect(warn).toHaveBeenCalledWith('[PremiumKeyService] App Check token nicht verfügbar:', boom);
-    expect(mockFetch.mock.calls[0][1].headers).toEqual({ 'Content-Type': 'application/json' });
+    expect(mockFetch.mock.calls[0][1].headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer ID_TOKEN' });
   });
 });
 
@@ -137,7 +141,7 @@ describe('Ohne registrierte App-Check-Instanz (frisches Modul)', () => {
     const fresh = await import('./PremiumKeyService');
     await expect(fresh.getGoogleMapsKey()).resolves.toBe('K');
     expect(getTokenMock).not.toHaveBeenCalled();
-    expect(mockFetch.mock.calls[0][1].headers).toEqual({ 'Content-Type': 'application/json' });
+    expect(mockFetch.mock.calls[0][1].headers).toEqual({ 'Content-Type': 'application/json', Authorization: 'Bearer ID_TOKEN' });
   });
 });
 

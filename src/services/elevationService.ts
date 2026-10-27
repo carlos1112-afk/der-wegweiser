@@ -1,4 +1,4 @@
-import { ConsentService } from './consentService';
+import { ConsentService } from './consentService.ts';
 
 export class ElevationService {
 
@@ -15,6 +15,10 @@ export class ElevationService {
     if (signal?.aborted) throw new DOMException('Route generation was cancelled.', 'AbortError');
     if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
       throw new Error('[ElevationService] Consent required before sending coordinates.');
+    }
+
+    if (!ConsentService.hasValidConsent()) {
+      throw new Error('Einwilligung zur Standortverarbeitung liegt nicht vor (Art. 6/7 DSGVO).');
     }
 
     const customEndpoint = import.meta.env.VITE_ELEVATION_PROVIDER_URL;

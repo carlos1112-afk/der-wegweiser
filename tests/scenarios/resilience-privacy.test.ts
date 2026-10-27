@@ -29,10 +29,10 @@ vi.mock('firebase/storage', () => ({
 
 import { RoutingService } from '../../src/services/routingService';
 import { ElevationService } from '../../src/services/elevationService';
+import { ConsentService } from '../../src/services/consentService';
 import { GpxExportService } from '../../src/services/gpxExportService';
 import { GpxImportService } from '../../src/services/gpxImportService';
 import { AccountDeletionService } from '../../src/services/accountDeletionService';
-import { ConsentService, CONSENT_VERSION } from '../../src/services/consentService';
 import { filterUgcText } from '../../src/services/dataRepository';
 import type { Route } from '../../src/types/navigation';
 
@@ -47,14 +47,7 @@ function geojsonRoute(n = 12) {
 describe('Szenario 13: Offline-Resilienz (echter RoutingService, Höhendienst ersetzt)', () => {
   let elevation: ReturnType<typeof vi.spyOn>;
   beforeEach(() => {
-    localStorage.setItem('der_wegweiser_legal_consent', JSON.stringify({
-      essential: true,
-      analytics: false,
-      surveys: false,
-      personalizedAds: false,
-      acceptedAt: '2026-01-01T00:00:00.000Z',
-      version: CONSENT_VERSION,
-    }));
+    ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     elevation = vi.spyOn(ElevationService, 'getElevations').mockImplementation(async (c) => c.map(() => 0));
@@ -75,13 +68,12 @@ describe('Szenario 13: Offline-Resilienz (echter RoutingService, Höhendienst er
     expect(offline).toHaveBeenCalledTimes(2);
   });
 
-  it('sendet nach Consent-Widerruf keine Standortkoordinaten an Routing-Anbieter', async () => {
+  it('ohne Einwilligung / nach Widerruf: bricht Routenberechnung ab und sendet 0 Netzwerkaufrufe (CWE-359 Fix)', async () => {
     ConsentService.withdraw();
     const fetchFn = vi.fn();
-
     await expect(RoutingService.generateBikeRoute(params, prefs, fetchFn as never))
-      .rejects.toThrow('Consent required');
-    expect(fetchFn).not.toHaveBeenCalled();
+      .rejects.toThrow('Einwilligung zur Standortverarbeitung liegt nicht vor');
+    expect(fetchFn).toHaveBeenCalledTimes(0);
   });
 
   it('BRouter erreichbar: straßengenaue Route mit unterstütztem Profil', async () => {
@@ -211,7 +203,6 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
   beforeEach(() => {
     fb.auth.currentUser = null;
     fb.deleteUser.mockReset();
-    fb.deleteAccountData.mockReset().mockResolvedValue({ data: { success: true, status: 'completed', jobId: 'u1' } });
     fb.deleteDoc.mockReset().mockResolvedValue(undefined);
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     localStorage.clear();
@@ -239,15 +230,17 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
 
   it('angemeldeter Nutzer: Cloud-Dokumente werden vor dem Auth-Konto gelöscht', async () => {
     fb.auth.currentUser = { uid: 'u1' };
+    fb.deleteUser.mockResolvedValue(undefined);
     await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
 
-    expect(fb.deleteAccountData).toHaveBeenCalledWith({});
-    expect(fb.deleteUser).not.toHaveBeenCalled();
+    expect(fb.deleteDoc).toHaveBeenCalled();
+    const lastDocDelete = Math.max(...fb.deleteDoc.mock.invocationCallOrder);
+    expect(lastDocDelete).toBeLessThan(fb.deleteUser.mock.invocationCallOrder[0]);
   });
 
   it('veraltete Anmeldung: Abbruch mit Hinweis, lokale Daten bleiben erhalten', async () => {
     fb.auth.currentUser = { uid: 'u1' };
-    fb.deleteAccountData.mockRejectedValue({ code: 'functions/unauthenticated' });
+    fb.deleteUser.mockRejectedValue({ code: 'auth/requires-recent-login' });
     localStorage.setItem('wegweiser_saved_routes', '[1]');
     await expect(AccountDeletionService.deleteAccount()).rejects.toThrow("erneut an");
 

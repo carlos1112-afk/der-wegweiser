@@ -264,6 +264,14 @@ describe('withdraw (Art. 7 Abs. 3 DSGVO)', () => {
     expect(ConsentService.hasValidConsent()).toBe(false);
   });
 
+  it('benachrichtigt registrierte Subscriber mit null beim Widerruf (CWE-359 Fix)', () => {
+    stored(valid());
+    const listener = vi.fn();
+    ConsentService.onChange(listener);
+    ConsentService.withdraw();
+    expect(listener).toHaveBeenCalledWith(null);
+  });
+
   it('entfernt den Consent-Key auch dann, wenn clear() wirft, und warnt exakt', () => {
     stored(valid());
     const removeSpy = vi.fn((k: string) => ls._map.delete(k));

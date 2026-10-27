@@ -1,5 +1,4 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { useTranslation } from 'react-i18next';
 import { SearchInput } from './components/Search/SearchInput';
 import type { SearchResult } from './components/Search/SearchInput';
 import { MapView } from './components/Map/MapView';
@@ -88,7 +87,6 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
 }
 
 export function App() {
-  const { t } = useTranslation();
   const { isMainMenuOpen, setMainMenuOpen, isSearchActive, setSearchActive } = useUILayout();
 
   // Modal States (Declared first to supply active modal context to lifecycle)
@@ -151,31 +149,25 @@ export function App() {
   const [consent, setConsent] = useState<boolean>(() => ConsentService.hasValidConsent());
   const [showConsentModal, setShowConsentModal] = useState<boolean>(() => !ConsentService.hasValidConsent());
   const hasConsent = consent;
-  const pendingRouteControllers = useRef(new Set<AbortController>());
 
-  const startRouteGeneration = () => {
-    const controller = new AbortController();
-    pendingRouteControllers.current.add(controller);
-    return controller;
-  };
+  // Track pending route calculation requests for cancellation on consent withdrawal
+  const activeRouteRequestId = useRef<number>(0);
 
-  const finishRouteGeneration = (controller: AbortController) => {
-    pendingRouteControllers.current.delete(controller);
-  };
-
+  // Subscribe to consent state changes across all modals and services (Art. 6/7 DSGVO)
   useEffect(() => {
-    return ConsentService.onChange((nextConsent) => {
-      const isGranted = nextConsent?.essential === true;
-      setConsent(isGranted);
-      if (!isGranted) {
-        pendingRouteControllers.current.forEach((controller) => controller.abort());
-        pendingRouteControllers.current.clear();
+    const unsubscribe = ConsentService.onChange((flags) => {
+      const isValid = flags !== null && ConsentService.hasValidConsent();
+      setConsent(isValid);
+      setShowConsentModal(!isValid);
+      if (!isValid) {
+        // Cancel pending route generation and stop active location tracking immediately
+        activeRouteRequestId.current++;
         setCurrentRoute(null);
         setIsSimulatingRoute(false);
-        setSimulatedLocation(null);
-        setShowConsentModal(true);
+        setSearchDestination(null);
       }
     });
+    return () => unsubscribe();
   }, []);
 
   // App Lifecycle Controller
@@ -297,62 +289,58 @@ export function App() {
   // Initialize Data & Pre-generate "Heute-Tour"
   // Startet erst, sobald eine gültige Einwilligung vorliegt.
   useEffect(() => {
-    if (!hasConsent) return;
+    if (!hasConsent || !ConsentService.hasValidConsent()) return;
 
-    const controller = startRouteGeneration();
+    let isSubscribed = true;
+    const reqId = ++activeRouteRequestId.current;
 
     const initData = async () => {
       try {
         // 1. Fetch Charging Stations
         const stations = await dataRepository.getChargingStations().catch(() => []);
+        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
         setChargingStations(stations);
 
         // 2. Fetch User Prefs & Memory
         const prefs: UserPreferences = await dataRepository.getUserPreferences(UserIdentity.getUserId());
         const memory: UserMemoryPattern = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
+        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
 
         // 3. Fetch Token Account Balance from Firestore/Cache
         const tokenAcc = await dataRepository.getTokenAccount(UserIdentity.getUserId());
+        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
         setTokenBalance(tokenAcc.balance);
 
         // 4. Pre-generate Zero-Click "Heute-Tour"
-        if (controller.signal.aborted || !ConsentService.allowsEssential) return;
         const anticipatedRoute = await AiAssistantService.generateAnticipatedRoute(
           userLocation.lat,
           userLocation.lng,
           prefs,
-          memory,
-          DEFAULT_MODEL,
-          controller.signal
+          memory
         ).catch((err) => {
-          if (controller.signal.aborted) return null;
           console.warn('[App] Heute-Tour konnte nicht generiert werden (Routing/Netzwerk offline):', err);
           return null;
         });
-        if (anticipatedRoute && !controller.signal.aborted && ConsentService.allowsEssential) {
+        if (isSubscribed && reqId === activeRouteRequestId.current && ConsentService.hasValidConsent() && anticipatedRoute) {
           setCurrentRoute(anticipatedRoute);
         }
       } catch (err) {
-        if (controller.signal.aborted) return;
         console.warn('[App] Initialer Datenabruf fehlgeschlagen (Offline-Modus):', err);
-      } finally {
-        finishRouteGeneration(controller);
       }
     };
 
     initData();
+
     return () => {
-      controller.abort();
-      finishRouteGeneration(controller);
+      isSubscribed = false;
     };
   }, [hasConsent, userLocation.lat, userLocation.lng]);
 
   // Background Corridor Offline Cache
   useEffect(() => {
-    if (!currentRoute?.pathCoordinates?.length) return;
-    const controller = new AbortController();
-    OfflineMapService.prefetchRouteCorridor(currentRoute.pathCoordinates, controller.signal);
-    return () => controller.abort();
+    if (currentRoute && currentRoute.pathCoordinates && currentRoute.pathCoordinates.length > 0) {
+      OfflineMapService.prefetchRouteCorridor(currentRoute.pathCoordinates);
+    }
   }, [currentRoute]);
 
   // Rapid Battery Drop Detection (FCM Trigger)
@@ -432,52 +420,45 @@ export function App() {
   };
 
   const handleRegenerateRoute = async (modelId: ModelId = DEFAULT_MODEL) => {
-    if (!ConsentService.allowsEssential) return;
-    const controller = startRouteGeneration();
+    if (!ConsentService.hasValidConsent()) return;
+    const reqId = ++activeRouteRequestId.current;
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
       const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       const newRoute = await AiAssistantService.generateAnticipatedRoute(
         userLocation.lat,
         userLocation.lng,
         prefs,
         memory,
-        modelId,
-        controller.signal
+        modelId
       );
-      if (!controller.signal.aborted && ConsentService.allowsEssential) setCurrentRoute(newRoute);
+      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
+        setCurrentRoute(newRoute);
+      }
     } catch (err: any) {
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       console.warn('[App] Route konnte nicht neu generiert werden:', err);
       alert('Routing-Dienst derzeit nicht erreichbar. Bitte Internetverbindung prüfen.');
-    } finally {
-      finishRouteGeneration(controller);
     }
   };
 
   const handleAutoReroute = async () => {
-    if (!currentRoute || !ConsentService.allowsEssential) return;
-    const controller = startRouteGeneration();
+    if (!currentRoute || !ConsentService.hasValidConsent()) return;
+    const reqId = ++activeRouteRequestId.current;
     console.log('[App] Auto-Rerouting triggered from current GPS position...');
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
       const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       const recalculated = await AiAssistantService.generateAnticipatedRoute(
         userLocation.lat,
         userLocation.lng,
         prefs,
-        memory,
-        DEFAULT_MODEL,
-        controller.signal
+        memory
       );
-      if (!controller.signal.aborted && ConsentService.allowsEssential) setCurrentRoute(recalculated);
+      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
+        setCurrentRoute(recalculated);
+      }
     } catch (err: any) {
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       console.warn('[App] Auto-Reroute fehlgeschlagen:', err);
-    } finally {
-      finishRouteGeneration(controller);
     }
   };
 
@@ -496,12 +477,11 @@ export function App() {
   };
 
   const handlePlanRouteToPoint = async (targetLat: number, targetLng: number) => {
-    if (!ConsentService.allowsEssential) return;
-    const controller = startRouteGeneration();
+    if (!ConsentService.hasValidConsent()) return;
+    const reqId = ++activeRouteRequestId.current;
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
       const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       const newRoute = await RoutingService.generateBikeRoute(
         {
           startLat: userLocation.lat,
@@ -513,33 +493,28 @@ export function App() {
           maxElevationGainM: 120,
           surfacePreference: 'any',
         },
-        prefs,
-        undefined,
-        controller.signal
+        prefs
       );
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       if (newRoute.pathCoordinates.length > 1) {
         newRoute.pathCoordinates[newRoute.pathCoordinates.length - 1] = [targetLat, targetLng];
       }
       newRoute.title = `Route zum gewählten Ziel (${newRoute.distanceKm} km)`;
       newRoute.aiStory = `Fahrradoptimierte Verbindung zum gewählten Zielort (~${distKm.toFixed(1)} km) mit minimalem Höhenmeter-Widerstand (Heuristische Routenführung).`;
-      setCurrentRoute(newRoute);
+      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
+        setCurrentRoute(newRoute);
+      }
     } catch (err: any) {
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       console.warn('[App] Navigation zum Zielpunkt fehlgeschlagen:', err);
       alert('Routenberechnung fehlgeschlagen. Der Routing-Dienst (BRouter) ist nicht erreichbar.');
-    } finally {
-      finishRouteGeneration(controller);
     }
   };
 
   const handlePlanRouteToStation = async (station: ChargingStation) => {
-    if (!ConsentService.allowsEssential) return;
-    const controller = startRouteGeneration();
+    if (!ConsentService.hasValidConsent()) return;
+    const reqId = ++activeRouteRequestId.current;
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
       const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, station.lat, station.lng);
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       const detourRoute = await RoutingService.generateBikeRoute(
         {
           startLat: userLocation.lat,
@@ -551,11 +526,8 @@ export function App() {
           maxElevationGainM: 60,
           surfacePreference: 'asphalt',
         },
-        prefs,
-        undefined,
-        controller.signal
+        prefs
       );
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       if (detourRoute.pathCoordinates.length > 1) {
         detourRoute.pathCoordinates[detourRoute.pathCoordinates.length - 1] = [station.lat, station.lng];
       }
@@ -565,13 +537,12 @@ export function App() {
         { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Start' },
         { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
       ];
-      setCurrentRoute(detourRoute);
+      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
+        setCurrentRoute(detourRoute);
+      }
     } catch (err: any) {
-      if (controller.signal.aborted || !ConsentService.allowsEssential) return;
       console.warn('[App] Anfahrt zur Ladestation fehlgeschlagen:', err);
       alert('Routenberechnung zur Ladestation fehlgeschlagen. Der Routing-Dienst ist nicht erreichbar.');
-    } finally {
-      finishRouteGeneration(controller);
     }
   };
 

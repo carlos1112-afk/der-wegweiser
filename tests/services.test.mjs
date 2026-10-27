@@ -3,8 +3,10 @@ import assert from 'node:assert';
 import { RoutingService } from '../src/services/routingService.ts';
 import { ElevationService } from '../src/services/elevationService.ts';
 import { WeatherService } from '../src/services/weatherService.ts';
+import { ConsentService } from '../src/services/consentService.ts';
 
 test('RoutingService requests a supported BRouter profile', async () => {
+  ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
   let requestedUrl;
   const coordinates = Array.from({ length: 6 }, (_, index) => [13.4 + index * 0.001, 52.52 + index * 0.001]);
   const mockFetch = async (url) => {
@@ -44,6 +46,7 @@ test('RoutingService requests a supported BRouter profile', async () => {
 });
 
 test('RoutingService marks its fallback corridor as unverified when offline', async () => {
+  ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
   // Mock fetch to simulate network error or offline
   const mockFetch = async () => {
     throw new TypeError('fetch failed');
@@ -75,6 +78,7 @@ test('RoutingService marks its fallback corridor as unverified when offline', as
 });
 
 test('WeatherService honest degradation when offline', async () => {
+  ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
   // Mock fetch to simulate network error
   const mockFetch = async () => {
     throw new TypeError('fetch failed');
@@ -90,4 +94,29 @@ test('WeatherService honest degradation when offline', async () => {
       message: '[WeatherService] Live weather integration unavailable; no fallback is permitted.'
     }
   );
+});
+
+test('RoutingService rejects outbound calls when consent is withdrawn (CWE-359 Fix)', async () => {
+  ConsentService.withdraw();
+  let fetchCalled = false;
+  const mockFetch = async () => {
+    fetchCalled = true;
+    return { ok: true, json: async () => ({}) };
+  };
+
+  await assert.rejects(
+    async () => {
+      await RoutingService.generateBikeRoute(
+        { startLat: 52.52, startLng: 13.4, batteryPercent: 80, bikeType: 'ebike' },
+        { batteryCapacityWh: 500, maxElevationSlopePercent: 10 },
+        mockFetch
+      );
+    },
+    {
+      name: 'Error',
+      message: 'Einwilligung zur Standortverarbeitung liegt nicht vor (Art. 6/7 DSGVO).'
+    }
+  );
+
+  assert.equal(fetchCalled, false);
 });

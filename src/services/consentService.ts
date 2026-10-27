@@ -38,10 +38,11 @@ export const CONSENT_VERSION = 2;
 
 const STORAGE_KEY = 'der_wegweiser_legal_consent';
 
-type ConsentListener = (flags: ConsentFlags | null) => void;
+export type ConsentListener = (flags: ConsentFlags | null) => void;
 
 export class ConsentService {
   private static listeners: ConsentListener[] = [];
+  private static inMemoryConsent: ConsentFlags | null = null;
 
   /**
    * Liest die gespeicherte Einwilligung. Gibt `null` zurück, wenn keine
@@ -50,9 +51,12 @@ export class ConsentService {
    * erneut eingewilligt werden.
    */
   public static getConsent(): ConsentFlags | null {
+    if (typeof localStorage === 'undefined') {
+      return this.inMemoryConsent;
+    }
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
+      if (!raw) return this.inMemoryConsent;
       const parsed = JSON.parse(raw) as Partial<ConsentFlags>;
 
       if (typeof parsed.essential !== 'boolean') return null;
@@ -69,7 +73,7 @@ export class ConsentService {
       };
     } catch (e) {
       console.warn('[Consent] Einwilligung nicht lesbar, erneute Zustimmung erforderlich:', e);
-      return null;
+      return this.inMemoryConsent;
     }
   }
 
@@ -116,7 +120,14 @@ export class ConsentService {
       acceptedAt: new Date().toISOString(),
       version: CONSENT_VERSION,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
+    this.inMemoryConsent = consent;
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(consent));
+      } catch (e) {
+        console.warn('[Consent] LocalStorage Speicherung fehlgeschlagen:', e);
+      }
+    }
     this.listeners.forEach((cb) => cb(consent));
     return consent;
   }
@@ -127,17 +138,24 @@ export class ConsentService {
    * erneut zur Zustimmung auffordert und die Verarbeitung einstellt.
    */
   public static withdraw(): void {
+    this.inMemoryConsent = null;
     try {
-      localStorage.removeItem(STORAGE_KEY);
-      // Alle lokal abgelegten personenbezogenen Daten verwerfen.
-      localStorage.clear();
-      sessionStorage.clear();
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.clear();
+      }
     } catch (e) {
       console.warn('[Consent] Lokale Daten beim Widerruf nicht vollständig löschbar:', e);
-    } finally {
-      // Der Widerruf muss auch bereits gemountete Verbraucher sofort erreichen.
-      this.listeners.slice().forEach((cb) => cb(null));
     }
+    try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.clear();
+      }
+    } catch (e) {
+      console.warn('[Consent] SessionStorage beim Widerruf nicht löschbar:', e);
+    }
+    // Event-Propagation an alle aktiven Subscriber (z.B. App.tsx stop location watch)
+    this.listeners.slice().forEach((cb) => cb(null));
   }
 
   public static onChange(callback: ConsentListener): () => void {
