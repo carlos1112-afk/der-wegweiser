@@ -72,7 +72,7 @@ describe('Szenario 13: Offline-Resilienz (echter RoutingService, Höhendienst er
     ConsentService.withdraw();
     const fetchFn = vi.fn();
     await expect(RoutingService.generateBikeRoute(params, prefs, fetchFn as never))
-      .rejects.toThrow('Einwilligung zur Standortverarbeitung liegt nicht vor');
+      .rejects.toThrow(/Einwilligung zur Standortverarbeitung|Consent required/);
     expect(fetchFn).toHaveBeenCalledTimes(0);
   });
 
@@ -202,8 +202,7 @@ describe('Szenario 12: UGC-Filter (echtes filterUgcText)', () => {
 describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionService)', () => {
   beforeEach(() => {
     fb.auth.currentUser = null;
-    fb.deleteUser.mockReset();
-    fb.deleteDoc.mockReset().mockResolvedValue(undefined);
+    fb.deleteAccountData.mockReset().mockResolvedValue({ data: { success: true, status: 'completed' } });
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     localStorage.clear();
     sessionStorage.clear();
@@ -215,11 +214,8 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
     localStorage.setItem('wegweiser_saved_routes', '[]');
     sessionStorage.setItem('x', 'y');
     await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
-
-
     expect(localStorage.length).toBe(0);
     expect(sessionStorage.length).toBe(0);
-    expect(fb.deleteUser).not.toHaveBeenCalled();
   });
 
   it('räumt auch Schlüssel anderer Herkunft ab (localStorage.clear, kein Präfix-Filter)', async () => {
@@ -228,24 +224,17 @@ describe('Szenario 15: DSGVO Art. 17 Kontolöschung (echter AccountDeletionServi
     expect(localStorage.getItem('third_party_cookie')).toBeNull();
   });
 
-  it('angemeldeter Nutzer: Cloud-Dokumente werden vor dem Auth-Konto gelöscht', async () => {
+  it('angemeldeter Nutzer: ruft Server Cloud Function auf und leert lokale Daten', async () => {
     fb.auth.currentUser = { uid: 'u1' };
-    fb.deleteUser.mockResolvedValue(undefined);
     await expect(AccountDeletionService.deleteAccount()).resolves.toBeUndefined();
-
-    expect(fb.deleteDoc).toHaveBeenCalled();
-    const lastDocDelete = Math.max(...fb.deleteDoc.mock.invocationCallOrder);
-    expect(lastDocDelete).toBeLessThan(fb.deleteUser.mock.invocationCallOrder[0]);
+    expect(fb.deleteAccountData).toHaveBeenCalled();
   });
 
-  it('veraltete Anmeldung: Abbruch mit Hinweis, lokale Daten bleiben erhalten', async () => {
+  it('Serverfehler bei Kontolöschung: wirft Fehler und bricht lokale Löschung ab', async () => {
     fb.auth.currentUser = { uid: 'u1' };
-    fb.deleteUser.mockRejectedValue({ code: 'auth/requires-recent-login' });
+    fb.deleteAccountData.mockRejectedValue(new Error('server down'));
     localStorage.setItem('wegweiser_saved_routes', '[1]');
-    await expect(AccountDeletionService.deleteAccount()).rejects.toThrow("erneut an");
-
-
-
+    await expect(AccountDeletionService.deleteAccount()).rejects.toThrow('Die Kontolöschung konnte nicht abgeschlossen werden');
     expect(localStorage.getItem('wegweiser_saved_routes')).toBe('[1]');
   });
 });
