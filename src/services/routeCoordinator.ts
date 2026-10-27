@@ -63,7 +63,7 @@ export class RouteCoordinator {
   startNavigation(session: NavigationSessionV1): void {
     if (!this.allowed) throw new RoutingError('CONSENT_REQUIRED');
     if (this.stateValue.status !== 'preview' || session.originalRoute !== this.stateValue.route
-      || JSON.stringify(session.originalRequest) !== JSON.stringify(this.previewRequest)) throw new RoutingError('INVALID_REQUEST');
+      || JSON.stringify(parseRouteRequest(session.originalRequest)) !== JSON.stringify(this.previewRequest)) throw new RoutingError('INVALID_REQUEST');
     this.sessionValue = session;
   }
 }

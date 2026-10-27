@@ -44,6 +44,12 @@ describe('shared routing contract', () => {
     expect(result.contentHash).toMatch(/^[a-f0-9]{64}$/);
     expect(Object.isFrozen(result.geometry[0])).toBe(true);
   });
+  it('normalizes request hashes across field order and irrelevant fields', async () => {
+    const first = await validateRoute(request(), candidate(), hash);
+    const reordered = Object.fromEntries(Object.entries(request()).reverse());
+    const second = await validateRoute({ ...reordered, ignoredMetadata: 'never hashed' } as any, candidate(), hash);
+    expect(second.requestHash).toBe(first.requestHash);
+  });
   it('rejects unverified corridors, bad provenance, malformed geometry, distance and endpoint errors', async () => {
     for (const value of [null, { ...candidate(), provenance: { engine: 'osrm' } }, { ...candidate(), geometry: [] },
       { ...candidate(), geometry: [{ lat: '52', lng: 13 }, { lat: 52, lng: 13 }] },

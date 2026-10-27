@@ -30,8 +30,20 @@ export function parseRouteRequest(value: unknown): RouteRequestV1 {
   } else if (r.kind === 'roundtrip') {
     if (!finite(r.targetDistanceM, L.minRoundtripM, L.maxRoundtripM) || r.destination !== undefined) throw new RoutingError('INVALID_REQUEST');
   } else throw new RoutingError('INVALID_REQUEST');
-  // Clone boundary data: an async caller cannot mutate an accepted request in place.
-  return JSON.parse(JSON.stringify(r)) as RouteRequestV1;
+  // Fixed field order and allowed fields give hashing a stable normalized representation.
+  // Copy nested data so an async caller cannot mutate an accepted request in place.
+  const coordinate = (point: Coordinate): Coordinate => ({ lat: point.lat, lng: point.lng });
+  const base = {
+    version: 1 as const, requestId: r.requestId, planning: r.planning,
+    start: { ...coordinate(s as unknown as Coordinate), source: s.source, observedAt: s.observedAt, accuracyM: s.accuracyM, confirmed: true },
+    mandatoryStops: r.mandatoryStops.map(coordinate), interests: [...r.interests],
+    criteria: { hard: [...c.hard].sort(), wishes: c.wishes,
+      weights: { asphalt: w.asphalt, nature: w.nature, flat: w.flat } },
+    profile: { bike: p.bike, batteryPercent: p.batteryPercent, batteryCapacityWh: p.batteryCapacityWh,
+      confirmedAt: p.confirmedAt, consentVersion: p.consentVersion },
+  };
+  return (r.kind === 'destination' ? { ...base, kind: 'destination', destination: coordinate(r.destination) }
+    : { ...base, kind: 'roundtrip', targetDistanceM: r.targetDistanceM }) as RouteRequestV1;
 }
 function orderedStops(stops: readonly Coordinate[], geometry: readonly Coordinate[], lengths: readonly number[]): boolean {
   let progress = 0;
