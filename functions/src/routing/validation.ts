@@ -58,6 +58,11 @@ function orderedStops(stops: readonly Coordinate[], geometry: readonly Coordinat
   }
   return true;
 }
+const validatedInstances = new WeakSet<object>();
+/** Serialized/legacy data must pass validation again before it can start guidance. */
+export function isValidatedRoute(value: unknown): value is ValidatedRouteV1 {
+  return !!value && typeof value === 'object' && validatedInstances.has(value);
+}
 const actions = new Set(['straight', 'turn-left', 'turn-right', 'slight-left', 'slight-right', 'roundabout', 'arrive']);
 /** Caller supplies a platform SHA-256 implementation; branded result is never obtained by casting in consumers. */
 export async function validateRoute(request: RouteRequestV1, candidate: RouteCandidateV1,
@@ -102,11 +107,13 @@ export async function validateRoute(request: RouteRequestV1, candidate: RouteCan
     previous = m.distanceAlongM;
   }
   // Hash covers the complete accepted content, not the original mutable object.
-  const contentHash = await sha256(JSON.stringify(c));
-  const requestHash = await sha256(JSON.stringify(r));
+  const contentHash = await sha256(canonicalJson(c));
+  const requestHash = await sha256(canonicalJson(r));
   if (![contentHash, requestHash].every(hash => /^[a-f0-9]{64}$/.test(hash))) throw new RoutingError('INVALID_GEOMETRY');
-  return deepFreeze({ ...c, validationVersion: 1,
+  const result = deepFreeze({ ...c, validationVersion: 1,
     guidanceCapability: c.maneuvers.length > 0 ? 'turn_by_turn' : 'track', contentHash, requestHash }) as ValidatedRouteV1;
+  validatedInstances.add(result);
+  return result;
 }
 function deepFreeze<T>(value: T): T {
   if (value && typeof value === 'object') {
@@ -114,4 +121,16 @@ function deepFreeze<T>(value: T): T {
     for (const child of Object.values(value)) deepFreeze(child);
   }
   return value;
+}
+
+/** Object key order must not change hashes across backend JSON and browser adapters. */
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (value && typeof value === 'object') {
+    const object = value as Record<string, unknown>;
+    return `{${Object.keys(object).sort().map(key => `${JSON.stringify(key)}:${canonicalJson(object[key])}`).join(',')}}`;
+  }
+  const result = JSON.stringify(value);
+  if (result === undefined) throw new RoutingError('INVALID_GEOMETRY');
+  return result;
 }

@@ -210,3 +210,5 @@ export * from "./issueCesiumIonToken";
 export * from "./vertexRouting";
 export * from "./tokenRewards";
 export * from "./aiProxy";
+export * from './routing/placeSearch';
+export * from './routing/freeRoute';

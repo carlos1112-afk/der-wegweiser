@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { parseRouteRequest, validateRoute } from '../../functions/src/routing/validation';
+import { parseRouteRequest, validateRoute, isValidatedRoute } from '../../functions/src/routing/validation';
 import { cumulativeDistances, projectRoute } from '../../functions/src/routing/geometry';
 import type { RouteCandidateV1, RouteRequestV1 } from '../../functions/src/routing/contracts';
 import { RouteCoordinator } from '../../src/services/routeCoordinator';
@@ -43,6 +43,8 @@ describe('shared routing contract', () => {
     expect(result.guidanceCapability).toBe('track');
     expect(result.contentHash).toMatch(/^[a-f0-9]{64}$/);
     expect(Object.isFrozen(result.geometry[0])).toBe(true);
+    expect(isValidatedRoute(result)).toBe(true);
+    expect(isValidatedRoute(JSON.parse(JSON.stringify(result)))).toBe(false);
   });
   it('normalizes request hashes across field order and irrelevant fields', async () => {
     const first = await validateRoute(request(), candidate(), hash);
