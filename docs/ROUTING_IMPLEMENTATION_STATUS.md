@@ -75,9 +75,26 @@ Rollback: Neue Vorarbeitsmodule haben keine bestehenden Konfigurationen oder Pro
 
 ## Prüfungen der neuen Vorarbeit
 
-- `./node_modules/.bin/vitest run tests/services/routingContracts.test.ts tests/services/navigationProgress.test.ts --reporter=dot`: 26 Tests bestanden; mehrfach nach relevanten Änderungen ausgeführt. Synthetische Geometrien sind im Test explizit bezeichnet. Fehlerfälle: ungültige Eingaben, Endpunkte/Via-Reihenfolge, harte Kriterien ohne Evidenz, Manöverindex, Consent/Auth-/Requestrennen, GPSqualität, Rundtourstart, Rejoinhysterese/-limits.
+- `./node_modules/.bin/vitest run tests/services/routingContracts.test.ts tests/services/navigationProgress.test.ts --reporter=dot`: 27 Tests bestanden; mehrfach nach relevanten Änderungen ausgeführt. Synthetische Geometrien sind im Test explizit bezeichnet. Fehlerfälle: ungültige Eingaben, Endpunkte/Via-Reihenfolge, harte Kriterien ohne Evidenz, Manöverindex, Consent/Auth-/Requestrennen, GPSqualität, Rundtourstart, Rejoinhysterese/-limits.
 - `npm run build` im Worktree und in `functions`: erfolgreich. Browser und Functions kompilieren dieselben Routingdateien; kein Code-Duplikat. Der Frontendbuild ist kein Laufzeit-/Gerätenachweis.
-- `cd functions && npm test -- --runInBand tests/walletLedger.test.ts --coverage --collectCoverageFrom=src/wallet/ledger.ts --coverageReporters=text`: 13 Tests bestanden, 100 % Statements/Funktionen/Zeilen, 98,27 % Zweige. Ausschließlich dieser reine Kern gemessen; keine Gesamtsystem- oder Transaktionsabdeckung.
+- `cd functions && npm test -- --runInBand tests/walletLedger.test.ts --coverage --collectCoverageFrom=src/wallet/ledger.ts --coverageReporters=text`: 13 Tests bestanden, 98,70 % Statements, 100 % Funktionen/Zeilen, 96,66 % Zweige. Ausschließlich dieser reine Kern gemessen; keine Gesamtsystem- oder Transaktionsabdeckung.
 - `cd functions && NODE_OPTIONS=--experimental-vm-modules ./node_modules/.bin/stryker run stryker.wallet.conf.js`: EPERM beim lokalen Listener, kein vollständiger Mutation-Score. Reproduzierbare Konfiguration liegt bei.
 - `scripts/check_wallet_mutations.py`: gezielte Ergänzung ohne Listener. Ein erster Lauf wurde nach einer getöteten Mutation wegen mehrdeutiger Ersetzung abgebrochen; Quelle im `finally` wiederhergestellt und Ersetzung präzisiert. Ergebnis des vollständigen erneuten Laufs wird unten dokumentiert.
-- Drei kopierte Pläne byteweise mit dem Ursprung verglichen: identisch. `git diff --check`: keine Whitespacefehler. Keine bestehende Anwendungskonfiguration verändert; keine neuen externen Verbindungen hergestellt.
+- Drei kopierte Pläne byteweise mit dem Ursprung verglichen: identisch. `git diff --check`: keine Whitespacefehler. Keine bestehende Anwendungskonfiguration verändert; keine Kontoverbindung eingerichtet.
+
+
+## Abschließender lokaler Stand
+
+[FAKT] Der erneute gezielte Mutationslauf `python3 scripts/check_wallet_mutations.py` hat alle **7/7** kuratierten Mutationen durch echte Testfehler erkannt: negative Beträge, negative Salden, falsches Capture-/Release-Delta, veränderte Replaybeträge, ignorierte Kontosperre und wiederholbare Erstattung. Baseline bestand, Quelle wurde im `finally` wiederhergestellt. Das ist kein vollständiger Stryker-Mutationsscore und kein Emulator-/Authnachweis. Anschließender Wallet-Testlauf nach der Fehlerweitergabe im Audit: 13/13 bestanden, aktuelle Coverage wie oben. Anschließende Builds beider Projekte bestanden.
+
+Lokale Umsetzungseinheiten:
+
+| Commit | Inhalt | Prüfung/Restgrenze |
+| --- | --- | --- |
+| `dfd0e34` | Kopierte Pläne und Phase-0-/Gatebericht | Pläne identisch; keine Implementierungsabnahme |
+| `bead64f` | Gemeinsamer Vertrag, Validator und Coordinator | Vertrags-/Race-Unitfälle; echte Fixtures fehlen |
+| `957c86c` | Fortschritts-/Rejoinvorarbeit | Synthetische Trackerfälle; keine Integration |
+| `4fa01e3` | Normalisierte Requesthashes und Übernahmebindung | Routingtests jetzt 27/27, Frontendbuild bestanden |
+| `2adbd10` | Walletkern, Audit und Prüfskripte | 13/13 Unitfälle, gemessene Coverage, 7 kuratierte Mutationen; Transaktionen/Migration offen |
+
+[FAKT] Ursprungs-`main` verbleibt auf `8447969`. Keine Änderungen an bestehenden Anwendungs-/Betriebskonfigurationen und keine produktiven Wallet-/Routingwriter migriert. **Der vollständige Arbeitsplan ist nicht abgeschlossen.** Diese Übergabe hält alle offenen Arbeitspakete fest; echte Integrations- und Betriebsnachweise sind die nächsten zwingenden Gates, keine durch Unit-Tests ersetzbaren Formalitäten.
