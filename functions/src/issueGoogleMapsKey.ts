@@ -24,14 +24,14 @@ export const issueGoogleMapsKey = onCall({
   const uid = auth.uid;
   const db = getFirestore();
 
-  // Subscription prüfen
-  const userDoc = await db.collection("users").doc(uid).get();
-  if (!userDoc.exists) {
-    throw new HttpsError("permission-denied", "User not found.");
+  // Subscription prüfen (Server-controlled record in subscriptions/{uid})
+  const subDoc = await db.collection("subscriptions").doc(uid).get();
+  if (!subDoc.exists) {
+    throw new HttpsError("permission-denied", "Subscription not found.");
   }
   
-  const userData = userDoc.data();
-  if (userData?.subscriptionStatus !== 'active') {
+  const subData = subDoc.data();
+  if (subData?.status !== 'active') {
     throw new HttpsError("permission-denied", "Active subscription required.");
   }
 

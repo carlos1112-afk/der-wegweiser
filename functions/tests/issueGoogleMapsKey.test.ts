@@ -87,7 +87,7 @@ describe('issueGoogleMapsKey', () => {
     const err: any = await issueGoogleMapsKey.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
     expect(err.code).toBe('permission-denied');
-    expect(err.message).toBe('User not found.');
+    expect(err.message).toBe('Subscription not found.');
   });
 
   it('should throw permission-denied if user doc data is missing', async () => {
@@ -101,7 +101,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should throw permission-denied if subscription is not active', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'canceled' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'canceled' }) });
     const err: any = await issueGoogleMapsKey.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
     expect(err.code).toBe('permission-denied');
@@ -110,7 +110,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should throw resource-exhausted if transaction throws resource-exhausted', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce(new HttpsError('resource-exhausted', 'Rate limit exceeded. Try again later.'));
     const err: any = await issueGoogleMapsKey.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
@@ -120,7 +120,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should throw internal if transaction throws random error', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce(new Error('Random DB Error'));
     const err: any = await issueGoogleMapsKey.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
@@ -130,7 +130,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should throw internal if transaction throws random string error', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce({code: 'some-other-error'});
     const err: any = await issueGoogleMapsKey.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
@@ -140,7 +140,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should return api key on success', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
         const t = {
             get: jest.fn().mockResolvedValueOnce({ exists: false }),
@@ -151,13 +151,13 @@ describe('issueGoogleMapsKey', () => {
 
     const res = await issueGoogleMapsKey.run(req);
     expect(res).toEqual({ key: 'mock-api-key' });
-    expect(mockCollection).toHaveBeenCalledWith('users');
+    expect(mockCollection).toHaveBeenCalledWith('subscriptions');
     expect(mockCollection).toHaveBeenCalledWith('keyRequests');
   });
 
   it('should initialize empty requests if missing timestamps', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
         const t = {
@@ -207,7 +207,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should allow if request is exactly at 60s boundary', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     // Captured BEFORE run so now_function - boundaryTimestamp >= 60000 → filtered out
     const boundaryTimestamp = Date.now() - 60000;
 
@@ -225,7 +225,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should return exact rate limit error message', async () => {
       const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-      mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+      mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
       mockRunTransaction.mockImplementationOnce(async (cb: any) => {
           const t = {
@@ -242,7 +242,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should clear old requests in transaction', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     const mockSet = jest.fn();
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
@@ -274,7 +274,7 @@ describe('issueGoogleMapsKey', () => {
   it('should block requests with timestamps 30s old (within 60s window)', async () => {
     // Kills ArithmeticOperator: 60 * 1000 → 60 / 1000
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
       const thirtySecondsAgo = Date.now() - 30_000;
@@ -297,7 +297,7 @@ describe('issueGoogleMapsKey', () => {
   it('should succeed when doc.data() returns undefined (optional chain guard)', async () => {
     // Kills OptionalChaining: data?.timestamps → data.timestamps (would throw TypeError)
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
       const t = {
@@ -314,7 +314,7 @@ describe('issueGoogleMapsKey', () => {
   it('should rethrow any HttpsError from transaction as rate-limit error (not internal)', async () => {
     // Kills LogicalOperator: || → && on line 64
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce(new HttpsError('unavailable', 'Firestore timeout'));
 
     const err: any = await issueGoogleMapsKey.run(req).catch(e => e);
@@ -326,7 +326,7 @@ describe('issueGoogleMapsKey', () => {
   it('should rethrow plain error with resource-exhausted code as rate-limit (not internal)', async () => {
     // Kills ConditionalExpression and StringLiteral on error.code check
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce({ code: 'resource-exhausted', message: 'quota' });
 
     const err: any = await issueGoogleMapsKey.run(req).catch(e => e);
@@ -344,7 +344,7 @@ describe('issueGoogleMapsKey', () => {
     // Kills StringLiteral on L57:30 (code="") and L57:52 (message="")
     // Intercepts the error thrown INSIDE the transaction callback before the outer catch rewraps it
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     let transactionThrown: any;
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {

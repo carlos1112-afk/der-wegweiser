@@ -85,12 +85,12 @@ describe('issueCesiumIonToken', () => {
     const err: any = await issueCesiumIonToken.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
     expect(err.code).toBe('permission-denied');
-    expect(err.message).toBe('User not found.');
+    expect(err.message).toBe('Subscription not found.');
   });
 
   it('should throw permission-denied if subscription is not active', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'canceled' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'canceled' }) });
     const err: any = await issueCesiumIonToken.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
     expect(err.code).toBe('permission-denied');
@@ -99,7 +99,7 @@ describe('issueCesiumIonToken', () => {
 
   it('should throw resource-exhausted if transaction throws resource-exhausted', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce(new HttpsError('resource-exhausted', 'Rate limit exceeded. Try again later.'));
     const err: any = await issueCesiumIonToken.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
@@ -109,7 +109,7 @@ describe('issueCesiumIonToken', () => {
 
   it('should throw internal if transaction throws random error', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce(new Error('Random DB Error'));
     const err: any = await issueCesiumIonToken.run(req).catch(e => e);
     expect(err).toBeInstanceOf(HttpsError);
@@ -119,7 +119,7 @@ describe('issueCesiumIonToken', () => {
 
   it('should return ion token on success', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
         const t = {
             get: jest.fn().mockResolvedValueOnce({ exists: false }),
@@ -130,13 +130,13 @@ describe('issueCesiumIonToken', () => {
 
     const res = await issueCesiumIonToken.run(req);
     expect(res).toEqual({ token: 'mock-ion-token' });
-    expect(mockCollection).toHaveBeenCalledWith('users');
+    expect(mockCollection).toHaveBeenCalledWith('subscriptions');
     expect(mockCollection).toHaveBeenCalledWith('cesiumKeyRequests');
   });
 
   it('should enforce rate limit inside transaction', async () => {
       const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-      mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+      mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
       mockRunTransaction.mockImplementationOnce(async (cb: any) => {
           const t = {
@@ -154,7 +154,7 @@ describe('issueCesiumIonToken', () => {
 
   it('should allow if less than 5 recent requests', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
         const t = {
@@ -170,7 +170,7 @@ describe('issueCesiumIonToken', () => {
 
   it('should clear old requests in transaction', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     const mockSet = jest.fn();
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
@@ -200,7 +200,7 @@ describe('issueCesiumIonToken', () => {
 
   it('should use a separate rate-limit collection from issueGoogleMapsKey (cesiumKeyRequests, not keyRequests)', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
         await cb({ get: jest.fn().mockResolvedValueOnce({ exists: false }), set: jest.fn() });
     });
@@ -210,7 +210,7 @@ describe('issueCesiumIonToken', () => {
 
   it('should rethrow any HttpsError from transaction as rate-limit error (not internal)', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
     mockRunTransaction.mockRejectedValueOnce(new HttpsError('unavailable', 'Firestore timeout'));
 
     const err: any = await issueCesiumIonToken.run(req).catch(e => e);

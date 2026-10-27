@@ -104,6 +104,9 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create, update: if false;
     }
+    match /subscriptions/{userId} {
+      allow read, write: if false;
+    }
 
     // --- 2. Charging Stations (Community-Ladeinfrastruktur) ---
     // Lesen: öffentlich (gemeinnützige Infrastruktur, Ladefotos/Preise).

@@ -36,7 +36,7 @@ const NOW = 1_700_000_000_000;
 
 async function runWithTimestamps(timestamps: number[]) {
   const req: any = { app: { appId: 'a' }, auth: { uid: 'u1' } };
-  mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+  mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
   const set = jest.fn();
   mockRunTransaction.mockImplementationOnce(async (cb: any) => {
     await cb({ get: jest.fn().mockResolvedValueOnce({ exists: true, data: () => ({ timestamps }) }), set });
