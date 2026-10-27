@@ -1,100 +1,67 @@
-# Routingumsetzung – Arbeitsstand und Übergabe
+# Routingumsetzung – aktueller Arbeitsstand
 
-Stand: 27.10.2026. **Teilumsetzung, keine Produkt- oder Betriebsfreigabe.**
+Stand: 27.10.2026. **Lokal weiter umgesetzt; Gesamtplan und Betriebsfreigabe weiterhin offen.**
 
-## Auftrag und isolierte Arbeitskopie
+Arbeitskopie: `/Users/pascalgregor/Documents/worktrees/wegweiser-routing`, Branch `codex/routing-implementation-20261027`, Basis `8447969`. Ursprung/main bleibt unverändert. Keine Agenten, Installation, Graphdownloads, Kontoverbindung, Livekontomigration, Push oder Deployment. Der vollständige [Arbeitsplan](ROUTING_IMPLEMENTATION_WORKPLAN.md) und [Architekturvertrag](ROUTING_AI_ARCHITECTURE_PLAN.md) bleiben maßgeblich. Die frühere Warteanweisung wurde vom Benutzer aufgehoben; der Auftrag umfasst weiterhin alle Phasen.
 
-[FAKT] Ursprung `/Users/pascalgregor/Documents/DER-WEGWEISER(AndroidStudio)` auf `main`, Commit `8447969`. Neuer Worktree `/Users/pascalgregor/Documents/worktrees/wegweiser-routing`, Branch `codex/routing-implementation-20261027`, vom ausdrücklich beauftragten Commit. Ziel/Branch waren zuvor nicht vorhanden. Die drei ungetrackten Pläne wurden kopiert. `.artifacts/` im Ursprung blieb unangetastet. Keine Installation, kein Push, kein Deploy, kein Modellkauf und kein Graphdownload.
+Der [historische Ausgangsbericht](ROUTING_BASELINE_20261027.md) hält die erste Phase und ihre damaligen Grenzen fest. Die folgende Fortsetzung ersetzt dessen Implementierungsstatus.
 
-Die frühere Warteanweisung in den Plänen ist durch den Umsetzungsauftrag aufgehoben. Die Gates, Daten-/Gerätenachweise und das Veröffentlichungsverbot bleiben bestehen. Keine Agenten verwendet. Lokale Bibliotheken werden über ignorierte `node_modules`-Symlinks wiederverwendet; für eine unabhängige spätere Installation sind die vorhandenen Lockfiles maßgeblich.
+## Seit der Fortsetzung tatsächlich geändert
 
-## Phase 0 – gemessener Bestand
+- **Wallet/Writer:** echter gemeinsamer Firestore-Transaktionsadapter mit deterministischen Belegen, Reservierungszuständen, Pause/Schemaversion, Sperrprüfung, Openingbelegen und strikt wiederholbarer Einzelkontomigration. Quiz, Rad und Gutscheine sind umgestellt. Alte Unlimitedfelder stellen Gutscheine nicht mehr frei. Ungültige oder nicht migrierte Konten erhalten kein erfundenes Guthaben.
+- **Regeln/Löschung:** direkte Konto-/Ledger-/Jobschreibzugriffe einschließlich Kontolöschen gesperrt; eigene Belege lesbar. Kontolöschung setzt eine Löschsperre, löst offene Reservierungen und entfernt persönliche Belege/Jobs/Subscriptiondaten. Verspätete Walletarbeit kann das Konto nicht wieder anlegen. Lokale Löschfehler werden sichtbar gemeldet; andere Bereinigungen werden trotzdem versucht.
+- **Ausgangsfehler:** die acht ursprünglichen Functions-Fehler sind behoben: veraltete Subscription-Testdaten, nicht zurückgesetzte Mocks und ein unvollständiger Lösch-Mock. Die produktive Subscription-Autorisierung wurde dafür nicht gelockert.
+- **Suche:** Betreiber-Callable und Browseradapter, explizites Absenden, maximal fünf Ergebnisse, Eingabe-/Antwortprüfung, Timeout, Ratenbegrenzung, Generation/Abort und Consent-/Authschutz. Öffentliche Nominatim-Autocomplete entfernt; Koordinatenauswahl funktioniert ohne neue Geocodinganfrage.
+- **Free-Routing:** vorbereitetes geschlossenes Betreiberbackend, Capabilityantwort, feste Profil-/URLgrenzen, Größen-/Zeitlimits und gemeinsame Validierung. Browser prüft Geometrie und kanonische Request-/Inhaltshashes erneut; Free kostet 0 Token und verwendet keinen Modell-/Walletendpunkt. Tatsächliche Betreiberfreigabe und Manöver bleiben ausstehend.
+- **Einstiege/Navigation:** kostenlose Ziel- und Stationsplanung verwenden denselben Vertrag. Keine nachträgliche Zielpunktverschiebung. Vorschau ersetzt eine Strecke erst nach Übernahme. GPS-Messzeit/-genauigkeit und manuelle Startwahl ersetzen den stillen Berliner Standardstart. Kreis-/Luftlinien-/OSRMfallbacks, erfundene Oberflächen-/Ladeversprechen, winkelbasierte Straßennamen und künstliche Steigungsfarben entfernt. Alte/serialisierte Validierungsflags starten keine Führung.
+- **Alte KI-Wege:** Legacy-`computeRoute` liefert keine Stubroute und ruft keinen Provider auf. Nicht abgenommene KI-Rundtour/Premium/Offlineplanung sind geschlossen. Automatische Abweichung ersetzt die Originalroute nicht mehr durch eine neue KI-Tour; noch fehlende echte Rückführung wird sichtbar benannt.
 
-- Node `v24.21.0`, Java Temurin `26.0.2.1`, Google Cloud SDK `588.0.0`, ADB `37.0.1`; Android-SDK-Verzeichnisse vorhanden. Das beweist keinen erfolgreichen Androidbuild.
-- Reale BRouter-Probe mit neutralen Berliner Testpunkten: `curl --max-time 15 --fail --silent --show-error 'https://brouter.de/brouter?lonlats=13.40,52.52%7C13.41,52.52&profile=trekking&alternativeidx=0&format=geojson&timode=2'`. Ergebnis: Exit 6, DNS-Auflösung fehlgeschlagen. Keine echte Fixture gespeichert, Via-/Manöverprobe weiterhin offen.
-- `bibel.local`: DNS-Fehler; lokaler Snapshot `/Users/pascalgregor/.codex/bibel/Bibel-v2.1.md` und passende Kapitel gelesen. Keine rechtliche Konformitätsbehauptung.
-- `gcloud auth list --filter=status:ACTIVE --format='value(account)'`: kein aktives Konto. Projektzugriff, Billing, regionale Providerantwort und Preisfreigabe fehlen. Keine Anmeldung oder Kontoverbindung ausgelöst.
-- Der vorhandene Functions-Abhängigkeitsbaum enthält `@google/genai` 1.52.0 einschließlich Typdefinitionen. Das Paket ist in `functions/package.json` noch keine direkte gepinnte Abhängigkeit; kein reproduzierbarer SDK-Integrationsnachweis. Vorhandenes Legacy-Vertex-SDK ist kein Ersatz für die Modellprobe.
-- `adb devices`: Start des lokalen Listeners mit `Operation not permitted` fehlgeschlagen, außerdem USB-Interfacefehler. Keine Geräte-, Flugmodus-, Speicher- oder Hintergrundmessung möglich.
-- Frontend-Ausgangslauf `npm test -- --reporter=dot`: 32 Suites bestanden, 2 übersprungen, 1 fehlgeschlagen; 375 Tests bestanden, 13 übersprungen, 11 todo. Fehler in `tests/scripts/anthropicFederationExchange.test.ts`: lokaler Socket `127.0.0.1` mit EPERM verweigert, danach Hooktimeout. Bestehende React-act-/Mockwarnungen sichtbar.
-- Functions-Ausgangslauf `npm test -- --runInBand`: 7 Suites bestanden, 2 fehlgeschlagen; 112 Tests bestanden, 8 fehlgeschlagen. Sieben Fehler in `issueGoogleMapsKey.test.ts` (Subscription-/Ratenlimit-Mocks), einer in `accountDeletion.test.ts` (Bereinigung). Diese Fehler bestanden vor neuen Produktionsänderungen; ihre Ursache wurde nicht abschließend behoben.
+## Gates und verbleibende Arbeit
 
-### Aufrufinventar (gelesener Quellcode)
-
-| Bereich | Produzenten und Konsumenten | Noch offene Umstellung |
+| Phase | Tatsächlicher Stand | Noch erforderlich |
 | --- | --- | --- |
-| Heute/Neuplanung | `App.tsx:handleRegenerateRoute` → `AiAssistantService.generateAnticipatedRoute` → `RoutingService.generateBikeRoute` und Browser-KI-Text | echter Premiumjob statt Beschreibung |
-| Automatische Abweichung | `useRouteTracker.ts` → `App.tsx:handleAutoReroute` → neue KI-Rundtour | Originalsession, kostenloser Rejoin, keine KI |
-| Ziel/Erweitert | `App.tsx:handlePlanRouteToPoint` → `AiAssistantService.generateDestinationRoute` | Standard/AI und online/local trennen |
-| Station | `handlePlanRouteToStation` berechnet Rundtour, ersetzt letzten Punkt | echtes Zielrouting |
-| Suche | `components/Search/SearchInput.tsx` öffentliche Nominatim-Debounces | Betreibersuche nach Absenden, Generation/Abort |
-| Import | `gpxImportService.ts`, GPX-Modal/gespeicherte `Route` | Legacy als ungeprüfter Track; kein Validated-Cast |
-| Browser-KI/Legacyserver | `ai/aiGatewayService.ts`, `vertexCloudAgentService.ts`, `functions/src/vertexRouting.ts:computeRoute` | nach Migration schließen; Stub nicht als Premium verwenden |
-| Geld | `tokenRewards.ts` Quiz/Rad, `index.ts` Gutscheine, `dataRepository.ts` Leser, `firestore.rules` | gemeinsame Transaktionswriter, Löschsperre, Unlimited-Ausnahme entfernen |
+| 0/1 | Bestand, gemeinsame Verträge, Runtimeprüfungen und synthetische Fixtures vorhanden | Echte P2P-/Via-/Manöverantworten, Modell-/Regions-/Preisprobe und native Signaturen; vollständiges Gate 0/1 weiter offen |
+| 2A | Free-/Suchendpunkte, Grenzen, Browser-/UIanschluss und Fehlerpfade implementiert, geschlossen | Eigene Instanzen/OSM-/Graph-/POIimporte, reales Profil-/Manöverfixture, Rundtouranker, Höhenqualität, Lizenzen, Daten-/Kostenmessung und echter Pilotfluss |
+| 2B | Writer/Transaktionsadapter/Regeln/Löschworkflow und Tests implementiert | Echte Emulator-/Konkurrenzabnahme, Kontobestand/Dry-run und Belegabgleich, freigegebene Migration, vollständiger Mutationstest; Lock-/TTL-Aufbewahrung vor Pilot entscheiden |
+| 2C | Nicht begonnen/freigegeben | Gepinnter nativer BRouterkern, originale kleine Pilotsegmente, zugängliches physisches 4-GB-Gerät und Flugmodus-/Cancel-/Speichermessung |
+| 3A | Geschlossen; Legacybypass entfernt | Premiumquotes, Jobs/Outbox/Leases/Worker, echte Planung/Auswahl, Artefakte, Budgets, Cancel/Sweeper nach 2A/2B-/Modellgates |
+| 3B | Tracker am UI angeschlossen, segment-/zeit-/qualitätsbasiert; keine KI-Reroutes | Räumlicher Index, vollständige Pflichtstoppfortschritte, echte Rejoinverbindungen/Routerkosten, Originalsession-/Manöverabnahme |
+| 3C/4B | Gesperrt | Native Paketprüfung/-download, Keystore/Foreground-Service, private Sessionpersistenz und Online-/Offline-Rejoin nach nativer Abnahme |
+| 4A | Free-Suche/Start/Ziel/Station/Vorschau/Fehler lokal verdrahtet | Premium-Kauf-/Job-/Heute-/Advancedfluss nach Backendgates sowie reale Mobil-/Browserabnahme |
+| 5/6 | Keine Freigabe | Vollständiger Qualitätskorpus, reale Plattform-/Netz-/Migrations-/Provider-/Pilotnachweise, Betriebswerte und ausdrückliche Betriebsfreigabe |
 
-[RISIKO] Bestehende Legacy-Produktrouten sind in diesem Stand noch nicht umgestellt. Ihre Kreise/Luftlinien, erfundenen Fakten, KI-Reroutes und alten Walletpfade sind keine implementierte Zielarchitektur und nicht freigegeben. Die neuen Module sind bewusst noch nicht in diese UI integriert; allein ihr Hinzufügen behebt die alten Laufzeitpfade nicht.
+## Reale Blocker
 
-## Implementierte unabhängige Vorarbeit
+[FAKT] Betreiber-URLs sind nicht konfiguriert. Die direkte BRouterprobe scheiterte an DNS; auch der Webabruf der Test-API war nicht zugänglich. Keine echte Routerfixture oder private Betreiberinstanz wurde vorgetäuscht.
 
-| Paket | Dateien | Ergebnis und Grenze |
+[FAKT] Weder eine lokale ADC-Datei noch `GOOGLE_APPLICATION_CREDENTIALS` ist vorhanden; die lokale Google-CLI hatte kein aktives Konto. Ein minimaler regionaler Modellprobeaufruf ist damit nicht durchgeführt. Preis-/Abrechnungsweg und Projektberechtigung bleiben offen. Kein automatischer Modell-/Regionswechsel.
+
+[FAKT] Der erneute Firestore-Emulatorversuch scheiterte an `listen EPERM` auf lokalen Emulatorports. ADB und Stryker waren aus demselben Grund nicht nutzbar. Die Transaktionstests nutzen ausdrücklich einen atomaren In-Memory-Adapter mit Read-Version-Retries, keinen echten Emulator.
+
+Für die tatsächliche Abnahme wurden die bereits eingerichteten Betreiber-URLs beim Benutzer angefragt; Zugangsdaten sollen ausschließlich lokal konfiguriert werden. Die Regeln, Grenzen und sichere spätere Reihenfolge stehen in [Lokale Prüfung und Betrieb](ROUTING_LOCAL_OPERATIONS.md).
+
+## Prüfnachweise
+
+[FAKT] Abschließende lokale Prüfläufe:
+
+- `npm test -- --reporter=dot --exclude tests/scripts/anthropicFederationExchange.test.ts`: **410 bestanden**, 36 Suites bestanden, 2 Suites übersprungen, 1 Test übersprungen, 11 todo. Die bekannte Socket-Suite wurde ausdrücklich ausgeschlossen; ihr EPERM-Blocker bleibt offen. Keine neue stille Testausnahme.
+- `npm test --prefix functions -- --runInBand --coverage '--collectCoverageFrom=src/wallet/*.ts' --coverageReporters=text`: **156/156 bestanden**, 15/15 Suites bestanden. Für die beiden Walletmodule: **100 % Statements/Funktionen/Zeilen, 97,60 % Zweige**; Adapter 96,92 %, reiner Kern 98,33 % Zweige. Das ist keine Abdeckung des gesamten Auth-/Job-/Migrationsbetriebs.
+- `node --import tsx --test tests/services.test.mjs`: **3/3 bestanden**. Der ursprüngliche tsx-CLIaufruf benötigte einen hier verbotenen IPC-Listener; der Node-Loader führt dieselben lokalen Tests ohne diesen Listener aus.
+- `npm run build` und `npm run build --prefix functions`: erfolgreich. Ein Build ist kein laufender Dienst oder Gerätebeweis. Die selbst erzeugten Änderungen an bereits getrackten Compilerartefakten wurden zurückgenommen; Quellen sind maßgeblich, vor Runtime/Deployment neu bauen.
+- `python3 scripts/check_wallet_integration_mutations.py`: **6/6 ausgewählte Integrationsmutationen erkannt**, Quelle im `finally` wiederhergestellt. Zwei Vorläufe wurden wegen fehlendem VM-Modulmodus bzw. einer nicht kompilierbaren Mutante abgebrochen und nicht als getötete Mutationen gezählt. Danach gültiger Baseline- und Mutationslauf. Kein vollständiger Stryker-Score.
+- Lint der geänderten/neuen TS-/TSX-Dateien: Exit 0, keine Fehler; verbleibende Warnungen (unter anderem vorhandene unbenutzte UIelemente/Hooks) nicht als fehlerfreie Codebasis verschwiegen.
+- Whitespaceprüfung mit Berücksichtigung bestehender CRLF-Dateien: `git -c core.whitespace=trailing-space,space-before-tab,cr-at-eol diff --check`, ohne Fehler. Die drei Originalpläne bleiben unverändert.
+
+Beim Integrationslauf gefundene Fehler wurden behoben: kanonische Hashes über Backend-/Browsergrenzen, Laufzeitschutz gegen gefälschte gespeicherte Validierungsflags, veraltete Winkelnavigations-Tests, Nullwertdarstellung, Erkennung von Teilfehlern bei Löschung und das Ratenlimit über den Stundenwechsel. Die Rate-/Geldtests verwenden keine echten Nutzerkonten oder Providerkosten.
+
+Es wird keine vollständige Abnahme, Geräteprüfung, rechtliche Konformität oder Echtanbieterqualität aus Unit-Tests abgeleitet.
+
+## Lokale Umsetzungseinheiten der Fortsetzung
+
+| Commit | Inhalt | Restgrenze |
 | --- | --- | --- |
-| 1.1/1.2/1.4 | `functions/src/routing/contracts.ts`, `src/types/routing.ts` | Ein gemeinsamer Browser-/Functions-Vertrag: SI/benannte Koordinaten, Standort-/Profilsnapshot, getrennte Planungs-/Ausführungsmodi, Metrikqualität, Manöver, Fähigkeiten, Originalsession, Fehlercodes. Preislimits zentral. Kein reales Fähigkeitsendpoint. |
-| 1.3 | `src/services/routeCoordinator.ts` | Vorschau getrennt von aktiver Fahrt; Generation, Abort, Auth-/Consentinvalidierung. Premium bis zum Backend geschlossen. Noch kein Reactanschluss, kein persistenter Premiumjob/-cancel. |
-| 1.5/2A.5 Vorbereitung | `functions/src/routing/geometry.ts`, `validation.ts` | Runtime-Eingaben, endliche Koordinaten, Geometrie-/Artefaktgrenzen, Endpunkte, segmentbasierte Via-Reihenfolge, Distanzvergleich, harte Kriterien, Manöverindex/-distanz, SHA-256-Request-/Inhaltshash, unveränderliches Ergebnis, opaker Validated-Typ. Kein unabhängiger Beweis jeder Graphkante; echte Adapter-/Abdeckungs-/Profilregistry noch nötig. |
-| 2B.1/2B.2 Vorbereitung | `functions/src/wallet/ledger.ts` | Reine Integer-/Saldo-/Reservierungsinvarianten, credit/reserve/capture/release/spend/refund, Replaykonflikte, Sperrprüfung, striktes Opening und read-only Audit ohne Summenpräzisionsverlust. Noch keine Firestore-Transaktionen, keine umgestellten Writer und keine Kontomigration. |
-| 3B Vorbereitung | `src/services/navigationProgress.ts` | Segmentprojektion mit Fortschrittsfenster, Messalter/Genauigkeit, Sprungfilter, Drei-Fix-/8-s-Hysterese, Rückkehr-/Cooldown-/Ein-Auftrag-Logik, maximal fünf Vorschläge vor nächstem Pflichtstopp. Synthetische Unitfälle, kein räumlicher Index, keine echten Rejoinstrecken/Routerkosten, keine Hook-/Geräteintegration. |
+| `bd3b687` | Atomare Walletwriter, Migration-/Löschsperren, Bereinigung und zugehörige Tests | Emulator-/Bestands-/Migrationsabnahme offen |
+| `768ad31` | Geschlossene Betreiber-Suche/Free-API, Hash-/Validierungsgrenzen, Ratenlimit und Legacyendpunkt geschlossen | Eigene Dienste und echte Graph-/Manöverantworten fehlen |
+| `52de967` | Free-Einstiege, bewusster Start/Vorschau, keine Scheinrouten/erfundenen Hinweise, Trackeranschluss und Tests | Vollständige Session-/Rejoin-/Premium-/Nativeintegration offen |
 
-## Gates und ausstehende Arbeit (vollständiger Auftrag bleibt erhalten)
-
-- **Gate 0: offen.** Echte P2P-/Via-/Manöverantworten und bestätigter regionaler Modellzugriff fehlen. Betreibergraph, Nominatim/PostGIS, OSM-Import/Lizenzen, CPU/RAM/Volumen-/Kostenmessung nicht vorhanden/geprüft. Früherer Push wurde nicht per Remote geprüft.
-- **Gate 1: teilweise.** Beide Projekte kompilieren den gemeinsamen Vertrag; Unitfixtures sind ausdrücklich synthetisch. Keine eingefrorene Provider-/Nativeintegration oder echte Routerfixture behauptet.
-- **2A: nicht abgenommen.** Betreiberinfrastruktur, Free-Callable, Suche/POIs, Profilregistry, Rundtourbewertung, Fallbackentfernung und früher UI-Freefluss offen.
-- **2B: nicht abgenommen.** Nur reiner Kern vorbereitet. Transaktionsadapter, sämtliche Writer, Regeln, Migrationspause/-durchlauf, Kontolöschworkflow, Emulator-Konkurrenzfälle und volle kritische Mutationstests offen.
-- **2C: blockiert/nicht begonnen.** Gepinnter nativer BRouterkern, originale Segmentdaten und physisches Gerät mit messbarem Zugriff fehlen. Keine Offlinefähigkeit zusagen.
-- **3A: blockiert durch 2A/2B/Modellprobe.** Quotes, Jobs/Outbox/Leases/Worker, private Artefakte, Planung/Auswahl, Budgets, Cancel/Sweeper und alte Endpunktmigration vollständig offen.
-- **3B: nicht abgenommen.** Reiner Tracker vorbereitet; räumlicher Index, Pflichtstoppnachweis, tatsächliche kostenlose Verbindungen/Routerkosten, Hook/Manöver/Ansagen und vollständige Sessionintegration offen.
-- **3C/4B: warten auf native Abnahme.** Manifest/Download/Keystore/Foreground-Service, Paket- und Sessionlebenszyklus sowie Online-/Offline-Rejoin offen.
-- **4A: wartet auf Backendgates.** Menü, echte Suche/Startwahl, Käufer-/Job-/Fehler-/Vorschauintegration und Mobilabnahme offen.
-- **5/6: nicht freigegeben.** Gesamtkorpus, Migration auf Testkopie, kritische Geld/Auth/Jobabnahme, reale Plattform-/Netz-/Pilotmessungen, Betriebswerte und ausdrückliche Betriebsfreigabe fehlen. Kein Deployment/Push beauftragt.
-
-## Sichere Fortsetzung
-
-1. In genau diesem Worktree starten; `git status` und diesen Bericht lesen, keine neuen Branches/Installationen nötig. Keine vorhandenen Änderungen zurücksetzen.
-2. Netzwerkfähige Ausführung für kleine Routerproben und Zugriff auf die gewählte Betreiberinstanz bereitstellen; reale P2P-/Via-/Manöverfixtures erst danach als solche speichern. BRouter-Upstream v1.7.10 ist nur ein geprüfter Releasekandidat, noch kein gebauter/gepinnter Projektadapter.
-3. Autorisierten regionalen Modellzugriff ohne Geheimnisse im Chat prüfen; tatsächliche SDK-Abhängigkeit reproduzierbar pinnen. Kein automatischer Regions-/Modellwechsel, kein Budgetversprechen aus Dokumentation.
-4. In einer Umgebung mit erlaubten lokalen Listenern Emulator-/ADB-/Strykerprüfungen durchführen. Die Socketbeschränkung nicht durch fremde Rechner oder Cloudfallback umgehen.
-5. Erst mit echten Verträgen 2A und 2C fortführen, Wallettransaktionen/Migration unabhängig vorbereiten und abnehmen. Danach weitere Phasen gemäß unverändertem Arbeitsplan.
-
-Rollback: Neue Vorarbeitsmodule haben keine bestehenden Konfigurationen oder Produktionswriter ersetzt. Git-Basis `8447969` und das unveränderte Ursprungsrepo bleiben Referenzen. Keine pauschalen Reset-/Löschbefehle für Benutzerdaten.
-
-## Externe Quellenprüfung (27.10.2026)
-
-[FAKT] Die [Google-Modellseite](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-5-flash) nennt `gemini-3.5-flash` als GA, strukturierte Ausgabe und `europe-west3` in der Regionsliste. Standard PayGo wird dort gesondert nur für global/us/eu aufgeführt. [RISIKO] Das bestätigt den geplanten regionalen Bezugs-/Abrechnungsweg noch nicht. Keine Ausweichregion gewählt. Abruf der offiziellen Preisseite scheiterte mit Timeout; aktuelle Preise bleiben ungeprüft.
-
-[FAKT] Die [BRouter-Releases](https://github.com/abrensch/brouter/releases) und der [ServerHandler auf v1.7.10](https://github.com/abrensch/brouter/blob/v1.7.10/brouter-server/src/main/java/btools/server/request/ServerHandler.java) wurden als Primärquellen geöffnet. Kein gebauter nativer Kern und kein Real-Graph-Vertrag daraus abgeleitet. Der öffentliche Webabruf ersetzt die gescheiterte direkte Routerprobe nicht.
-
-## Prüfungen der neuen Vorarbeit
-
-- `./node_modules/.bin/vitest run tests/services/routingContracts.test.ts tests/services/navigationProgress.test.ts --reporter=dot`: 27 Tests bestanden; mehrfach nach relevanten Änderungen ausgeführt. Synthetische Geometrien sind im Test explizit bezeichnet. Fehlerfälle: ungültige Eingaben, Endpunkte/Via-Reihenfolge, harte Kriterien ohne Evidenz, Manöverindex, Consent/Auth-/Requestrennen, GPSqualität, Rundtourstart, Rejoinhysterese/-limits.
-- `npm run build` im Worktree und in `functions`: erfolgreich. Browser und Functions kompilieren dieselben Routingdateien; kein Code-Duplikat. Der Frontendbuild ist kein Laufzeit-/Gerätenachweis.
-- `cd functions && npm test -- --runInBand tests/walletLedger.test.ts --coverage --collectCoverageFrom=src/wallet/ledger.ts --coverageReporters=text`: 13 Tests bestanden, 98,70 % Statements, 100 % Funktionen/Zeilen, 96,66 % Zweige. Ausschließlich dieser reine Kern gemessen; keine Gesamtsystem- oder Transaktionsabdeckung.
-- `cd functions && NODE_OPTIONS=--experimental-vm-modules ./node_modules/.bin/stryker run stryker.wallet.conf.js`: EPERM beim lokalen Listener, kein vollständiger Mutation-Score. Reproduzierbare Konfiguration liegt bei.
-- `scripts/check_wallet_mutations.py`: gezielte Ergänzung ohne Listener. Ein erster Lauf wurde nach einer getöteten Mutation wegen mehrdeutiger Ersetzung abgebrochen; Quelle im `finally` wiederhergestellt und Ersetzung präzisiert. Ergebnis des vollständigen erneuten Laufs wird unten dokumentiert.
-- Drei kopierte Pläne byteweise mit dem Ursprung verglichen: identisch. `git diff --check`: keine Whitespacefehler. Keine bestehende Anwendungskonfiguration verändert; keine Kontoverbindung eingerichtet.
-
-
-## Abschließender lokaler Stand
-
-[FAKT] Der erneute gezielte Mutationslauf `python3 scripts/check_wallet_mutations.py` hat alle **7/7** kuratierten Mutationen durch echte Testfehler erkannt: negative Beträge, negative Salden, falsches Capture-/Release-Delta, veränderte Replaybeträge, ignorierte Kontosperre und wiederholbare Erstattung. Baseline bestand, Quelle wurde im `finally` wiederhergestellt. Das ist kein vollständiger Stryker-Mutationsscore und kein Emulator-/Authnachweis. Anschließender Wallet-Testlauf nach der Fehlerweitergabe im Audit: 13/13 bestanden, aktuelle Coverage wie oben. Anschließende Builds beider Projekte bestanden.
-
-Lokale Umsetzungseinheiten:
-
-| Commit | Inhalt | Prüfung/Restgrenze |
-| --- | --- | --- |
-| `dfd0e34` | Kopierte Pläne und Phase-0-/Gatebericht | Pläne identisch; keine Implementierungsabnahme |
-| `bead64f` | Gemeinsamer Vertrag, Validator und Coordinator | Vertrags-/Race-Unitfälle; echte Fixtures fehlen |
-| `957c86c` | Fortschritts-/Rejoinvorarbeit | Synthetische Trackerfälle; keine Integration |
-| `4fa01e3` | Normalisierte Requesthashes und Übernahmebindung | Routingtests jetzt 27/27, Frontendbuild bestanden |
-| `2adbd10` | Walletkern, Audit und Prüfskripte | 13/13 Unitfälle, gemessene Coverage, 7 kuratierte Mutationen; Transaktionen/Migration offen |
-
-[FAKT] Ursprungs-`main` verbleibt auf `8447969`. Keine Änderungen an bestehenden Anwendungs-/Betriebskonfigurationen und keine produktiven Wallet-/Routingwriter migriert. **Der vollständige Arbeitsplan ist nicht abgeschlossen.** Diese Übergabe hält alle offenen Arbeitspakete fest; echte Integrations- und Betriebsnachweise sind die nächsten zwingenden Gates, keine durch Unit-Tests ersetzbaren Formalitäten.
+Rollback bleibt über diese lokalen Commits und Basis `8447969` nachvollziehbar. Es wurde nichts gepusht oder ausgerollt; insbesondere wurden keine produktiven Konten, Regeln, Flags oder Daten migriert.
