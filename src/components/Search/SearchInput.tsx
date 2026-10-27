@@ -185,20 +185,25 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           {error ? (
             <li className={styles.errorItem}>{error}</li>
           ) : (
-            results.map((item, idx) => (
-              <li
-                key={idx}
-                className={styles.resultItem}
-                role="option"
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  handleSelect(item);
-                }}
-              >
-                <span className={styles.resultPin}>📍</span>
-                <span className={styles.resultLabel}>{item.display_name}</span>
+            <>
+              {results.map((item, idx) => (
+                <li
+                  key={idx}
+                  className={styles.resultItem}
+                  role="option"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleSelect(item);
+                  }}
+                >
+                  <span className={styles.resultPin}>📍</span>
+                  <span className={styles.resultLabel}>{item.display_name}</span>
+                </li>
+              ))}
+              <li style={{ padding: '6px 12px', fontSize: '0.65rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-glass)', textAlign: 'center', background: 'rgba(0,0,0,0.2)' }}>
+                ℹ️ Suchanfragen werden zur Geokodierung an OpenStreetMap Nominatim übermittelt.
               </li>
-            ))
+            </>
           )}
         </ul>
       )}
