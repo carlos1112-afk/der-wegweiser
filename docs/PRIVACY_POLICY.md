@@ -64,6 +64,8 @@ Server-Standort: Google Cloud Platform (Frankfurt am Main, Region `europe-west3`
 | **Cesium ion** (Premium-3D-Kartenmodi: Satellit/Topo/Bike Premium) | 3D-Terrain, Luftbild-Imagery, OSM-Gebäude-Kacheln | Kachel-/Terrain-Koordinaten, IP-Adresse, User-Agent | **Anbieter Cesium GS, Inc. (USA) — genauer Server-Standort/Rechtsgrundlage nicht verifiziert, siehe PR**; Cesium ion Terms of Service | Server-Access-Logs des Anbieters |
 | **Open-Meteo API** | Wind-, Wetter- & Höhenabfragen | Geografische Koordinaten, IP-Adresse | **EU (Open-Meteo GmbH)**; Art. 6 Abs. 1 lit. b DSGVO; Open-Meteo Terms | Flüchtig zur Übertragung; Server-Logs werden nach max. 90 Tagen gelöscht |
 | **OpenStreetMap Nominatim** | Adress-Geokodierung & Zielsuche | Eingegebene Suchbegriffe / Adressen, IP-Adresse, User-Agent | **Global / OpenStreetMap Foundation**; Art. 6 Abs. 1 lit. b DSGVO; OSM Nominatim Usage Policy | Server-Access-Logs des Anbieters |
+| **BRouter (brouter.de)** | Online-Routenberechnung & Höhenprofil-Matching | Start-, Via- und Zielkoordinaten, IP-Adresse, User-Agent | **Deutschland / EU (BRouter Open Source Projekt)**; Art. 6 Abs. 1 lit. b DSGVO; BRouter Terms | Server-Access-Logs des Anbieters |
+| **Project-OSRM (router.project-osrm.org)** | Fallback-Routenberechnung | Start- und Zielkoordinaten, IP-Adresse, User-Agent | **Global / Open Source Routing Machine**; Art. 6 Abs. 1 lit. b DSGVO; OSRM Terms | Server-Access-Logs des Anbieters |
 | **BitLabs / CPX Research** | Freiwillige bezahlte Marktforschung | Pseudonyme User-ID, Session-ID | **USA / EU**; Art. 6 Abs. 1 lit. a DSGVO; EU-US Data Privacy Framework / SCC | Gemäß Richtlinien des jeweiligen Umfrage-Partners |
 
 ---

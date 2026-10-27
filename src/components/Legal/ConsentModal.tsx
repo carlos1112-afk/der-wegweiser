@@ -180,7 +180,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
                 <ShieldCheck size={20} color="var(--accent-gold)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '0.8rem', color: '#fff', lineHeight: '1.4' }}>
                   <strong style={{ color: 'var(--accent-gold)' }}>🛡️ Garantierter Ausschluss des Datenverkaufs:</strong><br />
-                  Deine Daten werden <strong>ausschließlich an den Betreiber persönlich (Carlos)</strong> übermittelt und strikt nur für die Funktionen der App verarbeitet. Ein Weiterverkauf oder Handel an Datenbroker/Dritte ist <strong>dauerhaft und ausnahmslos ausgeschlossen</strong>.
+                  Für die Online-Routenberechnung werden Start- und Zielkoordinaten an externe Routing-Dienste (<strong>BRouter</strong> & <strong>Project-OSRM</strong>) übermittelt. Abgesehen davon werden Daten <strong>ausschließlich an den Betreiber persönlich (Carlos)</strong> übermittelt und strikt nur für die Funktionen der App verarbeitet. Ein Weiterverkauf oder Handel an Datenbroker ist <strong>dauerhaft und ausnahmslos ausgeschlossen</strong>.
                 </div>
               </div>
             </div>
