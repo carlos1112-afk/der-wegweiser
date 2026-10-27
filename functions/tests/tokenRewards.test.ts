@@ -30,6 +30,7 @@ jest.mock('firebase-admin/firestore', () => ({
     runTransaction: async (callback: any) => callback({
       get: async (ref: any) => ({ exists: mockStore.has(ref.path), data: () => mockStore.get(ref.path) }),
       set: (ref: any, value: any) => mockStore.set(ref.path, { ...value }),
+      create: (ref: any, value: any) => { if (mockStore.has(ref.path)) throw new Error('already exists'); mockStore.set(ref.path, value); },
       update: (ref: any, value: any) => mockStore.set(ref.path, { ...mockStore.get(ref.path), ...value }),
     }),
   })),
@@ -39,7 +40,7 @@ import { getTokenQuizChallenge, submitTokenQuizAnswer, getTokenWheelStatus, spin
 const run = (callable: any, req: any) => callable.run(req);
 
 describe('server-verified token quiz rewards', () => {
-  beforeEach(() => mockStore.clear());
+  beforeEach(() => { mockStore.clear(); mockStore.set('wallet_control/current', { state: 'active', schemaVersion: 1 }); });
 
   const request = (data = {}, uid = 'rider-1', app: any = { appId: 'test-app' }) => ({
     auth: uid ? { uid } : null,
@@ -67,7 +68,7 @@ describe('server-verified token quiz rewards', () => {
     const stored = mockStore.get('token_quiz_challenges/rider-1');
     const result = await run(submitTokenQuizAnswer, request({ challengeId: challenge.challengeId, answerLabel: stored.answer }));
     expect(result).toMatchObject({ correct: true, balance: 6, rewardTokens: 6 });
-    expect(mockStore.get('user_tokens/rider-1')).toMatchObject({ userId: 'rider-1', balance: 6, lifetimeEarned: 6, unlimitedOnDemand: false });
+    expect(mockStore.get('user_tokens/rider-1')).toMatchObject({ userId: 'rider-1', balance: 6, lifetimeEarned: 6, schemaVersion: 1, reservedBalance: 0 });
     const replay = await run(submitTokenQuizAnswer, request({ challengeId: challenge.challengeId, answerLabel: stored.answer })).catch((error: any) => error);
     expect(replay).toBeInstanceOf(HttpsError);
     expect(replay.code).toBe('already-exists');
@@ -95,7 +96,7 @@ describe('server-verified token quiz rewards', () => {
 });
 
 describe('server-authoritative token wheel', () => {
-  beforeEach(() => mockStore.clear());
+  beforeEach(() => { mockStore.clear(); mockStore.set('wallet_control/current', { state: 'active', schemaVersion: 1 }); });
 
   const request = (uid = 'rider-1', app: any = { appId: 'test-app' }) => ({ auth: uid ? { uid } : null, app, data: {} });
 

@@ -99,10 +99,20 @@ service cloud.firestore {
       allow read, write, delete: if isOwner(userId);
     }
     match /user_tokens/{userId} {
-      // Guthaben und Berechtigungs-Token dürfen nicht direkt vom Client erstellt oder geändert werden,
-      // um Manipulationen zu verhindern (Backend Admin-SDK veraltet verarbeitet Schreibzugriffe).
-      allow read, delete: if isOwner(userId);
-      allow create, update: if false;
+      allow read: if isOwner(userId);
+      allow create, update, delete: if false;
+    }
+    match /token_ledger/{receiptId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    match /token_reservations/{reservationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    match /premium_route_jobs/{jobId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
     }
     match /subscriptions/{userId} {
       allow read, write: if false;

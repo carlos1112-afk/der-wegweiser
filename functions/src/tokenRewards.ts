@@ -1,5 +1,6 @@
+import { deletionLockId, prepareWalletMutation } from './wallet/firestoreLedger';
 import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { FieldValue, getFirestore, type Transaction, type Firestore } from "firebase-admin/firestore";
 import { randomInt } from "node:crypto";
 
 const QUIZ_REWARD = 6;
@@ -70,6 +71,13 @@ function requireVerifiedCaller(request: { auth?: { uid: string } | null; app?: u
   return request.auth.uid;
 }
 
+async function requireOpenAccount(db: Firestore, transaction: Transaction, uid: string): Promise<void> {
+  const deletion = await transaction.get(db.collection('account_deletion_locks').doc(deletionLockId(uid)));
+  if (deletion.exists) throw new HttpsError('permission-denied', 'Account deletion is in progress.');
+  const control = await transaction.get(db.collection('wallet_control').doc('current'));
+  if (control.data()?.state !== 'active' || control.data()?.schemaVersion !== 1) throw new HttpsError('failed-precondition', 'Token mutations are paused for migration.');
+}
+
 function utcDay(now = Date.now()): string {
   return new Date(now).toISOString().slice(0, 10);
 }
@@ -79,6 +87,7 @@ async function enforceQuizRequestLimit(uid: string, kind: "challenge" | "answer"
   const ref = db.collection("token_quiz_rate_limits").doc(uid);
   const now = Date.now();
   await db.runTransaction(async (transaction) => {
+    await requireOpenAccount(db, transaction, uid);
     const snapshot = await transaction.get(ref);
     const current = snapshot.data()?.[kind] as unknown;
     const recent = Array.isArray(current)
@@ -97,6 +106,7 @@ export const getTokenQuizChallenge = onCall({ region: "europe-west3", enforceApp
   const suspendedRef = db.collection("suspended_users").doc(uid);
   const today = utcDay();
   const challenge = await db.runTransaction(async (transaction) => {
+    await requireOpenAccount(db, transaction, uid);
     const suspendedSnap = await transaction.get(suspendedRef);
     if (suspendedSnap.exists) throw new HttpsError("permission-denied", "Account is suspended.");
     const existing = await transaction.get(challengeRef);
@@ -142,9 +152,9 @@ export const submitTokenQuizAnswer = onCall({ region: "europe-west3", enforceApp
 
   const db = getFirestore();
   const challengeRef = db.collection("token_quiz_challenges").doc(uid);
-  const tokenRef = db.collection("user_tokens").doc(uid);
   const suspendedRef = db.collection("suspended_users").doc(uid);
   return db.runTransaction(async (transaction) => {
+    await requireOpenAccount(db, transaction, uid);
     const suspendedSnap = await transaction.get(suspendedRef);
     if (suspendedSnap.exists) throw new HttpsError("permission-denied", "Account is suspended.");
     const challengeSnap = await transaction.get(challengeRef);
@@ -161,20 +171,11 @@ export const submitTokenQuizAnswer = onCall({ region: "europe-west3", enforceApp
 
     let balance: number | null = null;
     if (correct) {
-      const tokenSnap = await transaction.get(tokenRef);
-      const account = tokenSnap.data();
-      const currentBalance = account?.balance ?? 0;
-      const lifetimeEarned = account?.lifetimeEarned ?? 0;
-      if (!Number.isSafeInteger(currentBalance) || currentBalance < 0 || currentBalance > Number.MAX_SAFE_INTEGER - QUIZ_REWARD
-        || !Number.isSafeInteger(lifetimeEarned) || lifetimeEarned < 0 || lifetimeEarned > Number.MAX_SAFE_INTEGER - QUIZ_REWARD) {
-        throw new HttpsError("failed-precondition", "Token account is invalid.");
-      }
-      balance = currentBalance + QUIZ_REWARD;
-      if (tokenSnap.exists) {
-        transaction.update(tokenRef, { balance, lifetimeEarned: lifetimeEarned + QUIZ_REWARD });
-      } else {
-        transaction.set(tokenRef, { userId: uid, balance, lifetimeEarned: QUIZ_REWARD, unlimitedOnDemand: false });
-      }
+      const credit = await prepareWalletMutation(db, transaction, uid, {
+        operation: 'credit', amount: QUIZ_REWARD, reference: `quiz_${challenge.challengeId}`,
+      });
+      balance = credit.wallet.balance;
+      credit.commit();
     }
 
     transaction.update(challengeRef, { attempted: true, completed: correct, answeredAt: FieldValue.serverTimestamp() });
@@ -192,11 +193,12 @@ export const submitTokenQuizAnswer = onCall({ region: "europe-west3", enforceApp
 export const getTokenWheelStatus = onCall({ region: "europe-west3", enforceAppCheck: true }, async (request) => {
   const uid = requireVerifiedCaller(request);
   const db = getFirestore();
-  const [suspendedSnap, spinSnap] = await Promise.all([
+  const [suspendedSnap, spinSnap, deletionSnap] = await Promise.all([
     db.collection("suspended_users").doc(uid).get(),
     db.collection("token_wheel_spins").doc(uid).get(),
+    db.collection("account_deletion_locks").doc(deletionLockId(uid)).get(),
   ]);
-  if (suspendedSnap.exists) throw new HttpsError("permission-denied", "Account is suspended.");
+  if (suspendedSnap.exists || deletionSnap.exists) throw new HttpsError("permission-denied", "Account is unavailable.");
   return { alreadySpun: spinSnap.data()?.day === utcDay() };
 });
 
@@ -205,10 +207,10 @@ export const spinTokenWheel = onCall({ region: "europe-west3", enforceAppCheck: 
   const db = getFirestore();
   const today = utcDay();
   const spinRef = db.collection("token_wheel_spins").doc(uid);
-  const tokenRef = db.collection("user_tokens").doc(uid);
   const suspendedRef = db.collection("suspended_users").doc(uid);
 
   return db.runTransaction(async (transaction) => {
+    await requireOpenAccount(db, transaction, uid);
     const suspendedSnap = await transaction.get(suspendedRef);
     if (suspendedSnap.exists) throw new HttpsError("permission-denied", "Account is suspended.");
     const spinSnap = await transaction.get(spinRef);
@@ -220,20 +222,11 @@ export const spinTokenWheel = onCall({ region: "europe-west3", enforceAppCheck: 
     const rewardTokens = WHEEL_AWARDS[segmentIndex];
     let balance: number | null = null;
     if (rewardTokens > 0) {
-      const tokenSnap = await transaction.get(tokenRef);
-      const account = tokenSnap.data();
-      const currentBalance = account?.balance ?? 0;
-      const lifetimeEarned = account?.lifetimeEarned ?? 0;
-      if (!Number.isSafeInteger(currentBalance) || currentBalance < 0 || currentBalance > Number.MAX_SAFE_INTEGER - rewardTokens
-        || !Number.isSafeInteger(lifetimeEarned) || lifetimeEarned < 0 || lifetimeEarned > Number.MAX_SAFE_INTEGER - rewardTokens) {
-        throw new HttpsError("failed-precondition", "Token account is invalid.");
-      }
-      balance = currentBalance + rewardTokens;
-      if (tokenSnap.exists) {
-        transaction.update(tokenRef, { balance, lifetimeEarned: lifetimeEarned + rewardTokens });
-      } else {
-        transaction.set(tokenRef, { userId: uid, balance, lifetimeEarned: rewardTokens, unlimitedOnDemand: false });
-      }
+      const credit = await prepareWalletMutation(db, transaction, uid, {
+        operation: 'credit', amount: rewardTokens, reference: `wheel_${today}`,
+      });
+      balance = credit.wallet.balance;
+      credit.commit();
     }
 
     transaction.set(spinRef, {

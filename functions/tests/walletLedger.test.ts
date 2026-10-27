@@ -64,3 +64,7 @@ describe('wallet invariants (pure, no emulator claim)', () => {
   });
 
 });
+it('does not suppress unexpected input decoding failures during audit', () => {
+  const data = new Proxy({}, { get() { throw new Error('decode failed'); } });
+  expect(() => auditMigration([{ id: 'bad', data }])).toThrow('decode failed');
+});

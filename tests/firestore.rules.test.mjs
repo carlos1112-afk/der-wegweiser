@@ -191,7 +191,7 @@ test('Fremde Konten sind strikt isoliert', async () => {
   await assertFails(deleteDoc(doc(mallory, 'users', 'alice')));
   await assertSucceeds(deleteDoc(doc(alice, 'users', 'alice')));
 
-  // user_tokens collection isolation (Direct client creation/modification is denied; reading and deletion are allowed for owner)
+  // user_tokens collection isolation (Direct client creation/modification is denied; only reading is allowed for owner)
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const { doc: adminDoc, setDoc: adminSetDoc } = await import('firebase/firestore');
     await adminSetDoc(adminDoc(context.firestore(), 'user_tokens', 'alice'), { balance: 100, unlimitedOnDemand: false });
@@ -205,7 +205,7 @@ test('Fremde Konten sind strikt isoliert', async () => {
   await assertFails(getDoc(doc(mallory, 'user_tokens', 'alice')));
   await assertFails(updateDoc(doc(mallory, 'user_tokens', 'alice'), { token: 'xyz' }));
   await assertFails(deleteDoc(doc(mallory, 'user_tokens', 'alice')));
-  await assertSucceeds(deleteDoc(doc(alice, 'user_tokens', 'alice')));
+  await assertFails(deleteDoc(doc(alice, 'user_tokens', 'alice')));
 });
 
 test('Abonnement-Status (subscriptionStatus) kann nicht vom Client gesetzt oder geändert werden', async () => {
@@ -423,4 +423,28 @@ test('Ladesäulen-Validierung: Pflichtfelder duerfen nicht einfach weggelassen w
       plugType: 'schuko_230v',
     })
   );
+});
+
+test('Wallet-/Ledger-/Jobzustände sind nur serverseitig schreibbar', async () => {
+  const alice = ctx({ uid: 'alice' });
+  const mallory = ctx({ uid: 'mallory' });
+  const anonymous = ctx();
+  await testEnv.withSecurityRulesDisabled(async context => {
+    const db = context.firestore();
+    for (const name of ['token_ledger', 'token_reservations', 'premium_route_jobs']) {
+      await setDoc(doc(db, name, 'owned'), { userId: 'alice', balance: 4 });
+    }
+  });
+  for (const name of ['token_ledger', 'token_reservations', 'premium_route_jobs']) {
+    await assertSucceeds(getDoc(doc(alice, name, 'owned')));
+    await assertFails(getDoc(doc(mallory, name, 'owned')));
+    await assertFails(getDoc(doc(anonymous, name, 'owned')));
+    await assertFails(setDoc(doc(alice, name, 'owned'), { userId: 'alice', balance: null }));
+    await assertFails(updateDoc(doc(alice, name, 'owned'), { balance: 100 }));
+    await assertFails(deleteDoc(doc(alice, name, 'owned')));
+    await assertFails(setDoc(doc(alice, name, 'new'), { userId: 'alice' }));
+  }
+  for (const name of ['wallet_control', 'account_deletion_locks', 'routing_config']) {
+    await assertFails(setDoc(doc(alice, name, 'current'), { state: 'active' }));
+  }
 });

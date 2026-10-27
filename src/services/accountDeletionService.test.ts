@@ -19,9 +19,9 @@ describe('AccountDeletionService', () => {
     vi.clearAllMocks();
     auth.currentUser = { uid: 'test-user-123' } as any;
     deleteAccountData.mockResolvedValue({ data: { success: true, status: 'completed', jobId: 'test-user-123' } });
-    vi.stubGlobal('localStorage', { clear: vi.fn() });
+    vi.stubGlobal('localStorage', { clear: vi.fn(), removeItem: vi.fn() });
     vi.stubGlobal('sessionStorage', { clear: vi.fn() });
-    vi.stubGlobal('window', { caches: false, indexedDB: {} });
+    vi.stubGlobal('window', { caches: false, indexedDB: { databases: vi.fn(async () => []) } });
   });
 
   afterEach(() => {
@@ -49,4 +49,20 @@ describe('AccountDeletionService', () => {
     expect(httpsCallable).not.toHaveBeenCalled();
     expect(localStorage.clear).toHaveBeenCalledTimes(1);
   });
+  it('reports blocked database deletion and still attempts independent cache/storage cleanup', async () => {
+    const deleteCache = vi.fn(async () => true);
+    vi.stubGlobal('window', { caches: { keys: async () => ['private-cache'], delete: deleteCache }, indexedDB: {
+      databases: async () => [{ name: 'private-session' }],
+      deleteDatabase: () => { const request: any = {}; queueMicrotask(() => request.onblocked?.()); return request; },
+    } });
+    await expect(AccountDeletionService.deleteAccount()).rejects.toThrow('Lokale Löschung nicht vollständig');
+    expect(deleteCache).toHaveBeenCalledWith('private-cache'); expect(sessionStorage.clear).toHaveBeenCalled();
+  });
+  it('does not report success for storage errors or unavailable database enumeration', async () => {
+    vi.stubGlobal('localStorage', { removeItem: vi.fn(), clear: () => { throw new Error('blocked'); } });
+    vi.stubGlobal('window', { indexedDB: {} });
+    await expect(AccountDeletionService.deleteAccount()).rejects.toThrow('Lokale Löschung nicht vollständig');
+    expect(sessionStorage.clear).toHaveBeenCalled();
+  });
+
 });

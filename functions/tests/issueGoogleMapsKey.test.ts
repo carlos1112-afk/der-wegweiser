@@ -55,6 +55,8 @@ describe('issueGoogleMapsKey', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGet.mockReset();
+    mockRunTransaction.mockReset();
   });
 
   it('should throw unauthenticated if no app check token', async () => {
@@ -173,7 +175,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should enforce rate limit inside transaction', async () => {
       const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-      mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+      mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
       mockRunTransaction.mockImplementationOnce(async (cb: any) => {
           const t = {
@@ -191,7 +193,7 @@ describe('issueGoogleMapsKey', () => {
 
   it('should allow if less than 5 recent requests', async () => {
     const req: any = { app: { appId: '123' }, auth: { uid: 'user1' } };
-    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ subscriptionStatus: 'active' }) });
+    mockGet.mockResolvedValueOnce({ exists: true, data: () => ({ status: 'active' }) });
 
     mockRunTransaction.mockImplementationOnce(async (cb: any) => {
         const t = {
