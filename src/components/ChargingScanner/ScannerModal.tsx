@@ -18,7 +18,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
   const [isFree, setIsFree] = useState(true);
   const [photoCaptured, setPhotoCaptured] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [tokensEarned, setTokensEarned] = useState<number | null>(null);
+  const [stationSubmitted, setStationSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Trigger Sound Effect ("KATSCHINGG!")
   const playKatchingSound = () => {
@@ -64,23 +65,30 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!stationName) return;
-
-    onStationAdded({
-      name: stationName,
-      lat: userLocation.lat + (Math.random() - 0.5) * 0.005,
-      lng: userLocation.lng + (Math.random() - 0.5) * 0.005,
-      plugType,
-      isWeatherproof,
-      isFree,
-      openingHours: '24/7',
-      nearbyAmenities: ['Fahrradständer', 'WC'],
-      photoUrl: photoCaptured || undefined,
-      verifiedByCount: 1,
-      createdByUserId: UserIdentity.getUserId(),
-      isVerifiedBikeInfrastructure: true,
-    });
+    setSubmitError(null);
+    try {
+      await onStationAdded({
+        name: stationName.trim(),
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        plugType,
+        isWeatherproof,
+        isFree,
+        openingHours: '24/7',
+        nearbyAmenities: ['Fahrradständer', 'WC'],
+        photoUrl: photoCaptured || undefined,
+        verifiedByCount: 1,
+        createdByUserId: UserIdentity.getUserId(),
+        isVerifiedBikeInfrastructure: true,
+      });
+      setStationSubmitted(true);
+    } catch (error) {
+      console.error('[ScannerModal] Station konnte nicht gespeichert werden:', error);
+      setSubmitError('Der Stationsbeitrag konnte nicht gespeichert werden. Bitte prüfe die Verbindung und versuche es erneut.');
+      return;
+    }
 
     // Play "KATSCHINGG!" sound & launch confetti
     playKatchingSound();
@@ -91,7 +99,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
       colors: ['#00E6A3', '#00ff66', '#ffb700']
     });
 
-    setTokensEarned(20);
     setTimeout(() => {
       onClose();
     }, 1800);
@@ -127,7 +134,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="glow-text-green">
             <Zap size={20} />
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>LADESÄULE ERFASSEN & TOKENS VERDIENEN</h3>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>LADESÄULE ERFASSEN</h3>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#8a99ad', cursor: 'pointer', fontSize: '1.2rem' }}>
             ✕
@@ -135,17 +142,17 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
         </div>
 
         {/* Tokens Celebration Modal State */}
-        {tokensEarned ? (
+        {stationSubmitted ? (
           <div style={{ textAlign: 'center', padding: '30px 10px' }}>
             <Award size={64} className="glow-text-gold" style={{ margin: '0 auto 16px' }} />
             <h2 className="glow-text-gold" style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '8px' }}>
               KATSCHINGG!!
             </h2>
             <p style={{ fontSize: '1.2rem', color: 'var(--accent-neon-green)', fontWeight: 'bold' }}>
-              +20 TOKENS GUTGESCHRIEBEN!
+              Stationsbeitrag gespeichert
             </p>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '8px' }}>
-              Vielen Dank für deinen Beitrag zur E-Bike Community!
+              Danke für deinen Beitrag. Für Stationsmeldungen gibt es derzeit keine Token-Prämie.
             </p>
           </div>
         ) : (
@@ -296,13 +303,14 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({ userLocation, onStat
               </div>
             </div>
 
+            {submitError && <p role="alert" style={{ color: '#ff7777', marginBottom: '10px' }}>{submitError}</p>}
             <button
               onClick={handleSubmit}
               className="btn-gold"
               disabled={!stationName}
               style={{ width: '100%', padding: '12px', fontWeight: 'bold', fontSize: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
             >
-              <Sparkles size={18} /> Speichern & +20 Tokens Kassieren ("Katching!")
+              <Sparkles size={18} /> Stationsbeitrag speichern
             </button>
           </>
         )}

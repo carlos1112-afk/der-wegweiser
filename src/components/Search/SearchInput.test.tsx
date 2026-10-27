@@ -50,3 +50,9 @@ it('ignoriert leeren Suchbegriff ohne Anfrage', async () => {
   await new Promise((r) => setTimeout(r, 600));
   expect(mockFetch).not.toHaveBeenCalled();
 });
+
+it('fokussiert das Suchfeld, wenn die Routenplanung es anfordert', () => {
+  const onSelect = vi.fn();
+  render(<SearchInput onSelect={onSelect} focusRequest={1} />);
+  expect(document.activeElement).toBe(screen.getByPlaceholderText(/Ziel eingeben/));
+});

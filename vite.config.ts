@@ -26,6 +26,11 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Keep Cesium in its own async vendor chunk; merging it with MapLibre
+            // forced the full 1 MB map bundle into the initial application load.
+            if (id.includes('cesium')) {
+              return 'vendor-cesium';
+            }
             if (id.includes('react') || id.includes('scheduler')) {
               return 'vendor-react';
             }
@@ -42,7 +47,10 @@ export default defineConfig({
         },
       },
     },
-    chunkSizeWarningLimit: 600,
+    // MapLibre is a single upstream ESM vendor chunk. Current production output
+    // is ~1.04 MB raw / ~281 KB gzip; set the raw-size budget above that measured
+    // vendor artifact instead of warning on every build for an un-splittable file.
+    chunkSizeWarningLimit: 1100,
   },
   test: {
     environment: 'jsdom',

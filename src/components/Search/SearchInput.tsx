@@ -17,11 +17,13 @@ interface NominatimResult {
 interface SearchInputProps {
   onSelect: (result: SearchResult) => void;
   placeholder?: string;
+  focusRequest?: number;
 }
 
 export const SearchInput: React.FC<SearchInputProps> = ({
   onSelect,
   placeholder = 'Ziel eingeben...',
+  focusRequest = 0,
 }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<NominatimResult[]>([]);
@@ -29,8 +31,15 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (focusRequest > 0) {
+      inputRef.current?.focus();
+    }
+  }, [focusRequest]);
 
   const fetchResults = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -162,6 +171,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       <div className={styles.inputWrapper}>
         <span className={styles.searchIcon}>⌕</span>
         <input
+          ref={inputRef}
           type="text"
           className={styles.input}
           value={query}

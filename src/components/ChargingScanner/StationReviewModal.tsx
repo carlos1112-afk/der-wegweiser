@@ -9,7 +9,7 @@ import { stationReviewSchema } from '../../utils/validation';
 interface StationReviewModalProps {
   isOpen: boolean;
   station: ChargingStation | null;
-  onAddReview: (review: { rating: number; comment: string; tags: string[] }) => void;
+  onAddReview: (review: { rating: number; comment: string; tags: string[] }) => boolean | Promise<boolean>;
   onClose: () => void;
 }
 
@@ -48,7 +48,7 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFilterError(null);
     if (rating === 0) return;
@@ -68,9 +68,13 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
         return;
       }
     }
+    const saved = await onAddReview({ rating: parsed.data.rating, comment: parsed.data.comment || '', tags: selectedTags });
+    if (!saved) {
+      setFilterError('Bewertungen können derzeit nicht gespeichert werden. Es wurde keine Token-Prämie gutgeschrieben.');
+      return;
+    }
     SoundFxService.playSuccessChime();
     confetti({ particleCount: 70, spread: 70 });
-    onAddReview({ rating: parsed.data.rating, comment: parsed.data.comment || '', tags: selectedTags });
     setIsSubmitted(true);
   };
 
@@ -196,7 +200,7 @@ export const StationReviewModal: React.FC<StationReviewModalProps> = ({
               Vielen Dank für deine Bewertung!
             </h4>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '18px' }}>
-              Du hast der E-Bike Community geholfen und <strong>+10 Tokens</strong> verdient.
+              Bewertungsprämien sind derzeit deaktiviert.
             </p>
             <button className="btn-cyberpunk btn-gold" onClick={onClose} style={{ padding: '10px 24px' }}>
               Fertig

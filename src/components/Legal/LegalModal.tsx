@@ -21,14 +21,16 @@ export const LegalModal: React.FC<LegalModalProps> = ({
   const [isDataDeleted, setIsDataDeleted] = useState(false);
   const [currentConsent, setCurrentConsent] = useState(() => ConsentService.getConsent());
   const [isConsentWithdrawn, setIsConsentWithdrawn] = useState(false);
+  const [consentCleanupFailed, setConsentCleanupFailed] = useState(false);
 
   if (!isOpen) return null;
 
   // Widerruf der Einwilligungen (Art. 7 Abs. 3 DSGVO).
-  const handleWithdrawConsent = () => {
-    ConsentService.withdraw();
+  const handleWithdrawConsent = async () => {
+    const cleaned = await ConsentService.withdraw();
     setCurrentConsent(null);
-    setIsConsentWithdrawn(true);
+    setIsConsentWithdrawn(cleaned);
+    setConsentCleanupFailed(!cleaned);
   };
 
   // 1-Click User Data Export (Art. 20 DSGVO - Local Data)
@@ -336,15 +338,16 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 </h4>
                 <p style={{ color: 'var(--text-muted)' }}>Die App wird neu gestartet...</p>
               </div>
-            ) : isConsentWithdrawn ? (
+            ) : isConsentWithdrawn || consentCleanupFailed ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>
                 <Lock size={48} color="var(--accent-gold)" style={{ margin: '0 auto 12px' }} />
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', marginBottom: '6px' }}>
-                  Einwilligungen widerrufen
+                  {consentCleanupFailed ? 'Einwilligungen widerrufen; lokale Bereinigung unvollständig' : 'Einwilligungen widerrufen'}
                 </h4>
                 <p style={{ color: 'var(--text-muted)' }}>
-                  Die Verarbeitung nicht notwendiger Daten ist eingestellt und die lokal gespeicherten Daten wurden
-                  entfernt. Beim nächsten Start der App wirst du erneut um deine Entscheidung gebeten.
+                  {consentCleanupFailed
+                    ? 'Die Einwilligung wurde widerrufen und die Verarbeitung gestoppt. Mindestens eine lokale Bereinigung ist fehlgeschlagen; Details stehen in der App-Konsole.'
+                    : 'Die Verarbeitung nicht notwendiger Daten ist eingestellt und die lokal gespeicherten Daten wurden entfernt. Beim nächsten Start der App wirst du erneut um deine Entscheidung gebeten.'}
                 </p>
               </div>
             ) : (

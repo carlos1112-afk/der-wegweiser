@@ -20,6 +20,7 @@ import type { User } from 'firebase/auth';
 import { useUILayout } from './contexts/UILayoutContext';
 import { BurgerMenu } from './components/Navigation/BurgerMenu';
 import { StartScreen } from './components/StartScreen/StartScreen';
+import { AdvancedRoutePlanner, type AdvancedRouteOptions } from './components/StartScreen/AdvancedRoutePlanner';
 import { BottomActionBar } from './components/Navigation/BottomActionBar';
 import { ConfettiOverlay } from './components/Overlays/ConfettiOverlay';
 import { Menu } from 'lucide-react';
@@ -90,7 +91,7 @@ export function App() {
   const { isMainMenuOpen, setMainMenuOpen, isSearchActive, setSearchActive } = useUILayout();
 
   // Modal States (Declared first to supply active modal context to lifecycle)
-  const [showAnticipationModal, setShowAnticipationModal] = useState(true);
+  const [showAnticipationModal, setShowAnticipationModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [showLoungeModal, setShowLoungeModal] = useState(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
@@ -102,25 +103,25 @@ export function App() {
   const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authUser, setAuthUser] = useState<User | null>(AuthService.getCurrentUser());
+  const authUserIdRef = useRef<string | null>(AuthService.getCurrentUser()?.uid ?? null);
   const [showStartScreen, setShowStartScreen] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = AuthService.onAuthStateChange(setAuthUser);
-    return () => unsubscribe();
-  }, []);
+  const [showAdvancedRoutePlanner, setShowAdvancedRoutePlanner] = useState(false);
+  const [searchFocusRequest, setSearchFocusRequest] = useState(0);
 
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChange((user) => {
+      const nextUid = user?.uid ?? null;
+      if (authUserIdRef.current !== nextUid) {
+        activeRouteRequestId.current++;
+        setCurrentRoute(null);
+        setIsSimulatingRoute(false);
+        setTokenBalance(0);
+      }
+      authUserIdRef.current = nextUid;
       setAuthUser(user);
       // Bei An-/Abmeldung muss die anonyme Kennung verworfen werden,
       // damit die echte Firebase-UID für Cloud-Pfade verwendet wird.
       UserIdentity.clearCache();
-      if (!user) {
-        activeRouteRequestId.current++;
-        setCurrentRoute(null);
-        setIsSimulatingRoute(false);
-        setTokenBalance(60);
-      }
     });
 
     // Initialize FCM Push Notifications pipeline
@@ -132,7 +133,7 @@ export function App() {
   // State
   const [currentRoute, setCurrentRoute] = useState<Route | null>(null);
   const [chargingStations, setChargingStations] = useState<ChargingStation[]>([]);
-  const [tokenBalance, setTokenBalance] = useState(60);
+  const [tokenBalance, setTokenBalance] = useState(0);
   const [isOledModeActive, setIsOledModeActive] = useState(false);
   const [isSunlightMode, setIsSunlightMode] = useState(false);
   const [selectedStationForReview, setSelectedStationForReview] = useState<ChargingStation | null>(null);
@@ -302,34 +303,17 @@ export function App() {
 
     const initData = async () => {
       try {
+        const requestUid = authUserIdRef.current;
         // 1. Fetch Charging Stations
         const stations = await dataRepository.getChargingStations().catch(() => []);
-        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
+        if (!isSubscribed || reqId !== activeRouteRequestId.current || authUserIdRef.current !== requestUid || !ConsentService.hasValidConsent()) return;
         setChargingStations(stations);
 
-        // 2. Fetch User Prefs & Memory
-        const prefs: UserPreferences = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-        const memory: UserMemoryPattern = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
-
-        // 3. Fetch Token Account Balance from Firestore/Cache
-        const tokenAcc = await dataRepository.getTokenAccount(UserIdentity.getUserId());
-        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
+        // Lade nur die Menüdaten. Eine heutige Strecke wird erst auf Knopfdruck
+        // erzeugt, damit die Startseite weder ungefragt routet noch Daten sendet.
+        const tokenAcc = await dataRepository.getTokenAccount(requestUid ?? UserIdentity.getUserId());
+        if (!isSubscribed || reqId !== activeRouteRequestId.current || authUserIdRef.current !== requestUid || !ConsentService.hasValidConsent()) return;
         setTokenBalance(tokenAcc.balance);
-
-        // 4. Pre-generate Zero-Click "Heute-Tour"
-        const anticipatedRoute = await AiAssistantService.generateAnticipatedRoute(
-          userLocation.lat,
-          userLocation.lng,
-          prefs,
-          memory
-        ).catch((err) => {
-          console.warn('[App] Heute-Tour konnte nicht generiert werden (Routing/Netzwerk offline):', err);
-          return null;
-        });
-        if (isSubscribed && reqId === activeRouteRequestId.current && ConsentService.hasValidConsent() && anticipatedRoute) {
-          setCurrentRoute(anticipatedRoute);
-        }
       } catch (err) {
         console.warn('[App] Initialer Datenabruf fehlgeschlagen (Offline-Modus):', err);
       }
@@ -340,7 +324,7 @@ export function App() {
     return () => {
       isSubscribed = false;
     };
-  }, [hasConsent, userLocation.lat, userLocation.lng]);
+  }, [hasConsent, authUser?.uid, userLocation.lat, userLocation.lng]);
 
   // Background Corridor Offline Cache
   useEffect(() => {
@@ -414,15 +398,15 @@ export function App() {
   const handleStationAdded = async (station: Omit<ChargingStation, 'id' | 'createdAt'>) => {
     const newStation = await dataRepository.addChargingStation(station);
     setChargingStations((prev) => [...prev, newStation]);
-
-    // Add +20 Tokens
-    const newBal = await dataRepository.addTokens(UserIdentity.getUserId(), 20, 'Ladesäulen-Scan');
-    setTokenBalance(newBal);
   };
 
-  const handleAddTokens = async (amount: number) => {
-    const newBal = await dataRepository.addTokens(UserIdentity.getUserId(), amount, 'Lade-Lounge Game');
-    setTokenBalance(newBal);
+  const handleTokenBalanceRefresh = async (serverBalance?: number) => {
+    if (Number.isSafeInteger(serverBalance) && (serverBalance as number) >= 0) {
+      setTokenBalance(serverBalance as number);
+      return;
+    }
+    const account = await dataRepository.getTokenAccount(UserIdentity.getUserId());
+    setTokenBalance(account.balance);
   };
 
   const handleRegenerateRoute = async (modelId: ModelId = DEFAULT_MODEL) => {
@@ -440,6 +424,7 @@ export function App() {
       );
       if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
         setCurrentRoute(newRoute);
+        setShowAnticipationModal(true);
       }
     } catch (err: any) {
       console.warn('[App] Route konnte nicht neu generiert werden:', err);
@@ -482,37 +467,64 @@ export function App() {
     }
   };
 
-  const handlePlanRouteToPoint = async (targetLat: number, targetLng: number) => {
-    if (!ConsentService.hasValidConsent()) return;
+  const handlePlanRouteToPoint = async (
+    targetLat: number,
+    targetLng: number,
+    mode: 'premium' | 'offline' = 'premium',
+    destinationName = searchDestination?.label || 'Ausgewähltes Ziel',
+    advancedOptions?: AdvancedRouteOptions,
+  ) => {
+    if (!ConsentService.hasValidConsent()) {
+      setShowConsentModal(true);
+      return false;
+    }
     const reqId = ++activeRouteRequestId.current;
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
-      const newRoute = await RoutingService.generateBikeRoute(
+      const routePrefs: UserPreferences = {
+        ...prefs,
+        preferredSurface: advancedOptions?.surfacePreference ?? prefs.preferredSurface,
+        avoidSteepHills: advancedOptions?.avoidSteepHills ?? prefs.avoidSteepHills,
+      };
+      const newRoute = await AiAssistantService.generateDestinationRoute(
+        userLocation,
+        { lat: targetLat, lng: targetLng },
+        routePrefs,
         {
-          startLat: userLocation.lat,
-          startLng: userLocation.lng,
-          targetDistanceKm: Math.max(2, Math.round(distKm * 1.3)),
-          batteryPercent: telemetry.batteryPercent,
-          bikeType: prefs.bikeType || 'ebike',
-          themes: ['Direktverbindung'],
-          maxElevationGainM: 120,
-          surfacePreference: 'any',
-        },
-        prefs
+          mode,
+          destinationName,
+          via: advancedOptions?.via,
+          viaName: advancedOptions?.via?.label,
+          wishes: advancedOptions?.wishes,
+        }
       );
-      if (newRoute.pathCoordinates.length > 1) {
-        newRoute.pathCoordinates[newRoute.pathCoordinates.length - 1] = [targetLat, targetLng];
-      }
-      newRoute.title = `Route zum gewählten Ziel (${newRoute.distanceKm} km)`;
-      newRoute.aiStory = `Fahrradoptimierte Verbindung zum gewählten Zielort (~${distKm.toFixed(1)} km) mit minimalem Höhenmeter-Widerstand (Heuristische Routenführung).`;
       if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
         setCurrentRoute(newRoute);
+        setShowAnticipationModal(true);
+        return true;
       }
+      return false;
     } catch (err: any) {
       console.warn('[App] Navigation zum Zielpunkt fehlgeschlagen:', err);
-      alert('Routenberechnung fehlgeschlagen. Der Routing-Dienst (BRouter) ist nicht erreichbar.');
+      alert('Routenberechnung fehlgeschlagen. Bitte prüfe Ziel, Einwilligung und Netzwerkverbindung.');
+      return false;
     }
+  };
+
+  const handleGenerateTodayRoute = () => {
+    setShowStartScreen(false);
+    void handleRegenerateRoute();
+  };
+
+  const handleStartSimpleRoute = () => {
+    setShowStartScreen(false);
+    setSearchFocusRequest((request) => request + 1);
+  };
+
+  const handleAdvancedRoute = (destination: SearchResult, options: AdvancedRouteOptions) => {
+    setShowAdvancedRoutePlanner(false);
+    setShowStartScreen(false);
+    void handlePlanRouteToPoint(destination.lat, destination.lng, 'premium', destination.label, options);
   };
 
   const handlePlanRouteToStation = async (station: ChargingStation) => {
@@ -552,22 +564,26 @@ export function App() {
     }
   };
 
-  const handleAddStationReview = async (review: { rating: number; comment: string; tags: string[] }) => {
-    console.log('[App] Review added for station:', selectedStationForReview?.name, review);
-    // Reward +10 Tokens
-    await handleAddTokens(10);
+  const handleAddStationReview = async (_review: { rating: number; comment: string; tags: string[] }): Promise<boolean> => {
+    return false;
   };
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {showStartScreen && (
         <StartScreen
-          onStart={() => setShowStartScreen(false)}
+          onGenerateToday={handleGenerateTodayRoute}
+          onStartSimpleRoute={handleStartSimpleRoute}
+          onOpenAdvancedRoute={() => setShowAdvancedRoutePlanner(true)}
           onOpenSettings={() => setMainMenuOpen(true)}
           onOpenLogin={() => setShowAuthModal(true)}
-          tokenBalance={tokenBalance}
-          telemetry={telemetry}
           currentUser={authUser}
+        />
+      )}
+      {showAdvancedRoutePlanner && (
+        <AdvancedRoutePlanner
+          onClose={() => { setShowAdvancedRoutePlanner(false); setShowStartScreen(true); }}
+          onGenerate={handleAdvancedRoute}
         />
       )}
 
@@ -615,6 +631,7 @@ export function App() {
           {!currentRoute ? (
             <SearchInput
               placeholder="Ziel eingeben..."
+              focusRequest={searchFocusRequest}
               onSelect={(result) => {
                 setSearchDestination(result);
                 setSearchActive(false);
@@ -649,7 +666,7 @@ export function App() {
         </div>
       </div>
 
-      <BurgerMenu 
+      <BurgerMenu
         isOpen={isMainMenuOpen}
         onClose={() => setMainMenuOpen(false)}
         isSunlightMode={isSunlightMode}
@@ -673,15 +690,15 @@ export function App() {
         isBleConnected={telemetry.isConnected}
       />
 
-      <BottomActionBar 
+      {!isBottomCardOpen && <BottomActionBar
         isNavigating={!!currentRoute}
         onOpenScanner={() => setShowScannerModal(true)}
         onOpenVoice={() => setShowVoiceSettingsModal(true)}
-        onOpenSearch={() => setSearchActive(true)}
-      />
+        onOpenSearch={() => { setSearchActive(true); setSearchFocusRequest((request) => request + 1); }}
+      />}
 
       {/* Integrated E-Bike Telemetry & Bluetooth Pairing Widget */}
-      <div
+      {!isBottomCardOpen && <div
         style={{
           position: 'absolute',
           bottom: '88px',
@@ -696,7 +713,7 @@ export function App() {
           onConnectBLE={handleConnectBLE}
           onOpenBoschModal={() => setShowBoschModal(true)}
         />
-      </div>
+      </div>}
 
       {/* GPX Track Recorder Pill - Relocated right side above right controls */}
       {!currentRoute && (
@@ -719,9 +736,9 @@ export function App() {
         onSelectStation={(station) => handlePlanRouteToStation(station)}
         onAutoReroute={handleAutoReroute}
         onOpenReviewModal={(station) => setSelectedStationForReview(station)}
-        onPlanRouteToPoint={(lat, lng) => {
-          handlePlanRouteToPoint(lat, lng);
-          setSearchDestination(null);
+        onPlanRouteToPoint={async (lat, lng, mode) => {
+          const planned = await handlePlanRouteToPoint(lat, lng, mode);
+          if (planned) setSearchDestination(null);
         }}
         onPlanRouteToStation={handlePlanRouteToStation}
         isSimulating={isSimulatingRoute}
@@ -763,7 +780,7 @@ export function App() {
         {showLoungeModal && (
           <LoungeModal
             tokenBalance={tokenBalance}
-            onAddTokens={handleAddTokens}
+            onTokenBalanceRefresh={handleTokenBalanceRefresh}
             onClose={() => setShowLoungeModal(false)}
           />
         )}
@@ -800,7 +817,6 @@ export function App() {
         {showRideSummaryModal && (
           <RideSummaryModal
             isOpen={showRideSummaryModal}
-            onAddTokens={handleAddTokens}
             onClose={() => setShowRideSummaryModal(false)}
           />
         )}

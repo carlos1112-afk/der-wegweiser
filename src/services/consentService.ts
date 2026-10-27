@@ -38,11 +38,14 @@ export const CONSENT_VERSION = 2;
 
 const STORAGE_KEY = 'der_wegweiser_legal_consent';
 
-export type ConsentListener = (flags: ConsentFlags | null) => void;
+export type ConsentListener = (flags: ConsentFlags | null) => void | Promise<unknown>;
 
 export class ConsentService {
   private static listeners: ConsentListener[] = [];
   private static inMemoryConsent: ConsentFlags | null = null;
+  private static revision = 0;
+
+  public static getRevision(): number { return this.revision; }
 
   /**
    * Liest die gespeicherte Einwilligung. Gibt `null` zurück, wenn keine
@@ -112,6 +115,7 @@ export class ConsentService {
   }
 
   public static save(flags: Omit<ConsentFlags, 'acceptedAt' | 'version'>): ConsentFlags {
+    this.revision++;
     const consent: ConsentFlags = {
       essential: flags.essential,
       analytics: flags.analytics,
@@ -137,14 +141,17 @@ export class ConsentService {
    * Entfernt die Einwilligung vollständig, damit die App beim nächsten Start
    * erneut zur Zustimmung auffordert und die Verarbeitung einstellt.
    */
-  public static withdraw(): void {
+  public static async withdraw(): Promise<boolean> {
+    this.revision++;
     this.inMemoryConsent = null;
+    let storageCleanupSucceeded = true;
     try {
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.clear();
       }
     } catch (e) {
+      storageCleanupSucceeded = false;
       console.warn('[Consent] Lokale Daten beim Widerruf nicht vollständig löschbar:', e);
     }
     try {
@@ -152,10 +159,20 @@ export class ConsentService {
         sessionStorage.clear();
       }
     } catch (e) {
+      storageCleanupSucceeded = false;
       console.warn('[Consent] SessionStorage beim Widerruf nicht löschbar:', e);
     }
-    // Event-Propagation an alle aktiven Subscriber (z.B. App.tsx stop location watch)
-    this.listeners.slice().forEach((cb) => cb(null));
+    // Aktive Verbraucher stoppen zuerst ihre Verarbeitung; lokale Bereinigung
+    // wartet auf alle registrierten Dienste, damit der Widerruf nicht voreilig endet.
+    const listenerCleanup = await Promise.allSettled(this.listeners.slice().map((cb) => cb(null)));
+    const cleanup = await Promise.allSettled([
+      Filesystem.deleteFile({ path: 'bafang_testfahrt.txt', directory: Directory.Documents }).catch(() => undefined),
+    ]);
+    const succeeded = storageCleanupSucceeded
+      && listenerCleanup.every((item) => item.status === 'fulfilled' && item.value !== false)
+      && cleanup.every((item) => item.status === 'fulfilled');
+    if (!succeeded && storageCleanupSucceeded) console.warn('[Consent] Mindestens eine lokale Bereinigung ist fehlgeschlagen.');
+    return succeeded;
   }
 
   public static onChange(callback: ConsentListener): () => void {
@@ -165,3 +182,4 @@ export class ConsentService {
     };
   }
 }
+import { Directory, Filesystem } from '@capacitor/filesystem';

@@ -295,6 +295,7 @@ export interface PlanRouteParams {
   elevationGainM: number;
   surfaceType?: string;
   isScoutMission?: boolean;
+  extraPreferences?: string[];
 }
 
 export interface VoiceDialogueParams {
@@ -381,7 +382,13 @@ export class AiGatewayService {
   // FÄHIGKEIT 1: Tourenplanung & Antizipation (planRoute)
   // ===========================================================================
   public static async planRoute(params: PlanRouteParams): Promise<string> {
-    const prompt = `Erstelle eine kurze, motivierende E-Bike Tourenbeschreibung auf Deutsch (maximal 2 Sätze) für eine Tour von ${params.distanceKm} km mit ${params.elevationGainM} Höhenmetern. Untergrund: ${params.surfaceType || 'Asphalt & Schotter'}.${params.isScoutMission ? ' Dies ist eine Karten-Scout Tour zur Aktualisierung von Kartendaten.' : ''}`;
+    const destination = params.destination?.title
+      ? ` Ziel: ${params.destination.title} (${params.destination.lat.toFixed(5)}, ${params.destination.lng.toFixed(5)}).`
+      : '';
+    const preferences = params.extraPreferences?.length
+      ? ` Zusätzliche Wünsche: ${params.extraPreferences.join('; ')}.`
+      : '';
+    const prompt = `Erstelle eine kurze, motivierende E-Bike Tourenbeschreibung auf Deutsch (maximal 2 Sätze) für eine Tour von ${params.distanceKm} km mit ${params.elevationGainM} Höhenmetern. Untergrund: ${params.surfaceType || 'Asphalt & Schotter'}.${destination}${preferences}${params.isScoutMission ? ' Dies ist eine Karten-Scout Tour zur Aktualisierung von Kartendaten.' : ''}`;
 
     try {
       if (this.activeProvider !== 'heuristic_offline') {
@@ -396,7 +403,7 @@ export class AiGatewayService {
     }
 
     return params.isScoutMission
-      ? `Karten-Scout Mission (${params.distanceKm} km): Hilf mit, veraltete Straßenabschnitte zu verifizieren und sichere dir +35 Bonus-Tokens!`
+      ? `Karten-Scout-Vorschau (${params.distanceKm} km): Diese Route ist ein Hinweis zur Prüfung der Kartendaten; sie wurde nicht als Meldung verifiziert und bringt keine Token-Prämie.`
       : `Akku-optimierte Panorama-Runde über ${params.distanceKm} km mit ${params.elevationGainM} Höhenmetern. Ideal für eine gleichmäßige Unterstützung.`;
   }
 

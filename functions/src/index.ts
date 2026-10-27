@@ -43,7 +43,7 @@ const ACCOUNT_DATA_COLLECTIONS = [
 
 async function deleteAccountDocuments(uid: string): Promise<void> {
   const documentRefs = new Map<string, DocumentReference>();
-  for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'account_deletion_jobs']) {
+  for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'vertexRouteRequests', 'token_quiz_challenges', 'token_quiz_rate_limits', 'token_wheel_spins', 'account_deletion_jobs']) {
     documentRefs.set(`${path}/${uid}`, db.collection(path).doc(uid));
   }
 
@@ -106,7 +106,7 @@ export const deleteAccountData = onCall({ region: "europe-west3" }, async (reque
   }
 });
 
-export const redeemVoucher = onCall({ region: "europe-west3" }, async (request) => {
+export const redeemVoucher = onCall({ region: "europe-west3", enforceAppCheck: true }, async (request) => {
   const { data, auth } = request;
 
   // Ensure user is authenticated
@@ -115,6 +115,9 @@ export const redeemVoucher = onCall({ region: "europe-west3" }, async (request) 
       "unauthenticated",
       "User must be authenticated to redeem an item."
     );
+  }
+  if (!request.app) {
+    throw new HttpsError("unauthenticated", "Invalid App Check token.");
   }
 
   const { itemId } = data;
@@ -132,9 +135,15 @@ export const redeemVoucher = onCall({ region: "europe-west3" }, async (request) 
   const redemptionId = `${itemId}_${userId}`;
   const redemptionRef = db.collection("voucher_redemptions").doc(redemptionId);
   const tokenAccountRef = db.collection("user_tokens").doc(userId);
+  const suspendedUserRef = db.collection("suspended_users").doc(userId);
 
   try {
     const result = await db.runTransaction(async (transaction) => {
+      const suspendedUserDoc = await transaction.get(suspendedUserRef);
+      if (suspendedUserDoc.exists) {
+        throw new HttpsError("permission-denied", "Suspended accounts cannot redeem rewards.");
+      }
+
       // 1. Check double redemption
       const redemptionDoc = await transaction.get(redemptionRef);
       if (redemptionDoc.exists) {
@@ -154,8 +163,11 @@ export const redeemVoucher = onCall({ region: "europe-west3" }, async (request) 
       }
 
       const tokenData = tokenDoc.data();
-      const currentBalance = tokenData?.balance || 0;
-      const unlimited = tokenData?.unlimitedOnDemand || false;
+      const currentBalance = tokenData?.balance ?? 0;
+      const unlimited = tokenData?.unlimitedOnDemand === true;
+      if (!Number.isSafeInteger(currentBalance) || currentBalance < 0) {
+        throw new HttpsError("failed-precondition", "Token account balance is invalid.");
+      }
 
       if (!unlimited && currentBalance < item.cost) {
         throw new HttpsError(
@@ -196,4 +208,5 @@ export const redeemVoucher = onCall({ region: "europe-west3" }, async (request) 
 export * from "./issueGoogleMapsKey";
 export * from "./issueCesiumIonToken";
 export * from "./vertexRouting";
+export * from "./tokenRewards";
 export * from "./aiProxy";

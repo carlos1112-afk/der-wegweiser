@@ -56,7 +56,7 @@ const ACCOUNT_DATA_COLLECTIONS = [
 ];
 async function deleteAccountDocuments(uid) {
     const documentRefs = new Map();
-    for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'account_deletion_jobs']) {
+    for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'vertexRouteRequests', 'token_quiz_challenges', 'token_quiz_rate_limits', 'token_wheel_spins', 'account_deletion_jobs']) {
         documentRefs.set(`${path}/${uid}`, db.collection(path).doc(uid));
     }
     for (const collectionName of ACCOUNT_DATA_COLLECTIONS) {
@@ -114,11 +114,14 @@ exports.deleteAccountData = (0, https_1.onCall)({ region: "europe-west3" }, asyn
         throw new https_1.HttpsError('failed-precondition', 'Account cleanup did not complete; retry the deletion.', { jobId: uid });
     }
 });
-exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (request) => {
+exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3", enforceAppCheck: true }, async (request) => {
     const { data, auth } = request;
     // Ensure user is authenticated
     if (!auth) {
         throw new https_1.HttpsError("unauthenticated", "User must be authenticated to redeem an item.");
+    }
+    if (!request.app) {
+        throw new https_1.HttpsError("unauthenticated", "Invalid App Check token.");
     }
     const { itemId } = data;
     if (!itemId || !SHOP_ITEMS[itemId]) {
@@ -129,8 +132,14 @@ exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (r
     const redemptionId = `${itemId}_${userId}`;
     const redemptionRef = db.collection("voucher_redemptions").doc(redemptionId);
     const tokenAccountRef = db.collection("user_tokens").doc(userId);
+    const suspendedUserRef = db.collection("suspended_users").doc(userId);
     try {
         const result = await db.runTransaction(async (transaction) => {
+            var _a;
+            const suspendedUserDoc = await transaction.get(suspendedUserRef);
+            if (suspendedUserDoc.exists) {
+                throw new https_1.HttpsError("permission-denied", "Suspended accounts cannot redeem rewards.");
+            }
             // 1. Check double redemption
             const redemptionDoc = await transaction.get(redemptionRef);
             if (redemptionDoc.exists) {
@@ -142,8 +151,11 @@ exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (r
                 throw new https_1.HttpsError("not-found", "Token account not found.");
             }
             const tokenData = tokenDoc.data();
-            const currentBalance = (tokenData === null || tokenData === void 0 ? void 0 : tokenData.balance) || 0;
-            const unlimited = (tokenData === null || tokenData === void 0 ? void 0 : tokenData.unlimitedOnDemand) || false;
+            const currentBalance = (_a = tokenData === null || tokenData === void 0 ? void 0 : tokenData.balance) !== null && _a !== void 0 ? _a : 0;
+            const unlimited = (tokenData === null || tokenData === void 0 ? void 0 : tokenData.unlimitedOnDemand) === true;
+            if (!Number.isSafeInteger(currentBalance) || currentBalance < 0) {
+                throw new https_1.HttpsError("failed-precondition", "Token account balance is invalid.");
+            }
             if (!unlimited && currentBalance < item.cost) {
                 throw new https_1.HttpsError("failed-precondition", "Insufficient tokens.");
             }
@@ -173,5 +185,6 @@ exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (r
 __exportStar(require("./issueGoogleMapsKey"), exports);
 __exportStar(require("./issueCesiumIonToken"), exports);
 __exportStar(require("./vertexRouting"), exports);
+__exportStar(require("./tokenRewards"), exports);
 __exportStar(require("./aiProxy"), exports);
 //# sourceMappingURL=index.js.map

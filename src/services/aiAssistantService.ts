@@ -1,5 +1,5 @@
-import type { Route, UserPreferences, UserMemoryPattern, PlugType } from '../types/navigation';
-import { RoutingService } from './routingService';
+import type { Location, Route, UserPreferences, UserMemoryPattern, PlugType } from '../types/navigation';
+import { RoutingService, type DestinationRouteOptions } from './routingService';
 import { AiGatewayService } from './ai/aiGatewayService';
 import { ConsentService } from './consentService';
 
@@ -177,6 +177,37 @@ export class AiAssistantService {
     });
     if (storyText?.trim()) route.aiStory = storyText.trim();
 
+    return route;
+  }
+
+  /** Creates an actual point-to-point route, then adds an AI description when
+   * the road router returned verified geometry. */
+  public static async generateDestinationRoute(
+    start: Location,
+    destination: Location,
+    userPrefs: UserPreferences,
+    options: DestinationRouteOptions,
+    signal?: AbortSignal,
+  ): Promise<Route> {
+    if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
+      throw new Error('[AiAssistantService] Consent required before generating a route.');
+    }
+    const route = await RoutingService.generateDestinationRoute(start, destination, userPrefs, options, undefined, signal);
+    if (options.mode === 'premium' && route.isRoadSnapped) {
+      const extraPreferences = [
+        options.viaName ? `Zwischenziel ${options.viaName}` : '',
+        options.wishes ?? '',
+        `Steigung vermeiden: ${userPrefs.avoidSteepHills ? 'ja' : 'nein'}`,
+      ].filter(Boolean);
+      route.aiStory = await AiGatewayService.planRoute({
+        start: { ...start, title: 'Start' },
+        destination: { ...destination, title: options.destinationName || 'Ziel' },
+        distanceKm: route.distanceKm,
+        elevationGainM: route.elevationGainM,
+        surfaceType: userPrefs.preferredSurface,
+        extraPreferences,
+      });
+    }
     return route;
   }
 

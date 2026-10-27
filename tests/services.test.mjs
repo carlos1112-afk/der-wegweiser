@@ -77,6 +77,57 @@ test('RoutingService marks its fallback corridor as unverified when offline', as
   }
 });
 
+test('RoutingService creates a real point-to-point BRouter route for a selected destination', async () => {
+  ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
+  let requestedUrl;
+  const mockFetch = async (url) => {
+    requestedUrl = new URL(url);
+    return {
+      ok: true,
+      json: async () => ({
+        features: [{ geometry: { coordinates: [[13.4, 52.5], [13.45, 52.55], [13.5, 52.6]] }, properties: { 'track-length': '14500' } }]
+      })
+    };
+  };
+  const originalGetElevations = ElevationService.getElevations;
+  ElevationService.getElevations = async (coords) => coords.map(() => 0);
+  try {
+    const route = await RoutingService.generateDestinationRoute(
+      { lat: 52.5, lng: 13.4 },
+      { lat: 52.6, lng: 13.5 },
+      { batteryCapacityWh: 500, batteryCurrentPercent: 80, bikeType: 'ebike', preferredSurface: 'asphalt', avoidSteepHills: true },
+      { mode: 'premium', destinationName: 'Testziel' },
+      mockFetch
+    );
+    assert.equal(requestedUrl.searchParams.get('profile'), 'trekking');
+    assert.equal(requestedUrl.searchParams.get('lonlats'), '13.4,52.5|13.5,52.6');
+    assert.equal(route.isRoadSnapped, true);
+    assert.equal(route.routingEngineStatus, 'online_brouter');
+    assert.deepEqual(route.pathCoordinates.at(-1), [52.6, 13.5]);
+    assert.equal(route.distanceKm, 14.5);
+  } finally {
+    ElevationService.getElevations = originalGetElevations;
+  }
+});
+
+test('offline destination generation makes no network request and labels the line unverified', async () => {
+  ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
+  let fetchCalled = false;
+  const route = await RoutingService.generateDestinationRoute(
+    { lat: 52.5, lng: 13.4 },
+    { lat: 52.6, lng: 13.5 },
+    { batteryCapacityWh: 500, batteryCurrentPercent: 80, bikeType: 'ebike', preferredSurface: 'any', avoidSteepHills: false },
+    { mode: 'offline', destinationName: 'Testziel' },
+    async () => { fetchCalled = true; throw new Error('offline mode must not fetch'); }
+  );
+  assert.equal(fetchCalled, false);
+  assert.equal(route.isRoadSnapped, false);
+  assert.equal(route.routingEngineStatus, 'offline_corridor_unverified');
+  assert.deepEqual(route.pathCoordinates[0], [52.5, 13.4]);
+  assert.deepEqual(route.pathCoordinates.at(-1), [52.6, 13.5]);
+  assert.match(route.aiStory, /keine befahrbare Navigation/i);
+});
+
 test('WeatherService honest degradation when offline', async () => {
   ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
   // Mock fetch to simulate network error

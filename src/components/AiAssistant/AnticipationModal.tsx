@@ -118,8 +118,8 @@ export const AnticipationModal: React.FC<AnticipationModalProps> = ({
                 </div>
               </div>
             </div>
-            <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
-              🪙 +{route.scoutBountyTokens || 15} Bonus
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Vorschau · keine Token-Prämie
             </span>
           </div>
         )}

@@ -23,31 +23,26 @@ if (typeof globalThis.localStorage === 'undefined') {
 
 import { dataRepository } from '../src/services/dataRepository';
 
-test('TokenAccount caching should use in-memory cache and not LocalStorage', async () => {
+test('TokenAccount fails closed and never accepts client-side balance changes', async () => {
   const userId = 'test-user-security-123';
 
   // Seed localStorage with legacy tokens entry to test purging
   localStorage.setItem(`tokens_${userId}`, JSON.stringify({ userId, balance: 99999, lifetimeEarned: 99999 }));
   assert.equal(localStorage.getItem(`tokens_${userId}`) !== null, true);
 
-  // 1. Get token account - should purge legacy localStorage item and return token account
+  // An absent server account has no credits, and legacy localStorage cannot create any.
   const account = await dataRepository.getTokenAccount(userId);
   assert.equal(account.userId, userId);
+  assert.equal(account.balance, 0);
+  assert.equal(account.unlimitedOnDemand, false);
   assert.equal(localStorage.getItem(`tokens_${userId}`), null, 'Legacy tokens entry in localStorage should be removed');
 
-  // 2. Add tokens - should update in-memory cache and NOT populate localStorage
-  const newBalance = await dataRepository.addTokens(userId, 50, 'test_reward');
-  assert.equal(newBalance, account.balance + 50);
+  // A client cannot award credits without server-verifiable earning evidence.
+  await assert.rejects(dataRepository.addTokens(userId, 50, 'test_reward'), /server-verified earning event/);
   assert.equal(localStorage.getItem(`tokens_${userId}`), null, 'addTokens must not save to localStorage');
 
-  const cachedAccount = await dataRepository.getTokenAccount(userId);
-  assert.equal(cachedAccount.balance, newBalance, 'Updated balance should be retained in memory');
-
-  // 3. Deduct token - should update in-memory cache and NOT populate localStorage
+  // Spending is accepted only by trusted server callables.
   const deducted = await dataRepository.deductToken(userId, 10);
-  assert.equal(deducted, true);
+  assert.equal(deducted, false);
   assert.equal(localStorage.getItem(`tokens_${userId}`), null, 'deductToken must not save to localStorage');
-
-  const finalAccount = await dataRepository.getTokenAccount(userId);
-  assert.equal(finalAccount.balance, newBalance - 10, 'Deducted balance should be retained in memory');
 });
