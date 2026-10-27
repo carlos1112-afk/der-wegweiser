@@ -38,11 +38,12 @@ const ACCOUNT_DATA_COLLECTIONS = [
   'points_of_interest',
   'scout_reports',
   'station_reviews',
+  'voucher_redemptions',
 ];
 
 async function deleteAccountDocuments(uid: string): Promise<void> {
   const documentRefs = new Map<string, DocumentReference>();
-  for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns']) {
+  for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'account_deletion_jobs']) {
     documentRefs.set(`${path}/${uid}`, db.collection(path).doc(uid));
   }
 
@@ -92,12 +93,7 @@ export const deleteAccountData = onCall({ region: "europe-west3" }, async (reque
       if (error?.code !== 'auth/user-not-found') throw error;
     }
 
-    await jobRef.set({
-      uid,
-      status: 'completed',
-      completedAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true });
+    await jobRef.delete();
     return { success: true, status: 'completed', jobId: uid };
   } catch (error: any) {
     await jobRef.set({

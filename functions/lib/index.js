@@ -52,10 +52,11 @@ const ACCOUNT_DATA_COLLECTIONS = [
     'points_of_interest',
     'scout_reports',
     'station_reviews',
+    'voucher_redemptions',
 ];
 async function deleteAccountDocuments(uid) {
     const documentRefs = new Map();
-    for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns']) {
+    for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'account_deletion_jobs']) {
         documentRefs.set(`${path}/${uid}`, db.collection(path).doc(uid));
     }
     for (const collectionName of ACCOUNT_DATA_COLLECTIONS) {
@@ -100,12 +101,7 @@ exports.deleteAccountData = (0, https_1.onCall)({ region: "europe-west3" }, asyn
             if ((error === null || error === void 0 ? void 0 : error.code) !== 'auth/user-not-found')
                 throw error;
         }
-        await jobRef.set({
-            uid,
-            status: 'completed',
-            completedAt: firestore_1.FieldValue.serverTimestamp(),
-            updatedAt: firestore_1.FieldValue.serverTimestamp(),
-        }, { merge: true });
+        await jobRef.delete();
         return { success: true, status: 'completed', jobId: uid };
     }
     catch (error) {
