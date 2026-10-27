@@ -16,7 +16,7 @@ import { readMapKeys, demSource, cycleSource, topoSource, satelliteSource } from
 export type MapTileTheme = 'topo' | 'cycle' | 'satellite' | 'satellite-3d' | 'topo-premium' | 'cycle-premium';
 
 interface MapViewProps {
-  userLocation: { lat: number; lng: number };
+  userLocation: { lat: number; lng: number; accuracyM?: number | null; observedAt?: number | null };
   accuracy?: number | null;
   heading?: number | null;
   currentRoute: Route | null;
@@ -24,7 +24,7 @@ interface MapViewProps {
   onSelectStation?: (station: ChargingStation) => void;
   onAutoReroute?: () => void;
   onOpenReviewModal?: (station: ChargingStation) => void;
-  onPlanRouteToPoint?: (lat: number, lng: number, mode?: 'premium' | 'offline') => void | Promise<void>;
+  onPlanRouteToPoint?: (lat: number, lng: number, mode?: 'standard' | 'premium' | 'offline') => void | Promise<void>;
   onPlanRouteToStation?: (station: ChargingStation) => void;
   isSimulating?: boolean;
   onToggleSimulation?: () => void;
@@ -151,7 +151,7 @@ function getMapLibreStyle(theme: MapTileTheme): maplibregl.StyleSpecification | 
 
 type RouteGeoJSON = FeatureCollection<LineString, { layer: string; color?: string; weight?: number }>;
 
-function buildRouteGeoJSON(polyline: [number, number][], route: Route | null): RouteGeoJSON {
+function buildRouteGeoJSON(polyline: [number, number][], _route: Route | null): RouteGeoJSON {
   const features: RouteGeoJSON['features'] = [];
   if (polyline.length < 2) return { type: 'FeatureCollection', features };
 
@@ -162,19 +162,15 @@ function buildRouteGeoJSON(polyline: [number, number][], route: Route | null): R
     geometry: { type: 'LineString', coordinates: polyline.map(([lat, lng]) => [lng, lat]) },
   });
 
-  // Per-segment slope colors
+  // Neutral route segments; no invented slope attribution
   polyline.forEach((pt, idx) => {
     if (idx >= polyline.length - 1) return;
     const next = polyline[idx + 1];
-    const progress = idx / polyline.length;
-    const isClimb =
-      (progress > 0.35 && progress < 0.5) ||
-      (route !== null && route.elevationGainM > 180 && idx % 7 === 2);
-    const isDownhill = (progress > 0.75 && progress < 0.9) || idx % 7 === 5;
-    const color = isClimb ? '#ff3333' : isDownhill ? '#00ff66' : '#00E6A3';
+    // No segment elevation source is available: use a neutral route color.
+    const color = '#00E6A3';
     features.push({
       type: 'Feature',
-      properties: { layer: 'segment', color, weight: isClimb ? 6 : 5 },
+      properties: { layer: 'segment', color, weight: 5 },
       geometry: { type: 'LineString', coordinates: [[pt[1], pt[0]], [next[1], next[0]]] },
     });
   });
@@ -274,14 +270,14 @@ export const MapView: React.FC<MapViewProps> = ({
   const routePolyline = currentRoute?.pathCoordinates || [];
   const routeWaypoints = getRouteWaypoints(currentRoute);
 
-  const { currentManeuver, isOffRoute, offRouteDistanceM } = useRouteTracker(
+  const { currentManeuver, isOffRoute, offRouteDistanceM, positionUncertain } = useRouteTracker(
     userLocation, currentRoute,
     () => { if (onAutoReroute) onAutoReroute(); }
   );
 
   const currentHeadingDeg = heading ?? 0;
 
-  const planSelectedDestination = async (mode: 'premium' | 'offline') => {
+  const planSelectedDestination = async (mode: 'standard' | 'premium' | 'offline') => {
     if (!selectedDestination || !onPlanRouteToPoint || isPlanningDestination) return;
     setIsPlanningDestination(true);
     try {
@@ -550,6 +546,7 @@ export const MapView: React.FC<MapViewProps> = ({
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
+      {currentRoute?.validatedRoute && positionUncertain && <div role="status" className="glass-pill" style={{ position: 'absolute', top: 12, left: 12, zIndex: 1500 }}>Position ungenau oder veraltet · Abbiegeführung pausiert</div>}
       <TurnByTurnBanner
         maneuver={currentManeuver}
         isOffRoute={isOffRoute}
@@ -630,15 +627,15 @@ export const MapView: React.FC<MapViewProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) 36px', alignItems: 'stretch', gap: '6px', width: '100%' }}>
             <button className="btn-cyberpunk btn-gold"
               disabled={isPlanningDestination}
-              onClick={(e) => { e.stopPropagation(); void planSelectedDestination('premium'); }}
+              onClick={(e) => { e.stopPropagation(); void planSelectedDestination('standard'); }}
               style={{ padding: '9px 8px', fontSize: '0.72rem', fontWeight: 'bold', justifyContent: 'center', whiteSpace: 'normal', opacity: isPlanningDestination ? .6 : 1 }}>
-              {isPlanningDestination ? 'Route wird berechnet …' : 'KI-Premium-Generation'}
+              {isPlanningDestination ? 'Route wird berechnet …' : 'Kostenlos mit BRouter'}
             </button>
             <button className="btn-cyberpunk"
-              disabled={isPlanningDestination}
-              onClick={(e) => { e.stopPropagation(); void planSelectedDestination('offline'); }}
+              disabled
+              onClick={(e) => { e.stopPropagation(); }}
               style={{ padding: '9px 8px', fontSize: '0.72rem', fontWeight: 'bold', justifyContent: 'center', whiteSpace: 'normal', opacity: isPlanningDestination ? .6 : 1 }}>
-              Offline-Generation
+              KI / Offline noch nicht verfügbar
             </button>
             <button onClick={(e) => { e.stopPropagation(); setSelectedDestination(null); }}
               aria-label="Ziel verwerfen" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}>

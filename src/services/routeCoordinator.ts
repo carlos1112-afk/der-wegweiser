@@ -1,6 +1,6 @@
 import { RoutingError } from '../../functions/src/routing/contracts';
 import type { NavigationSessionV1, RouteRequestV1, ValidatedRouteV1 } from '../../functions/src/routing/contracts';
-import { parseRouteRequest } from '../../functions/src/routing/validation';
+import { isValidatedRoute, parseRouteRequest } from '../../functions/src/routing/validation';
 export type PlanningState = { status: 'idle' } | { status: 'planning'; requestId: string }
   | { status: 'preview'; route: ValidatedRouteV1 } | { status: 'error'; error: RoutingError };
 export interface RouteExecutor {
@@ -49,7 +49,7 @@ export class RouteCoordinator {
     try {
       const route = await this.executor.plan(request, controller.signal);
       if (generation !== this.generation || controller.signal.aborted || !this.allowed) return;
-      if (route.requestId !== request.requestId) throw new RoutingError('INVALID_GEOMETRY');
+      if (!isValidatedRoute(route) || route.requestId !== request.requestId) throw new RoutingError('INVALID_GEOMETRY');
       this.previewRequest = request;
       this.stateValue = { status: 'preview', route };
     } catch (error) {

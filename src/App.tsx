@@ -1,4 +1,6 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { isValidatedRoute } from './types/routing';
+import type { RouteLocation } from './types/routing';
+import { useCallback, useState, useEffect, lazy, Suspense } from 'react';
 import { SearchInput } from './components/Search/SearchInput';
 import type { SearchResult } from './components/Search/SearchInput';
 import { MapView } from './components/Map/MapView';
@@ -13,7 +15,6 @@ import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
 import { AuthService } from './services/authService';
-import { RoutingService } from './services/routingService';
 import { EBikeDisplayService } from './services/ebikeDisplayService';
 import type { User } from 'firebase/auth';
 
@@ -76,16 +77,6 @@ const ConsentModal = lazy(() =>
   import('./components/Legal/ConsentModal').then((m) => ({ default: m.ConsentModal }))
 );
 
-function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 
 export function App() {
   const { isMainMenuOpen, setMainMenuOpen, isSearchActive, setSearchActive } = useUILayout();
@@ -132,6 +123,12 @@ export function App() {
 
   // State
   const [currentRoute, setCurrentRoute] = useState<Route | null>(null);
+  const [routePreview, setRoutePreview] = useState<Route | null>(null);
+  const [manualStart, setManualStart] = useState<RouteLocation | null>(null);
+  const [showManualStart, setShowManualStart] = useState(false);
+  const [routingNotice, setRoutingNotice] = useState<string | null>(null);
+  const routeAbort = useRef<AbortController | null>(null);
+  const cancelRouting = useCallback(() => { routeAbort.current?.abort(); activeRouteRequestId.current++; }, []);
   const [chargingStations, setChargingStations] = useState<ChargingStation[]>([]);
   const [tokenBalance, setTokenBalance] = useState(0);
   const [isOledModeActive, setIsOledModeActive] = useState(false);
@@ -185,14 +182,14 @@ export function App() {
     : showAnticipationModal
     ? 'anticipation'
     : null;
-  const isNavigating = !showAnticipationModal && !!currentRoute;
+  const isNavigating = isValidatedRoute(currentRoute?.validatedRoute) && currentRoute.validatedRoute.guidanceCapability === 'turn_by_turn';
   const lifecycle = useAppLifecycle(activeModalName, isNavigating, telemetry.speedKmH);
 
   // Hardware & Sensor Bindings throttled by Lifecycle Mode
   // Ohne gültige Einwilligung wird kein Standortwatch gestartet und keine
   // OS-Berechtigungsabfrage ausgelöst.
   const geo = useGeolocation(lifecycle.isHighAccuracyGps, hasConsent);
-  const userLocation = { lat: geo.lat, lng: geo.lng };
+  const userLocation = { lat: geo.lat, lng: geo.lng, accuracyM: geo.accuracy, observedAt: geo.observedAt };
   useScreenWakeLock(lifecycle.isWakeLockActive || isOledModeActive);
 
   // GPS Route Simulation State (Demo-Fahrt entlang der berechneten Route)
@@ -409,48 +406,13 @@ export function App() {
     setTokenBalance(account.balance);
   };
 
-  const handleRegenerateRoute = async (modelId: ModelId = DEFAULT_MODEL) => {
-    if (!ConsentService.hasValidConsent()) return;
-    const reqId = ++activeRouteRequestId.current;
-    try {
-      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-      const newRoute = await AiAssistantService.generateAnticipatedRoute(
-        userLocation.lat,
-        userLocation.lng,
-        prefs,
-        memory,
-        modelId
-      );
-      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(newRoute);
-        setShowAnticipationModal(true);
-      }
-    } catch (err: any) {
-      console.warn('[App] Route konnte nicht neu generiert werden:', err);
-      alert('Routing-Dienst derzeit nicht erreichbar. Bitte Internetverbindung prüfen.');
-    }
+  const handleRegenerateRoute = async (_modelId: ModelId = DEFAULT_MODEL) => {
+    setRoutingNotice('KI-Premium ist noch nicht freigegeben. Kostenlose Zielplanung bleibt separat verfügbar.');
   };
 
   const handleAutoReroute = async () => {
-    if (!currentRoute || !ConsentService.hasValidConsent()) return;
-    const reqId = ++activeRouteRequestId.current;
-    console.log('[App] Auto-Rerouting triggered from current GPS position...');
-    try {
-      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-      const recalculated = await AiAssistantService.generateAnticipatedRoute(
-        userLocation.lat,
-        userLocation.lng,
-        prefs,
-        memory
-      );
-      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(recalculated);
-      }
-    } catch (err: any) {
-      console.warn('[App] Auto-Reroute fehlgeschlagen:', err);
-    }
+    if (!currentRoute || !ConsentService.allowsEssential) return;
+    setRoutingNotice('Kostenlose Rückführung ist noch nicht freigegeben. Die Originalroute bleibt erhalten; Abbiegeführung pausiert.');
   };
 
   const handleToggleOledMode = () => {
@@ -470,7 +432,7 @@ export function App() {
   const handlePlanRouteToPoint = async (
     targetLat: number,
     targetLng: number,
-    mode: 'premium' | 'offline' = 'premium',
+    mode: 'standard' | 'premium' | 'offline' = 'standard',
     destinationName = searchDestination?.label || 'Ausgewähltes Ziel',
     advancedOptions?: AdvancedRouteOptions,
   ) => {
@@ -478,6 +440,11 @@ export function App() {
       setShowConsentModal(true);
       return false;
     }
+    const start: RouteLocation | null = manualStart ?? (geo.isTracking && !geo.error && geo.observedAt !== null && geo.observedAt <= Date.now() && Date.now() - geo.observedAt <= 10000 && geo.accuracy !== null && geo.accuracy <= 50
+      ? { ...userLocation, source: 'gps', observedAt: geo.observedAt, accuracyM: geo.accuracy, confirmed: true } : null);
+    if (!start) { setRoutingNotice('Aktueller GPS-Start fehlt. Bitte einen manuellen Start festlegen.'); setShowManualStart(true); return false; }
+    routeAbort.current?.abort();
+    const controller = new AbortController(); routeAbort.current = controller;
     const reqId = ++activeRouteRequestId.current;
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
@@ -487,26 +454,29 @@ export function App() {
         avoidSteepHills: advancedOptions?.avoidSteepHills ?? prefs.avoidSteepHills,
       };
       const newRoute = await AiAssistantService.generateDestinationRoute(
-        userLocation,
+        start,
         { lat: targetLat, lng: targetLng },
         routePrefs,
         {
           mode,
+          start,
           destinationName,
           via: advancedOptions?.via,
           viaName: advancedOptions?.via?.label,
           wishes: advancedOptions?.wishes,
-        }
+        },
+        controller.signal
       );
       if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(newRoute);
+        setRoutePreview(newRoute);
         setShowAnticipationModal(true);
         return true;
       }
       return false;
     } catch (err: any) {
+      if (reqId !== activeRouteRequestId.current || controller.signal.aborted) return false;
       console.warn('[App] Navigation zum Zielpunkt fehlgeschlagen:', err);
-      alert('Routenberechnung fehlgeschlagen. Bitte prüfe Ziel, Einwilligung und Netzwerkverbindung.');
+      if (err?.name !== 'AbortError') setRoutingNotice(err?.message || 'Routenberechnung fehlgeschlagen.');
       return false;
     }
   };
@@ -528,48 +498,39 @@ export function App() {
   };
 
   const handlePlanRouteToStation = async (station: ChargingStation) => {
-    if (!ConsentService.hasValidConsent()) return;
-    const reqId = ++activeRouteRequestId.current;
-    try {
-      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, station.lat, station.lng);
-      const detourRoute = await RoutingService.generateBikeRoute(
-        {
-          startLat: userLocation.lat,
-          startLng: userLocation.lng,
-          targetDistanceKm: Math.max(1, Math.round(distKm * 1.2)),
-          batteryPercent: telemetry.batteryPercent,
-          bikeType: prefs.bikeType || 'ebike',
-          themes: ['Ladesäulen-Anfahrt'],
-          maxElevationGainM: 60,
-          surfacePreference: 'asphalt',
-        },
-        prefs
-      );
-      if (detourRoute.pathCoordinates.length > 1) {
-        detourRoute.pathCoordinates[detourRoute.pathCoordinates.length - 1] = [station.lat, station.lng];
-      }
-      detourRoute.title = `Anfahrt: ${station.name}`;
-      detourRoute.aiStory = `Direkte Anfahrt zur Ladestation ${station.name} (${station.plugType.toUpperCase()}) (Heuristische Routenführung).`;
-      detourRoute.waypoints = [
-        { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Start' },
-        { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
-      ];
-      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(detourRoute);
-      }
-    } catch (err: any) {
-      console.warn('[App] Anfahrt zur Ladestation fehlgeschlagen:', err);
-      alert('Routenberechnung zur Ladestation fehlgeschlagen. Der Routing-Dienst ist nicht erreichbar.');
-    }
+    await handlePlanRouteToPoint(station.lat, station.lng, 'standard', station.name);
   };
 
   const handleAddStationReview = async (_review: { rating: number; comment: string; tags: string[] }): Promise<boolean> => {
     return false;
   };
 
+  useEffect(() => {
+    const unsubscribe = ConsentService.onChange(flags => {
+      routeAbort.current?.abort(); activeRouteRequestId.current++;
+      setRoutePreview(null); setManualStart(null);
+      if (!flags?.essential) setCurrentRoute(null);
+    });
+    return () => { unsubscribe(); cancelRouting(); };
+  }, [cancelRouting]);
+
+  useEffect(() => {
+    routeAbort.current?.abort(); activeRouteRequestId.current++;
+    setRoutePreview(null); setManualStart(null); setRoutingNotice(null);
+  }, [authUser?.uid, hasConsent]);
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      {!showStartScreen && !currentRoute && <div style={{ position: 'absolute', top: 86, left: 12, right: 12, zIndex: 2101 }}>
+        <button type="button" className="glass-pill" onClick={() => setShowManualStart(value => !value)}>{manualStart ? 'Manuellen Start ändern' : 'Start manuell festlegen'}</button>
+        {showManualStart && <SearchInput placeholder="Start suchen oder lat,lng" onSelect={place => {
+          setManualStart({ lat: place.lat, lng: place.lng, source: 'manual', accuracyM: null, observedAt: Date.now(), confirmed: true });
+          setShowManualStart(false); setRoutingNotice(`Manueller Start: ${place.label}. Navigation benötigt später eine aktuelle GPS-Position.`);
+        }} />}
+      </div>}
+      {routingNotice && !showStartScreen && <div role="status" className="glass-panel" style={{ position: 'absolute', top: 136, left: 12, right: 12, zIndex: 1800, padding: 12 }}>
+        {routingNotice} <button type="button" aria-label="Routenhinweis schließen" onClick={() => setRoutingNotice(null)}>✕</button>
+      </div>}
       {showStartScreen && (
         <StartScreen
           onGenerateToday={handleGenerateTodayRoute}
@@ -649,7 +610,7 @@ export function App() {
               }}
             >
               <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
-                ▼ Navigation aktiv
+                ▼ Track / Route anzeigen
               </span>
             </div>
           )}
@@ -757,15 +718,17 @@ export function App() {
             onClose={() => setShowAuthModal(false)}
           />
         )}
-        {showAnticipationModal && currentRoute && (
+        {showAnticipationModal && routePreview && (
           <AnticipationModal
-            route={currentRoute}
+            route={routePreview}
             onAcceptRoute={(route) => {
+              if (!isValidatedRoute(route.validatedRoute)) return;
               setCurrentRoute(route);
+              setRoutePreview(null);
               setShowAnticipationModal(false);
             }}
             onRegenerate={handleRegenerateRoute}
-            onClose={() => setShowAnticipationModal(false)}
+            onClose={() => { routeAbort.current?.abort(); setRoutePreview(null); setShowAnticipationModal(false); }}
           />
         )}
 

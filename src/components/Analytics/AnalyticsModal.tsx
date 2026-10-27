@@ -455,7 +455,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
                     <span>📏 <strong>{route.distanceKm} km</strong></span>
                     <span>⛰️ <strong>{route.elevationGainM} hm</strong></span>
                     <span>⏱️ <strong>~{route.estimatedTimeMin} min</strong></span>
-                    <span>⚡ <strong>~{route.estimatedBatteryConsumptionWh} Wh</strong></span>
+                    <span>⚡ <strong>{route.estimatedBatteryConsumptionWh === null ? 'Energiebedarf unbekannt' : `~${route.estimatedBatteryConsumptionWh} Wh`}</strong></span>
                     {route.chargingStopsOnRoute?.length > 0 && (
                       <span className="glow-text-green">🔌 <strong>{route.chargingStopsOnRoute.length} Ladesäulen</strong></span>
                     )}

@@ -3,15 +3,35 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { createElement, act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { haversineMeters, calculateBearing, useRouteTracker } from '../../src/hooks/useRouteTracker';
+import { createHash } from 'node:crypto';
+import { validateRoute } from '../../functions/src/routing/validation';
+import { cumulativeDistances } from '../../functions/src/routing/geometry';
+import type { ManeuverAction, RouteCandidateV1, RouteRequestV1 } from '../../src/types/routing';
 import type { Route } from '../../src/types/navigation';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-type Loc = { lat: number; lng: number };
+type Loc = { lat: number; lng: number; accuracyM?: number | null; observedAt?: number | null };
 type TrackerState = ReturnType<typeof useRouteTracker>;
 
-function routeOf(coords: [number, number][]): Route {
-  return { title: 'Testroute', pathCoordinates: coords } as unknown as Route;
+async function routeOf(coords: [number, number][], action?: ManeuverAction): Promise<Route> {
+  const geometry = coords.map(([lat, lng]) => ({ lat, lng })), lengths = cumulativeDistances(geometry);
+  const req: RouteRequestV1 = { version: 1, requestId: 'hook-test', planning: 'standard', kind: 'destination',
+    start: { ...geometry[0], source: 'manual', observedAt: 1, accuracyM: null, confirmed: true }, destination: geometry[geometry.length - 1],
+    mandatoryStops: [], interests: [], criteria: { hard: [], wishes: '', weights: { asphalt: 0, nature: 0, flat: 0 } },
+    profile: { bike: 'bicycle', batteryPercent: null, batteryCapacityWh: null, confirmedAt: 1, consentVersion: '2' } };
+  const unknown = { value: null, source: null, quality: 'unknown' as const };
+  const index = action === 'arrive' ? geometry.length - 1 : 1;
+  const candidate: RouteCandidateV1 = { version: 1, id: 'synthetic', requestId: req.requestId, execution: 'online', geometry,
+    metrics: { distanceM: { value: lengths[lengths.length - 1], source: 'synthetic', quality: 'known' }, ascentM: unknown, durationS: unknown, energyWh: unknown },
+    provenance: { engine: 'brouter', engineVersion: 'synthetic', dataVersion: 'synthetic', profile: 'trekking' }, criteriaFindings: [],
+    maneuvers: action ? [{ geometryIndex: index, distanceAlongM: lengths[index], action, instruction: 'Vom Router übernommener Hinweis', street: null }] : [] };
+  const validatedRoute = await validateRoute(req, candidate, async text => createHash('sha256').update(text).digest('hex'));
+  return { id: 'synthetic', title: 'Testroute', pathCoordinates: coords, validatedRoute } as Route;
+}
+function fix(lat: number, lng: number, observedAt = 1000, accuracyM = 5): Loc {
+  vi.spyOn(Date, 'now').mockReturnValue(observedAt);
+  return { lat, lng, observedAt, accuracyM };
 }
 
 function mountTracker(route: Route | null, onOffRoute?: (d: number) => void) {
@@ -38,6 +58,7 @@ function mountTracker(route: Route | null, onOffRoute?: (d: number) => void) {
 const mounted: { unmount(): void }[] = [];
 afterEach(() => {
   mounted.splice(0).forEach((m) => m.unmount());
+  vi.restoreAllMocks();
 });
 function track(route: Route | null, onOffRoute?: (d: number) => void) {
   const m = mountTracker(route, onOffRoute);
@@ -76,95 +97,54 @@ describe('Szenario 7: Peilung (echtes calculateBearing)', () => {
   });
 });
 
-describe('Szenario 7/8: Abbiegehinweise (echter Hook useRouteTracker)', () => {
-  const A: [number, number] = [52.5, 13.4];
-  const B: [number, number] = [52.501, 13.4];
-
-  it('Rechtskurve nach Norden dann Osten: turn-right mit Entfernungstext', () => {
-    const t = track(routeOf([A, B, [52.501, 13.4015], [52.501, 13.403]]));
-    const s = t.move({ lat: A[0], lng: A[1] });
-    expect(s.currentManeuver?.action).toBe('turn-right');
-    expect(s.currentManeuver?.instruction).toMatch(/^In \d+m rechts abbiegen$/);
-    expect(s.currentManeuver?.distanceM).toBeGreaterThan(105);
-    expect(s.currentManeuver?.distanceM).toBeLessThan(117);
-    expect(s.currentManeuver?.isApproaching).toBe(true);
-    expect(s.currentManeuver?.isImminent).toBe(false);
+describe('Szenario 7/8: nur belegte Routermanöver', () => {
+  const coords: [number, number][] = [[52.5, 13.4], [52.501, 13.4], [52.501, 13.402]];
+  it.each(['turn-right', 'turn-left', 'straight'] as const)('übernimmt %s aus Routerdaten statt Winkel/Straßennamen zu erfinden', async action => {
+    const t = track(await routeOf(coords, action));
+    const state = t.move(fix(52.5, 13.4));
+    expect(state.currentManeuver?.action).toBe(action);
+    expect(state.currentManeuver?.instruction).toBe('Vom Router übernommener Hinweis');
+    expect(state.currentManeuver?.nextStreet).toBe('Straße unbekannt');
+    expect(state.currentManeuver?.distanceM).toBeGreaterThan(105);
+    expect(state.currentManeuver?.distanceM).toBeLessThan(117);
   });
-
-  it('Linkskurve: turn-left', () => {
-    const t = track(routeOf([A, B, [52.501, 13.3985], [52.501, 13.397]]));
-    const s = t.move({ lat: A[0], lng: A[1] });
-    expect(s.currentManeuver?.action).toBe('turn-left');
-    expect(s.currentManeuver?.instruction).toMatch(/^In \d+m links abbiegen$/);
+  it('behauptet ohne validierte Manöver oder brauchbare Position keine Führung', async () => {
+    expect(track(await routeOf(coords)).move(fix(52.5, 13.4)).currentManeuver).toBeNull();
+    const t = track(await routeOf(coords, 'turn-right'));
+    expect(t.move({ lat: 52.5, lng: 13.4 }).positionUncertain).toBe(true);
+    expect(t.move(fix(52.5, 13.4, 1000, 100)).currentManeuver).toBeNull();
+    expect(track({ title: 'GPX', pathCoordinates: coords } as Route).move(fix(52.5, 13.4)).currentManeuver).toBeNull();
+    expect(track(null).move(fix(52.5, 13.4)).currentManeuver).toBeNull();
   });
-
-  it('gerade Strecke: straight', () => {
-    const t = track(routeOf([A, B, [52.502, 13.4], [52.503, 13.4]]));
-    const s = t.move({ lat: A[0], lng: A[1] });
-    expect(s.currentManeuver?.action).toBe('straight');
-  });
-
-  it('am Routenende: arrive', () => {
-    const coords: [number, number][] = [A, B, [52.502, 13.4], [52.503, 13.4]];
-    const t = track(routeOf(coords));
-    const s = t.move({ lat: 52.503, lng: 13.4 });
-    expect(s.currentManeuver?.action).toBe('arrive');
-  });
-
-  it('ohne Route gibt es keinen Hinweis', () => {
-    const t = track(null);
-    const s = t.move({ lat: A[0], lng: A[1] });
-    expect(s.currentManeuver).toBeNull();
-    expect(s.isOffRoute).toBe(false);
+  it('Ankunft erfordert Fortschritt bis zum Ende und Zielnähe', async () => {
+    const line: [number, number][] = [[52.5, 13.4], [52.501, 13.4], [52.502, 13.4], [52.503, 13.4]];
+    const t = track(await routeOf(line, 'arrive'));
+    expect(t.move(fix(52.503, 13.4)).currentManeuver).toBeNull();
+    // A new session starts at the start, then proceeds through successive fresh positions.
+    const journey = track(await routeOf(line, 'arrive'));
+    journey.move(fix(52.5, 13.4)); journey.move(fix(52.501, 13.4, 10000)); journey.move(fix(52.502, 13.4, 20000));
+    expect(journey.move(fix(52.503, 13.4, 30000)).currentManeuver?.action).toBe('arrive');
   });
 });
-
-describe('Szenario 10: Abseits-der-Route-Erkennung (echter Hook)', () => {
-  const route = routeOf([
-    [52.5163, 13.3777],
-    [52.517, 13.385],
-    [52.518, 13.392],
-    [52.5185, 13.395],
-  ]);
-
-  it('auf der Route: nicht abseits, Abstand nahe 0', () => {
-    const cb = vi.fn();
-    const t = track(route, cb);
-    const s = t.move({ lat: 52.51705, lng: 13.3851 });
-    expect(s.isOffRoute).toBe(false);
-    expect(s.offRouteDistanceM).toBeLessThan(45);
-    expect(cb).not.toHaveBeenCalled();
+describe('Szenario 10: belastbare Abweichung und Rückkehr', () => {
+  const coords: [number, number][] = [[52.5, 13.4], [52.501, 13.4], [52.502, 13.4], [52.503, 13.4]];
+  it('projiziert auf dünne Segmente statt nur Stützpunkte', async () => {
+    const cb = vi.fn(), t = track(await routeOf(coords), cb);
+    const state = t.move(fix(52.5005, 13.4));
+    expect(state.offRouteDistanceM).toBeLessThan(1); expect(cb).not.toHaveBeenCalled();
   });
-
-  it('erst das zweite Update abseits (>45 m) löst Alarm und Neuberechnung aus', () => {
-    const cb = vi.fn();
-    const t = track(route, cb);
-    const first = t.move({ lat: 52.5185, lng: 13.383 });
-    expect(first.offRouteDistanceM).toBeGreaterThan(45);
-    expect(first.isOffRoute).toBe(false);
-    expect(cb).not.toHaveBeenCalled();
-
-    const second = t.move({ lat: 52.51851, lng: 13.383 });
-    expect(second.isOffRoute).toBe(true);
-    expect(cb).toHaveBeenCalledTimes(1);
-    expect(cb.mock.calls[0][0]).toBeGreaterThan(45);
+  it('fordert erst nach drei brauchbaren Messungen über acht Sekunden begrenzt Rückführung an', async () => {
+    const cb = vi.fn(), t = track(await routeOf(coords), cb);
+    expect(t.move(fix(52.4995, 13.4)).isOffRoute).toBe(false);
+    expect(t.move(fix(52.4995, 13.4, 5000)).isOffRoute).toBe(false);
+    expect(t.move(fix(52.4995, 13.4, 9000)).isOffRoute).toBe(true);
+    t.move(fix(52.4995, 13.4, 13000)); expect(cb).toHaveBeenCalledTimes(1);
+    expect(t.move(fix(52.5, 13.4, 18000)).isOffRoute).toBe(true);
+    expect(t.move(fix(52.5, 13.4, 23000)).isOffRoute).toBe(false);
   });
-
-  it('Rückkehr auf die Route setzt den Alarm zurück', () => {
-    const cb = vi.fn();
-    const t = track(route, cb);
-    t.move({ lat: 52.5185, lng: 13.383 });
-    t.move({ lat: 52.51851, lng: 13.383 });
-    const back = t.move({ lat: 52.51705, lng: 13.3851 });
-    expect(back.isOffRoute).toBe(false);
-  });
-
-  it('ein einzelner Ausreißer löst keinen Alarm aus', () => {
-    const cb = vi.fn();
-    const t = track(route, cb);
-    t.move({ lat: 52.5185, lng: 13.383 });
-    const back = t.move({ lat: 52.51705, lng: 13.3851 });
-    expect(back.isOffRoute).toBe(false);
-    expect(cb).not.toHaveBeenCalled();
+  it('ein Positionssprung erzeugt Unsicherheit statt Alarm oder Ankunft', async () => {
+    const cb = vi.fn(), t = track(await routeOf(coords), cb);
+    t.move(fix(52.5, 13.4)); const state = t.move(fix(52.6, 13.4, 2000));
+    expect(state.positionUncertain).toBe(true); expect(state.currentManeuver).toBeNull(); expect(cb).not.toHaveBeenCalled();
   });
 });

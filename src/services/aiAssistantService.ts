@@ -150,7 +150,7 @@ export class AiAssistantService {
         startLat: userLat,
         startLng: userLng,
         targetDistanceKm,
-        batteryPercent: userPrefs.batteryCurrentPercent || 80,
+        batteryPercent: userPrefs.batteryCurrentPercent ?? null,
         bikeType: userPrefs.bikeType || 'ebike',
         themes: [mainTheme],
         maxElevationGainM: userPrefs.maxElevationSlopePercent
@@ -193,21 +193,7 @@ export class AiAssistantService {
       throw new Error('[AiAssistantService] Consent required before generating a route.');
     }
     const route = await RoutingService.generateDestinationRoute(start, destination, userPrefs, options, undefined, signal);
-    if (options.mode === 'premium' && route.isRoadSnapped) {
-      const extraPreferences = [
-        options.viaName ? `Zwischenziel ${options.viaName}` : '',
-        options.wishes ?? '',
-        `Steigung vermeiden: ${userPrefs.avoidSteepHills ? 'ja' : 'nein'}`,
-      ].filter(Boolean);
-      route.aiStory = await AiGatewayService.planRoute({
-        start: { ...start, title: 'Start' },
-        destination: { ...destination, title: options.destinationName || 'Ziel' },
-        distanceKm: route.distanceKm,
-        elevationGainM: route.elevationGainM,
-        surfaceType: userPrefs.preferredSurface,
-        extraPreferences,
-      });
-    }
+
     return route;
   }
 

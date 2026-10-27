@@ -1,3 +1,4 @@
+import type { ValidatedRouteV1 } from './routing';
 export type BikeType = 'ebike' | 'gravel' | 'city' | 'cargo' | 'racing';
 
 export type SurfacePreference = 'asphalt' | 'gravel' | 'any' | 'forest';
@@ -77,15 +78,16 @@ export interface Route {
   summary: string;
   aiStory: string;
   distanceKm: number;
-  elevationGainM: number;
-  estimatedTimeMin: number;
-  estimatedBatteryConsumptionWh: number;
-  isBatterySafe: boolean; // True if battery % is enough for elevation/distance
+  elevationGainM: number | null;
+  estimatedTimeMin: number | null;
+  estimatedBatteryConsumptionWh: number | null;
+  isBatterySafe: boolean | null; // True if battery % is enough for elevation/distance
   surfaceBreakdown: {
     asphaltPercent: number;
     gravelPercent: number;
     unpavedPercent: number;
-  };
+  } | null;
+  validatedRoute?: ValidatedRouteV1;
   waypoints: Waypoint[];
   pathCoordinates: [number, number][]; // [lat, lng] array
   chargingStopsOnRoute: ChargingStation[];

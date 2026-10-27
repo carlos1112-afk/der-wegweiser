@@ -309,10 +309,10 @@ export const BatteryHUD: React.FC<BatteryHUDProps> = ({
                     color: isBatterySafe ? 'var(--accent-neon-green)' : 'var(--accent-gold)',
                   }}
                 >
-                  {isBatterySafe ? 'Reichweite Ausreichend' : 'Ladestopp Empfohlen'}
+                  {isBatterySafe === null ? 'Reichweite unbekannt' : isBatterySafe ? 'Reichweite Ausreichend' : 'Ladestopp Empfohlen'}
                 </div>
                 <div style={{ color: 'var(--text-muted)' }}>
-                  ~{currentRoute.estimatedBatteryConsumptionWh} Wh ({currentRoute.elevationGainM}m hm)
+                  {currentRoute.estimatedBatteryConsumptionWh === null ? 'Energiebedarf unbekannt' : `~${currentRoute.estimatedBatteryConsumptionWh} Wh`} ({currentRoute.elevationGainM === null ? 'Höhen unbekannt' : `${currentRoute.elevationGainM} m Hm`})
                 </div>
               </div>
             </div>
