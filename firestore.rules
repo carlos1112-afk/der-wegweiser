@@ -60,6 +60,31 @@ service cloud.firestore {
         );
     }
 
+    // Ersteller-Prüfung bei Neuerstellung von Datensätzen (Schutz vor Authorization Bypass / CWE-862).
+    // Stellt sicher, dass das Eigentümerfeld (userId und/oder createdByUserId) zwingend
+    // mit request.auth.uid übereinstimmt und widersprüchliche Ownership-Attribute
+    // abgewiesen werden.
+    function isOwnerOnCreate() {
+      let data = request.resource.data;
+      let hasUserId = 'userId' in data;
+      let hasCreatedBy = 'createdByUserId' in data;
+      return isActiveUser()
+        && (hasUserId || hasCreatedBy)
+        && (!hasUserId || (data.userId is string && data.userId == request.auth.uid))
+        && (!hasCreatedBy || (data.createdByUserId is string && data.createdByUserId == request.auth.uid));
+    }
+
+    // Verhindert das Ändern der Eigentümerschaft beim Aktualisieren von Datensätzen.
+    function isImmutableOwnerOnUpdate() {
+      let newData = request.resource.data;
+      let oldData = resource.data;
+      let hasOldUserId = 'userId' in oldData;
+      let hasOldCreatedBy = 'createdByUserId' in oldData;
+      return isCreator()
+        && (!hasOldUserId || ('userId' in newData && newData.userId == oldData.userId))
+        && (!hasOldCreatedBy || ('createdByUserId' in newData && newData.createdByUserId == oldData.createdByUserId));
+    }
+
     // --- 1. User Profiles & Cloud Token States (Art. 17 DSGVO, strikte Isolation) ---
     match /users/{userId} {
       allow read, delete: if isOwner(userId);
@@ -105,8 +130,8 @@ service cloud.firestore {
     // (Admin-Seed), schützt Community-Einträge vor fremder Überschreibung.
     match /points_of_interest/{poiId} {
       allow read: if true;
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isOwnerOnCreate();
+      allow update: if isImmutableOwnerOnUpdate();
       allow delete: if isCreator();
     }
 
@@ -115,8 +140,8 @@ service cloud.firestore {
     // (`docs/APPLE_UGC_COMPLIANCE.md` weist eigene Routen ausdrücklich als privat aus.)
     match /routes/{routeId} {
       allow read: if isCreator();
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isOwnerOnCreate();
+      allow update: if isImmutableOwnerOnUpdate();
       allow delete: if isCreator();
     }
 
@@ -124,16 +149,16 @@ service cloud.firestore {
     // Öffentlich lesbar, aber nur mit Konto anleg- und änderbar.
     match /station_reviews/{reviewId} {
       allow read: if true;
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isOwnerOnCreate();
+      allow update: if isImmutableOwnerOnUpdate();
       allow delete: if isCreator();
     }
 
     // --- 5. Scout Reports ---
     match /scout_reports/{reportId} {
       allow read: if true;
-      allow create: if isActiveUser();
-      allow update: if isCreator();
+      allow create: if isOwnerOnCreate();
+      allow update: if isImmutableOwnerOnUpdate();
       allow delete: if isCreator();
     }
 

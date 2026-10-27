@@ -103,6 +103,41 @@ test('Private Routen bleiben privat: nur der Ersteller liest sie', async () => {
   await assertFails(getDocs(collection(other, 'routes')));
 });
 
+test('Authorization bypass (CWE-862): Route-Erstellung verlangt eigene UID und verbietet fremde Eigentümer-Zuordnung', async () => {
+  const attacker = ctx({ uid: 'attacker-1' });
+  const owner = ctx({ uid: 'owner-1' });
+
+  // 1. Angreifer versucht eine Route mit fremder userId/createdByUserId anzulegen -> ABGEWIESEN
+  await assertFails(
+    setDoc(doc(attacker, 'routes', 'fake-route-1'), { title: 'Fremde Route', userId: 'victim-1' })
+  );
+  await assertFails(
+    setDoc(doc(attacker, 'routes', 'fake-route-2'), { title: 'Fremde Route', createdByUserId: 'victim-1' })
+  );
+  await assertFails(
+    setDoc(doc(attacker, 'routes', 'fake-route-3'), {
+      title: 'Widersprüchlich',
+      userId: 'victim-1',
+      createdByUserId: 'attacker-1',
+    })
+  );
+
+  // 2. Ersteller legt Route mit eigener UID an -> ERFOLGREICH
+  await assertSucceeds(
+    setDoc(doc(owner, 'routes', 'legit-route-1'), { title: 'Eigene Tour', userId: 'owner-1' })
+  );
+
+  // 3. Eigentümer versucht beim Update die userId auf ein fremdes Konto zu ändern -> ABGEWIESEN
+  await assertFails(
+    updateDoc(doc(owner, 'routes', 'legit-route-1'), { userId: 'victim-1' })
+  );
+
+  // 4. Legitimes Update ohne Eigentümerwechsel -> ERFOLGREICH
+  await assertSucceeds(
+    updateDoc(doc(owner, 'routes', 'legit-route-1'), { title: 'Eigene Tour v2', userId: 'owner-1' })
+  );
+});
+
 test('Gelöschte Dokumente geben kein Eigentum mehr preis', async () => {
   // Ohne vorheriges Lesen/Existieren darf niemand den Besitz ausnutzen.
   const attacker = ctx({ uid: 'attacker-1' });
