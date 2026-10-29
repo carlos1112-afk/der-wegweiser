@@ -163,6 +163,11 @@ export class GpxRecorderService {
     this.manualPaused = false;
     this.autoPaused = false;
 
+    return this.getSummary();
+  }
+
+  /** Snapshot without stopping: permits durable checkpoints during a ride. */
+  public static getSummary(): RideSummary {
     const distanceKm = +(this.totalDistanceM / 1000).toFixed(2);
     const durationSeconds = this.elapsedSeconds;
     

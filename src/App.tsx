@@ -1,3 +1,5 @@
+import { routeArchive } from './services/routeArchiveService';
+import { GpxRecorderService, type RideSummary } from './services/gpxRecorderService';
 import { isValidatedRoute } from './types/routing';
 import type { RouteLocation } from './types/routing';
 import { useCallback, useState, useEffect, lazy, Suspense } from 'react';
@@ -89,6 +91,7 @@ export function App() {
   const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false);
   const [showBoschModal, setShowBoschModal] = useState(false);
   const [showRideSummaryModal, setShowRideSummaryModal] = useState(false);
+  const [completedRideSummary, setCompletedRideSummary] = useState<RideSummary | null>(null);
   const [showGpxImportModal, setShowGpxImportModal] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
@@ -105,6 +108,7 @@ export function App() {
       if (authUserIdRef.current !== nextUid) {
         activeRouteRequestId.current++;
         setCurrentRoute(null);
+        setCompletedRideSummary(null); setShowRideSummaryModal(false); setShowAnalyticsModal(false);
         setIsSimulatingRoute(false);
         setTokenBalance(0);
       }
@@ -440,6 +444,8 @@ export function App() {
       setShowConsentModal(true);
       return false;
     }
+    const archiveOwner = UserIdentity.getUserId();
+    if (routeArchive.hasPending(archiveOwner)) { setRoutingNotice('Zuerst die offene Archiv-Sicherung abschließen.'); setShowAnalyticsModal(true); return false; }
     const start: RouteLocation | null = manualStart ?? (geo.isTracking && !geo.error && geo.observedAt !== null && geo.observedAt <= Date.now() && Date.now() - geo.observedAt <= 10000 && geo.accuracy !== null && geo.accuracy <= 50
       ? { ...userLocation, source: 'gps', observedAt: geo.observedAt, accuracyM: geo.accuracy, confirmed: true } : null);
     if (!start) { setRoutingNotice('Aktueller GPS-Start fehlt. Bitte einen manuellen Start festlegen.'); setShowManualStart(true); return false; }
@@ -467,13 +473,15 @@ export function App() {
         },
         controller.signal
       );
+      const archived = await routeArchive.saveGenerated(archiveOwner, newRoute);
       if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setRoutePreview(newRoute);
+        setRoutePreview({ ...newRoute, archivePlanId: archived.id });
         setShowAnticipationModal(true);
         return true;
       }
       return false;
     } catch (err: any) {
+      if (routeArchive.hasPending(archiveOwner) && archiveOwner === UserIdentity.getUserId()) { setRoutingNotice('Strecke ist erzeugt, aber noch nicht dauerhaft gesichert. Bitte im Archiv die Sicherung wiederholen.'); setShowAnalyticsModal(true); return false; }
       if (reqId !== activeRouteRequestId.current || controller.signal.aborted) return false;
       console.warn('[App] Navigation zum Zielpunkt fehlgeschlagen:', err);
       if (err?.name !== 'AbortError') setRoutingNotice(err?.message || 'Routenberechnung fehlgeschlagen.');
@@ -506,10 +514,15 @@ export function App() {
   };
 
   useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => { if (routeArchive.hasAnyPending() || GpxRecorderService.getStatus().isRecording) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn);
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = ConsentService.onChange(flags => {
       routeAbort.current?.abort(); activeRouteRequestId.current++;
       setRoutePreview(null); setManualStart(null);
-      if (!flags?.essential) setCurrentRoute(null);
+      if (!flags?.essential) { setCurrentRoute(null); setCompletedRideSummary(null); setShowRideSummaryModal(false); setShowAnalyticsModal(false); }
     });
     return () => { unsubscribe(); cancelRouting(); };
   }, [cancelRouting]);
@@ -677,12 +690,16 @@ export function App() {
       </div>}
 
       {/* GPX Track Recorder Pill - Relocated right side above right controls */}
-      {!currentRoute && (
-        <div style={{ position: 'absolute', right: '10px', top: '150px', zIndex: 1900 }}>
+      {!showStartScreen && hasConsent && (
+        <div style={{ position: 'absolute', right: '10px', top: '190px', zIndex: 1900 }}>
           <GpxRecorderHUD
-            userLocation={activeUserLocation}
+            key={UserIdentity.getUserId()}
+            ownerId={UserIdentity.getUserId()}
+            route={currentRoute}
+            isSimulating={isSimulatingRoute}
+            userLocation={userLocation}
             telemetry={telemetry}
-            onFinishRide={() => setShowRideSummaryModal(true)}
+            onFinishRide={(summary) => { setCompletedRideSummary(summary); setShowRideSummaryModal(true); }}
           />
         </div>
       )}
@@ -723,6 +740,7 @@ export function App() {
             route={routePreview}
             onAcceptRoute={(route) => {
               if (!isValidatedRoute(route.validatedRoute)) return;
+              if (GpxRecorderService.getStatus().isRecording || routeArchive.hasPending(UserIdentity.getUserId())) { setRoutingNotice('Bitte die laufende Aufzeichnung zuerst beenden und sichern. Die neue Strecke bleibt im Archiv.'); return; }
               setCurrentRoute(route);
               setRoutePreview(null);
               setShowAnticipationModal(false);
@@ -750,8 +768,14 @@ export function App() {
 
         {showAnalyticsModal && (
           <AnalyticsModal
+            key={UserIdentity.getUserId()}
             isOpen={showAnalyticsModal}
             currentRoute={currentRoute}
+            onOpenRoute={(route) => {
+              if (GpxRecorderService.getStatus().isRecording || routeArchive.hasPending(UserIdentity.getUserId())) { setRoutingNotice('Bitte zuerst die laufende Aufzeichnung beenden und sichern.'); return; }
+              setCurrentRoute(route); setShowAnalyticsModal(false); setShowStartScreen(false);
+              setRoutingNotice('Gespeicherter Track geladen. Keine erneute Wegeprüfung oder Abbiegeführung.');
+            }}
             onClose={() => setShowAnalyticsModal(false)}
           />
         )}
@@ -777,8 +801,9 @@ export function App() {
         )}
 
         {/* Ride Summary & GPX Export Modal */}
-        {showRideSummaryModal && (
+        {showRideSummaryModal && completedRideSummary && (
           <RideSummaryModal
+            summary={completedRideSummary}
             isOpen={showRideSummaryModal}
             onClose={() => setShowRideSummaryModal(false)}
           />
@@ -789,6 +814,7 @@ export function App() {
           <GpxImportModal
             isOpen={showGpxImportModal}
             onRouteLoaded={(importedRoute) => {
+              if (GpxRecorderService.getStatus().isRecording || routeArchive.hasPending(UserIdentity.getUserId())) { setRoutingNotice('Bitte zuerst die laufende Aufzeichnung beenden und sichern.'); return; }
               setCurrentRoute(importedRoute);
               setShowGpxImportModal(false);
             }}

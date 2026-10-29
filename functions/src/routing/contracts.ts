@@ -1,3 +1,5 @@
+/** Policy revision includes persistent route and ride archives. */
+export const ROUTING_CONSENT_VERSION = 3;
 /** Versioned platform-neutral contract. Browser and Functions import this same module. */
 export interface Coordinate { readonly lat: number; readonly lng: number }
 export interface RouteLocation extends Coordinate {

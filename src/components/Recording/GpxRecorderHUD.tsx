@@ -1,48 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Circle, Pause, Play, Square } from 'lucide-react';
-import { GpxRecorderService } from '../../services/gpxRecorderService';
+import { routeArchive, type ArchivedRide } from '../../services/routeArchiveService';
+import { ConsentService } from '../../services/consentService';
+import { GpxRecorderService, type RideSummary } from '../../services/gpxRecorderService';
 import { SoundFxService } from '../../services/soundFxService';
-import type { LiveBikeTelemetry } from '../../types/navigation';
+import type { LiveBikeTelemetry, Route } from '../../types/navigation';
 
 interface GpxRecorderHUDProps {
-  userLocation: { lat: number; lng: number };
+  userLocation: { lat: number; lng: number; accuracyM?: number | null; observedAt?: number | null };
+  ownerId: string;
+  route: Route | null;
+  isSimulating?: boolean;
   telemetry: LiveBikeTelemetry;
-  onFinishRide: () => void;
+  onFinishRide: (summary: RideSummary) => void;
 }
 
 export const GpxRecorderHUD: React.FC<GpxRecorderHUDProps> = ({
   userLocation,
   telemetry,
-  onFinishRide,
+  onFinishRide, ownerId, route, isSimulating = false,
 }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [distanceKm, setDistanceKm] = useState(0);
 
-  // Periodic ticker & telemetry feeder
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const starting = useRef(false), mounted = useRef(true);
+  const ride = useRef<ArchivedRide | null>(null), pendingFinish = useRef<RideSummary | null>(null);
+  const lastAutoRoute = useRef<Route | null>(null);
+  const live = useRef({ userLocation, telemetry, isSimulating }); live.current = { userLocation, telemetry, isSimulating };
+
+  const handleStart = async () => {
+    if (starting.current || GpxRecorderService.getStatus().isRecording || pendingFinish.current) return;
+    if (isSimulating) { setError('Demo-Fahrten werden nicht als echte Fahrten gespeichert.'); return; }
+    if (routeArchive.hasPending(ownerId)) { setError('Bitte zuerst die offene Archiv-Sicherung abschließen.'); return; }
+    starting.current = true; setBusy(true); setError(null);
+    try {
+      const created = await routeArchive.beginRide(ownerId, route);
+      if (!mounted.current || !ConsentService.allowsEssential) return;
+      ride.current = created;
+      GpxRecorderService.startRecording(telemetry.batteryPercent);
+      setIsRecording(true); setIsPaused(false); SoundFxService.playTurnChime();
+    } catch (error: any) { if (mounted.current) setError(error?.message ?? 'Aufzeichnung konnte nicht gesichert gestartet werden.'); }
+    finally { starting.current = false; if (mounted.current) setBusy(false); }
+  };
+  const startCurrent = useRef(handleStart); startCurrent.current = handleStart;
   useEffect(() => {
+    if (route && route !== lastAutoRoute.current && !isSimulating) {
+      lastAutoRoute.current = route; void startCurrent.current();
+    }
+  }, [route, ownerId, isSimulating]);
+
+  useEffect(() => {
+    mounted.current = true;
+    let lastCheckpointAt = 0, lastPositionTime: number | null = null;
     const interval = setInterval(() => {
       const status = GpxRecorderService.getStatus();
-      setIsRecording(status.isRecording);
-      setIsPaused(status.isPaused);
-      setElapsedSeconds(status.elapsedSeconds);
-      setDistanceKm(status.distanceKm);
-
-      if (status.isRecording) {
-        GpxRecorderService.addPoint(userLocation, telemetry);
+      setIsRecording(status.isRecording); setIsPaused(status.isPaused);
+      setElapsedSeconds(ride.current ? Math.max(0, Math.round((Date.now() - Date.parse(ride.current.startedAt)) / 1000)) : status.elapsedSeconds); setDistanceKm(status.distanceKm);
+      const current = live.current, position = current.userLocation;
+      if (status.isRecording && !current.isSimulating && position.observedAt != null && position.observedAt !== lastPositionTime
+        && Date.now() >= position.observedAt && Date.now() - position.observedAt <= 10000 && position.accuracyM != null && position.accuracyM >= 0 && position.accuracyM <= 30
+        && Number.isFinite(position.lat) && Number.isFinite(position.lng) && Math.abs(position.lat) <= 90 && Math.abs(position.lng) <= 180) {
+        lastPositionTime = position.observedAt; GpxRecorderService.addPoint(position, current.telemetry);
+        if (ride.current && (lastCheckpointAt === 0 || Date.now() - lastCheckpointAt >= 5000)) { lastCheckpointAt = Date.now(); void routeArchive.saveRide(ride.current, { ...GpxRecorderService.getSummary(), durationSeconds: Math.max(0, Math.round((Date.now() - Date.parse(ride.current.startedAt)) / 1000)) }, false)
+          .catch((error: any) => { if (mounted.current) setError(error?.message ?? 'Zwischensicherung fehlgeschlagen.'); }); }
       }
     }, 1000);
-
-    return () => clearInterval(interval);
-  }, [userLocation, telemetry]);
-
-  const handleStart = () => {
-    SoundFxService.playTurnChime();
-    GpxRecorderService.startRecording(telemetry.batteryPercent);
-    setIsRecording(true);
-    setIsPaused(false);
-  };
+    return () => {
+      mounted.current = false; clearInterval(interval);
+      if (ride.current) {
+        if (ConsentService.allowsEssential) void routeArchive.saveRide(ride.current, pendingFinish.current ?? GpxRecorderService.getSummary(), !!pendingFinish.current).catch(() => { /* Retained in the archive retry queue. */ });
+        GpxRecorderService.reset();
+      }
+    };
+  }, []);
 
   const handleTogglePause = () => {
     SoundFxService.playClick();
@@ -50,9 +84,17 @@ export const GpxRecorderHUD: React.FC<GpxRecorderHUDProps> = ({
     setIsPaused(paused);
   };
 
-  const handleStop = () => {
-    SoundFxService.playSuccessChime();
-    onFinishRide();
+  const handleStop = async () => {
+    if (!ride.current || busy) return;
+    setBusy(true); setError(null);
+    const summary = pendingFinish.current ?? { ...GpxRecorderService.stopRecording(), durationSeconds: Math.max(0, Math.round((Date.now() - Date.parse(ride.current.startedAt)) / 1000)) }; pendingFinish.current = summary;
+    setIsRecording(false);
+    try {
+      await routeArchive.saveRide(ride.current, summary, true);
+      ride.current = null; pendingFinish.current = null;
+      if (mounted.current) { SoundFxService.playSuccessChime(); onFinishRide(summary); }
+    } catch (error: any) { if (mounted.current) setError(error?.message ?? 'Fahrt noch nicht gesichert. Bitte Sicherung wiederholen.'); }
+    finally { if (mounted.current) setBusy(false); }
   };
 
   const formatTime = (secs: number) => {
@@ -67,8 +109,9 @@ export const GpxRecorderHUD: React.FC<GpxRecorderHUDProps> = ({
 
   if (!isRecording) {
     return (
-      <button
-        onClick={handleStart}
+      <div><button
+        disabled={busy || !!pendingFinish.current}
+        onClick={() => void handleStart()}
         className="btn-cyberpunk glass-panel"
         style={{
           padding: '8px 14px',
@@ -82,8 +125,11 @@ export const GpxRecorderHUD: React.FC<GpxRecorderHUDProps> = ({
         title="GPX Track-Aufzeichnung mit voller Telemetrie starten"
       >
         <Circle size={14} fill="#ff3333" color="#ff3333" />
-        <span>REC Tour</span>
+        <span>{busy ? 'Speichern …' : 'REC Tour'}</span>
       </button>
+      {error && <p role="alert">{error}</p>}
+      {pendingFinish.current && <button type="button" disabled={busy} onClick={() => void handleStop()}>Fahrt-Sicherung wiederholen</button>}
+      </div>
     );
   }
 
@@ -102,6 +148,7 @@ export const GpxRecorderHUD: React.FC<GpxRecorderHUDProps> = ({
         animation: 'fadeIn 0.3s ease',
       }}
     >
+      {error && <span role="alert">{error}</span>}
       {/* Blinking REC Dot & Status */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
         <Circle
@@ -143,7 +190,8 @@ export const GpxRecorderHUD: React.FC<GpxRecorderHUDProps> = ({
         </button>
 
         <button
-          onClick={handleStop}
+          disabled={busy}
+          onClick={() => void handleStop()}
           style={{
             background: 'none',
             border: 'none',

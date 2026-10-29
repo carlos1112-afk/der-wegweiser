@@ -1,3 +1,4 @@
+import { ROUTING_CONSENT_VERSION } from '../../functions/src/routing/contracts';
 /**
  * Einwilligungsverwaltung (Art. 6/7 DSGVO, § 25 TDDDG) — Der Wegweiser
  *
@@ -34,7 +35,7 @@ export interface ConsentFlags {
  * Bei jeder inhaltlichen Änderung der Datenschutzerklärung hochzählen,
  * damit eine erneute Einwilligung abgefragt wird.
  */
-export const CONSENT_VERSION = 2;
+export const CONSENT_VERSION = ROUTING_CONSENT_VERSION;
 
 const STORAGE_KEY = 'der_wegweiser_legal_consent';
 

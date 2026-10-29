@@ -1,3 +1,5 @@
+import { routeArchive } from './routeArchiveService';
+import { UserIdentity } from './userIdentity';
 import type { Location, Route, UserPreferences } from '../types/navigation';
 import type { RouteLocation, RouteRequestV1 } from '../types/routing';
 import { RoutingError } from '../types/routing';
@@ -32,6 +34,8 @@ export class RoutingService {
     if (options.mode === 'premium') throw new RoutingError('PREMIUM_UNAVAILABLE', 'KI-Premium ist noch nicht freigegeben.');
     if (options.mode === 'offline') throw new RoutingError('OFFLINE_UNAVAILABLE', 'Lokales Offline-Routing ist noch nicht verfügbar.');
     if (!options.start?.confirmed || options.start.lat !== start.lat || options.start.lng !== start.lng) throw new RoutingError('INVALID_START', 'Bitte einen aktuellen GPS-Start oder einen manuellen Start bestätigen.');
+    const ownerId = UserIdentity.getUserId();
+    if (routeArchive.hasPending(ownerId)) throw new Error('Zuerst die noch offene Archiv-Sicherung abschließen.');
     const profile = prefs;
     const validBattery = Number.isFinite(profile.batteryCurrentPercent) && profile.batteryCurrentPercent >= 0 && profile.batteryCurrentPercent <= 100;
     const request: RouteRequestV1 = { version: 1, requestId: crypto.randomUUID(), kind: 'destination', planning: 'standard',
@@ -40,9 +44,8 @@ export class RoutingService {
       profile: { bike: 'bicycle', batteryPercent: validBattery ? profile.batteryCurrentPercent : null,
         batteryCapacityWh: Number.isFinite(profile.batteryCapacityWh) && profile.batteryCapacityWh > 0 ? profile.batteryCapacityWh : null,
         confirmedAt: Date.now(), consentVersion: String(CONSENT_VERSION) } };
-    const route = await FreeRouteService.plan(request, signal);
-    allowed(signal);
-    return { id: route.id, title: `Route: ${options.destinationName || 'Ausgewähltes Ziel'}`, summary: `${(route.metrics.distanceM.value! / 1000).toFixed(1)} km · Kostenlos mit BRouter`,
+    const route = await FreeRouteService.plan(request);
+    const result: Route = { id: route.id, title: `Route: ${options.destinationName || 'Ausgewähltes Ziel'}`, summary: `${(route.metrics.distanceM.value! / 1000).toFixed(1)} km · Kostenlos mit BRouter`,
       aiStory: route.guidanceCapability === 'track' ? 'Geprüfte Trackgeometrie. Abbiegeführung, Oberflächen- und Akkudaten sind noch nicht verfügbar.' : 'Kostenlose Fahrradroute.',
       distanceKm: route.metrics.distanceM.value! / 1000, elevationGainM: route.metrics.ascentM.value,
       estimatedTimeMin: route.metrics.durationS.value === null ? null : route.metrics.durationS.value / 60,
@@ -52,5 +55,9 @@ export class RoutingService {
       waypoints: [{ id: 'start', ...request.start, name: 'Bestätigter Start', category: 'start' },
         ...(options.via ? [{ id: 'via', ...options.via, name: options.viaName || 'Zwischenziel', category: 'scenic' as const }] : []),
         { id: 'destination', ...destination, name: options.destinationName || 'Ziel', category: 'end' }] };
+    // Save every completed computation even if another preview has since been requested.
+    const archived = await routeArchive.saveGenerated(ownerId, result);
+    allowed(signal);
+    return { ...result, archivePlanId: archived.id };
   }
 }

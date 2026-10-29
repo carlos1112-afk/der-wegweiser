@@ -19,7 +19,7 @@ async function routeOf(coords: [number, number][], action?: ManeuverAction): Pro
   const req: RouteRequestV1 = { version: 1, requestId: 'hook-test', planning: 'standard', kind: 'destination',
     start: { ...geometry[0], source: 'manual', observedAt: 1, accuracyM: null, confirmed: true }, destination: geometry[geometry.length - 1],
     mandatoryStops: [], interests: [], criteria: { hard: [], wishes: '', weights: { asphalt: 0, nature: 0, flat: 0 } },
-    profile: { bike: 'bicycle', batteryPercent: null, batteryCapacityWh: null, confirmedAt: 1, consentVersion: '2' } };
+    profile: { bike: 'bicycle', batteryPercent: null, batteryCapacityWh: null, confirmedAt: 1, consentVersion: '3' } };
   const unknown = { value: null, source: null, quality: 'unknown' as const };
   const index = action === 'arrive' ? geometry.length - 1 : 1;
   const candidate: RouteCandidateV1 = { version: 1, id: 'synthetic', requestId: req.requestId, execution: 'online', geometry,

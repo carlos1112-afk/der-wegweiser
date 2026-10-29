@@ -12,6 +12,8 @@ vi.mock('firebase/firestore', async (importOriginal) => {
     getDocs: vi.fn(),
     setDoc: vi.fn(),
     getFirestore: vi.fn(),
+    query: vi.fn((...args) => args),
+    where: vi.fn((...args) => args),
   };
 });
 

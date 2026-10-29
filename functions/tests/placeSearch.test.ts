@@ -4,7 +4,7 @@ jest.mock('firebase-functions/v2/https', () => ({
 }));
 import { createPlaceSearchHandler, searchPlaces } from '../src/routing/placeSearch';
 const row = { lat: '52.52', lon: '13.4', display_name: 'Berlin', osm_type: 'node', osm_id: 1 };
-const caller = (query: unknown = 'Berlin') => ({ app: { appId: 'test' }, data: { query, consentVersion: 2 } });
+const caller = (query: unknown = 'Berlin') => ({ app: { appId: 'test' }, data: { query, consentVersion: 3 } });
 const setup = (rows: unknown = [row], base = 'http://operator.internal/') => {
   const fetch = jest.fn(async () => new Response(JSON.stringify(rows), { status: 200 }));
   const rateLimit = jest.fn(async () => {});

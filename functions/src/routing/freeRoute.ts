@@ -2,7 +2,7 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { defineString } from 'firebase-functions/params';
 import { getFirestore } from 'firebase-admin/firestore';
 import { createHash } from 'node:crypto';
-import { RoutingError, ROUTING_LIMITS } from './contracts';
+import { RoutingError, ROUTING_LIMITS, ROUTING_CONSENT_VERSION } from './contracts';
 import type { RouteCandidateV1, RouteRequestV1, RoutingCapabilitiesV1, ValidatedRouteV1 } from './contracts';
 import { isCoordinate } from './geometry';
 import { parseRouteRequest, validateRoute } from './validation';
@@ -63,7 +63,7 @@ export function createFreeRouteHandler(deps: FreeRouteDependencies) {
     try {
       const request = parseRouteRequest(caller.data);
       if (request.planning !== 'standard') throw new RoutingError('PREMIUM_UNAVAILABLE');
-      if (request.profile.consentVersion !== '2') throw new RoutingError('CONSENT_REQUIRED');
+      if (request.profile.consentVersion !== String(ROUTING_CONSENT_VERSION)) throw new RoutingError('CONSENT_REQUIRED');
       if (request.criteria.hard.length) throw new RoutingError('UNSUPPORTED_CRITERIA');
       const config = await deps.config();
       if (!isOperatorConfig(config)) throw new RoutingError('UNAVAILABLE', 'Betreiberrouting ist noch nicht freigegeben.');

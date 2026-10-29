@@ -128,7 +128,7 @@ describe('getConsent', () => {
   it('liefert die aktuelle CONSENT_VERSION', () => {
     stored(valid());
     expect(ConsentService.getConsent()!.version).toBe(CONSENT_VERSION);
-    expect(CONSENT_VERSION).toBe(2);
+    expect(CONSENT_VERSION).toBe(3);
   });
 
   it('kaputtes JSON: null und exakte Warnung', () => {

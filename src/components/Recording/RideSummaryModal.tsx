@@ -1,38 +1,35 @@
 import React, { useState } from 'react';
 import { Trophy, Download, Share2, Sparkles, CheckCircle2, X } from 'lucide-react';
-import { GpxRecorderService, type RideSummary } from '../../services/gpxRecorderService';
+import type { RideSummary } from '../../services/gpxRecorderService';
 import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
 import { SoundFxService } from '../../services/soundFxService';
-import confetti from 'canvas-confetti';
 
 interface RideSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  summary: RideSummary;
 }
 
 export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
   isOpen,
-  onClose,
+  onClose, summary,
 }) => {
-  const [summary] = useState<RideSummary>(() => {
-    const s = GpxRecorderService.stopRecording();
-    confetti({ particleCount: 90, spread: 80 });
-    return s;
-  });
-
   const [downloaded, setDownloaded] = useState(false);
 
   if (!isOpen) return null;
 
   const handleDownload = () => {
     SoundFxService.playClick();
-    GpxRecorderService.downloadGpxFile(`wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`);
+    const url = URL.createObjectURL(new Blob([summary.gpxXmlString], { type: 'application/gpx+xml' }));
+    const anchor = document.createElement('a'); anchor.href = url; anchor.download = `wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`; anchor.click(); URL.revokeObjectURL(url);
     setDownloaded(true);
   };
 
   const handleShare = async () => {
     SoundFxService.playClick();
-    await GpxRecorderService.shareGpxTrack(`wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`);
+    const file = new File([summary.gpxXmlString], `wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`, { type: 'application/gpx+xml' });
+    if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: 'Meine aufgezeichnete Tour' });
+    else handleDownload();
   };
 
   const handleFinish = async () => {

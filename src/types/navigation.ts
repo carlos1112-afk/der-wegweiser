@@ -73,6 +73,7 @@ export interface TokenAccount {
 }
 
 export interface Route {
+  archivePlanId?: string;
   id: string;
   title: string;
   summary: string;

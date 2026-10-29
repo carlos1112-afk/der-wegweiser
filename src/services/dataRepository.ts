@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount, Route } from '../types/navigation';
 import { ChargingStationImportService } from './chargingStationImportService';
@@ -322,52 +322,41 @@ class LocalAndFirestoreRepository implements IDataRepository {
   }
 
   async saveRoute(userId: string, route: Route): Promise<string> {
-    // 1. Save locally for instant offline retrieval
+    let localSaved = false;
+    let localError: unknown;
     try {
-      const saved = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
-      if (!saved.some((r: Route) => r.id === route.id)) {
-        saved.push(route);
-      }
-      localStorage.setItem(`routes_${userId}`, JSON.stringify(saved));
-    } catch (e) {
-      console.warn('Could not save route to localStorage:', e);
-    }
-
-    // 2. Persist in Firestore
+      const saved: Route[] = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      if (!Array.isArray(saved)) throw new Error('Ungültiger lokaler Routenbestand.');
+      const merged = new Map(saved.map(item => [item.id, item])); merged.set(route.id, route);
+      localStorage.setItem(`routes_${userId}`, JSON.stringify([...merged.values()])); localSaved = true;
+    } catch (error) { localError = error; }
     try {
-      const docRef = doc(db, 'routes', route.id);
-      await setDoc(docRef, { ...route, userId, savedAt: new Date().toISOString() });
-    } catch (error) {
-      console.warn('Firestore saveRoute failed, persisted locally:', error);
+      await setDoc(doc(db, 'routes', route.id), { ...route, userId, savedAt: new Date().toISOString() });
+    } catch (cloudError) {
+      if (!localSaved) throw new AggregateError([localError, cloudError], 'Route konnte weder lokal noch in der Cloud gespeichert werden.');
     }
-
     return route.id;
   }
 
   async getSavedRoutes(userId: string): Promise<Route[]> {
-    let firestoreRoutes: Route[] = [];
-
+    let local: Route[] = []; let localError: unknown;
     try {
-      const querySnapshot = await getDocs(collection(db, 'routes'));
-      firestoreRoutes = querySnapshot.docs.map((d) => d.data() as Route);
-      if (firestoreRoutes.length > 0) {
-        localStorage.setItem(`routes_${userId}`, JSON.stringify(firestoreRoutes));
-        return firestoreRoutes;
-      }
-    } catch (error) {
-      console.warn('Firestore getSavedRoutes failed, using local cache:', error);
-    }
-
+      const value = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      if (!Array.isArray(value)) throw new Error('Ungültiger lokaler Routenbestand.');
+      local = value;
+    } catch (error) { localError = error; }
     try {
-      const local = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
-      if (local && local.length > 0) {
-        return local;
-      }
-    } catch {
-      // Fallback
+      const result = await getDocs(query(collection(db, 'routes'), where('userId', '==', userId)));
+      const merged = new Map(result.docs.map(item => { const route = item.data() as Route; return [route.id, route] as const; }));
+      // Never replace offline-only routes with a smaller cloud response.
+      local.forEach(route => merged.set(route.id, route));
+      const routes = [...merged.values()];
+      try { localStorage.setItem(`routes_${userId}`, JSON.stringify(routes)); } catch { /* The durable IndexedDB archive is independent of this compatibility cache. */ }
+      return routes;
+    } catch (cloudError) {
+      if (localError) throw new AggregateError([localError, cloudError], 'Gespeicherte Routen konnten nicht gelesen werden.');
+      return local;
     }
-
-    return [];
   }
 
   async addPartnerLead(lead: { businessName: string; email: string; plan: string; type: string }): Promise<void> {

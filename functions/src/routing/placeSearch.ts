@@ -1,3 +1,4 @@
+import { ROUTING_CONSENT_VERSION } from './contracts';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { defineSecret, defineString } from 'firebase-functions/params';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
@@ -17,7 +18,7 @@ export function createPlaceSearchHandler(deps: SearchDependencies) {
   return async (request: SearchCaller): Promise<{ results: PlaceResultV1[] }> => {
     if (!request.app) throw new HttpsError('unauthenticated', 'App Check required.');
     const data = request.data as { query?: unknown; consentVersion?: unknown } | null;
-    if (!data || data.consentVersion !== 2) throw new HttpsError('failed-precondition', 'CONSENT_REQUIRED');
+    if (!data || data.consentVersion !== ROUTING_CONSENT_VERSION) throw new HttpsError('failed-precondition', 'CONSENT_REQUIRED');
     if (typeof data.query !== 'string' || !data.query.trim() || data.query.length > 100 || Array.from(data.query).some(character => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)) {
       throw new HttpsError('invalid-argument', 'INVALID_REQUEST');
     }

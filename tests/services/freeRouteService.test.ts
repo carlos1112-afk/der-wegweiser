@@ -12,7 +12,7 @@ vi.mock('firebase/functions', () => ({ httpsCallable: () => mocks.call }));
 const request: RouteRequestV1 = { version: 1, requestId: 'free-client', kind: 'destination', planning: 'standard',
   start: { lat: 52.52, lng: 13.4, source: 'manual', observedAt: 1, accuracyM: null, confirmed: true }, destination: { lat: 52.52, lng: 13.402 },
   mandatoryStops: [], interests: [], criteria: { hard: [], wishes: '', weights: { asphalt: 0, nature: 0, flat: 0 } },
-  profile: { bike: 'bicycle', batteryPercent: 0, batteryCapacityWh: null, confirmedAt: 1, consentVersion: '2' } };
+  profile: { bike: 'bicycle', batteryPercent: 0, batteryCapacityWh: null, confirmedAt: 1, consentVersion: '3' } };
 async function result() {
   const geometry = [request.start, { lat: 52.52, lng: 13.401 }, { lat: 52.52, lng: 13.402 }].map(p => ({ lat: p.lat, lng: p.lng }));
   const unknown = { value: null, source: null, quality: 'unknown' as const };
