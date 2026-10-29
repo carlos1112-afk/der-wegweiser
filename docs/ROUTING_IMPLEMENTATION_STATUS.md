@@ -1,10 +1,22 @@
 # Routingumsetzung – aktueller Arbeitsstand
 
-Stand: 27.10.2026. **Lokal weiter umgesetzt; Gesamtplan und Betriebsfreigabe weiterhin offen.**
+Stand: 29.10.2026. **Lokal weiter umgesetzt; Gesamtplan und Betriebsfreigabe weiterhin offen.**
 
 Arbeitskopie: `/Users/pascalgregor/Documents/worktrees/wegweiser-routing`, Branch `codex/routing-implementation-20261027`, Basis `8447969`. Ursprung/main bleibt unverändert. Keine Agenten, Installation, Graphdownloads, Kontoverbindung, Livekontomigration, Push oder Deployment. Der vollständige [Arbeitsplan](ROUTING_IMPLEMENTATION_WORKPLAN.md) und [Architekturvertrag](ROUTING_AI_ARCHITECTURE_PLAN.md) bleiben maßgeblich. Die frühere Warteanweisung wurde vom Benutzer aufgehoben; der Auftrag umfasst weiterhin alle Phasen.
 
 Der [historische Ausgangsbericht](ROUTING_BASELINE_20261027.md) hält die erste Phase und ihre damaligen Grenzen fest. Die folgende Fortsetzung ersetzt dessen Implementierungsstatus.
+
+## Archivauftrag vom 28.10.2026 – Abschluss am 29.10.2026
+
+[FAKT] Automatisches Gerätearchiv und Fahrtenhistorie sind implementiert. Jede erfolgreich berechnete Strecke wird vor ihrer Vorschau in einer IndexedDB-Transaktion gespeichert; neue Varianten überschreiben frühere nicht. Auch eine durch eine neue Vorschau abgelöste Berechnung bleibt bei unverändert gültigem Auth/Consent erhalten. Ungefahrene und alle gespeicherten Strecken sowie tatsächliche Fahrten sind getrennt zugänglich. Wiederholungen derselben Planung erhalten eigene Fahrteinträge; Originalplanung und tatsächlicher GPS-Track bleiben getrennt.
+
+Aufzeichnungsstart und -abschluss warten auf erfolgreiche Speicherung. Unterbrochene Aufzeichnungen behalten bestätigte Zwischenstände. Quota-/Transaktionsfehler bleiben sichtbar mit Retry/Export, statt als erfolgreiche Speicherung zu gelten; bis zur offenen Sicherung ist weitere Generierung gesperrt. Alte lokale Routen werden idempotent importiert, kleinere Cloudbestände überschreiben den Offlinebestand nicht. Die festen Beispielwerte wurden aus der Fahrtenstatistik entfernt. Die gemeinsame Consentversion 3 und die Informationstexte berücksichtigen die neue Aufbewahrung.
+
+Vollständige lokale Prüfungen am 28.10.: **427 Frontendtests bestanden**, 41 Suites bestanden, 2 Suites übersprungen, 1 Test übersprungen, 11 todo; die bekannte Socket-Suite bleibt ausdrücklich ausgeschlossen. **156 Backendtests bestanden**, 15/15 Suites. Beide Builds bestanden. Die 17 gezielten Archivprüfungen wurden am 29.10. erneut ausgeführt: 17/17 bestanden. Lint meldete keine Fehler, aber verbleibende überwiegend vorhandene Warnungen. Es wurde kein Browser-/Android-Gerätetest vorgetäuscht.
+
+[RISIKO] Das ist ein lokales Gerätearchiv, keine neu eingerichtete Cloud-/Mehrgeräte-Sicherung. Ein abruptes Beenden kann letzte noch nicht bestätigte Messungen verlieren. App-/Browserdatenlöschung, Geräteverlust oder ausdrücklicher Widerruf bleiben relevante Grenzen. Das gesperrte Premium-KI-Backend ist nicht freigeschaltet; der Architekturvertrag verlangt dort nun dauerhaftes serverseitiges Archivieren vor `ready`/Capture, ohne 24-h-Verfall gültiger Ergebnisse. Details: [Streckenarchiv und Fahrtenhistorie](ROUTE_ARCHIVE_AND_RIDE_HISTORY.md).
+
+Die nachfolgenden Abnahme- und Zugriffsgrenzen stammen aus der vorherigen Routingarbeit; Anbieter-/Gerätezugänge wurden im Archivauftrag nicht neu geprüft.
 
 ## Seit der Fortsetzung tatsächlich geändert
 
