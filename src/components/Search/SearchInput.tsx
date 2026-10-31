@@ -11,11 +11,12 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onSelect, placeholder 
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [coverageNote, setCoverageNote] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const generation = useRef(0);
-  const invalidate = () => { generation.current++; abortRef.current?.abort(); setIsLoading(false); setResults([]); setError(null); setIsOpen(false); };
+  const invalidate = () => { generation.current++; abortRef.current?.abort(); setIsLoading(false); setResults([]); setError(null); setCoverageNote(null); setIsOpen(false); };
   useEffect(() => { if (focusRequest > 0) inputRef.current?.focus(); }, [focusRequest]);
   useEffect(() => () => { generation.current++; abortRef.current?.abort(); }, []);
   useEffect(() => ConsentService.onChange(() => { invalidate(); }), []);
@@ -28,7 +29,9 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onSelect, placeholder 
     try {
       const places = await PlaceSearchService.search(parsed.data, controller.signal);
       if (current !== generation.current || controller.signal.aborted) return;
-      setResults(places); setIsOpen(true); if (!places.length) setError('Keine Ergebnisse gefunden.');
+      setResults(places.results); setIsOpen(true);
+      if (!places.osmAvailable) setCoverageNote('Es werden interne Wegweiser-Ziele angezeigt; die öffentliche Suche ist gerade nicht verfügbar oder deaktiviert.');
+      if (!places.results.length) setError('Keine Ergebnisse gefunden.');
     } catch (error: any) {
       if (current !== generation.current || controller.signal.aborted || error?.name === 'AbortError') return;
       setError(error?.code === 'CONSENT_REQUIRED' ? 'Bitte zuerst der Standortverarbeitung zustimmen.' : 'Zielsuche derzeit nicht verfügbar. Koordinaten können weiterhin eingegeben werden.'); setIsOpen(true);
@@ -44,8 +47,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({ onSelect, placeholder 
       {query && <button type="button" className={styles.clearBtn} onClick={() => { invalidate(); setQuery(''); inputRef.current?.focus(); }} aria-label="Eingabe löschen">✕</button>}
     </form>
     {isOpen && <ul className={styles.dropdown} aria-label="Suchergebnisse">
-      {error ? <li className={styles.errorItem} role="status">{error}</li> : results.map((item, index) => <li key={item.id ?? index} className={styles.resultItem}>
-        <button type="button" onClick={() => select(item)}>{item.label}</button>
+      {coverageNote && <li className={styles.errorItem} role="status">{coverageNote}</li>}
+      {error && <li className={styles.errorItem} role="status">{error}</li>}
+      {results.map((item, index) => <li key={item.id ?? index} className={styles.resultItem}>
+        <button type="button" onClick={() => select(item)}>{item.label}<small> · {item.source === 'wegweiser' ? 'Wegweiser' : item.source === 'osm' ? 'OpenStreetMap' : 'Koordinate'}</small></button>
       </li>)}
     </ul>}
   </div>;

@@ -17,6 +17,8 @@ export interface ProfileSnapshotV1 {
 }
 export interface CriteriaV1 {
   readonly hard: readonly ('avoid_ferries' | 'avoid_unpaved')[];
+  /** Explicit preference is preserved even when this router cannot score its surface data. */
+  readonly surfacePreference?: 'asphalt' | 'gravel' | 'forest' | 'any';
   readonly wishes: string;
   readonly weights: Readonly<{ asphalt: number; nature: number; flat: number }>;
 }
@@ -80,7 +82,7 @@ export interface RouteCandidateV1 {
   readonly geometry: readonly Coordinate[];
   readonly metrics: RouteMetricsV1;
   readonly maneuvers: readonly ManeuverV1[];
-  readonly provenance: Readonly<{ engine: 'brouter'; engineVersion: string; dataVersion: string; profile: string }>;
+  readonly provenance: Readonly<{ engine: 'brouter' | 'openrouteservice'; engineVersion: string; dataVersion: string; profile: string }>;
   readonly criteriaFindings: readonly Readonly<{ criterion: string; status: 'satisfied' | 'violated' | 'unknown'; source: string }>[];
 }
 // Opaque at compile time; only the validator may construct this type.

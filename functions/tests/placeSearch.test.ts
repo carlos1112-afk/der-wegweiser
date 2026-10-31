@@ -14,7 +14,7 @@ const setup = (rows: unknown = [row], base = 'http://operator.internal/') => {
 };
 it('uses operator jsonv2 search with five results only, no caller-controlled upstream', async () => {
   const { handler, fetch, rateLimit } = setup();
-  expect(await handler(caller())).toEqual({ results: [{ id: 'osm:node:1', lat: 52.52, lng: 13.4, label: 'Berlin' }] });
+  expect(await handler(caller())).toEqual({ results: [{ id: 'osm:node:1', lat: 52.52, lng: 13.4, label: 'Berlin', source: 'osm' }], osmAvailable: true });
   const url = new URL(String((fetch.mock.calls[0] as unknown as unknown[])[0]));
   expect(url.origin).toBe('http://operator.internal'); expect(url.searchParams.get('limit')).toBe('5');
   expect(url.searchParams.get('format')).toBe('jsonv2'); expect(url.searchParams.get('q')).toBe('Berlin');
@@ -30,16 +30,23 @@ it('rejects unauthenticated app, absent consent and invalid input before upstrea
 });
 it('keeps a missing/disabled/public operator closed and never falls back', async () => {
   for (const base of ['', 'file:///tmp/data', 'https://nominatim.openstreetmap.org/', 'http://user:pass@host/']) {
-    const { handler, fetch } = setup([], base); await expect(handler(caller())).rejects.toMatchObject({ code: 'unavailable' }); expect(fetch).not.toHaveBeenCalled();
+    const { handler, fetch } = setup([], base); await expect(handler(caller())).resolves.toEqual({ results: [], osmAvailable: false }); expect(fetch).not.toHaveBeenCalled();
   }
   const deps = setup(); deps.enabled.mockResolvedValue(false);
-  await expect(deps.handler(caller())).rejects.toMatchObject({ code: 'unavailable' }); expect(deps.fetch).not.toHaveBeenCalled();
+  await expect(deps.handler(caller())).resolves.toEqual({ results: [], osmAvailable: false }); expect(deps.fetch).not.toHaveBeenCalled();
 });
 it('handles empty results; rejects invalid coordinates, malformed JSON shapes and oversized payloads', async () => {
-  expect(await setup([]).handler(caller())).toEqual({ results: [] });
+  expect(await setup([]).handler(caller())).toEqual({ results: [], osmAvailable: true });
   for (const result of [{}, [null], [{ ...row, lat: '' }], [{ ...row, lon: '181' }], [{ ...row, osm_type: 'unknown' }], Array(6).fill(row), 'x'.repeat(130000)]) {
-    await expect(setup(result).handler(caller())).rejects.toMatchObject({ code: 'unavailable' });
+    await expect(setup(result).handler(caller())).resolves.toEqual({ results: [], osmAvailable: false });
   }
+});
+it('keeps internal Wegweiser destinations visible when the public geocoder is malformed', async () => {
+  const internal = { id: 'wegweiser:points_of_interest/1', lat: 52.52, lng: 13.4, label: 'Gemeinschaftsgarten', source: 'wegweiser' as const };
+  const deps = setup([null]);
+  const handler = createPlaceSearchHandler({ baseUrl: () => 'http://operator.internal/', enabled: async () => true,
+    searchInternal: async () => [internal], rateLimit: async () => {}, fetch: deps.fetch as any });
+  await expect(handler(caller())).resolves.toEqual({ results: [internal], osmAvailable: false });
 });
 it('propagates rate limit errors without querying operator', async () => {
   const deps = setup(); deps.rateLimit.mockRejectedValue(new Error('limit'));

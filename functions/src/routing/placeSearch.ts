@@ -1,36 +1,46 @@
 import { ROUTING_CONSENT_VERSION } from './contracts';
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { defineSecret, defineString } from 'firebase-functions/params';
-import { getFirestore, type Firestore } from 'firebase-admin/firestore';
+import { getFirestore, type DocumentData, type Firestore } from 'firebase-admin/firestore';
 import { createHmac } from 'node:crypto';
 import { isCoordinate } from './geometry';
 
-export interface PlaceResultV1 { id: string; lat: number; lng: number; label: string }
+export interface PlaceResultV1 { id: string; lat: number; lng: number; label: string; source: 'wegweiser' | 'osm' }
 interface SearchCaller { app?: unknown; auth?: { uid: string } | null; data: unknown; ip?: string }
 export interface SearchDependencies {
   enabled: () => Promise<boolean>;
+  searchInternal?: (query: string) => Promise<PlaceResultV1[]>;
   baseUrl: () => string;
   rateLimit: (caller: SearchCaller) => Promise<void>;
   fetch: typeof fetch;
 }
 /** Contract: Nominatim Search jsonv2; no caller-controlled URLs and no public autocomplete. */
 export function createPlaceSearchHandler(deps: SearchDependencies) {
-  return async (request: SearchCaller): Promise<{ results: PlaceResultV1[] }> => {
+  return async (request: SearchCaller): Promise<{ results: PlaceResultV1[]; osmAvailable: boolean }> => {
     if (!request.app) throw new HttpsError('unauthenticated', 'App Check required.');
     const data = request.data as { query?: unknown; consentVersion?: unknown } | null;
     if (!data || data.consentVersion !== ROUTING_CONSENT_VERSION) throw new HttpsError('failed-precondition', 'CONSENT_REQUIRED');
     if (typeof data.query !== 'string' || !data.query.trim() || data.query.length > 100 || Array.from(data.query).some(character => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)) {
       throw new HttpsError('invalid-argument', 'INVALID_REQUEST');
     }
-    if (!await deps.enabled()) throw new HttpsError('unavailable', 'Betreibersuche ist noch nicht freigegeben.');
+    await deps.rateLimit(request);
+    // The Wegweiser catalog is authoritative for community/local destinations. Query it even
+    // when the public geocoder is disabled; a geocoder outage must not hide internal places.
+    let internal: PlaceResultV1[];
+    try { internal = deps.searchInternal ? await deps.searchInternal(data.query.trim()) : []; }
+    catch { throw new HttpsError('unavailable', 'Interne Zielsuche ist derzeit nicht verfügbar.'); }
+    if (!Array.isArray(internal) || internal.length > 20 || !internal.every(item => item.source === 'wegweiser' && isCoordinate(item))) {
+      throw new HttpsError('internal', 'Interne Zielsuche lieferte ungültige Ergebnisse.');
+    }
+    if (!await deps.enabled()) return { results: internal.slice(0, 10), osmAvailable: false };
     let url: URL;
     try {
       const base = new URL(deps.baseUrl());
       if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || base.search || base.hash
-        || base.hostname === 'nominatim.openstreetmap.org' || base.pathname !== '/') throw new Error('invalid operator');
+      || base.hostname === 'nominatim.openstreetmap.org' || base.pathname !== '/') throw new Error('invalid operator');
       url = new URL('/search', base);
-    } catch { throw new HttpsError('unavailable', 'Operator geocoder is not configured.'); }
-    await deps.rateLimit(request);
+    } catch { return { results: internal.slice(0, 10), osmAvailable: false }; }
     url.searchParams.set('q', data.query.trim()); url.searchParams.set('format', 'jsonv2');
     url.searchParams.set('limit', '5'); url.searchParams.set('addressdetails', '0');
     const controller = new AbortController();
@@ -59,19 +69,112 @@ export function createPlaceSearchHandler(deps: SearchDependencies) {
         const position = { lat: Number(row.lat), lng: Number(row.lon) };
         if (!isCoordinate(position) || typeof row.display_name !== 'string' || !row.display_name.trim() || row.display_name.length > 1000
           || !['node', 'way', 'relation'].includes(row.osm_type) || !Number.isSafeInteger(row.osm_id) || row.osm_id < 1) throw new Error('invalid result');
-        return { ...position, id: `osm:${row.osm_type}:${row.osm_id}`, label: row.display_name };
+        return { ...position, id: `osm:${row.osm_type}:${row.osm_id}`, label: row.display_name, source: 'osm' as const };
       });
-      return { results };
+      const combined = [...internal, ...results];
+      const unique: PlaceResultV1[] = [];
+      for (const item of combined) {
+        if (unique.some(existing => existing.id === item.id
+          || (Math.abs(existing.lat - item.lat) < 0.00045 && Math.abs(existing.lng - item.lng) < 0.00045))) continue;
+        unique.push(item);
+        if (unique.length === 10) break;
+      }
+      return { results: unique, osmAvailable: true };
     } catch {
-      if (controller.signal.aborted) throw new HttpsError('deadline-exceeded', 'Place search timed out.');
-      throw new HttpsError('unavailable', 'Place search failed.');
+      // Preserve local discovery when the external geocoder fails; surface partial coverage.
+      return { results: internal.slice(0, 10), osmAvailable: false };
     } finally { clearTimeout(timer); }
   };
 }
 const operatorUrl = defineString('NOMINATIM_BASE_URL', { default: '' });
 export const routingLimiterKey = defineSecret('ROUTING_RATE_LIMIT_KEY');
+const INTERNAL_DESTINATIONS = ['points_of_interest', 'charging_stations', 'charging_stations_v2'] as const;
+type InternalDestinationCollection = typeof INTERNAL_DESTINATIONS[number];
+function normalizedSearchName(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss')
+    .toLocaleLowerCase('de-DE').replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+}
+function destinationSearchPrefixes(label: string): string[] {
+  const normalized = normalizedSearchName(label);
+  const terms = new Set([normalized, ...normalized.split(' ')]);
+  const prefixes = new Set<string>();
+  for (const term of terms) for (let end = 1; end <= Math.min(term.length, 100); end++) prefixes.add(term.slice(0, end));
+  return [...prefixes];
+}
+function destinationSearchRecord(sourceCollection: InternalDestinationCollection, value: DocumentData) {
+  const label = [value.name, value.label, value.title].find(text => typeof text === 'string' && text.trim());
+  const lat = value.lat ?? value.latitude, lng = value.lng ?? value.lon ?? value.longitude;
+  if (typeof label !== 'string' || label.length > 200 || !isCoordinate({ lat, lng })) return null;
+  return { sourceCollection, label: label.trim(), lat, lng,
+    normalizedName: normalizedSearchName(label), searchPrefixes: destinationSearchPrefixes(label), schemaVersion: 1 };
+}
+async function syncDestinationIndex(collection: InternalDestinationCollection, id: string): Promise<void> {
+  const db = getFirestore(), sourceRef = db.collection(collection).doc(id), indexRef = sourceRef.collection('destination_search').doc('v1');
+  await db.runTransaction(async transaction => {
+    const source = await transaction.get(sourceRef);
+    const record = source.exists ? destinationSearchRecord(collection, source.data()!) : null;
+    if (!record) transaction.delete(indexRef);
+    else transaction.set(indexRef, record);
+  });
+}
+export const indexPoiDestination = onDocumentWritten({ document: 'points_of_interest/{documentId}', region: 'europe-west3', maxInstances: 5 }, async event => {
+  await syncDestinationIndex('points_of_interest', event.params.documentId);
+});
+export const indexChargingStationDestination = onDocumentWritten({ document: 'charging_stations/{documentId}', region: 'europe-west3', maxInstances: 5 }, async event => {
+  await syncDestinationIndex('charging_stations', event.params.documentId);
+});
+export const indexChargingStationV2Destination = onDocumentWritten({ document: 'charging_stations_v2/{documentId}', region: 'europe-west3', maxInstances: 5 }, async event => {
+  await syncDestinationIndex('charging_stations_v2', event.params.documentId);
+});
 const handler = createPlaceSearchHandler({
   enabled: async () => (await getFirestore().collection('routing_config').doc('current').get()).data()?.searchEnabled === true,
+  searchInternal: async query => {
+    // Canonical prefix index handles all catalog records and token-prefix search. Source documents
+    // are re-read before returning hits, so deleted/stale index entries are never surfaced.
+    const db = getFirestore(), normalized = normalizedSearchName(query);
+    if (!normalized) return [];
+    const canonical = normalized
+      ? await db.collectionGroup('destination_search').where('searchPrefixes', 'array-contains', normalized).limit(20).get()
+      : null;
+    const indexed = canonical?.docs.flatMap(document => {
+      const parent = document.ref.parent.parent;
+      if (!parent || !INTERNAL_DESTINATIONS.includes(parent.parent.id as InternalDestinationCollection)) return [];
+      return [{ sourceRef: parent, indexData: document.data() }];
+    }) ?? [];
+    const current = indexed.length ? await db.getAll(...indexed.map(item => item.sourceRef)) : [];
+    const found = new Map<string, PlaceResultV1>();
+    indexed.forEach((item, index) => {
+      const source = current[index];
+      if (!source?.exists) return;
+      const collection = source.ref.parent.id as InternalDestinationCollection;
+      const result = destinationSearchRecord(collection, source.data()!);
+      if (result && item.indexData.schemaVersion === 1 && item.indexData.sourceCollection === collection
+        && result.searchPrefixes.includes(normalized)) {
+        found.set(`wegweiser:${source.ref.path}`, { id: `wegweiser:${source.ref.path}`, lat: result.lat, lng: result.lng, label: result.label, source: 'wegweiser' });
+      }
+    });
+    // Transitional fallback ensures older collections remain discoverable before the backfill
+    // finishes. Each query is capped; there is no unbounded collection scan.
+    const collections = [
+      { name: 'points_of_interest', fields: ['name', 'label', 'title', 'searchName'] },
+      { name: 'charging_stations', fields: ['name'] },
+      { name: 'charging_stations_v2', fields: ['name'] },
+    ];
+    const queryForms = [...new Set([query.trim(), query.trim().toLocaleLowerCase('de-DE'), query.trim().charAt(0).toLocaleUpperCase('de-DE') + query.trim().slice(1)])];
+    const rows = await Promise.all(collections.flatMap(({ name, fields }) => fields.flatMap(field => queryForms.map(form =>
+      db.collection(name).orderBy(field).startAt(form).endAt(`${form}\uf8ff`).limit(5).get()))));
+    for (const snapshot of rows) for (const document of snapshot.docs) {
+      const value = document.data();
+      const label = [value.name, value.label, value.title].find(text => typeof text === 'string' && text.trim());
+      const lat = value.lat ?? value.latitude, lng = value.lng ?? value.lon ?? value.longitude;
+      if (typeof label !== 'string' || !isCoordinate({ lat, lng })) continue;
+      // Case-folded check guards the query-field result and keeps search behavior predictable.
+      if (!normalizedSearchName(label).startsWith(normalized)) continue;
+      const result = { id: `wegweiser:${document.ref.path}`, lat, lng, label: label.trim(), source: 'wegweiser' as const };
+      found.set(result.id, result);
+    }
+    return [...found.values()].slice(0, 20);
+  },
   baseUrl: () => operatorUrl.value(), fetch: (...args) => fetch(...args),
   rateLimit: caller => consumeRoutingLimit(caller, 'search'),
 });

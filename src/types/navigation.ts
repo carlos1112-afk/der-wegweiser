@@ -96,7 +96,7 @@ export interface Route {
   scoutBountyTokens?: number;
   isRoadSnapped?: boolean; // False if generated as raw offline corridor
   isOfflineFallbackCorridor?: boolean;
-  routingEngineStatus?: 'online_brouter' | 'offline_cached' | 'offline_corridor_unverified';
+  routingEngineStatus?: 'online_brouter' | 'online_openrouteservice' | 'offline_cached' | 'offline_corridor_unverified';
 }
 
 export type BikeManufacturer = 'bosch' | 'shimano' | 'specialized' | 'mahle' | 'fazua' | 'bafang' | 'generic';

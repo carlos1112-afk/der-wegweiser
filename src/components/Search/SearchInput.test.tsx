@@ -5,13 +5,13 @@ import { SearchInput } from './SearchInput';
 import { PlaceSearchService } from '../../services/placeSearchService';
 vi.mock('../../services/placeSearchService', () => ({ PlaceSearchService: { search: vi.fn() } }));
 const search = vi.mocked(PlaceSearchService.search);
-beforeEach(() => { cleanup(); search.mockReset(); search.mockResolvedValue([]); });
+beforeEach(() => { cleanup(); search.mockReset(); search.mockResolvedValue({ results: [], osmAvailable: true }); });
 const type = (value: string) => fireEvent.change(screen.getByLabelText('Zielsuche'), { target: { value } });
 const submit = () => fireEvent.click(screen.getByRole('button', { name: 'Ziel suchen' }));
 it('sucht erst nach bewusstem Absenden und übernimmt die Auswahl ohne Folgeanfrage', async () => {
-  const onSelect = vi.fn(); search.mockResolvedValue([{ id: 'osm:node:1', lat: 52.5, lng: 13.4, label: 'Berlin, Deutschland' }]);
+  const onSelect = vi.fn(); search.mockResolvedValue({ results: [{ id: 'osm:node:1', lat: 52.5, lng: 13.4, label: 'Berlin, Deutschland', source: 'osm' }], osmAvailable: true });
   render(<SearchInput onSelect={onSelect} />); type('Berlin'); expect(search).not.toHaveBeenCalled(); submit();
-  fireEvent.click(await screen.findByRole('button', { name: 'Berlin, Deutschland' }));
+  fireEvent.click(await screen.findByRole('button', { name: /Berlin, Deutschland/ }));
   expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ lat: 52.5, lng: 13.4 })); expect(search).toHaveBeenCalledTimes(1);
 });
 it('weist Steuerzeichen und leere Eingaben vor der Anfrage zurück', async () => {
@@ -24,7 +24,7 @@ it('verwirft alte Antworten auch wenn der Transport Abort ignoriert', async () =
   render(<SearchInput onSelect={vi.fn()} />); type('Berlin'); submit();
   const firstSignal = search.mock.calls[0][1]; type('Potsdam'); submit();
   await screen.findByText('Keine Ergebnisse gefunden.');
-  await act(async () => { resolve([{ id: 'old', lat: 52.5, lng: 13.4, label: 'Altes Ergebnis' }]); });
+  await act(async () => { resolve({ results: [{ id: 'old', lat: 52.5, lng: 13.4, label: 'Altes Ergebnis', source: 'osm' }], osmAvailable: true }); });
   expect(firstSignal.aborted).toBe(true); expect(screen.queryByText('Altes Ergebnis')).toBeNull();
 });
 it('Löschen und Unmount brechen laufende Suche ab', async () => {

@@ -4,6 +4,8 @@ import { routeArchive } from '../../services/routeArchiveService';
 import type { ArchivedPlan, ArchivedRide } from '../../services/routeArchiveService';
 import { dataRepository } from '../../services/dataRepository';
 import { exportRouteToGpx } from '../../services/gpxExportService';
+import { PremiumRouteService } from '../../services/premiumRouteService';
+import { auth } from '../../firebase';
 interface Props { ownerId: string; onOpenRoute?: (route: Route) => void }
 export function RouteArchivePanel({ ownerId, onOpenRoute }: Props) {
   const [plans, setPlans] = useState<ArchivedPlan[]>([]), [rides, setRides] = useState<ArchivedRide[]>([]);
@@ -30,6 +32,10 @@ export function RouteArchivePanel({ ownerId, onOpenRoute }: Props) {
       } catch (error: any) { if (active) setError(error?.message ?? 'Frühere Routen konnten nicht importiert werden.'); }
     })();
     const unsubscribe = routeArchive.subscribe(() => { if (active) { updatePending(value => value + 1); void refresh(); } });
+    if (auth.currentUser?.uid === ownerId) {
+      void PremiumRouteService.syncArchivedCandidates().then(() => { if (active) void refresh(); })
+        .catch((reason: any) => { if (active) setError(reason?.message ?? 'Cloudarchiv konnte nicht synchronisiert werden.'); });
+    }
     return () => { active = false; generation++; unsubscribe(); };
   }, [ownerId]);
   const pending = routeArchive.pendingPlans(ownerId), pendingRides = routeArchive.pendingRideCount(ownerId);
@@ -38,12 +44,22 @@ export function RouteArchivePanel({ ownerId, onOpenRoute }: Props) {
     try { await routeArchive.retryPending(ownerId); await reload(); } catch (error: any) { setError(error?.message ?? 'Sicherung fehlgeschlagen.'); }
     finally { setBusy(false); }
   };
+  const syncCloudArchive = async () => {
+    setBusy(true); setError(null);
+    try {
+      const result = await PremiumRouteService.syncArchivedCandidates();
+      await reload();
+      if (result.failed) setError(`${result.restored} Premiumstrecken wiederhergestellt; ${result.failed} Kandidaten konnten nicht geladen oder geprüft werden. Bitte später erneut versuchen.`);
+    } catch (reason: any) { setError(reason?.message ?? 'Cloudarchiv konnte nicht synchronisiert werden.'); }
+    finally { setBusy(false); }
+  };
   const download = (value: unknown, name: string) => {
     const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }));
     const anchor = document.createElement('a'); anchor.href = url; anchor.download = name; anchor.click(); URL.revokeObjectURL(url);
   };
   return <section aria-label="Streckenarchiv und Fahrtenhistorie">
     <p>Auf diesem Gerät gespeichert. Neue Strecken bleiben erhalten, auch wenn eine andere Tour gewählt wird.</p>
+    {auth.currentUser?.uid === ownerId && <button type="button" disabled={busy} onClick={() => void syncCloudArchive()}>{busy ? 'Cloudarchiv wird abgeglichen …' : 'Premiumarchiv wiederherstellen / abgleichen'}</button>}
     <button type="button" onClick={() => download({ version: 1, plans, rides, pending, pendingRides: routeArchive.pendingRideEntries(ownerId) }, 'wegweiser-streckenarchiv.json')}>Archiv als Sicherungsdatei exportieren</button>
     {(pending.length > 0 || pendingRides > 0) && <div role="alert">
       {pending.length} Strecken und {pendingRides} Aufzeichnungen sind noch nicht dauerhaft gesichert. Keine weitere Generierung bis zur Sicherung.

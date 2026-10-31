@@ -8,7 +8,7 @@ import type { RouteRequestV1 } from '../src/routing/contracts';
 const request: RouteRequestV1 = { version: 1, requestId: 'test', kind: 'destination', planning: 'standard',
   start: { lat: 52.52, lng: 13.4, source: 'manual', observedAt: 1, accuracyM: null, confirmed: true }, destination: { lat: 52.52, lng: 13.402 },
   mandatoryStops: [], interests: [], criteria: { hard: [], wishes: '', weights: { asphalt: 0, nature: 0, flat: 0 } },
-  profile: { bike: 'bicycle', batteryPercent: 0, batteryCapacityWh: null, consentVersion: '3', confirmedAt: 1 } };
+  profile: { bike: 'bicycle', batteryPercent: null, batteryCapacityWh: null, consentVersion: '3', confirmedAt: 1 } };
 const geometry = [{ lat: 52.52, lng: 13.4 }, { lat: 52.52, lng: 13.401 }, { lat: 52.52, lng: 13.402 }];
 // Synthetic fixture exercising the documented adapter fields; not a real graph acceptance test.
 const fixture = () => ({ type: 'FeatureCollection', features: [{ geometry: { type: 'LineString', coordinates: geometry.map(p => [p.lng, p.lat]) }, properties: { 'track-length': String(cumulativeDistances(geometry).slice(-1)[0]) } }] });

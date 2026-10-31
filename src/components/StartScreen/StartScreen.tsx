@@ -67,8 +67,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         >
           <Sparkles size={24} />
           <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            <strong style={{ fontSize: '1rem' }}>KI plant meine Strecke für heute</strong>
-            <small style={{ opacity: 0.76, fontWeight: 400 }}>Start am aktuellen Standort, angepasst an deine gespeicherten Vorlieben</small>
+            <strong style={{ fontSize: '1rem' }}>KI-Routenplanung für heute</strong>
+            <small style={{ opacity: 0.76, fontWeight: 400 }}>Derzeit noch nicht freigeschaltet</small>
           </span>
         </button>
 
@@ -80,7 +80,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <Map size={22} />
           <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <strong style={{ fontSize: '0.98rem' }}>Einfache Routenplanung</strong>
-            <small style={{ opacity: 0.72, fontWeight: 400 }}>Ziel suchen, dann KI- oder Offline-Route wählen</small>
+            <small style={{ opacity: 0.72, fontWeight: 400 }}>Ziel suchen und kostenfreie Online-Fahrradroute planen, sofern freigeschaltet</small>
           </span>
         </button>
 
@@ -92,7 +92,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           <SlidersHorizontal size={22} />
           <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             <strong style={{ fontSize: '0.98rem' }}>Erweiterte Routenplanung <span style={{ color: 'var(--accent-gold)' }}>(Premium)</span></strong>
-            <small style={{ opacity: 0.72, fontWeight: 400 }}>Zwischenziel, Untergrund und persönliche Wünsche</small>
+            <small style={{ opacity: 0.72, fontWeight: 400 }}>Premiumplanung derzeit noch nicht freigeschaltet</small>
           </span>
         </button>
 

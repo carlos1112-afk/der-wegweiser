@@ -5,6 +5,7 @@ import type { RouteLocation, RouteRequestV1 } from '../types/routing';
 import { RoutingError } from '../types/routing';
 import { ConsentService, CONSENT_VERSION } from './consentService';
 import { FreeRouteService } from './freeRouteService';
+import { PremiumRouteService, type RoutePriority } from './premiumRouteService';
 export interface RouteGenerationParams {
   startLat: number; startLng: number; targetDistanceKm?: number; maxElevationGainM?: number;
   surfacePreference?: 'asphalt' | 'gravel' | 'any'; themes?: string[]; batteryPercent: number | null;
@@ -12,7 +13,7 @@ export interface RouteGenerationParams {
 }
 export interface DestinationRouteOptions {
   mode: 'standard' | 'premium' | 'offline'; start?: RouteLocation; destinationName?: string;
-  via?: Location; viaName?: string; wishes?: string;
+  via?: Location[]; wishes?: string; userSelectedPriority?: RoutePriority;
 }
 export class RouteGenerationCancelledError extends Error {
   constructor(message = 'Route generation was cancelled.') { super(message); this.name = 'AbortError'; }
@@ -31,33 +32,48 @@ export class RoutingService {
   static async generateDestinationRoute(start: Location, destination: Location, prefs: UserPreferences,
     options: DestinationRouteOptions, _legacyFetch?: typeof fetch, signal?: AbortSignal): Promise<Route> {
     allowed(signal);
-    if (options.mode === 'premium') throw new RoutingError('PREMIUM_UNAVAILABLE', 'KI-Premium ist noch nicht freigegeben.');
     if (options.mode === 'offline') throw new RoutingError('OFFLINE_UNAVAILABLE', 'Lokales Offline-Routing ist noch nicht verfügbar.');
     if (!options.start?.confirmed || options.start.lat !== start.lat || options.start.lng !== start.lng) throw new RoutingError('INVALID_START', 'Bitte einen aktuellen GPS-Start oder einen manuellen Start bestätigen.');
     const ownerId = UserIdentity.getUserId();
     if (routeArchive.hasPending(ownerId)) throw new Error('Zuerst die noch offene Archiv-Sicherung abschließen.');
     const profile = prefs;
-    const validBattery = Number.isFinite(profile.batteryCurrentPercent) && profile.batteryCurrentPercent >= 0 && profile.batteryCurrentPercent <= 100;
-    const request: RouteRequestV1 = { version: 1, requestId: crypto.randomUUID(), kind: 'destination', planning: 'standard',
-      start: options.start, destination, mandatoryStops: options.via ? [options.via] : [], interests: [],
-      criteria: { hard: [], wishes: options.wishes ?? '', weights: { asphalt: profile.preferredSurface === 'asphalt' ? 1 : 0, nature: profile.preferredSurface === 'forest' ? 1 : 0, flat: profile.avoidSteepHills ? 1 : 0 } },
-      profile: { bike: 'bicycle', batteryPercent: validBattery ? profile.batteryCurrentPercent : null,
-        batteryCapacityWh: Number.isFinite(profile.batteryCapacityWh) && profile.batteryCapacityWh > 0 ? profile.batteryCapacityWh : null,
+    const premium = options.mode === 'premium';
+    const request: RouteRequestV1 = { version: 1, requestId: crypto.randomUUID(), kind: 'destination', planning: premium ? 'ai' : 'standard',
+      start: options.start, destination, mandatoryStops: options.via ?? [], interests: [],
+      // Free routing is intentionally not personalized; premium uses only preferences shown in the confirmation flow.
+      criteria: { hard: [], surfacePreference: 'any', wishes: '',
+        weights: { asphalt: 0, nature: 0, flat: profile.avoidSteepHills ? 1 : 0 } },
+      profile: { bike: 'bicycle', batteryPercent: null, batteryCapacityWh: null,
         confirmedAt: Date.now(), consentVersion: String(CONSENT_VERSION) } };
-    const route = await FreeRouteService.plan(request);
-    const result: Route = { id: route.id, title: `Route: ${options.destinationName || 'Ausgewähltes Ziel'}`, summary: `${(route.metrics.distanceM.value! / 1000).toFixed(1)} km · Kostenlos mit BRouter`,
-      aiStory: route.guidanceCapability === 'track' ? 'Geprüfte Trackgeometrie. Abbiegeführung, Oberflächen- und Akkudaten sind noch nicht verfügbar.' : 'Kostenlose Fahrradroute.',
-      distanceKm: route.metrics.distanceM.value! / 1000, elevationGainM: route.metrics.ascentM.value,
-      estimatedTimeMin: route.metrics.durationS.value === null ? null : route.metrics.durationS.value / 60,
-      estimatedBatteryConsumptionWh: route.metrics.energyWh.value, isBatterySafe: null, surfaceBreakdown: null,
-      pathCoordinates: route.geometry.map(p => [p.lat, p.lng]), chargingStopsOnRoute: [], isRoadSnapped: true,
-      isOfflineFallbackCorridor: false, routingEngineStatus: 'online_brouter', validatedRoute: route,
-      waypoints: [{ id: 'start', ...request.start, name: 'Bestätigter Start', category: 'start' },
-        ...(options.via ? [{ id: 'via', ...options.via, name: options.viaName || 'Zwischenziel', category: 'scenic' as const }] : []),
-        { id: 'destination', ...destination, name: options.destinationName || 'Ziel', category: 'end' }] };
-    // Save every completed computation even if another preview has since been requested.
-    const archived = await routeArchive.saveGenerated(ownerId, result);
-    allowed(signal);
-    return { ...result, archivePlanId: archived.id };
+    const premiumResult = premium ? await PremiumRouteService.generate(request, options.userSelectedPriority ?? null, signal) : null;
+    const selected = premiumResult?.route ?? await FreeRouteService.plan(request, signal);
+    const candidates = premiumResult?.candidates ?? [selected];
+    let selectedArchiveId: string | undefined;
+    let selectedRoute: Route | undefined;
+    for (const [index, candidate] of candidates.entries()) {
+      const isSelected = candidate.id === selected.id;
+      const result: Route = { id: candidate.id, title: `${premium ? `KI-Alternative ${index + 1}` : 'Route'}: ${options.destinationName || 'Ausgewähltes Ziel'}`,
+        summary: `${(candidate.metrics.distanceM.value! / 1000).toFixed(1)} km · ${premium ? 'KI-Premium' : 'Kostenlos'} · ${candidate.provenance.engine}`,
+        aiStory: isSelected && premiumResult ? `${premiumResult.evidence.reason}${premiumResult.evidence.criteriaUnknown.length ? ` Unbekannte Kriterien: ${premiumResult.evidence.criteriaUnknown.join(', ')}.` : ''}${premiumResult.unrestoredCandidateIds.length ? ` Weitere Varianten sind dauerhaft serverseitig gespeichert, konnten aber noch nicht lokal synchronisiert werden (Auftrag ${premiumResult.jobId}).` : ''}`
+          : premium ? 'Vom KI-Routing erzeugte und serverseitig archivierte Alternative.'
+            : candidate.guidanceCapability === 'track' ? 'Geprüfte Trackgeometrie. Abbiegeführung, Oberflächen- und Akkudaten sind noch nicht verfügbar; Freitextwünsche werden nicht ausgewertet.' : 'Kostenlose Fahrradroute.',
+        distanceKm: candidate.metrics.distanceM.value! / 1000, elevationGainM: candidate.metrics.ascentM.value,
+        estimatedTimeMin: candidate.metrics.durationS.value === null ? null : candidate.metrics.durationS.value / 60,
+        estimatedBatteryConsumptionWh: candidate.metrics.energyWh.value, isBatterySafe: null, surfaceBreakdown: null,
+        pathCoordinates: candidate.geometry.map(p => [p.lat, p.lng]), chargingStopsOnRoute: [], isRoadSnapped: true,
+        isOfflineFallbackCorridor: false, routingEngineStatus: candidate.provenance.engine === 'openrouteservice' ? 'online_openrouteservice' : 'online_brouter', validatedRoute: candidate,
+        waypoints: [{ id: 'start', ...request.start, name: 'Bestätigter Start', category: 'start' },
+          ...(options.via ?? []).map((stop, index) => ({ id: `via-${index}`, ...stop, name: stop.name || `Zwischenstopp ${index + 1}`, category: 'scenic' as const })),
+          { id: 'destination', ...destination, name: options.destinationName || 'Ziel', category: 'end' }] };
+      const archived = premiumResult
+        ? await routeArchive.saveGenerated(ownerId, result, `premium:${premiumResult.jobId}:${candidate.id}`)
+        : await routeArchive.saveGenerated(ownerId, result);
+      if (isSelected) { selectedArchiveId = archived.id; selectedRoute = result; }
+    }
+    if (!selectedRoute || !selectedArchiveId) throw new Error('Die ausgewählte Route wurde nicht vollständig archiviert.');
+    // A successful result is archived even if the preview was cancelled while it was in flight,
+    // but a stale preview must never replace the user's current screen.
+    if (signal?.aborted) throw new RouteGenerationCancelledError();
+    return { ...selectedRoute, archivePlanId: selectedArchiveId };
   }
 }

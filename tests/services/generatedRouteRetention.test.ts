@@ -6,7 +6,7 @@ import { UserIdentity } from '../../src/services/userIdentity';
 import { ConsentService } from '../../src/services/consentService';
 const start = { lat: 52.52, lng: 13.4, source: 'manual' as const, observedAt: 1, accuracyM: null, confirmed: true };
 const prefs = { preferredSurface: 'asphalt', batteryCurrentPercent: 0, batteryCapacityWh: 500 } as any;
-const computed = { id: 'computed', geometry: [start,{ lat:52.521,lng:13.401 }], metrics: { distanceM: { value: 100 }, ascentM: { value: null }, durationS: { value: null }, energyWh: { value: null } }, guidanceCapability: 'track' } as any;
+const computed = { id: 'computed', geometry: [start,{ lat:52.521,lng:13.401 }], provenance: { engine: 'brouter', engineVersion: 'test', dataVersion: 'test', profile: 'trekking' }, metrics: { distanceM: { value: 100 }, ascentM: { value: null }, durationS: { value: null }, energyWh: { value: null } }, guidanceCapability: 'track' } as any;
 beforeEach(() => { ConsentService.save({ essential:true,analytics:false,surveys:false,personalizedAds:false }); vi.spyOn(UserIdentity,'getUserId').mockReturnValue('alice'); vi.spyOn(routeArchive,'hasPending').mockReturnValue(false); });
 afterEach(() => vi.restoreAllMocks());
 it('archives a completed computation even after a newer preview cancels the old UI request', async () => {

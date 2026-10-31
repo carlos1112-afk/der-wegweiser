@@ -1,4 +1,5 @@
 import { routeArchive } from './services/routeArchiveService';
+import type { RoutePriority } from './services/premiumRouteService';
 import { GpxRecorderService, type RideSummary } from './services/gpxRecorderService';
 import { isValidatedRoute } from './types/routing';
 import type { RouteLocation } from './types/routing';
@@ -10,7 +11,7 @@ import { BatteryHUD } from './components/BatteryHUD/BatteryHUD';
 import { WeatherHUD } from './components/WeatherHUD/WeatherHUD';
 import { GpxRecorderHUD } from './components/Recording/GpxRecorderHUD';
 import { OledBlackMode } from './components/DisplayModes/OledBlackMode';
-import type { Route, ChargingStation, LiveBikeTelemetry, UserPreferences, UserMemoryPattern } from './types/navigation';
+import type { Route, ChargingStation, LiveBikeTelemetry, UserMemoryPattern } from './types/navigation';
 import { dataRepository } from './services/dataRepository';
 import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService';
 import type { ModelId } from './services/aiAssistantService';
@@ -23,7 +24,7 @@ import type { User } from 'firebase/auth';
 import { useUILayout } from './contexts/UILayoutContext';
 import { BurgerMenu } from './components/Navigation/BurgerMenu';
 import { StartScreen } from './components/StartScreen/StartScreen';
-import { AdvancedRoutePlanner, type AdvancedRouteOptions } from './components/StartScreen/AdvancedRoutePlanner';
+import { AdvancedRoutePlanner } from './components/StartScreen/AdvancedRoutePlanner';
 import { BottomActionBar } from './components/Navigation/BottomActionBar';
 import { ConfettiOverlay } from './components/Overlays/ConfettiOverlay';
 import { Menu } from 'lucide-react';
@@ -438,7 +439,8 @@ export function App() {
     targetLng: number,
     mode: 'standard' | 'premium' | 'offline' = 'standard',
     destinationName = searchDestination?.label || 'Ausgewähltes Ziel',
-    advancedOptions?: AdvancedRouteOptions,
+    userSelectedPriority: RoutePriority = null,
+    namedStops: SearchResult[] = [],
   ) => {
     if (!ConsentService.hasValidConsent()) {
       setShowConsentModal(true);
@@ -454,22 +456,16 @@ export function App() {
     const reqId = ++activeRouteRequestId.current;
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const routePrefs: UserPreferences = {
-        ...prefs,
-        preferredSurface: advancedOptions?.surfacePreference ?? prefs.preferredSurface,
-        avoidSteepHills: advancedOptions?.avoidSteepHills ?? prefs.avoidSteepHills,
-      };
       const newRoute = await AiAssistantService.generateDestinationRoute(
         start,
         { lat: targetLat, lng: targetLng },
-        routePrefs,
+        prefs,
         {
           mode,
           start,
           destinationName,
-          via: advancedOptions?.via,
-          viaName: advancedOptions?.via?.label,
-          wishes: advancedOptions?.wishes,
+          userSelectedPriority,
+          via: namedStops.map(stop => ({ lat: stop.lat, lng: stop.lng, name: stop.label })),
         },
         controller.signal
       );
@@ -497,12 +493,6 @@ export function App() {
   const handleStartSimpleRoute = () => {
     setShowStartScreen(false);
     setSearchFocusRequest((request) => request + 1);
-  };
-
-  const handleAdvancedRoute = (destination: SearchResult, options: AdvancedRouteOptions) => {
-    setShowAdvancedRoutePlanner(false);
-    setShowStartScreen(false);
-    void handlePlanRouteToPoint(destination.lat, destination.lng, 'premium', destination.label, options);
   };
 
   const handlePlanRouteToStation = async (station: ChargingStation) => {
@@ -556,8 +546,13 @@ export function App() {
       )}
       {showAdvancedRoutePlanner && (
         <AdvancedRoutePlanner
+          signedIn={Boolean(authUser)}
+          onGenerate={async (destination, priority, stops) => {
+            const generated = await handlePlanRouteToPoint(destination.lat, destination.lng, 'premium', destination.label, priority, stops);
+            if (generated) { setShowAdvancedRoutePlanner(false); setShowStartScreen(false); }
+            return generated;
+          }}
           onClose={() => { setShowAdvancedRoutePlanner(false); setShowStartScreen(true); }}
-          onGenerate={handleAdvancedRoute}
         />
       )}
 

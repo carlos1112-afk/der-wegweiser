@@ -43,7 +43,7 @@ it.each(['abort', 'consent', 'auth'])('ignores a late callable answer after %s',
 });
 it('coordinates are selected locally and malformed remote search results are refused', async () => {
   const signal = new AbortController().signal;
-  expect(await PlaceSearchService.search('52.52, 13.4', signal)).toMatchObject([{ lat: 52.52, lng: 13.4 }]); expect(mocks.call).not.toHaveBeenCalled();
+  expect(await PlaceSearchService.search('52.52, 13.4', signal)).toMatchObject({ results: [{ lat: 52.52, lng: 13.4, source: 'coordinate' }] }); expect(mocks.call).not.toHaveBeenCalled();
   await expect(PlaceSearchService.search('91, 13.4', signal)).rejects.toThrow();
   mocks.call.mockResolvedValue({ data: { results: [{ lat: '52.52', lng: 13.4, label: 'Wrong' }] } });
   await expect(PlaceSearchService.search('Berlin', signal)).rejects.toThrow();

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import { isValidatedRoute } from '../../types/routing';
 import type { Route } from '../../types/navigation';
 import type { ModelId } from '../../services/aiAssistantService';
@@ -27,6 +27,13 @@ export const AnticipationModal: React.FC<Props> = ({ route, onAcceptRoute, onClo
         <dt>Anstieg</dt><dd>{route.elevationGainM === null ? 'Unbekannt' : `${route.elevationGainM} m`}</dd>
         <dt>Akku und Oberflächen</dt><dd>Ohne belastbare Quelldaten unbekannt.</dd>
         <dt>Routenart</dt><dd>{valid ? valid.guidanceCapability === 'track' ? 'Trackanzeige · keine Abbiegeführung' : 'Mit geprüften Abbiegehinweisen' : 'Alte oder importierte Spur · ungeprüft'}</dd>
+        {valid?.criteriaFindings.map(finding => <Fragment key={finding.criterion}>
+          <dt>{finding.criterion === 'prefer_flatter_route' ? 'Steigungswunsch' : finding.criterion === 'surface_preference' ? 'Untergrundwunsch' : finding.criterion === 'free_text_wishes' ? 'Freitextwünsche' : 'Routenwunsch'}</dt>
+          <dd>{finding.criterion === 'prefer_flatter_route'
+            ? finding.status === 'satisfied' ? 'Berücksichtigt: geringster erfasster Anstieg unter den geprüften Alternativen mit höchstens 10 % Mehrstrecke.' : 'Nicht bewertbar: Es fehlten ausreichende Höhenwerte oder unterschiedliche Alternativen.'
+            : finding.criterion === 'surface_preference' ? 'Nicht bewertet: Für diese Route liegen keine belastbaren Untergrundanteile vor.'
+              : finding.criterion === 'free_text_wishes' ? 'In der kostenlosen Planung nicht ausgewertet.' : 'Nicht bewertet.'}</dd>
+        </Fragment>)}
       </dl>
       <button type="button" className="btn-cyberpunk" disabled={!valid} onClick={() => onAcceptRoute(route)}>{valid?.guidanceCapability === 'turn_by_turn' ? 'Navigation starten und aufzeichnen' : valid ? 'Track übernehmen und aufzeichnen' : 'Track übernehmen'}</button>
       <button type="button" onClick={onClose}>Schließen</button>

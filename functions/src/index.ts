@@ -45,6 +45,7 @@ const ACCOUNT_DATA_COLLECTIONS = [
   'premium_route_jobs',
   'premium_route_quotes',
   'premium_route_outbox',
+  'premium_route_active',
 ];
 
 async function releaseAccountReservations(uid: string): Promise<void> {
@@ -212,3 +213,4 @@ export * from "./tokenRewards";
 export * from "./aiProxy";
 export * from './routing/placeSearch';
 export * from './routing/freeRoute';
+export * from './routing/premiumRoute';

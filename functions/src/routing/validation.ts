@@ -20,6 +20,7 @@ export function parseRouteRequest(value: unknown): RouteRequestV1 {
     || !Array.isArray(r.interests) || r.interests.length > 40 || !r.interests.every((v: unknown) => text(v, 128))
     || !Array.isArray(c.hard) || c.hard.length > 2 || new Set(c.hard).size !== c.hard.length
     || !c.hard.every((v: unknown) => v === 'avoid_ferries' || v === 'avoid_unpaved')
+    || !(c.surfacePreference === undefined || ['asphalt', 'gravel', 'forest', 'any'].includes(c.surfacePreference))
     || typeof c.wishes !== 'string' || c.wishes.length > L.maxWishes
     || ![w.asphalt, w.nature, w.flat].every(v => finite(v, 0, 1))
     || p.bike !== 'bicycle' || !timestamp(p.confirmedAt) || !text(p.consentVersion, 128)
@@ -37,7 +38,7 @@ export function parseRouteRequest(value: unknown): RouteRequestV1 {
     version: 1 as const, requestId: r.requestId, planning: r.planning,
     start: { ...coordinate(s as unknown as Coordinate), source: s.source, observedAt: s.observedAt, accuracyM: s.accuracyM, confirmed: true },
     mandatoryStops: r.mandatoryStops.map(coordinate), interests: [...r.interests],
-    criteria: { hard: [...c.hard].sort(), wishes: c.wishes,
+    criteria: { hard: [...c.hard].sort(), surfacePreference: c.surfacePreference ?? 'any', wishes: c.wishes,
       weights: { asphalt: w.asphalt, nature: w.nature, flat: w.flat } },
     profile: { bike: p.bike, batteryPercent: p.batteryPercent, batteryCapacityWh: p.batteryCapacityWh,
       confirmedAt: p.confirmedAt, consentVersion: p.consentVersion },
@@ -76,9 +77,14 @@ export async function validateRoute(request: RouteRequestV1, candidate: RouteCan
     c = JSON.parse(serialized);
   } catch { throw new RoutingError('INVALID_GEOMETRY'); }
   if (!c || c.version !== 1 || !text(c.id, 128) || c.requestId !== r.requestId || !['online', 'local'].includes(c.execution)
-    || c.provenance?.engine !== 'brouter' || !text(c.provenance.engineVersion, 128) || !text(c.provenance.dataVersion, 128)
+    || !['brouter', 'openrouteservice'].includes(c.provenance?.engine) || !text(c.provenance.engineVersion, 128) || !text(c.provenance.dataVersion, 128)
     || !text(c.provenance.profile, 128) || !Array.isArray(c.geometry) || c.geometry.length < 2 || c.geometry.length > L.maxPoints
-    || !c.geometry.every(isCoordinate) || !Array.isArray(c.criteriaFindings)) throw new RoutingError('INVALID_GEOMETRY');
+    || !c.geometry.every(isCoordinate) || !Array.isArray(c.criteriaFindings)
+    || c.criteriaFindings.length > 64 || !c.criteriaFindings.every((finding: unknown) => {
+      if (!finding || typeof finding !== 'object' || Array.isArray(finding)) return false;
+      const item = finding as Record<string, unknown>;
+      return text(item.criterion, 64) && ['satisfied', 'violated', 'unknown'].includes(String(item.status)) && text(item.source, 256);
+    })) throw new RoutingError('INVALID_GEOMETRY');
   for (let i = 1; i < c.geometry.length; i++) {
     if (Math.abs(c.geometry[i].lng - c.geometry[i - 1].lng) > 180) throw new RoutingError('INVALID_GEOMETRY');
   }
