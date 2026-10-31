@@ -1,5 +1,6 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
+import { ConsentService } from '../consentService';
 import { BleClient } from '@capacitor-community/bluetooth-le';
 import type { LiveBikeTelemetry, BikeManufacturer } from '../../types/navigation';
 import { parsePowerMeasurement, parseBatteryLevel, parseCscMeasurement, resetStandardSigState } from './parsers/standardSigParser';
@@ -68,6 +69,25 @@ export class BleManager {
       return BleManager.connectNative(targetManufacturer);
     }
     return BleManager.connectWeb(targetManufacturer);
+  }
+
+  public static async disconnect(): Promise<void> {
+    if (this.reconnectTimer !== null) clearTimeout(this.reconnectTimer);
+    this.reconnectTimer = null;
+    this.reconnectAttempts = 0;
+    this.telemetryCallback = null;
+    const deviceId = this.activeDeviceId;
+    const device = this.activeBluetoothDevice;
+    this.activeDeviceId = null;
+    this.activeBluetoothDevice = null;
+    this.activeGattServer = null;
+    try {
+      if (Capacitor.isNativePlatform() && deviceId) await BleClient.disconnect(deviceId);
+      else if (device?.gatt?.connected) device.gatt.disconnect();
+    } catch (error) {
+      console.warn('[BleManager] BLE disconnect failed:', error);
+    }
+    this.updateState({ isConnected: false });
   }
 
   // ─── Native path (Android / iOS via @capacitor-community/bluetooth-le) ───
@@ -191,8 +211,8 @@ export class BleManager {
         const parsed = parseBafangPacket(value);
         this.updateState({ ...parsed, manufacturer: 'bafang' });
 
-        // Capacitor File Logger for Test Drive
         try {
+          if (!ConsentService.hasValidConsent()) return;
           const rawStr = Array.from(new Uint8Array(value.buffer, value.byteOffset, value.byteLength))
             .map(b => b.toString(16).padStart(2, '0')).join(' ');
           const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}\n`;
@@ -222,6 +242,7 @@ export class BleManager {
   }
 
   private static onNativeDisconnected(deviceId: string) {
+    if (deviceId !== this.activeDeviceId) return;
     console.warn('[BleManager] BleClient connection lost! Initiating auto-reconnect backoff...');
     resetStandardSigState();
     this.updateState({ isConnected: false });
@@ -430,8 +451,8 @@ export class BleManager {
           const parsed = parseBafangPacket(target.value);
           this.updateState({ ...parsed, manufacturer: 'bafang' });
 
-          // Capacitor File Logger for Test Drive
           try {
+            if (!ConsentService.hasValidConsent()) return;
             const rawStr = Array.from(new Uint8Array(target.value.buffer)).map(b => b.toString(16).padStart(2, '0')).join(' ');
             const logLine = `[${new Date().toISOString()}] RAW: ${rawStr} | PARSED: ${JSON.stringify(parsed)}\n`;
             Filesystem.appendFile({
@@ -610,3 +631,7 @@ export class BleManager {
     };
   }
 }
+
+// BLE owns its lifecycle cleanup; ConsentService remains independent of BLE and
+// can await this listener on withdrawal without creating a service import cycle.
+ConsentService.onChange((flags) => (flags === null ? BleManager.disconnect() : undefined));

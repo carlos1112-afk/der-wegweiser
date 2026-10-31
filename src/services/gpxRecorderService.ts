@@ -1,4 +1,5 @@
 import type { LiveBikeTelemetry } from '../types/navigation';
+import { ConsentService } from './consentService';
 
 export interface GpxTrackPoint {
   lat: number;
@@ -19,7 +20,6 @@ export interface RideSummary {
   maxSpeedKmH: number;
   elevationGainM: number;
   energyWhUsed: number;
-  tokensEarned: number;
   trackPointsCount: number;
   coordinates: [number, number][];
   gpxXmlString: string;
@@ -68,14 +68,29 @@ export class GpxRecorderService {
   }
 
   public static togglePause(): boolean {
-    if (this.manualPaused || this.autoPaused) {
+    if (this.manualPaused) {
       this.manualPaused = false;
+      this.autoPaused = false;
+      this.idleSecondsCount = 0;
+    } else if (this.autoPaused) {
       this.autoPaused = false;
       this.idleSecondsCount = 0;
     } else {
       this.manualPaused = true;
     }
     return this.manualPaused || this.autoPaused;
+  }
+
+  /** Stop recording and erase all retained track data. */
+  public static reset(): void {
+    this.isRecording = false;
+    this.manualPaused = false;
+    this.autoPaused = false;
+    this.elapsedSeconds = 0;
+    this.totalDistanceM = 0;
+    this.recordedPoints = [];
+    this.initialBatterySoC = null;
+    this.idleSecondsCount = 0;
   }
 
   public static getStatus() {
@@ -109,7 +124,7 @@ export class GpxRecorderService {
       if (this.idleSecondsCount >= 5) this.autoPaused = true;
     } else {
       this.idleSecondsCount = 0;
-      this.autoPaused = false;
+      if (!this.manualPaused) this.autoPaused = false;
     }
 
     if (this.manualPaused || this.autoPaused) return;
@@ -148,6 +163,11 @@ export class GpxRecorderService {
     this.manualPaused = false;
     this.autoPaused = false;
 
+    return this.getSummary();
+  }
+
+  /** Snapshot without stopping: permits durable checkpoints during a ride. */
+  public static getSummary(): RideSummary {
     const distanceKm = +(this.totalDistanceM / 1000).toFixed(2);
     const durationSeconds = this.elapsedSeconds;
     
@@ -164,8 +184,6 @@ export class GpxRecorderService {
     });
 
     const avgSpeed = this.recordedPoints.length > 0 ? +(speedSum / this.recordedPoints.length).toFixed(1) : 0;
-    const tokensEarned = Math.max(1, Math.floor(distanceKm)); // 1 Token per km
-
     // Energy calculation
     const lastPoint = this.recordedPoints.length > 0 ? this.recordedPoints[this.recordedPoints.length - 1] : null;
     const lastSoC = lastPoint ? lastPoint.batterySoC : null;
@@ -183,7 +201,6 @@ export class GpxRecorderService {
       maxSpeedKmH: Math.round(maxSpeed),
       elevationGainM: Math.round(elevGain),
       energyWhUsed,
-      tokensEarned,
       trackPointsCount: this.recordedPoints.length,
       coordinates,
       gpxXmlString,
@@ -231,6 +248,7 @@ export class GpxRecorderService {
   }
 
   public static downloadGpxFile(filename: string = 'der_wegweiser_tour.gpx'): void {
+    if (!ConsentService.hasValidConsent()) return;
     const xml = this.generateGpxXml();
     const blob = new Blob([xml], { type: 'application/gpx+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -244,6 +262,7 @@ export class GpxRecorderService {
   }
 
   public static async shareGpxTrack(filename: string = 'der_wegweiser_tour.gpx'): Promise<boolean> {
+    if (!ConsentService.hasValidConsent()) return false;
     const xml = this.generateGpxXml();
     const file = new File([xml], filename, { type: 'application/gpx+xml' });
 
@@ -265,3 +284,7 @@ export class GpxRecorderService {
     return true;
   }
 }
+
+ConsentService.onChange((flags) => {
+  if (flags === null) GpxRecorderService.reset();
+});

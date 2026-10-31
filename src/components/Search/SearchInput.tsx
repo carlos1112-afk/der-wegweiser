@@ -1,212 +1,57 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './SearchInput.module.css';
 import { searchQuerySchema } from '../../utils/validation';
-
-export interface SearchResult {
-  lat: number;
-  lng: number;
-  label: string;
-}
-
-interface NominatimResult {
-  lat: string;
-  lon: string;
-  display_name: string;
-}
-
-interface SearchInputProps {
-  onSelect: (result: SearchResult) => void;
-  placeholder?: string;
-}
-
-export const SearchInput: React.FC<SearchInputProps> = ({
-  onSelect,
-  placeholder = 'Ziel eingeben...',
-}) => {
+import { PlaceSearchService } from '../../services/placeSearchService';
+import { ConsentService } from '../../services/consentService';
+import type { PlaceResult } from '../../services/placeSearchService';
+export interface SearchResult { lat: number; lng: number; label: string }
+interface SearchInputProps { onSelect: (result: SearchResult) => void; placeholder?: string; focusRequest?: number }
+export const SearchInput: React.FC<SearchInputProps> = ({ onSelect, placeholder = 'Ziel eingeben...', focusRequest = 0 }) => {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<NominatimResult[]>([]);
+  const [results, setResults] = useState<PlaceResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [coverageNote, setCoverageNote] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
-
-  const fetchResults = useCallback(async (q: string) => {
-    if (!q.trim()) {
-      setResults([]);
-      setIsOpen(false);
-      setError(null);
-      return;
-    }
-
-    const parsedQuery = searchQuerySchema.safeParse(q);
-    if (!parsedQuery.success) {
-      setResults([]);
-      setIsOpen(true);
-      setError(parsedQuery.error.issues?.[0]?.message ?? 'Ungültiger Suchbegriff.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
-    abortRef.current = new AbortController();
-
+  const generation = useRef(0);
+  const invalidate = () => { generation.current++; abortRef.current?.abort(); setIsLoading(false); setResults([]); setError(null); setCoverageNote(null); setIsOpen(false); };
+  useEffect(() => { if (focusRequest > 0) inputRef.current?.focus(); }, [focusRequest]);
+  useEffect(() => () => { generation.current++; abortRef.current?.abort(); }, []);
+  useEffect(() => ConsentService.onChange(() => { invalidate(); }), []);
+  const submit = async () => {
+    invalidate();
+    const parsed = searchQuerySchema.safeParse(query);
+    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? 'Ungültiger Suchbegriff.'); setIsOpen(true); return; }
+    const current = generation.current, controller = new AbortController(); abortRef.current = controller;
     setIsLoading(true);
-    setError(null);
-
     try {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1`;
-      const response = await fetch(url, {
-        signal: abortRef.current.signal,
-        headers: {
-          'User-Agent': 'Der-Wegweiser-App/1.0',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data: NominatimResult[] = await response.json();
-
-      if (data.length === 0) {
-        setError('Keine Ergebnisse gefunden.');
-        setResults([]);
-        setIsOpen(true);
-      } else {
-        setResults(data);
-        setError(null);
-        setIsOpen(true);
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') return;
-      setError('Netzwerkfehler. Bitte erneut versuchen.');
-      setResults([]);
-      setIsOpen(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    if (!query.trim()) {
-      setResults([]);
-      setIsOpen(false);
-      setError(null);
-      setIsLoading(false);
-      return;
-    }
-
-    debounceRef.current = setTimeout(() => {
-      fetchResults(query);
-    }, 400);
-
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, [query, fetchResults]);
-
-  // Close on ESC key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-        setResults([]);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Close on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSelect = (item: NominatimResult) => {
-    const result: SearchResult = {
-      lat: parseFloat(item.lat),
-      lng: parseFloat(item.lon),
-      label: item.display_name,
-    };
-    setQuery(item.display_name.split(',')[0]);
-    setIsOpen(false);
-    setResults([]);
-    onSelect(result);
+      const places = await PlaceSearchService.search(parsed.data, controller.signal);
+      if (current !== generation.current || controller.signal.aborted) return;
+      setResults(places.results); setIsOpen(true);
+      if (!places.osmAvailable) setCoverageNote('Es werden interne Wegweiser-Ziele angezeigt; die öffentliche Suche ist gerade nicht verfügbar oder deaktiviert.');
+      if (!places.results.length) setError('Keine Ergebnisse gefunden.');
+    } catch (error: any) {
+      if (current !== generation.current || controller.signal.aborted || error?.name === 'AbortError') return;
+      setError(error?.code === 'CONSENT_REQUIRED' ? 'Bitte zuerst der Standortverarbeitung zustimmen.' : 'Zielsuche derzeit nicht verfügbar. Koordinaten können weiterhin eingegeben werden.'); setIsOpen(true);
+    } finally { if (current === generation.current) setIsLoading(false); }
   };
-
-  const handleClear = () => {
-    setQuery('');
-    setResults([]);
-    setIsOpen(false);
-    setError(null);
-  };
-
-  return (
-    <div ref={containerRef} className={styles.container}>
-      <div className={styles.inputWrapper}>
-        <span className={styles.searchIcon}>⌕</span>
-        <input
-          type="text"
-          className={styles.input}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder}
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-          aria-label="Zielsuche"
-        />
-        {isLoading && <span className={styles.spinner} aria-label="Laden" />}
-        {!isLoading && query && (
-          <button className={styles.clearBtn} onClick={handleClear} aria-label="Eingabe löschen">
-            ✕
-          </button>
-        )}
-      </div>
-
-      {isOpen && (
-        <ul className={styles.dropdown} role="listbox">
-          {error ? (
-            <li className={styles.errorItem}>{error}</li>
-          ) : (
-            <>
-              {results.map((item, idx) => (
-                <li
-                  key={idx}
-                  className={styles.resultItem}
-                  role="option"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    handleSelect(item);
-                  }}
-                >
-                  <span className={styles.resultPin}>📍</span>
-                  <span className={styles.resultLabel}>{item.display_name}</span>
-                </li>
-              ))}
-              <li style={{ padding: '6px 12px', fontSize: '0.65rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-glass)', textAlign: 'center', background: 'rgba(0,0,0,0.2)' }}>
-                ℹ️ Suchanfragen werden zur Geokodierung an OpenStreetMap Nominatim übermittelt.
-              </li>
-            </>
-          )}
-        </ul>
-      )}
-    </div>
-  );
+  const select = (item: PlaceResult) => { invalidate(); setQuery(item.label.split(',')[0]); onSelect(item); };
+  return <div className={styles.container}>
+    <form className={styles.inputWrapper} onSubmit={event => { event.preventDefault(); void submit(); }}>
+      <span className={styles.searchIcon} aria-hidden="true">⌕</span>
+      <input ref={inputRef} type="text" className={styles.input} value={query} onChange={event => { invalidate(); setQuery(event.target.value); }}
+        onKeyDown={event => { if (event.key === 'Escape') invalidate(); }} placeholder={placeholder} autoComplete="off" spellCheck={false} aria-label="Zielsuche" />
+      <button type="submit" disabled={isLoading} aria-label="Ziel suchen">{isLoading ? 'Suche…' : 'Suchen'}</button>
+      {query && <button type="button" className={styles.clearBtn} onClick={() => { invalidate(); setQuery(''); inputRef.current?.focus(); }} aria-label="Eingabe löschen">✕</button>}
+    </form>
+    {isOpen && <ul className={styles.dropdown} aria-label="Suchergebnisse">
+      {coverageNote && <li className={styles.errorItem} role="status">{coverageNote}</li>}
+      {error && <li className={styles.errorItem} role="status">{error}</li>}
+      {results.map((item, index) => <li key={item.id ?? index} className={styles.resultItem}>
+        <button type="button" onClick={() => select(item)}>{item.label}<small> · {item.source === 'wegweiser' ? 'Wegweiser' : item.source === 'osm' ? 'OpenStreetMap' : 'Koordinate'}</small></button>
+      </li>)}
+    </ul>}
+  </div>;
 };

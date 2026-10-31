@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { LoungeModal } from './LoungeModal';
@@ -53,8 +54,12 @@ vi.mock('../../firebase', () => ({
 }));
 
 vi.mock('firebase/functions', () => ({
-  httpsCallable: vi.fn(() => vi.fn(async () => ({
-    data: { success: true, code: 'server-issued-test-code' },
+  httpsCallable: vi.fn((_functions: unknown, name: string) => vi.fn(async () => ({
+    data: name === 'getTokenQuizChallenge'
+      ? { challengeId: 'challenge-1', questionId: 'test-question', question: 'Test?', options: [{ label: 'A', text: 'Answer' }], explanation: 'Because', rewardTokens: 6, completed: false }
+      : name === 'submitTokenQuizAnswer'
+        ? { correct: true, balance: 56, correctAnswerLabel: 'A', explanation: 'Because', rewardTokens: 6 }
+        : { success: true, code: 'server-issued-test-code' },
   }))),
 }));
 
@@ -66,16 +71,15 @@ describe('LoungeModal - Redemption Flow', () => {
     cleanup();
   });
 
-  const renderModalAndGoToShop = (tokenBalance: number, onAddTokens = vi.fn()) => {
-    render(<LoungeModal tokenBalance={tokenBalance} onAddTokens={onAddTokens} onClose={vi.fn()} />);
+  const renderModalAndGoToShop = (tokenBalance: number, onTokenBalanceRefresh = vi.fn().mockResolvedValue(undefined)) => {
+    render(<LoungeModal tokenBalance={tokenBalance} onTokenBalanceRefresh={onTokenBalanceRefresh} onClose={vi.fn()} />);
 
     const shopTab = screen.getByText(/Shop/i);
     fireEvent.click(shopTab);
   };
 
   it('prevents redemption when balance is insufficient', () => {
-    const onAddTokens = vi.fn();
-    renderModalAndGoToShop(10, onAddTokens);
+    renderModalAndGoToShop(10);
 
     const itemTitle = screen.getByText('1x Bio-Kaffee im Bike-Café');
     const itemContainer = itemTitle.closest('.glass-panel');
@@ -84,12 +88,11 @@ describe('LoungeModal - Redemption Flow', () => {
     expect(redeemButton.disabled).toBe(true);
 
     fireEvent.click(redeemButton);
-    expect(onAddTokens).not.toHaveBeenCalled();
   });
 
   it('allows redemption when balance is sufficient', async () => {
-    const onAddTokens = vi.fn();
-    renderModalAndGoToShop(50, onAddTokens);
+    const onTokenBalanceRefresh = vi.fn().mockResolvedValue(undefined);
+    renderModalAndGoToShop(50, onTokenBalanceRefresh);
 
     const itemTitle = screen.getByText('1x Bio-Kaffee im Bike-Café');
     const itemContainer = itemTitle.closest('.glass-panel');
@@ -100,13 +103,12 @@ describe('LoungeModal - Redemption Flow', () => {
     await fireEvent.click(redeemButton);
 
     await waitFor(() => {
-      expect(onAddTokens).toHaveBeenCalledWith(-40);
+      expect(onTokenBalanceRefresh).toHaveBeenCalled();
     });
   });
 
   it('prevents double-redemption by displaying the code after first redemption', async () => {
-    const onAddTokens = vi.fn();
-    renderModalAndGoToShop(100, onAddTokens);
+    renderModalAndGoToShop(100);
 
     const itemTitle = screen.getByText('1x Bio-Kaffee im Bike-Café');
     const itemContainer = itemTitle.closest('.glass-panel');
@@ -116,10 +118,19 @@ describe('LoungeModal - Redemption Flow', () => {
     await fireEvent.click(redeemButton);
 
     await waitFor(() => {
-      expect(onAddTokens).toHaveBeenCalledWith(-40);
+      expect(screen.getByText('server-issued-test-code')).toBeTruthy();
     });
 
     const codeContainer = await screen.findByText('server-issued-test-code');
     expect(codeContainer).toBeTruthy();
+  });
+
+  it('awards quiz tokens only after the server verifies the answer', async () => {
+    const onTokenBalanceRefresh = vi.fn().mockResolvedValue(undefined);
+    render(<LoungeModal tokenBalance={0} onTokenBalanceRefresh={onTokenBalanceRefresh} onClose={vi.fn()} />);
+    fireEvent.click(screen.getByText(/Quiz/i));
+    const answer = await screen.findByRole('button', { name: /A\) Answer/ });
+    fireEvent.click(answer);
+    await waitFor(() => expect(onTokenBalanceRefresh).toHaveBeenCalled());
   });
 });

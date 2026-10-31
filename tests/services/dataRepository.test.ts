@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { dataRepository, filterUgcText } from '../../src/services/dataRepository';
 import { ChargingStationImportService } from '../../src/services/chargingStationImportService';
 import { getDocs, getDoc, setDoc } from 'firebase/firestore';
+import { ConsentService } from '../../src/services/consentService';
 
 vi.mock('firebase/firestore', async (importOriginal) => {
   return {
@@ -11,6 +12,8 @@ vi.mock('firebase/firestore', async (importOriginal) => {
     getDocs: vi.fn(),
     setDoc: vi.fn(),
     getFirestore: vi.fn(),
+    query: vi.fn((...args) => args),
+    where: vi.fn((...args) => args),
   };
 });
 
@@ -55,6 +58,7 @@ describe('dataRepository', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    ConsentService.save({ essential: true, analytics: false, surveys: false, personalizedAds: false });
   });
 
   describe('filterUgcText', () => {
@@ -219,26 +223,15 @@ describe('dataRepository', () => {
       expect(result.balance).toBe(100);
     });
 
-    it('should add tokens', async () => {
-      (getDoc as any).mockResolvedValue({
-        exists: () => true,
-        data: () => ({ userId: 'u1', balance: 10, lifetimeEarned: 10, unlimitedOnDemand: false }),
-      });
-
-      const newBalance = await dataRepository.addTokens('u1', 5, 'reward');
-      expect(newBalance).toBe(15);
-      expect(setDoc).toHaveBeenCalled();
+    it('rejects client-issued token rewards without writing to Firestore', async () => {
+      await expect(dataRepository.addTokens('u1', 5, 'reward')).rejects.toThrow('server-verified earning event');
+      expect(setDoc).not.toHaveBeenCalled();
     });
 
-    it('should deduct token if balance is sufficient', async () => {
-      (getDoc as any).mockResolvedValue({
-        exists: () => true,
-        data: () => ({ userId: 'u1', balance: 10, lifetimeEarned: 10, unlimitedOnDemand: false }),
-      });
-
+    it('does not mutate token balances from the client', async () => {
       const success = await dataRepository.deductToken('u1', 5);
-      expect(success).toBe(true);
-      expect(setDoc).toHaveBeenCalled();
+      expect(success).toBe(false);
+      expect(setDoc).not.toHaveBeenCalled();
     });
 
     it('should not deduct token if balance is insufficient', async () => {
@@ -251,14 +244,10 @@ describe('dataRepository', () => {
       expect(success).toBe(false);
     });
 
-    it('should deduct token if unlimitedOnDemand is true regardless of balance', async () => {
-      (getDoc as any).mockResolvedValue({
-        exists: () => true,
-        data: () => ({ userId: 'u1', balance: 2, lifetimeEarned: 10, unlimitedOnDemand: true }),
-      });
-
-      const success = await dataRepository.deductToken('u1', 5);
-      expect(success).toBe(true);
+    it('defaults a missing token account to zero and no unlimited entitlement', async () => {
+      (getDoc as any).mockResolvedValue({ exists: () => false });
+      const account = await dataRepository.getTokenAccount('missing-user');
+      expect(account).toMatchObject({ balance: 0, lifetimeEarned: 0, unlimitedOnDemand: false });
     });
   });
 

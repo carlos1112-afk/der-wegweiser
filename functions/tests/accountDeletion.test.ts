@@ -7,6 +7,8 @@ const mockJobData = new Map<string, any>();
 const mockDocsMap = new Map<string, any>();
 
 const mockJobRef = (jobId: string) => ({
+  path: `account_deletion_jobs/${jobId}`,
+  delete: jest.fn(async () => { mockJobData.delete(jobId); }),
   get: jest.fn(async () => ({
     exists: mockJobData.has(jobId),
     data: () => mockJobData.get(jobId),
@@ -22,6 +24,7 @@ const mockJobRef = (jobId: string) => ({
 
 const mockDocRef = (path: string) => ({
   path,
+  set: jest.fn(async (data: any) => { mockDocsMap.set(path, data); }),
   get: jest.fn(async () => ({
     exists: mockDocsMap.has(path),
     data: () => mockDocsMap.get(path),
@@ -58,6 +61,11 @@ const mockDb = {
     };
   }),
   batch: jest.fn(() => mockBatch),
+  runTransaction: async (callback: any) => callback({
+    get: (ref: any) => ref.get(),
+    set: (ref: any, data: any) => ref.set(data),
+    create: (ref: any, data: any) => ref.set(data),
+  }),
 };
 
 const mockFiles: Array<{ name: string; delete: jest.Mock }> = [];
@@ -160,13 +168,8 @@ describe("deleteAccountData Cloud Function", () => {
     // Verify Auth user deleted
     expect(mockAuthDeleteUser).toHaveBeenCalledWith(uid);
 
-    // Verify job status marked as completed
-    expect(mockJobData.get(uid)).toEqual(
-      expect.objectContaining({
-        uid,
-        status: "completed",
-      })
-    );
+    // Successful cleanup removes the private deletion job.
+    expect(mockJobData.has(uid)).toBe(false);
   });
 
   it("returns completed status immediately if job is already completed (idempotency)", async () => {
@@ -198,5 +201,34 @@ describe("deleteAccountData Cloud Function", () => {
         error: "Firestore write error",
       })
     );
+  });
+});
+
+
+describe('wallet-aware account deletion', () => {
+  beforeEach(() => { jest.clearAllMocks(); mockJobData.clear(); mockDocsMap.clear(); mockCollectionQueries.clear(); mockFiles.length = 0; });
+  const { walletReceiptId, deletionLockId } = require('../src/wallet/firestoreLedger');
+  function reservedAccount(amount = 2) {
+    const uid = 'reserved-user';
+    const id = walletReceiptId(uid, 'reservation', 'route_job');
+    const data = { userId: uid, reference: 'route_job', amount, state: 'reserved' };
+    mockDocsMap.set(`user_tokens/${uid}`, { userId: uid, schemaVersion: 1, balance: 8, reservedBalance: 2, lifetimeEarned: 10 });
+    mockDocsMap.set(`token_reservations/${id}`, data);
+    mockCollectionQueries.set(`token_reservations:userId:${uid}`, [{ id, data }]);
+    return uid;
+  }
+  it('sets the deletion lock and releases outstanding reservations before account documents are removed', async () => {
+    const uid = reservedAccount();
+    await expect((deleteAccountData as any)({ auth: { uid } })).resolves.toMatchObject({ success: true });
+    expect(mockDocsMap.get(`account_deletion_locks/${deletionLockId(uid)}`)).toEqual({ blocked: true });
+    expect(mockDocsMap.get(`user_tokens/${uid}`)).toMatchObject({ balance: 10, reservedBalance: 0 });
+    expect(mockDocsMap.get(`token_ledger/${walletReceiptId(uid, 'release', 'route_job')}`)).toMatchObject({ balanceDelta: 2, reservedDelta: -2 });
+    expect(mockBatch.delete).toHaveBeenCalledWith(expect.objectContaining({ path: `user_tokens/${uid}` }));
+  });
+  it('does not erase the account or report completion if reservation settlement fails', async () => {
+    const uid = reservedAccount(-1);
+    await expect((deleteAccountData as any)({ auth: { uid } })).rejects.toMatchObject({ code: 'failed-precondition' });
+    expect(mockBatch.commit).not.toHaveBeenCalled(); expect(mockAuthDeleteUser).not.toHaveBeenCalled();
+    expect(mockJobData.get(uid)?.status).toBe('failed');
   });
 });

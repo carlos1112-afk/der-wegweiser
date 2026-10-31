@@ -1,45 +1,39 @@
 import React, { useState } from 'react';
 import { Trophy, Download, Share2, Sparkles, CheckCircle2, X } from 'lucide-react';
-import { GpxRecorderService, type RideSummary } from '../../services/gpxRecorderService';
+import type { RideSummary } from '../../services/gpxRecorderService';
 import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
 import { SoundFxService } from '../../services/soundFxService';
-import confetti from 'canvas-confetti';
 
 interface RideSummaryModalProps {
   isOpen: boolean;
-  onAddTokens: (amount: number) => void;
   onClose: () => void;
+  summary: RideSummary;
 }
 
 export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
   isOpen,
-  onAddTokens,
-  onClose,
+  onClose, summary,
 }) => {
-  const [summary] = useState<RideSummary>(() => {
-    const s = GpxRecorderService.stopRecording();
-    confetti({ particleCount: 90, spread: 80 });
-    return s;
-  });
-
   const [downloaded, setDownloaded] = useState(false);
 
   if (!isOpen) return null;
 
   const handleDownload = () => {
     SoundFxService.playClick();
-    GpxRecorderService.downloadGpxFile(`wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`);
+    const url = URL.createObjectURL(new Blob([summary.gpxXmlString], { type: 'application/gpx+xml' }));
+    const anchor = document.createElement('a'); anchor.href = url; anchor.download = `wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`; anchor.click(); URL.revokeObjectURL(url);
     setDownloaded(true);
   };
 
   const handleShare = async () => {
     SoundFxService.playClick();
-    await GpxRecorderService.shareGpxTrack(`wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`);
+    const file = new File([summary.gpxXmlString], `wegweiser_tour_${Math.round(summary.distanceKm)}km.gpx`, { type: 'application/gpx+xml' });
+    if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: 'Meine aufgezeichnete Tour' });
+    else handleDownload();
   };
 
   const handleFinish = async () => {
     SoundFxService.playSuccessChime();
-    onAddTokens(summary.tokensEarned);
 
     // Anonymously sanitize and merge navigational intelligence into collective map
     if (summary.coordinates && summary.coordinates.length > 0) {
@@ -113,7 +107,7 @@ export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
           </button>
         </div>
 
-        {/* Token Reward Banner */}
+        {/* GPS data is client generated and currently has no server verification path for token rewards. */}
         <div
           style={{
             padding: '14px 18px',
@@ -129,17 +123,11 @@ export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
             <Sparkles size={24} className="glow-text-gold" />
             <div>
               <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#fff' }}>
-                Belohnung: +{summary.tokensEarned} Tokens verdient!
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                (+1 Token pro gefahrenem Kilometer)
+                Für aufgezeichnete Fahrten werden derzeit keine Tokens gutgeschrieben.
               </div>
             </div>
           </div>
 
-          <div className="glow-text-gold" style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>
-            🪙 +{summary.tokensEarned}
-          </div>
         </div>
 
         {/* Key Metrics Grid */}
@@ -211,7 +199,7 @@ export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
           className="btn-cyberpunk"
           style={{ padding: '12px', justifyContent: 'center', width: '100%', borderColor: 'var(--accent-neon-green)', color: 'var(--accent-neon-green)' }}
         >
-          <CheckCircle2 size={16} /> Tour Abschließen & Tokens Einlösen
+          <CheckCircle2 size={16} /> Tour abschließen
         </button>
       </div>
     </div>

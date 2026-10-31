@@ -1,3 +1,5 @@
+import { ConsentService } from './consentService';
+
 export interface OfflineRegionBounds {
   minLat: number;
   maxLat: number;
@@ -46,6 +48,19 @@ function latToTileY(lat: number, zoom: number): number {
 }
 
 export class OfflineMapService {
+  public static async clearLocalData(): Promise<boolean> {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        await caches.delete(TILE_CACHE_NAME);
+      }
+      return true;
+    } catch (error) {
+      console.warn('[OfflineMapService] Failed to clear local map data:', error);
+      return false;
+    }
+  }
+
   /** Prefetches a bounded tile corridor around route points, not the route's full bounding rectangle. */
   public static async prefetchRouteCorridor(
     coordinates: [number, number][],
@@ -216,6 +231,8 @@ export class OfflineMapService {
     }
   }
 }
+
+ConsentService.onChange((flags) => (flags === null ? OfflineMapService.clearLocalData() : undefined));
 
 export const downloadOfflineRegion = OfflineMapService.downloadOfflineRegion.bind(OfflineMapService);
 export const getDownloadedRegions = OfflineMapService.getDownloadedRegions.bind(OfflineMapService);

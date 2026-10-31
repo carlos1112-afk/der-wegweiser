@@ -28,7 +28,6 @@ vi.mock('firebase/storage', () => ({
 }));
 
 import { RoutingService } from '../../src/services/routingService';
-import { ElevationService } from '../../src/services/elevationService';
 import { ConsentService } from '../../src/services/consentService';
 import { GpxExportService } from '../../src/services/gpxExportService';
 import { GpxImportService } from '../../src/services/gpxImportService';
@@ -39,78 +38,33 @@ import type { Route } from '../../src/types/navigation';
 const prefs = { batteryCapacityWh: 625, maxElevationSlopePercent: 8 } as never;
 const params = { startLat: 51.5, startLng: 14.3, targetDistanceKm: 20, batteryPercent: 80, bikeType: 'trekking' };
 
-function geojsonRoute(n = 12) {
-  const coordinates = Array.from({ length: n }, (_, i) => [14.3 + i * 0.001, 51.5 + i * 0.001, 100 + i]);
-  return { features: [{ geometry: { coordinates }, properties: { 'track-length': '20000' } }] };
-}
 
-describe('Szenario 13: Offline-Resilienz (echter RoutingService, Höhendienst ersetzt)', () => {
-  let elevation: ReturnType<typeof vi.spyOn>;
-  beforeEach(() => {
-    ConsentService.save({ essential: true, analytics: true, surveys: false, personalizedAds: false });
-    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('offline'); }));
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
-    elevation = vi.spyOn(ElevationService, 'getElevations').mockImplementation(async (c) => c.map(() => 0));
+describe('Szenario 13: keine startbaren Scheinrouten', () => {
+  beforeEach(() => { ConsentService.save({ essential: true, analytics: false, surveys: false, personalizedAds: false }); });
+  afterEach(() => vi.restoreAllMocks());
+  it('legacy roundtrip is closed without BRouter/OSRM/circle fallback', async () => {
+    const fetch = vi.fn();
+    await expect(RoutingService.generateBikeRoute(params, prefs, fetch as never)).rejects.toMatchObject({ code: 'PREMIUM_UNAVAILABLE' });
+    expect(fetch).not.toHaveBeenCalled();
   });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
+  it('requires consent before any request', async () => {
+    await ConsentService.withdraw(); const fetch = vi.fn();
+    await expect(RoutingService.generateBikeRoute(params, prefs, fetch as never)).rejects.toMatchObject({ code: 'CONSENT_REQUIRED' });
+    expect(fetch).not.toHaveBeenCalled();
   });
-
-  it('ohne Netz: markierter, ungeprüfter Korridor statt Absturz oder falscher Straßenroute', async () => {
-    const offline = vi.fn(async () => { throw new Error('offline'); });
-    const route = await RoutingService.generateBikeRoute(params, prefs, offline as never);
-    expect(route.isRoadSnapped).toBe(false);
-    expect(route.isOfflineFallbackCorridor).toBe(true);
-    expect(route.routingEngineStatus).toBe('offline_corridor_unverified');
-    expect(route.pathCoordinates.length).toBeGreaterThan(10);
-    expect(route.title).toContain('Ungeprüfter');
-    expect(offline).toHaveBeenCalledTimes(2);
+  it('does not pretend local routing or paid planning is available', async () => {
+    const fetch = vi.fn();
+    for (const mode of ['premium', 'offline'] as const) {
+      await expect(RoutingService.generateDestinationRoute({ lat: 52.52, lng: 13.4 }, { lat: 52.53, lng: 13.4 }, prefs, { mode }, fetch as never)).rejects.toThrow();
+    }
+    expect(fetch).not.toHaveBeenCalled();
   });
-
-  it('ohne Einwilligung / nach Widerruf: bricht Routenberechnung ab und sendet 0 Netzwerkaufrufe (CWE-359 Fix)', async () => {
-    ConsentService.withdraw();
-    const fetchFn = vi.fn();
-    await expect(RoutingService.generateBikeRoute(params, prefs, fetchFn as never))
-      .rejects.toThrow(/Einwilligung zur Standortverarbeitung|Consent required/);
-    expect(fetchFn).toHaveBeenCalledTimes(0);
+  it('does not use map-center coordinates as a confirmed GPS start', async () => {
+    await expect(RoutingService.generateDestinationRoute({ lat: 52.52, lng: 13.4 }, { lat: 52.53, lng: 13.4 }, prefs, { mode: 'standard' })).rejects.toMatchObject({ code: 'INVALID_START' });
   });
-
-  it('BRouter erreichbar: straßengenaue Route mit unterstütztem Profil', async () => {
-    const ok = vi.fn(async () => ({ ok: true, json: async () => geojsonRoute() }));
-    const route = await RoutingService.generateBikeRoute(params, prefs, ok as never);
-    expect(route.isRoadSnapped).toBe(true);
-    expect(route.routingEngineStatus).toBe('online_brouter');
-    expect(route.distanceKm).toBe(20);
-    expect(String(ok.mock.calls[0][0])).toContain('profile=trekking&');
-    expect(String(ok.mock.calls[0][0])).not.toContain('trekking-pedelec');
-  });
-
-  it('BRouter antwortet mit Fehler: OSRM übernimmt', async () => {
-    const osrm = { routes: [{ distance: 15000, geometry: { coordinates: geojsonRoute().features[0].geometry.coordinates } }] };
-    const fetchFn = vi.fn()
-      .mockResolvedValueOnce({ ok: false, json: async () => ({}) })
-      .mockResolvedValueOnce({ ok: true, json: async () => osrm });
-    const route = await RoutingService.generateBikeRoute(params, prefs, fetchFn as never);
-    expect(route.isRoadSnapped).toBe(true);
-    expect(route.distanceKm).toBe(15);
-    expect(String(fetchFn.mock.calls[1][0])).toContain('router.project-osrm.org');
-  });
-
-  it('BEKANNTER FEHLER: bei echtem Totalausfall wirft die Planung, weil der Höhendienst keinen Fallback hat', async () => {
-    elevation.mockRestore();
-    const down = vi.fn(async () => { throw new Error('offline'); });
-    await expect(RoutingService.generateBikeRoute(params, prefs, down as never))
-      .rejects.toThrow('no fallback is permitted');
-  });
-
-  it('Korridor-Route hat Sicherheitsaufschlag auf den Energiebedarf', async () => {
-    const down = vi.fn(async () => { throw new Error('offline'); });
-    const ok = vi.fn(async () => ({ ok: true, json: async () => geojsonRoute() }));
-    const corridor = await RoutingService.generateBikeRoute(params, prefs, down as never);
-    const snapped = await RoutingService.generateBikeRoute({ ...params, targetDistanceKm: 20 }, prefs, ok as never);
-    expect(corridor.estimatedBatteryConsumptionWh / corridor.distanceKm)
-      .toBeGreaterThan(snapped.estimatedBatteryConsumptionWh / snapped.distanceKm);
+  it('honors abort before any generation work', async () => {
+    const controller = new AbortController(); controller.abort();
+    await expect(RoutingService.generateBikeRoute(params, prefs, undefined, controller.signal)).rejects.toMatchObject({ name: 'AbortError' });
   });
 });
 

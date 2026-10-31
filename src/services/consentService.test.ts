@@ -128,7 +128,7 @@ describe('getConsent', () => {
   it('liefert die aktuelle CONSENT_VERSION', () => {
     stored(valid());
     expect(ConsentService.getConsent()!.version).toBe(CONSENT_VERSION);
-    expect(CONSENT_VERSION).toBe(2);
+    expect(CONSENT_VERSION).toBe(3);
   });
 
   it('kaputtes JSON: null und exakte Warnung', () => {
@@ -243,36 +243,36 @@ describe('onChange', () => {
 });
 
 describe('withdraw (Art. 7 Abs. 3 DSGVO)', () => {
-  it('benachrichtigt gemountete Verbraucher über den widerrufenen Zustand', () => {
+  it('benachrichtigt gemountete Verbraucher über den widerrufenen Zustand', async () => {
     stored(valid());
     const listener = vi.fn();
     ConsentService.onChange(listener);
 
-    ConsentService.withdraw();
+    await ConsentService.withdraw();
 
     expect(listener).toHaveBeenCalledWith(null);
   });
 
-  it('entfernt die Einwilligung und leert local- und sessionStorage', () => {
+  it('entfernt die Einwilligung und leert local- und sessionStorage', async () => {
     stored(valid());
     ls.setItem('anderes', 'x');
     ss.setItem('sess', 'y');
-    ConsentService.withdraw();
+    await ConsentService.withdraw();
     expect(ls.getItem(KEY)).toBeNull();
     expect(ls.getItem('anderes')).toBeNull();
     expect(ss.getItem('sess')).toBeNull();
     expect(ConsentService.hasValidConsent()).toBe(false);
   });
 
-  it('benachrichtigt registrierte Subscriber mit null beim Widerruf (CWE-359 Fix)', () => {
+  it('benachrichtigt registrierte Subscriber mit null beim Widerruf (CWE-359 Fix)', async () => {
     stored(valid());
     const listener = vi.fn();
     ConsentService.onChange(listener);
-    ConsentService.withdraw();
+    await ConsentService.withdraw();
     expect(listener).toHaveBeenCalledWith(null);
   });
 
-  it('entfernt den Consent-Key auch dann, wenn clear() wirft, und warnt exakt', () => {
+  it('entfernt den Consent-Key auch dann, wenn clear() wirft, und warnt exakt', async () => {
     stored(valid());
     const removeSpy = vi.fn((k: string) => ls._map.delete(k));
     vi.stubGlobal('localStorage', {
@@ -283,7 +283,7 @@ describe('withdraw (Art. 7 Abs. 3 DSGVO)', () => {
       },
     });
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    expect(() => ConsentService.withdraw()).not.toThrow();
+    await expect(ConsentService.withdraw()).resolves.toBe(false);
     expect(removeSpy).toHaveBeenCalledWith(KEY);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0][0]).toBe(

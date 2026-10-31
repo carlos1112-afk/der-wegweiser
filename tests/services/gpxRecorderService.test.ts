@@ -53,6 +53,13 @@ describe('GpxRecorderService pause controls', () => {
     expect(status.pointsCount).toBe(1);
   });
 
+  it('erases the recording state and retained coordinates on reset', () => {
+    addPoint(0, 12);
+    GpxRecorderService.reset();
+    expect(GpxRecorderService.getStatus()).toMatchObject({ isRecording: false, pointsCount: 0, elapsedSeconds: 0, distanceKm: 0 });
+    expect(GpxRecorderService.generateGpxXml()).not.toContain('<trkpt');
+  });
+
   it('allows moving telemetry to clear only the automatic idle pause', () => {
     for (let i = 0; i < 5; i++) addPoint(i, 0);
     expect(GpxRecorderService.getStatus().isAutoPaused).toBe(true);

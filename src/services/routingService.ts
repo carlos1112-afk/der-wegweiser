@@ -1,204 +1,79 @@
-import type { Route, Waypoint, UserPreferences } from '../types/navigation';
-import { ElevationService } from './elevationService.ts';
-import { ConsentService } from './consentService.ts';
-import { logger } from '../utils/logger';
-
+import { routeArchive } from './routeArchiveService';
+import { UserIdentity } from './userIdentity';
+import type { Location, Route, UserPreferences } from '../types/navigation';
+import type { RouteLocation, RouteRequestV1 } from '../types/routing';
+import { RoutingError } from '../types/routing';
+import { ConsentService, CONSENT_VERSION } from './consentService';
+import { FreeRouteService } from './freeRouteService';
+import { PremiumRouteService, type RoutePriority } from './premiumRouteService';
 export interface RouteGenerationParams {
-  startLat: number;
-  startLng: number;
-  targetDistanceKm?: number;
-  maxElevationGainM?: number;
-  surfacePreference?: 'asphalt' | 'gravel' | 'any';
-  themes?: string[];
-  batteryPercent: number | null;
-  bikeType: string;
-  isMapScoutMode?: boolean; // Karten-Scout Modus: Bevorzugt veraltete Sektoren für Bonus-Tokens
+  startLat: number; startLng: number; targetDistanceKm?: number; maxElevationGainM?: number;
+  surfacePreference?: 'asphalt' | 'gravel' | 'any'; themes?: string[]; batteryPercent: number | null;
+  bikeType: string; isMapScoutMode?: boolean;
 }
-
+export interface DestinationRouteOptions {
+  mode: 'standard' | 'premium' | 'offline'; start?: RouteLocation; destinationName?: string;
+  via?: Location[]; wishes?: string; userSelectedPriority?: RoutePriority;
+}
 export class RouteGenerationCancelledError extends Error {
-  public constructor(message = 'Route generation was cancelled.') {
-    super(message);
-    this.name = 'AbortError';
-  }
+  constructor(message = 'Route generation was cancelled.') { super(message); this.name = 'AbortError'; }
 }
-
-function assertRouteGenerationAllowed(signal?: AbortSignal): void {
+function allowed(signal?: AbortSignal): void {
   if (signal?.aborted) throw new RouteGenerationCancelledError();
-  if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
-    throw new Error('[RoutingService] Consent required before sending coordinates.');
-  }
-  if (!ConsentService.hasValidConsent()) {
-    throw new Error('Einwilligung zur Standortverarbeitung liegt nicht vor (Art. 6/7 DSGVO).');
-  }
+  if (!ConsentService.allowsEssential) throw new RoutingError('CONSENT_REQUIRED', 'Einwilligung zur Standortverarbeitung fehlt.');
 }
-
 export class RoutingService {
-  /**
-   * Generates a road-snapped bike loop using the BRouter bike routing API.
-   * If the routing server is unavailable, explicitly flags the route as an unverified
-   * geometric corridor rather than pretending it is turn-by-turn navigable road data.
-   */
-  public static async generateBikeRoute(
-    params: RouteGenerationParams,
-    userPrefs: UserPreferences,
-    fetchFn: typeof fetch = typeof globalThis !== 'undefined' ? globalThis.fetch : fetch,
-    signal?: AbortSignal
-  ): Promise<Route> {
-    assertRouteGenerationAllowed(signal);
-
-    const distance = params.targetDistanceKm || 28;
-    const isScout = !!params.isMapScoutMode;
-    const radius = (distance / (2 * Math.PI)) * 0.009; // approx degree delta
-
-    // Generate circular via points (If Scout Mode: slightly detour via refreshable ridge / sector)
-    const viaLat = params.startLat + radius * (isScout ? 0.95 : 0.8);
-    const viaLng = params.startLng + radius * (isScout ? 0.75 : 0.6);
-
-    let pathCoordinates: [number, number][] = [];
-    let realDistanceKm = distance;
-    let elevationGainM = Math.round(distance * 4.5);
-    let isRoadSnapped = false;
-    let routingEngineStatus: 'online_brouter' | 'offline_cached' | 'offline_corridor_unverified' = 'offline_corridor_unverified';
-
-    try {
-      assertRouteGenerationAllowed(signal);
-      // BRouter API call: start -> via -> start
-      const brouterUrl = `https://brouter.de/brouter?lonlats=${params.startLng},${params.startLat}|${viaLng},${viaLat}|${params.startLng},${params.startLat}&profile=trekking&alternativeidx=0&format=geojson`;
-      const res = await fetchFn(brouterUrl, { signal } as RequestInit);
-
-      if (res.ok) {
-        const geojson = await res.json();
-        const coords = geojson.features?.[0]?.geometry?.coordinates;
-        if (Array.isArray(coords) && coords.length > 5) {
-          // BRouter returns [lng, lat, elevation?]
-          pathCoordinates = coords.map((c: number[]) => [c[1], c[0]] as [number, number]);
-          const props = geojson.features[0].properties;
-          if (props?.['track-length']) {
-            realDistanceKm = +(parseFloat(props['track-length']) / 1000).toFixed(1);
-          }
-          isRoadSnapped = true;
-          routingEngineStatus = 'online_brouter';
-        }
-      }
-    } catch (err: any) {
-      if (signal?.aborted || err?.name === 'AbortError') throw new RouteGenerationCancelledError();
-      if (err?.message?.includes('Einwilligung') || err?.message?.includes('Consent')) throw err;
-      logger.warn('[RoutingService] BRouter API unavailable:', err);
+  /** Legacy roundtrip entry is closed until real network anchors and premium jobs are available. */
+  static async generateBikeRoute(_params: RouteGenerationParams, _prefs: UserPreferences,
+    _legacyFetch?: typeof fetch, signal?: AbortSignal): Promise<Route> {
+    allowed(signal);
+    throw new RoutingError('PREMIUM_UNAVAILABLE', 'Persönliche Rundtouren sind noch nicht freigegeben.');
+  }
+  static async generateDestinationRoute(start: Location, destination: Location, prefs: UserPreferences,
+    options: DestinationRouteOptions, _legacyFetch?: typeof fetch, signal?: AbortSignal): Promise<Route> {
+    allowed(signal);
+    if (options.mode === 'offline') throw new RoutingError('OFFLINE_UNAVAILABLE', 'Lokales Offline-Routing ist noch nicht verfügbar.');
+    if (!options.start?.confirmed || options.start.lat !== start.lat || options.start.lng !== start.lng) throw new RoutingError('INVALID_START', 'Bitte einen aktuellen GPS-Start oder einen manuellen Start bestätigen.');
+    const ownerId = UserIdentity.getUserId();
+    if (routeArchive.hasPending(ownerId)) throw new Error('Zuerst die noch offene Archiv-Sicherung abschließen.');
+    const profile = prefs;
+    const premium = options.mode === 'premium';
+    const request: RouteRequestV1 = { version: 1, requestId: crypto.randomUUID(), kind: 'destination', planning: premium ? 'ai' : 'standard',
+      start: options.start, destination, mandatoryStops: options.via ?? [], interests: [],
+      // Free routing is intentionally not personalized; premium uses only preferences shown in the confirmation flow.
+      criteria: { hard: [], surfacePreference: 'any', wishes: '',
+        weights: { asphalt: 0, nature: 0, flat: profile.avoidSteepHills ? 1 : 0 } },
+      profile: { bike: 'bicycle', batteryPercent: null, batteryCapacityWh: null,
+        confirmedAt: Date.now(), consentVersion: String(CONSENT_VERSION) } };
+    const premiumResult = premium ? await PremiumRouteService.generate(request, options.userSelectedPriority ?? null, signal) : null;
+    const selected = premiumResult?.route ?? await FreeRouteService.plan(request, signal);
+    const candidates = premiumResult?.candidates ?? [selected];
+    let selectedArchiveId: string | undefined;
+    let selectedRoute: Route | undefined;
+    for (const [index, candidate] of candidates.entries()) {
+      const isSelected = candidate.id === selected.id;
+      const result: Route = { id: candidate.id, title: `${premium ? `KI-Alternative ${index + 1}` : 'Route'}: ${options.destinationName || 'Ausgewähltes Ziel'}`,
+        summary: `${(candidate.metrics.distanceM.value! / 1000).toFixed(1)} km · ${premium ? 'KI-Premium' : 'Kostenlos'} · ${candidate.provenance.engine}`,
+        aiStory: isSelected && premiumResult ? `${premiumResult.evidence.reason}${premiumResult.evidence.criteriaUnknown.length ? ` Unbekannte Kriterien: ${premiumResult.evidence.criteriaUnknown.join(', ')}.` : ''}${premiumResult.unrestoredCandidateIds.length ? ` Weitere Varianten sind dauerhaft serverseitig gespeichert, konnten aber noch nicht lokal synchronisiert werden (Auftrag ${premiumResult.jobId}).` : ''}`
+          : premium ? 'Vom KI-Routing erzeugte und serverseitig archivierte Alternative.'
+            : candidate.guidanceCapability === 'track' ? 'Geprüfte Trackgeometrie. Abbiegeführung, Oberflächen- und Akkudaten sind noch nicht verfügbar; Freitextwünsche werden nicht ausgewertet.' : 'Kostenlose Fahrradroute.',
+        distanceKm: candidate.metrics.distanceM.value! / 1000, elevationGainM: candidate.metrics.ascentM.value,
+        estimatedTimeMin: candidate.metrics.durationS.value === null ? null : candidate.metrics.durationS.value / 60,
+        estimatedBatteryConsumptionWh: candidate.metrics.energyWh.value, isBatterySafe: null, surfaceBreakdown: null,
+        pathCoordinates: candidate.geometry.map(p => [p.lat, p.lng]), chargingStopsOnRoute: [], isRoadSnapped: true,
+        isOfflineFallbackCorridor: false, routingEngineStatus: candidate.provenance.engine === 'openrouteservice' ? 'online_openrouteservice' : 'online_brouter', validatedRoute: candidate,
+        waypoints: [{ id: 'start', ...request.start, name: 'Bestätigter Start', category: 'start' },
+          ...(options.via ?? []).map((stop, index) => ({ id: `via-${index}`, ...stop, name: stop.name || `Zwischenstopp ${index + 1}`, category: 'scenic' as const })),
+          { id: 'destination', ...destination, name: options.destinationName || 'Ziel', category: 'end' }] };
+      const archived = premiumResult
+        ? await routeArchive.saveGenerated(ownerId, result, `premium:${premiumResult.jobId}:${candidate.id}`)
+        : await routeArchive.saveGenerated(ownerId, result);
+      if (isSelected) { selectedArchiveId = archived.id; selectedRoute = result; }
     }
-
-    // OSRM fallback when BRouter is unreachable
-    if (pathCoordinates.length === 0) {
-      try {
-        assertRouteGenerationAllowed(signal);
-        const osrmUrl = `https://router.project-osrm.org/route/v1/bike/${params.startLng},${params.startLat};${viaLng},${viaLat};${params.startLng},${params.startLat}?overview=full&geometries=geojson`;
-        const res = await fetchFn(osrmUrl, { signal } as RequestInit);
-        if (res.ok) {
-          const data = await res.json();
-          const coords = data.routes?.[0]?.geometry?.coordinates;
-          if (Array.isArray(coords) && coords.length > 5) {
-            pathCoordinates = coords.map((c: number[]) => [c[1], c[0]] as [number, number]);
-            const distM = data.routes[0].distance;
-            if (distM) realDistanceKm = +(distM / 1000).toFixed(1);
-            isRoadSnapped = true;
-            routingEngineStatus = 'online_brouter'; // road-snapped via OSRM
-          }
-        }
-      } catch (err: any) {
-        if (signal?.aborted || err?.name === 'AbortError') throw new RouteGenerationCancelledError();
-        if (err?.message?.includes('Einwilligung') || err?.message?.includes('Consent')) throw err;
-        logger.warn('[RoutingService] OSRM fallback unavailable:', err);
-      }
-    }
-
-    assertRouteGenerationAllowed(signal);
-
-    // Geometric circle fallback — clearly marked as unverified corridor
-    if (pathCoordinates.length === 0) {
-      const steps = 32;
-      for (let i = 0; i <= steps; i++) {
-        const angle = (2 * Math.PI * i) / steps;
-        pathCoordinates.push([
-          params.startLat + radius * Math.sin(angle),
-          params.startLng + radius * Math.cos(angle),
-        ]);
-      }
-      routingEngineStatus = 'offline_corridor_unverified';
-    }
-
-    // Calculate elevation profiles if we have coordinates
-    if (pathCoordinates.length > 0) {
-      const sampleCoords = pathCoordinates.filter((_, idx) => idx % Math.ceil(pathCoordinates.length / 20) === 0);
-      const elevations = await ElevationService.getElevations(sampleCoords, signal);
-      let calculatedGain = 0;
-      for (let i = 1; i < elevations.length; i++) {
-        const diff = elevations[i] - elevations[i - 1];
-        if (diff > 0) calculatedGain += diff;
-      }
-      if (calculatedGain > 0) {
-        elevationGainM = Math.round(calculatedGain * (pathCoordinates.length / sampleCoords.length));
-      }
-    }
-
-    // 5 waypoints along the route
-    const waypoints: Waypoint[] = [
-      { id: 'wp-1', lat: params.startLat, lng: params.startLng, name: 'Startpunkt', category: 'start' },
-      { id: 'wp-2', lat: viaLat, lng: viaLng, name: isScout ? '🔍 Scout-Sektor: Kiefernkamm' : (isRoadSnapped ? 'Badesee Promenade' : 'Zwischenziel (Peilung)'), category: 'scenic' },
-      { id: 'wp-3', lat: params.startLat + radius * 1.2, lng: params.startLng - radius * 0.4, name: 'Lademöglichkeit Region', category: 'charging' },
-      { id: 'wp-4', lat: params.startLat + radius * 0.3, lng: params.startLng - radius * 1.1, name: 'Aussichtspunkt Korridor', category: 'scenic' },
-      { id: 'wp-5', lat: params.startLat, lng: params.startLng, name: 'Ziel & Rückkehr', category: 'end' },
-    ];
-
-    // Wh calculation: ~8.5Wh per km + 0.12Wh per meter elevation gain (plus reserve if offline)
-    const WhPerKm = params.bikeType === 'cargo' ? 12 : 8.5;
-    const safetyFactor = isRoadSnapped ? 1.0 : 1.15; // 15% safety penalty for unverified corridor detours
-    const totalWhNeeded = Math.round((realDistanceKm * WhPerKm + elevationGainM * 0.12) * safetyFactor);
-
-    const availableWh = params.batteryPercent !== null
-      ? (userPrefs.batteryCapacityWh * params.batteryPercent) / 100
-      : null;
-    const isBatterySafe = availableWh !== null ? availableWh >= totalWhNeeded * 1.15 : false;
-
-    let title: string;
-    let summary: string;
-    let aiStory: string;
-
-    if (isRoadSnapped) {
-      title = isScout
-        ? `🗺️ Karten-Scout: ${params.themes?.[0] || 'Topographie'} Aktualisierung (+35 Tokens)`
-        : `KI-Runde: ${params.themes?.[0] || 'Badesee'} & Panoramatour`;
-
-      summary = `${realDistanceKm} km • ${elevationGainM}m Höhenmeter • ${isScout ? '🔍 Scout-Prämie (+35 Tok.)' : 'Asphalt & Uferwege'}`;
-
-      aiStory = isScout
-        ? `Karten-Scout Mission: Diese Route führt dich über einen Sektor mit veralteten Topographie-Daten (> 180 Tage). Deine anonymen Sensordaten aktualisieren Steigung & Belag für alle E-Biker. Bonus bei Tour-Abschluss: +35 Tokens!`
-        : `Diese Route wurde straßengenau zusammengestellt: Sie führt über verifizierte Radwege, vermeidet steile Anstiege über ${userPrefs.maxElevationSlopePercent}% und beinhaltet eine Lademöglichkeit bei KM 18.`;
-    } else {
-      title = `⚠️ Ungeprüfter Offline-Korridor (${realDistanceKm} km)`;
-      summary = `${realDistanceKm} km • ~${elevationGainM}m Hm • ⚠️ Keine Straßenbindung (Offline-Peilung)`;
-      aiStory = `⚠️ Achtung: Der Routing-Server ist offline. Die angezeigte Linie ist ein mathematischer Orientierungskorridor ohne Straßen- oder Wegenetzprüfung. Bitte achte eigenständig auf Flüsse, Bahnlinien, Privatwege und Verkehrsregeln.`;
-    }
-
-    return {
-      id: `route-${Date.now()}`,
-      title,
-      summary,
-      aiStory,
-      distanceKm: realDistanceKm,
-      elevationGainM,
-      estimatedTimeMin: Math.round((realDistanceKm / 19) * 60),
-      estimatedBatteryConsumptionWh: totalWhNeeded,
-      isBatterySafe,
-      surfaceBreakdown: isRoadSnapped 
-        ? { asphaltPercent: 82, gravelPercent: 15, unpavedPercent: 3 }
-        : { asphaltPercent: 50, gravelPercent: 30, unpavedPercent: 20 },
-      waypoints,
-      pathCoordinates,
-      isScoutMission: isScout,
-      scoutBountyTokens: isScout ? 35 : 0,
-      isRoadSnapped,
-      isOfflineFallbackCorridor: !isRoadSnapped,
-      routingEngineStatus,
-      chargingStopsOnRoute: [],
-    };
+    if (!selectedRoute || !selectedArchiveId) throw new Error('Die ausgewählte Route wurde nicht vollständig archiviert.');
+    // A successful result is archived even if the preview was cancelled while it was in flight,
+    // but a stale preview must never replace the user's current screen.
+    if (signal?.aborted) throw new RouteGenerationCancelledError();
+    return { ...selectedRoute, archivePlanId: selectedArchiveId };
   }
 }

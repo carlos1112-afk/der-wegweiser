@@ -1,3 +1,4 @@
+import type { ValidatedRouteV1 } from './routing';
 export type BikeType = 'ebike' | 'gravel' | 'city' | 'cargo' | 'racing';
 
 export type SurfacePreference = 'asphalt' | 'gravel' | 'any' | 'forest';
@@ -72,20 +73,22 @@ export interface TokenAccount {
 }
 
 export interface Route {
+  archivePlanId?: string;
   id: string;
   title: string;
   summary: string;
   aiStory: string;
   distanceKm: number;
-  elevationGainM: number;
-  estimatedTimeMin: number;
-  estimatedBatteryConsumptionWh: number;
-  isBatterySafe: boolean; // True if battery % is enough for elevation/distance
+  elevationGainM: number | null;
+  estimatedTimeMin: number | null;
+  estimatedBatteryConsumptionWh: number | null;
+  isBatterySafe: boolean | null; // True if battery % is enough for elevation/distance
   surfaceBreakdown: {
     asphaltPercent: number;
     gravelPercent: number;
     unpavedPercent: number;
-  };
+  } | null;
+  validatedRoute?: ValidatedRouteV1;
   waypoints: Waypoint[];
   pathCoordinates: [number, number][]; // [lat, lng] array
   chargingStopsOnRoute: ChargingStation[];
@@ -93,7 +96,7 @@ export interface Route {
   scoutBountyTokens?: number;
   isRoadSnapped?: boolean; // False if generated as raw offline corridor
   isOfflineFallbackCorridor?: boolean;
-  routingEngineStatus?: 'online_brouter' | 'offline_cached' | 'offline_corridor_unverified';
+  routingEngineStatus?: 'online_brouter' | 'online_openrouteservice' | 'offline_cached' | 'offline_corridor_unverified';
 }
 
 export type BikeManufacturer = 'bosch' | 'shimano' | 'specialized' | 'mahle' | 'fazua' | 'bafang' | 'generic';

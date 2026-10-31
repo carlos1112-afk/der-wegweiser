@@ -142,7 +142,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
                 <MapPin size={20} color="var(--accent-cyan)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '0.8rem', color: '#fff', lineHeight: '1.4' }}>
                   <strong>Hintergrund-Standorterfassung (Google Play Richtlinie):</strong><br />
-                  Der Wegweiser erfasst Standortdaten im Vordergrund und <strong>Hintergrund</strong> (auch bei gesperrtem Bildschirm), um <strong>Turn-by-Turn Sprachführung</strong>, automatische Routen-Neuberechnung bei Abweichungen und lückenlose <strong>GPX-Tourenaufzeichnung</strong> zu ermöglichen.
+                  Während einer gestarteten Aufzeichnung verarbeitet Der Wegweiser nutzbare Standortdaten bei aktiver App für deine Position und den gefahrenen GPX-Track. Unterbrochene Aufzeichnungen bleiben als offene Aufzeichnungen erkennbar.
                 </div>
               </div>
 
@@ -179,8 +179,10 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
               >
                 <ShieldCheck size={20} color="var(--accent-gold)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <div style={{ fontSize: '0.8rem', color: '#fff', lineHeight: '1.4' }}>
-                  <strong style={{ color: 'var(--accent-gold)' }}>🛡️ Garantierter Ausschluss des Datenverkaufs:</strong><br />
-                  Für die Online-Routenberechnung werden Start- und Zielkoordinaten an externe Routing-Dienste (<strong>BRouter</strong> & <strong>Project-OSRM</strong>) übermittelt. Abgesehen davon werden Daten <strong>ausschließlich an den Betreiber persönlich (Carlos)</strong> übermittelt und strikt nur für die Funktionen der App verarbeitet. Ein Weiterverkauf oder Handel an Datenbroker ist <strong>dauerhaft und ausnahmslos ausgeschlossen</strong>.
+                  <strong style={{ color: 'var(--accent-gold)' }}>Streckenarchiv und Onlineverarbeitung:</strong><br />
+                  Jede erfolgreich erzeugte Strecke wird vor der Vorschau im <strong>lokalen Streckenarchiv</strong> gespeichert, auch wenn du sie nicht fährst oder weitere Varianten erzeugst. Aufzeichnungen werden mit dem tatsächlich gefahrenen Track in der Fahrtenhistorie behalten. Es gibt keine automatische zeitliche Löschung. Kontolöschung oder Widerruf der Einwilligung entfernen die lokalen privaten Daten; ein Archivexport dient als zusätzliche Sicherung. Das Gerätearchiv ist keine geräteübergreifende Cloud-Sicherung.<br />
+                  Bei freigegebener Onlineplanung werden Start, Ziel und Pflichtstopps an das Betreiber-Backend und die konfigurierte BRouterinstanz übermittelt. Suchbegriffe werden erst nach bewusstem Absenden über das Backend bei der Betreibersuche verarbeitet. Dabei fallen notwendige Verbindungsmetadaten an.
+
                 </div>
               </div>
             </div>
@@ -256,7 +258,7 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({
             <div className="glass-panel" style={{ padding: '12px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>1. Technisch Notwendig (Immer aktiv)</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>GPS-Navigation, Bluetooth-Telemetrie & lokaler Kartencache</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Standort, Bluetooth-Telemetrie, Streckenarchiv & Fahrtenaufzeichnung</div>
               </div>
               <span style={{ fontSize: '0.75rem', color: 'var(--accent-neon-green)', fontWeight: 'bold' }}>Erforderlich</span>
             </div>

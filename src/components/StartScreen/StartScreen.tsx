@@ -1,141 +1,105 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings, LogIn, LogOut, Bluetooth, Battery, Trophy, Play } from 'lucide-react';
+import { Map, Settings, LogIn, LogOut, Sparkles, Route, SlidersHorizontal } from 'lucide-react';
 import type { User } from 'firebase/auth';
-import type { LiveBikeTelemetry } from '../../types/navigation';
 
 interface StartScreenProps {
-  onStart: () => void;
+  onGenerateToday: () => void;
+  onStartSimpleRoute: () => void;
+  onOpenAdvancedRoute: () => void;
   onOpenSettings: () => void;
   onOpenLogin: () => void;
-  tokenBalance: number;
-  telemetry: LiveBikeTelemetry;
   currentUser: User | null;
 }
 
 export const StartScreen: React.FC<StartScreenProps> = ({
-  onStart,
+  onGenerateToday,
+  onStartSimpleRoute,
+  onOpenAdvancedRoute,
   onOpenSettings,
   onOpenLogin,
-  tokenBalance,
-  telemetry,
   currentUser,
 }) => {
   const { t } = useTranslation();
+
   return (
-    <div
+    <main
+      aria-label="Hauptmenü"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 2999,
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'var(--bg-primary)',
-        padding: '24px 20px',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(0,230,163,0.12), transparent 55%), var(--bg-primary)',
+        padding: 'max(18px, env(safe-area-inset-top)) 20px max(18px, env(safe-area-inset-bottom))',
         overflowY: 'auto',
       }}
     >
-      {/* Top Utility Bar: Settings + Login */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '560px', width: '100%', margin: '0 auto' }}>
         <button
           className="btn-cyberpunk btn-icon-ghost"
           onClick={onOpenLogin}
-          style={{ padding: '8px', borderRadius: '50%' }}
-          title={currentUser ? t('start.loggedInAs', { name: currentUser.email ?? currentUser.displayName ?? 'Nutzer' }) : t('start.login')}
+          aria-label={currentUser ? 'Abmelden oder Konto wechseln' : t('start.login')}
+          title={currentUser ? (currentUser.email ?? currentUser.displayName ?? 'Konto') : t('start.login')}
+          style={{ padding: '10px', borderRadius: '50%' }}
         >
           {currentUser ? <LogOut size={18} /> : <LogIn size={18} />}
         </button>
-        <button
-          className="btn-cyberpunk btn-icon-ghost"
-          onClick={onOpenSettings}
-          style={{ padding: '8px', borderRadius: '50%' }}
-          title={t('start.settings')}
-        >
+        <button className="btn-cyberpunk btn-icon-ghost" onClick={onOpenSettings} aria-label={t('start.settings')} style={{ padding: '10px', borderRadius: '50%' }}>
           <Settings size={18} />
         </button>
-      </div>
+      </header>
 
-      {/* Branding */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10vh', marginBottom: '32px' }}>
-        <img src="/icon-192.png" alt={t('app.title')} width={88} height={88} style={{ borderRadius: '22px', boxShadow: 'var(--glow-cyan)' }} />
-        <h1
-          style={{
-            marginTop: '16px',
-            fontSize: '2rem',
-            fontFamily: "'Chakra Petch', monospace",
-            fontWeight: 700,
-            color: '#ffffff',
-            letterSpacing: '0.5px',
-            textAlign: 'center',
-          }}
-        >
+      <section style={{ width: '100%', maxWidth: '560px', margin: 'clamp(22px, 7vh, 64px) auto 28px', textAlign: 'center' }}>
+        <img src="/icon-192.png" alt="" width={64} height={64} style={{ borderRadius: '18px', boxShadow: 'var(--glow-cyan)' }} />
+        <h1 style={{ margin: '12px 0 4px', fontSize: 'clamp(1.65rem, 6vw, 2.1rem)', fontFamily: "'Chakra Petch', monospace", fontWeight: 700, color: '#fff' }}>
           {t('app.title')}
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '4px', textAlign: 'center' }}>
-          {t('app.tagline')}
-        </p>
-      </div>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>{t('app.tagline')}</p>
+      </section>
 
-      {/* Dashboard Widget */}
-      <div
-        className="glass-panel"
-        style={{
-          padding: '18px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '14px',
-          marginBottom: '32px',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Bluetooth size={18} className={telemetry.isConnected ? 'glow-text-green' : undefined} style={!telemetry.isConnected ? { color: 'var(--text-muted)' } : undefined} />
-            <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: telemetry.isConnected ? undefined : 'var(--text-muted)' }} className={telemetry.isConnected ? 'glow-text-green' : undefined}>
-              {telemetry.isConnected ? t('start.ebikeConnected') : t('start.ebikeDisconnected')}
-            </span>
-          </div>
-          {telemetry.isConnected && typeof telemetry.batteryPercent === 'number' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Battery size={16} className="glow-text-green" />
-              <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }} className="glow-text-green">
-                {telemetry.batteryPercent}%
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div style={{ height: '1px', backgroundColor: 'var(--border-glass)' }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Trophy size={18} className="glow-text-gold" />
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              {t('start.rank')}: <strong style={{ color: '#ffffff' }}>E-Bike Scout</strong>
-            </span>
-          </div>
-          <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }} className="glow-text-gold">
-            🪙 {tokenBalance} {t('start.tokens')}
+      <nav aria-label="Routenplanung" style={{ width: '100%', maxWidth: '560px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <button
+          className="btn-cyberpunk btn-cyan"
+          onClick={onGenerateToday}
+          style={{ minHeight: '76px', borderRadius: '16px', padding: '16px 18px', justifyContent: 'flex-start', gap: '14px', textAlign: 'left' }}
+        >
+          <Sparkles size={24} />
+          <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <strong style={{ fontSize: '1rem' }}>KI-Routenplanung für heute</strong>
+            <small style={{ opacity: 0.76, fontWeight: 400 }}>Derzeit noch nicht freigeschaltet</small>
           </span>
-        </div>
-      </div>
+        </button>
 
-      {/* Spacer pushes CTA toward the bottom on tall screens */}
-      <div style={{ flex: 1 }} />
+        <button
+          className="btn-cyberpunk"
+          onClick={onStartSimpleRoute}
+          style={{ minHeight: '68px', borderRadius: '16px', padding: '14px 18px', justifyContent: 'flex-start', gap: '14px', textAlign: 'left' }}
+        >
+          <Map size={22} />
+          <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <strong style={{ fontSize: '0.98rem' }}>Einfache Routenplanung</strong>
+            <small style={{ opacity: 0.72, fontWeight: 400 }}>Ziel suchen und kostenfreie Online-Fahrradroute planen, sofern freigeschaltet</small>
+          </span>
+        </button>
 
-      <button
-        className="btn-cyberpunk btn-cyan"
-        onClick={onStart}
-        style={{
-          width: '100%',
-          padding: '18px',
-          borderRadius: '16px',
-          fontSize: '1.05rem',
-          justifyContent: 'center',
-          marginBottom: '8px',
-        }}
-      >
-        <Play size={20} /> {t('start.start')}
-      </button>
-    </div>
+        <button
+          className="btn-cyberpunk"
+          onClick={onOpenAdvancedRoute}
+          style={{ minHeight: '68px', borderRadius: '16px', padding: '14px 18px', justifyContent: 'flex-start', gap: '14px', textAlign: 'left' }}
+        >
+          <SlidersHorizontal size={22} />
+          <span style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <strong style={{ fontSize: '0.98rem' }}>Erweiterte Routenplanung <span style={{ color: 'var(--accent-gold)' }}>(Premium)</span></strong>
+            <small style={{ opacity: 0.72, fontWeight: 400 }}>Premiumplanung derzeit noch nicht freigeschaltet</small>
+          </span>
+        </button>
+
+        <button className="btn-cyberpunk btn-icon-ghost" onClick={onStartSimpleRoute} style={{ marginTop: '8px', minHeight: '44px', justifyContent: 'center', gap: '8px' }}>
+          <Route size={17} /> Karte öffnen
+        </button>
+      </nav>
+    </main>
   );
 };

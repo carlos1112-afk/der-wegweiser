@@ -1,15 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Route } from '../types/navigation';
-
+import { isValidatedRoute } from '../types/routing';
+import { NavigationProgress } from '../services/navigationProgress';
 export interface TurnManeuver {
+  id?: string;
   action: 'straight' | 'turn-left' | 'turn-right' | 'slight-left' | 'slight-right' | 'roundabout' | 'arrive';
-  distanceM: number;
-  instruction: string;
-  nextStreet: string;
-  isApproaching: boolean; // < 200m
-  isImminent: boolean; // < 50m
+  distanceM: number; instruction: string; nextStreet: string; isApproaching: boolean; isImminent: boolean;
 }
-
 export function haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371000; // meters
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -30,103 +27,35 @@ export function calculateBearing(lat1: number, lon1: number, lat2: number, lon2:
 }
 
 export function useRouteTracker(
-  userLocation: { lat: number; lng: number },
-  route: Route | null,
-  onOffRoute?: (distanceM: number) => void
+  userLocation: { lat: number; lng: number; accuracyM?: number | null; observedAt?: number | null },
+  route: Route | null, onOffRoute?: (distanceM: number) => void | Promise<void>,
 ) {
   const [currentManeuver, setCurrentManeuver] = useState<TurnManeuver | null>(null);
-  const [offRouteDistanceM, setOffRouteDistanceM] = useState<number>(0);
-  const [isOffRoute, setIsOffRoute] = useState<boolean>(false);
-  const offRouteCountRef = useRef<number>(0);
-
+  const [offRouteDistanceM, setOffRouteDistanceM] = useState(0);
+  const [isOffRoute, setIsOffRoute] = useState(false);
+  const [positionUncertain, setPositionUncertain] = useState(true);
+  const tracker = useRef<{ route: Route; progress: NavigationProgress } | null>(null);
+  const callback = useRef(onOffRoute); callback.current = onOffRoute;
   useEffect(() => {
-    if (!route || !route.pathCoordinates || route.pathCoordinates.length < 2) {
-      setCurrentManeuver(null);
-      setIsOffRoute(false);
-      return;
+    if (!isValidatedRoute(route?.validatedRoute)) {
+      tracker.current = null; setCurrentManeuver(null); setIsOffRoute(false); setOffRouteDistanceM(0); setPositionUncertain(true); return;
     }
-
-    const coords = route.pathCoordinates;
-
-    // 1. Find closest point on route
-    let minDistance = Infinity;
-    let closestIndex = 0;
-
-    for (let i = 0; i < coords.length; i++) {
-      const d = haversineMeters(userLocation.lat, userLocation.lng, coords[i][0], coords[i][1]);
-      if (d < minDistance) {
-        minDistance = d;
-        closestIndex = i;
-      }
+    if (tracker.current?.route !== route) tracker.current = { route, progress: new NavigationProgress(route.validatedRoute) };
+    if (userLocation.observedAt == null || userLocation.accuracyM == null) {
+      setCurrentManeuver(null); setPositionUncertain(true); return;
     }
-
-    setOffRouteDistanceM(Math.round(minDistance));
-
-    // Off-route check (> 45m for 2+ consecutive updates)
-    if (minDistance > 45) {
-      offRouteCountRef.current += 1;
-      if (offRouteCountRef.current >= 2) {
-        setIsOffRoute(true);
-        if (onOffRoute) {
-          onOffRoute(Math.round(minDistance));
-        }
-      }
-    } else {
-      offRouteCountRef.current = 0;
-      setIsOffRoute(false);
+    const progress = tracker.current.progress;
+    const state = progress.update({ lat: userLocation.lat, lng: userLocation.lng, source: 'gps', observedAt: userLocation.observedAt, accuracyM: userLocation.accuracyM, confirmed: true }, Date.now());
+    setPositionUncertain(state.status === 'position_uncertain');
+    setOffRouteDistanceM(Math.round(state.distanceFromRouteM ?? 0)); setIsOffRoute(state.status === 'off_route');
+    if (state.shouldRequestRejoin) {
+      Promise.resolve(callback.current?.(Math.round(state.distanceFromRouteM ?? 0))).catch(() => { if (tracker.current?.progress === progress) setPositionUncertain(true); }).finally(() => progress.finishRejoin());
     }
-
-    // 2. Find next significant turn maneuver ahead
-    const lookAheadIndex = Math.min(coords.length - 1, closestIndex + 1);
-    const targetCoord = coords[lookAheadIndex];
-    const distToNextM = Math.round(haversineMeters(userLocation.lat, userLocation.lng, targetCoord[0], targetCoord[1]));
-
-    // Detect angle change between segments
-    let action: TurnManeuver['action'] = 'straight';
-    let instruction = 'Dem Straßenverlauf folgen';
-    let nextStreet = 'Radfernweg / Hauptstrecke';
-
-    if (lookAheadIndex < coords.length - 2) {
-      const b1 = calculateBearing(coords[closestIndex][0], coords[closestIndex][1], coords[lookAheadIndex][0], coords[lookAheadIndex][1]);
-      const b2 = calculateBearing(coords[lookAheadIndex][0], coords[lookAheadIndex][1], coords[lookAheadIndex + 1][0], coords[lookAheadIndex + 1][1]);
-      let diff = b2 - b1;
-      while (diff < -180) diff += 360;
-      while (diff > 180) diff -= 360;
-
-      if (diff > 45 && diff <= 120) {
-        action = 'turn-right';
-        instruction = `In ${distToNextM}m rechts abbiegen`;
-        nextStreet = 'Uferpromenade';
-      } else if (diff < -45 && diff >= -120) {
-        action = 'turn-left';
-        instruction = `In ${distToNextM}m links abbiegen`;
-        nextStreet = 'Waldradweg';
-      } else if (diff > 15 && diff <= 45) {
-        action = 'slight-right';
-        instruction = `In ${distToNextM}m halb rechts halten`;
-      } else if (diff < -15 && diff >= -45) {
-        action = 'slight-left';
-        instruction = `In ${distToNextM}m halb links halten`;
-      }
-    } else if (closestIndex >= coords.length - 3) {
-      action = 'arrive';
-      instruction = 'Ziel in Kürze erreicht!';
-      nextStreet = route.title || 'Zielort';
-    }
-
-    setCurrentManeuver({
-      action,
-      distanceM: distToNextM,
-      instruction,
-      nextStreet,
-      isApproaching: distToNextM <= 200,
-      isImminent: distToNextM <= 50,
-    });
-  }, [userLocation.lat, userLocation.lng, route]);
-
-  return {
-    currentManeuver,
-    offRouteDistanceM,
-    isOffRoute,
-  };
+    const next = route.validatedRoute.maneuvers.find(m => m.distanceAlongM >= state.progressM && (m.action !== 'arrive' || state.status === 'arrived'));
+    if (!next || state.status === 'off_route' || state.status === 'position_uncertain' || route.validatedRoute.guidanceCapability !== 'turn_by_turn') { setCurrentManeuver(null); return; }
+    const distance = Math.max(0, Math.round(next.distanceAlongM - state.progressM));
+    setCurrentManeuver({ id: `${route.id}:${next.geometryIndex}:${next.action}`, action: next.action, distanceM: distance,
+      instruction: next.instruction, nextStreet: next.street ?? 'Straße unbekannt', isApproaching: distance <= 200, isImminent: distance <= 50 });
+  }, [route, userLocation.lat, userLocation.lng, userLocation.accuracyM, userLocation.observedAt]);
+  return { currentManeuver, offRouteDistanceM, isOffRoute, positionUncertain };
 }

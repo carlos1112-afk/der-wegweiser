@@ -87,9 +87,10 @@ describe('Szenario 3: BLE-Parser (echter Code aus src/services/ble/parsers)', ()
     expect(isBafangSafeToWrite('C245 Display')).toBe(false);
   });
 
-  it('Bafang Schreibschutz: bekannte sichere Modelle erlaubt', () => {
-    expect(isBafangSafeToWrite('Bafang M400')).toBe(true);
-    expect(isBafangSafeToWrite('AEG ComfortDrive')).toBe(true);
+  it('Bafang Schreibschutz: Gerätenamen allein berechtigen nie zum Schreiben', () => {
+    expect(isBafangSafeToWrite('Bafang M400')).toBe(false);
+    expect(isBafangSafeToWrite('AEG ComfortDrive')).toBe(false);
+    expect(isBafangSafeToWrite('Unknown Bafang M400 spoof')).toBe(false);
   });
 
   it('Bafang Schreibschutz: unbekannte Modelle und fehlender Name per Default gesperrt', () => {

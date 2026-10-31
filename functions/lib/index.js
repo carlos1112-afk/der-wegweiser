@@ -15,6 +15,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.redeemVoucher = exports.deleteAccountData = void 0;
+const firestoreLedger_1 = require("./wallet/firestoreLedger");
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-admin/firestore");
 const auth_1 = require("firebase-admin/auth");
@@ -53,10 +54,31 @@ const ACCOUNT_DATA_COLLECTIONS = [
     'scout_reports',
     'station_reviews',
     'voucher_redemptions',
+    'token_ledger',
+    'token_reservations',
+    'premium_route_jobs',
+    'premium_route_quotes',
+    'premium_route_outbox',
+    'premium_route_active',
 ];
+async function releaseAccountReservations(uid) {
+    const reservations = await db.collection('token_reservations').where('userId', '==', uid).get();
+    for (const document of reservations.docs) {
+        await db.runTransaction(async (transaction) => {
+            const current = await transaction.get(document.ref);
+            const data = current.data();
+            if (!data || data.state !== 'reserved')
+                return;
+            const release = await (0, firestoreLedger_1.prepareWalletMutation)(db, transaction, uid, {
+                operation: 'release', reference: data.reference, amount: data.amount,
+            });
+            release.commit();
+        });
+    }
+}
 async function deleteAccountDocuments(uid) {
     const documentRefs = new Map();
-    for (const path of ['users', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'account_deletion_jobs']) {
+    for (const path of ['users', 'subscriptions', 'user_tokens', 'user_preferences', 'user_memory_patterns', 'cesiumKeyRequests', 'keyRequests', 'vertexRouteRequests', 'token_quiz_challenges', 'token_quiz_rate_limits', 'token_wheel_spins', 'account_deletion_jobs']) {
         documentRefs.set(`${path}/${uid}`, db.collection(path).doc(uid));
     }
     for (const collectionName of ACCOUNT_DATA_COLLECTIONS) {
@@ -79,8 +101,11 @@ exports.deleteAccountData = (0, https_1.onCall)({ region: "europe-west3" }, asyn
     }
     const uid = request.auth.uid;
     const jobRef = db.collection('account_deletion_jobs').doc(uid);
+    // Persistent digest-only tombstone stops late wallet workers from recreating deleted accounts.
+    await db.collection('account_deletion_locks').doc((0, firestoreLedger_1.deletionLockId)(uid)).set({ blocked: true });
     const existingJob = await jobRef.get();
     if (((_a = existingJob.data()) === null || _a === void 0 ? void 0 : _a.status) === 'completed') {
+        await jobRef.delete();
         return { success: true, status: 'completed', jobId: uid };
     }
     await jobRef.set({
@@ -90,6 +115,7 @@ exports.deleteAccountData = (0, https_1.onCall)({ region: "europe-west3" }, asyn
         updatedAt: firestore_1.FieldValue.serverTimestamp(),
     }, { merge: true });
     try {
+        await releaseAccountReservations(uid);
         await deleteAccountDocuments(uid);
         const bucket = (0, storage_1.getStorage)().bucket();
         const [files] = await bucket.getFiles({ prefix: `users/${uid}/` });
@@ -114,11 +140,14 @@ exports.deleteAccountData = (0, https_1.onCall)({ region: "europe-west3" }, asyn
         throw new https_1.HttpsError('failed-precondition', 'Account cleanup did not complete; retry the deletion.', { jobId: uid });
     }
 });
-exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (request) => {
+exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3", enforceAppCheck: true }, async (request) => {
     const { data, auth } = request;
     // Ensure user is authenticated
     if (!auth) {
         throw new https_1.HttpsError("unauthenticated", "User must be authenticated to redeem an item.");
+    }
+    if (!request.app) {
+        throw new https_1.HttpsError("unauthenticated", "Invalid App Check token.");
     }
     const { itemId } = data;
     if (!itemId || !SHOP_ITEMS[itemId]) {
@@ -128,31 +157,23 @@ exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (r
     const userId = auth.uid;
     const redemptionId = `${itemId}_${userId}`;
     const redemptionRef = db.collection("voucher_redemptions").doc(redemptionId);
-    const tokenAccountRef = db.collection("user_tokens").doc(userId);
+    const suspendedUserRef = db.collection("suspended_users").doc(userId);
     try {
         const result = await db.runTransaction(async (transaction) => {
+            const suspendedUserDoc = await transaction.get(suspendedUserRef);
+            if (suspendedUserDoc.exists) {
+                throw new https_1.HttpsError("permission-denied", "Suspended accounts cannot redeem rewards.");
+            }
             // 1. Check double redemption
             const redemptionDoc = await transaction.get(redemptionRef);
             if (redemptionDoc.exists) {
                 throw new https_1.HttpsError("already-exists", "You have already redeemed this item.");
             }
-            // 2. Check user's token balance
-            const tokenDoc = await transaction.get(tokenAccountRef);
-            if (!tokenDoc.exists) {
-                throw new https_1.HttpsError("not-found", "Token account not found.");
-            }
-            const tokenData = tokenDoc.data();
-            const currentBalance = (tokenData === null || tokenData === void 0 ? void 0 : tokenData.balance) || 0;
-            const unlimited = (tokenData === null || tokenData === void 0 ? void 0 : tokenData.unlimitedOnDemand) || false;
-            if (!unlimited && currentBalance < item.cost) {
-                throw new https_1.HttpsError("failed-precondition", "Insufficient tokens.");
-            }
-            // 3. Deduct tokens and record redemption atomically
-            if (!unlimited) {
-                transaction.update(tokenAccountRef, {
-                    balance: currentBalance - item.cost
-                });
-            }
+            // All items use the same available balance; a route flat rate never grants vouchers.
+            const spend = await (0, firestoreLedger_1.prepareWalletMutation)(db, transaction, userId, {
+                operation: 'spend', amount: item.cost, reference: `voucher_${itemId}`,
+            });
+            spend.commit();
             transaction.set(redemptionRef, {
                 itemId,
                 userId,
@@ -173,5 +194,9 @@ exports.redeemVoucher = (0, https_1.onCall)({ region: "europe-west3" }, async (r
 __exportStar(require("./issueGoogleMapsKey"), exports);
 __exportStar(require("./issueCesiumIonToken"), exports);
 __exportStar(require("./vertexRouting"), exports);
+__exportStar(require("./tokenRewards"), exports);
 __exportStar(require("./aiProxy"), exports);
+__exportStar(require("./routing/placeSearch"), exports);
+__exportStar(require("./routing/freeRoute"), exports);
+__exportStar(require("./routing/premiumRoute"), exports);
 //# sourceMappingURL=index.js.map

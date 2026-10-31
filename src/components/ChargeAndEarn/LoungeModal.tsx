@@ -17,7 +17,6 @@ import {
   QrCode,
   FileText,
   Play,
-  Video,
   CreditCard,
   Building2,
   ExternalLink,
@@ -30,16 +29,12 @@ import {
 import { SoundFxService } from '../../services/soundFxService';
 import { functions } from '../../firebase';
 import { httpsCallable } from 'firebase/functions';
-import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
-import { SurveyWallService, type AvailableSurvey } from '../../services/surveyWallService';
-import { UserIdentity } from '../../services/userIdentity';
-import { SPONSOR_ADS, type SponsorAd } from '../../services/adService';
 import { ConsentService } from '../../services/consentService';
 import { PartnerModal } from './PartnerModal';
 
 interface LoungeModalProps {
   tokenBalance: number;
-  onAddTokens: (amount: number) => void;
+  onTokenBalanceRefresh: (serverBalance?: number) => Promise<void>;
   onClose: () => void;
 }
 
@@ -167,10 +162,13 @@ const MAP_QUESTS: MapQuest[] = [
 ];
 
 interface TriviaQuestion {
-  id: number;
+  challengeId: string;
+  questionId: string;
   question: string;
-  options: { label: string; text: string; isCorrect: boolean }[];
+  options: { label: string; text: string }[];
   explanation: string;
+  rewardTokens: number;
+  completed: boolean;
 }
 
 interface ShopItem {
@@ -190,59 +188,6 @@ interface LeaderboardEntry {
   badge: string;
   isUser?: boolean;
 }
-
-const quizQuestions: TriviaQuestion[] = [
-  {
-    id: 1,
-    question: 'Wie schont man den E-Bike-Akku am Berg am besten?',
-    options: [
-      { label: 'A', text: 'Hohe Trittfrequenz (70-80 RPM) & mittlere Motorstufe', isCorrect: true },
-      { label: 'B', text: 'Niedrige Trittfrequenz im höchsten Gang im Turbo-Modus', isCorrect: false },
-      { label: 'C', text: 'Gleichmäßiges Bremsen bei gleichzeitigem Vollgas-Treten', isCorrect: false },
-    ],
-    explanation: 'Eine höhere Trittfrequenz entlastet den Motor und schont die Akkuzellen vor Überhitzung und schnellem Entladen.',
-  },
-  {
-    id: 2,
-    question: 'Bei welcher Temperatur fühlt sich ein Lithium-Ionen-Akku am wohlsten?',
-    options: [
-      { label: 'A', text: 'Bei frostigen Temperaturen unter 0°C', isCorrect: false },
-      { label: 'B', text: 'Bei Zimmertemperatur (15°C bis 25°C)', isCorrect: true },
-      { label: 'C', text: 'Unter praller Sonne bei über 40°C', isCorrect: false },
-    ],
-    explanation: 'Extreme Kälte verringert die Kapazität temporär, extreme Hitze schädigt die Akkuzellen dauerhaft. 15-25°C sind optimal.',
-  },
-  {
-    id: 3,
-    question: 'Wie lagert man einen E-Bike-Akku optimal über den Winter?',
-    options: [
-      { label: 'A', text: 'Komplett leergefahren (0%) im kalten Keller', isCorrect: false },
-      { label: 'B', text: 'Vollständig geladen (100%) in der warmen Wohnung', isCorrect: false },
-      { label: 'C', text: 'Bei ca. 30% bis 60% Ladestand an einem kühlen, trockenen Ort', isCorrect: true },
-    ],
-    explanation: 'Ein mittlerer Ladestand verhindert Tiefentladung und schont die Chemie, da die Zellspannung nicht auf Extremwerten liegt.',
-  },
-  {
-    id: 4,
-    question: 'Welchen Vorteil bietet eine vorausschauende Routenplanung für E-Bikes?',
-    options: [
-      { label: 'A', text: 'Sie spart bis zu 30% Akku durch Vermeidung extremer Steigungen', isCorrect: true },
-      { label: 'B', text: 'Sie erhöht die Maximalgeschwindigkeit des Motors auf 45 km/h', isCorrect: false },
-      { label: 'C', text: 'Sie lädt den Akku durch Solarenergie während der Fahrt auf', isCorrect: false },
-    ],
-    explanation: 'Durch smarte Routenplanung mit geringeren Steigungen kann die Unterstützungsstufe gesenkt und viel Energie gespart werden.',
-  },
-  {
-    id: 5,
-    question: 'Was erhöht die Reichweite deines E-Bikes am effektivsten?',
-    options: [
-      { label: 'A', text: 'Fahren mit minimalem Reifendruck', isCorrect: false },
-      { label: 'B', text: 'Optimaler Reifendruck und regelmäßiges Ölen der Kette', isCorrect: true },
-      { label: 'C', text: 'Tragen von besonders schwerem Gepäck', isCorrect: false },
-    ],
-    explanation: 'Ein optimaler Reifendruck verringert den Rollwiderstand drastisch, sodass weniger Motorunterstützung nötig ist.',
-  },
-];
 
 const SHOP_ITEMS: ShopItem[] = [
   {
@@ -288,26 +233,19 @@ const LEADERBOARD_DATA: LeaderboardEntry[] = [
   { rank: 6, name: 'Sven_Hamburg', scans: 9, tokens: 180, badge: '⚓ Hafen Cruiser' },
 ];
 
-const COOLDOWN_KEY = 'lounge_wheel_cooldown';
-const QUIZ_ATTEMPT_KEY = 'lounge_quiz_attempted';
-
-export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTokens, onClose }) => {
+export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onTokenBalanceRefresh, onClose }) => {
   const [activeTab, setActiveTab] = useState<'wheel' | 'quests' | 'catcher' | 'surveys' | 'quiz' | 'shop' | 'leaderboard'>('wheel');
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotationDegree, setRotationDegree] = useState(0);
   const [lastWin, setLastWin] = useState<string | null>(null);
-  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+  const [wheelAlreadySpun, setWheelAlreadySpun] = useState(false);
+  const [wheelStatusLoading, setWheelStatusLoading] = useState(true);
 
   // Map Quests State
   const [selectedQuest, setSelectedQuest] = useState<MapQuest | null>(null);
   const [questAnswers, setQuestAnswers] = useState<Record<number, string>>({});
-  const [completedQuestIds, setCompletedQuestIds] = useState<string[]>([]);
   const [questPinConfirmed, setQuestPinConfirmed] = useState(false);
-
-  // Digital Token Pack Checkout State (§ 356 Abs. 5 BGB Compliance)
-  const [pendingPurchase, setPendingPurchase] = useState<{ amount: number; priceEur: string } | null>(null);
-  const [consentInstantDelivery, setConsentInstantDelivery] = useState(false);
-  const [consentWaiverRight, setConsentWaiverRight] = useState(false);
+  const [questNotice, setQuestNotice] = useState<string | null>(null);
 
   const handleStartQuest = (quest: MapQuest) => {
     SoundFxService.playClick();
@@ -326,40 +264,11 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     setQuestPinConfirmed(true);
   };
 
-  const handleSubmitQuest = async () => {
-    if (!selectedQuest) return;
-
-    // Credit Token Bounty
-    onAddTokens(selectedQuest.bountyTokens);
-    SoundFxService.playSuccessChime();
-    confetti({ particleCount: 80, spread: 80 });
-
-    // Anonymously sanitize and merge verified intelligence into collective map
-    await SpatialTelemetrySanitizerService.sanitizeAndMergeTrack(
-      [[selectedQuest.lat, selectedQuest.lng], [selectedQuest.lat + 0.002, selectedQuest.lng + 0.002]],
-      20,
-      1.2,
-      15
-    );
-
-    setCompletedQuestIds((prev) => [...prev, selectedQuest.id]);
-    setSelectedQuest(null);
+  const handleSubmitQuest = () => {
+    setQuestNotice('Missionen sind derzeit Demo-Inhalte. Standort und Antworten werden nicht als geprüft gespeichert und es gibt dafür keine Token-Gutschrift.');
   };
 
-  // Rewarded Video Ad Modal State
-  const [showVideoAd, setShowVideoAd] = useState(false);
-  const [adTimeLeft, setAdTimeLeft] = useState(15);
-  const [currentAd, setCurrentAd] = useState<SponsorAd>(SPONSOR_ADS[0]);
-
   // Survey State
-  const [surveys] = useState<AvailableSurvey[]>(SurveyWallService.getAvailableSurveys());
-  const [activeSurvey, setActiveSurvey] = useState<AvailableSurvey | null>(null);
-  const [offerwallUrl, setOfferwallUrl] = useState<string>('');
-  useEffect(() => {
-    SurveyWallService.getOfferwallUrl(UserIdentity.getUserId()).then(setOfferwallUrl).catch(() => {});
-  }, []);
-  const [surveyStep, setSurveyStep] = useState(1);
-  const [completedSurveys, setCompletedSurveys] = useState<string[]>([]);
 
   // B2B Partner Modal State
   const [showPartnerModal, setShowPartnerModal] = useState(false);
@@ -367,6 +276,8 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   // Watt-Catcher Game State
   const [catcherActive, setCatcherActive] = useState(false);
   const [catcherScore, setCatcherScore] = useState(0);
+  const catcherScoreRef = useRef(0);
+  const [catcherFinalScore, setCatcherFinalScore] = useState<number | null>(null);
   const [catcherTimeLeft, setCatcherTimeLeft] = useState(20);
   const [catcherOrbs, setCatcherOrbs] = useState<{ id: number; x: number; y: number; type: 'energy' | 'super' | 'glitch' }[]>([]);
 
@@ -374,18 +285,56 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   const [redeemedCodes, setRedeemedCodes] = useState<Record<string, string>>({});
 
   // Quiz State
-  const [quizAnswered, setQuizAnswered] = useState<boolean>(() => {
-    return sessionStorage.getItem(QUIZ_ATTEMPT_KEY) === 'true';
-  });
-  const [quizAlreadyCompletedOnLoad] = useState<boolean>(() => {
-    return sessionStorage.getItem(QUIZ_ATTEMPT_KEY) === 'true';
-  });
-  const [currentQuestion] = useState<TriviaQuestion>(() => {
-    const randomIndex = Math.floor(Math.random() * quizQuestions.length);
-    return quizQuestions[randomIndex];
-  });
+  const [quizAnswered, setQuizAnswered] = useState(false);
+  const [quizAlreadyCompletedOnLoad, setQuizAlreadyCompletedOnLoad] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(true);
+  const [quizSubmitting, setQuizSubmitting] = useState(false);
+  const [quizError, setQuizError] = useState<string | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<TriviaQuestion | null>(null);
   const [quizSelectedOption, setQuizSelectedOption] = useState<string | null>(null);
   const [quizIsCorrect, setQuizIsCorrect] = useState<boolean | null>(null);
+  const [correctAnswerLabel, setCorrectAnswerLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    if (!functions) {
+      setQuizError('Das Tagesquiz ist derzeit nicht verfügbar.');
+      setQuizLoading(false);
+      return;
+    }
+    const getChallenge = httpsCallable<Record<string, never>, TriviaQuestion>(functions, 'getTokenQuizChallenge');
+    getChallenge({}).then(({ data }) => {
+      if (!active) return;
+      setCurrentQuestion(data);
+      setQuizAlreadyCompletedOnLoad(data.completed);
+      setQuizAnswered(data.completed);
+    }).catch((error: any) => {
+      if (!active) return;
+      setQuizError(error?.code === 'functions/unauthenticated'
+        ? 'Melde dich an und aktiviere App Check, um am Tokenquiz teilzunehmen.'
+        : 'Das Tagesquiz konnte nicht geladen werden. Bitte versuche es später erneut.');
+    }).finally(() => {
+      if (active) setQuizLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!functions) {
+      setWheelStatusLoading(false);
+      return;
+    }
+    let active = true;
+    const getStatus = httpsCallable<Record<string, never>, { alreadySpun: boolean }>(functions, 'getTokenWheelStatus');
+    getStatus({}).then(({ data }) => {
+      if (active) setWheelAlreadySpun(data.alreadySpun === true);
+    }).catch(() => {
+      // The spin callable remains the final authority if status lookup is unavailable.
+    }).finally(() => {
+      if (active) setWheelStatusLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
 
   const tickTimeoutRef = useRef<ReturnType<typeof setTimeout> | number | null>(null);
 
@@ -409,73 +358,9 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     }, delay);
   };
 
-  // Cooldown checking
-  useEffect(() => {
-    const checkCooldown = () => {
-      const stored = localStorage.getItem(COOLDOWN_KEY);
-      if (stored) {
-        const remaining = Math.max(0, parseInt(stored, 10) - Date.now());
-        setCooldownRemaining(Math.ceil(remaining / 1000));
-      }
-    };
-
-    checkCooldown();
-    const interval = setInterval(() => {
-      const stored = localStorage.getItem(COOLDOWN_KEY);
-      if (stored) {
-        const remaining = Math.max(0, parseInt(stored, 10) - Date.now());
-        setCooldownRemaining(Math.ceil(remaining / 1000));
-        if (remaining <= 0) {
-          clearInterval(interval);
-        }
-      } else {
-        clearInterval(interval);
-      }
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-      if (tickTimeoutRef.current) {
-        clearTimeout(tickTimeoutRef.current as any);
-      }
-    };
-  }, [isSpinning]);
-
-  // Video Ad Countdown Timer
-  useEffect(() => {
-    if (!showVideoAd) return;
-    setAdTimeLeft(15);
-
-    const timer = setInterval(() => {
-      setAdTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [showVideoAd]);
-
-  const handleStartVideoAd = () => {
-    SoundFxService.playClick();
-    const randomAd = SPONSOR_ADS[Math.floor(Math.random() * SPONSOR_ADS.length)];
-    setCurrentAd(randomAd);
-    setShowVideoAd(true);
-  };
-
-  const handleCompleteVideoAd = () => {
-    setShowVideoAd(false);
-    onAddTokens(currentAd.rewardTokens);
-    SoundFxService.playSuccessChime();
-    confetti({ particleCount: 70, spread: 70 });
-
-    // Reset wheel cooldown
-    localStorage.removeItem(COOLDOWN_KEY);
-    setCooldownRemaining(0);
-  };
+  useEffect(() => () => {
+    if (tickTimeoutRef.current) clearTimeout(tickTimeoutRef.current as any);
+  }, []);
 
   // Watt-Catcher Game Loop
   useEffect(() => {
@@ -511,6 +396,8 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   const startCatcherGame = () => {
     SoundFxService.playClick();
     setCatcherScore(0);
+    catcherScoreRef.current = 0;
+    setCatcherFinalScore(null);
     setCatcherTimeLeft(20);
     setCatcherOrbs([]);
     setCatcherActive(true);
@@ -519,76 +406,99 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
   const endCatcherGame = () => {
     setCatcherActive(false);
     setCatcherOrbs([]);
-    const earned = Math.min(10, Math.floor(catcherScore / 3));
-    if (earned > 0) {
-      onAddTokens(earned);
-      SoundFxService.playSuccessChime();
-      confetti({ particleCount: 60, spread: 60 });
-    }
+    setCatcherFinalScore(catcherScoreRef.current);
   };
 
   const handleCatchOrb = (id: number, type: 'energy' | 'super' | 'glitch') => {
     setCatcherOrbs((prev) => prev.filter((o) => o.id !== id));
     if (type === 'energy') {
-      setCatcherScore((s) => s + 2);
+      catcherScoreRef.current += 2;
+      setCatcherScore(catcherScoreRef.current);
       SoundFxService.playClick();
     } else if (type === 'super') {
-      setCatcherScore((s) => s + 5);
+      catcherScoreRef.current += 5;
+      setCatcherScore(catcherScoreRef.current);
       SoundFxService.playTurnChime();
     } else if (type === 'glitch') {
-      setCatcherScore((s) => Math.max(0, s - 3));
+      catcherScoreRef.current = Math.max(0, catcherScoreRef.current - 3);
+      setCatcherScore(catcherScoreRef.current);
       SoundFxService.playWarningTone();
     }
   };
 
-  const handleSpinWheel = () => {
-    if (isSpinning || cooldownRemaining > 0) return;
+  const handleSpinWheel = async () => {
+    if (isSpinning || wheelAlreadySpun || !functions) return;
     setIsSpinning(true);
     setLastWin(null);
+    try {
+      const spin = httpsCallable<Record<string, never>, { segmentIndex: number; rewardTokens: number; balance: number | null }>(functions, 'spinTokenWheel');
+      const { data } = await spin({});
+      if (!Number.isInteger(data.segmentIndex) || data.segmentIndex < 0 || data.segmentIndex >= sectors.length
+        || data.rewardTokens !== sectors[data.segmentIndex].amount) {
+        throw new Error('Ungültiges Serverergebnis für das Glücksrad.');
+      }
 
-    playDeceleratingTicks(50);
+      const winningSector = sectors[data.segmentIndex];
+      playDeceleratingTicks(50);
+      const currentSpins = Math.ceil(rotationDegree / 360);
+      const targetAngle = (270 - (data.segmentIndex * 45 + 22.5)) % 360;
+      const normalizedTargetAngle = targetAngle < 0 ? targetAngle + 360 : targetAngle;
+      setRotationDegree((currentSpins + 5) * 360 + normalizedTargetAngle);
 
-    const winningIndex = Math.floor(Math.random() * sectors.length);
-    const winningSector = sectors[winningIndex];
-
-    const currentSpins = Math.ceil(rotationDegree / 360);
-    const targetAngle = (270 - (winningIndex * 45 + 22.5)) % 360;
-    const normalizedTargetAngle = targetAngle < 0 ? targetAngle + 360 : targetAngle;
-    const newRotation = (currentSpins + 5) * 360 + normalizedTargetAngle;
-    setRotationDegree(newRotation);
-
-    setTimeout(() => {
+      setTimeout(() => {
+        setIsSpinning(false);
+        setWheelAlreadySpun(true);
+        setLastWin(winningSector.fullLabel);
+        if (data.rewardTokens > 0) {
+          void onTokenBalanceRefresh(data.balance ?? undefined).catch((error) => {
+            console.warn('[LoungeModal] Serverkonto konnte nach Radgutschrift nicht aktualisiert werden:', error);
+          });
+          SoundFxService.playSuccessChime();
+          confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+        } else {
+          SoundFxService.playWarningTone();
+        }
+      }, 4000);
+    } catch (error: any) {
       setIsSpinning(false);
-      setLastWin(winningSector.fullLabel);
+      if (error?.code === 'functions/already-exists') setWheelAlreadySpun(true);
+      else alert('Das Glücksrad konnte nicht sicher gestartet werden. Bitte melde dich an und versuche es später erneut.');
+    }
+  };
 
-      if (winningSector.amount > 0) {
-        onAddTokens(winningSector.amount);
+  const handleQuizAnswer = async (optionLabel: string) => {
+    if (quizAnswered || quizSubmitting || !currentQuestion || !functions) return;
+    setQuizSubmitting(true);
+    setQuizSelectedOption(optionLabel);
+    try {
+      const submitAnswer = httpsCallable<
+        { challengeId: string; answerLabel: string },
+        { correct: boolean; balance: number | null; correctAnswerLabel: string; explanation: string; rewardTokens: number }
+      >(functions, 'submitTokenQuizAnswer');
+      const { data } = await submitAnswer({ challengeId: currentQuestion.challengeId, answerLabel: optionLabel });
+      setQuizAnswered(true);
+      setQuizIsCorrect(data.correct);
+      setCorrectAnswerLabel(data.correctAnswerLabel);
+      setCurrentQuestion((question) => question ? { ...question, explanation: data.explanation, completed: true } : question);
+      if (data.correct) {
+        await onTokenBalanceRefresh(data.balance ?? undefined).catch((error) => {
+          console.warn('[LoungeModal] Serverkonto konnte nach Quizgutschrift nicht aktualisiert werden:', error);
+        });
         SoundFxService.playSuccessChime();
-        confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+        confetti({ particleCount: 50, spread: 50 });
       } else {
         SoundFxService.playWarningTone();
       }
-
-      const cooldownTime = Date.now() + 30000;
-      localStorage.setItem(COOLDOWN_KEY, cooldownTime.toString());
-      setCooldownRemaining(30);
-    }, 4000);
-  };
-
-  const handleQuizAnswer = (optionLabel: string, isCorrect: boolean) => {
-    if (quizAnswered) return;
-
-    setQuizSelectedOption(optionLabel);
-    setQuizIsCorrect(isCorrect);
-    setQuizAnswered(true);
-    sessionStorage.setItem(QUIZ_ATTEMPT_KEY, 'true');
-
-    if (isCorrect) {
-      onAddTokens(6);
-      SoundFxService.playSuccessChime();
-      confetti({ particleCount: 50, spread: 50 });
-    } else {
-      SoundFxService.playWarningTone();
+    } catch (error: any) {
+      setQuizSelectedOption(null);
+      if (error?.code === 'functions/already-exists') {
+        setQuizAlreadyCompletedOnLoad(true);
+        setQuizAnswered(true);
+      } else {
+        setQuizError('Deine Antwort konnte nicht sicher übermittelt werden. Bitte versuche es erneut.');
+      }
+    } finally {
+      setQuizSubmitting(false);
     }
   };
 
@@ -612,7 +522,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
       const returnedCode = data.code;
 
       // Optimistically update client token UI state
-      onAddTokens(-item.cost);
+      await onTokenBalanceRefresh();
       SoundFxService.playSuccessChime();
       confetti({ particleCount: 70, spread: 70 });
       setRedeemedCodes((prev) => ({ ...prev, [item.id]: returnedCode }));
@@ -623,57 +533,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
     }
   };
 
-  const handleInitiateBuyTokenPack = (amount: number, priceEur: string) => {
-    SoundFxService.playClick();
-    setPendingPurchase({ amount, priceEur });
-    setConsentInstantDelivery(false);
-    setConsentWaiverRight(false);
-  };
 
-  const handleConfirmPurchase = () => {
-    if (!pendingPurchase || !consentInstantDelivery || !consentWaiverRight) {
-      SoundFxService.playWarningTone();
-      return;
-    }
-
-    // Compliant receipt logging according to § 356 Abs. 5 BGB
-    const receipt = {
-      timestamp: new Date().toISOString(),
-      pack: `${pendingPurchase.amount} Tokens`,
-      price: pendingPurchase.priceEur,
-      consentInstantDelivery: true,
-      consentWaiverRightOfWithdrawal: true,
-      legalBasis: '§ 356 Abs. 5 BGB',
-    };
-    const existing = JSON.parse(localStorage.getItem('wegweiser_token_purchases') || '[]');
-    localStorage.setItem('wegweiser_token_purchases', JSON.stringify([...existing, receipt]));
-
-    onAddTokens(pendingPurchase.amount);
-    SoundFxService.playSuccessChime();
-    confetti({ particleCount: 80, spread: 80 });
-    alert(`🎉 Kauf erfolgreich! +${pendingPurchase.amount} Tokens gutgeschrieben. Vielen Dank für deinen Support!`);
-    setPendingPurchase(null);
-  };
-
-  const handleStartSurvey = (survey: AvailableSurvey) => {
-    SoundFxService.playClick();
-    setActiveSurvey(survey);
-    setSurveyStep(1);
-  };
-
-  const handleCompleteSurveyStep = () => {
-    if (!activeSurvey) return;
-    if (surveyStep < 3) {
-      SoundFxService.playClick();
-      setSurveyStep((s) => s + 1);
-    } else {
-      onAddTokens(activeSurvey.tokenReward);
-      SoundFxService.playSuccessChime();
-      confetti({ particleCount: 80, spread: 80 });
-      setCompletedSurveys((prev) => [...prev, activeSurvey.id]);
-      setActiveSurvey(null);
-    }
-  };
 
   return (
     <div
@@ -891,29 +751,20 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
             <div style={{ display: 'flex', gap: '10px', maxWidth: '400px', margin: '0 auto' }}>
               <button
                 onClick={handleSpinWheel}
-                disabled={isSpinning || cooldownRemaining > 0}
+                disabled={isSpinning || wheelStatusLoading || wheelAlreadySpun}
                 className="btn-gold"
                 style={{
                   flex: 1,
                   padding: '12px',
                   fontSize: '0.9rem',
                   fontWeight: 'bold',
-                  cursor: isSpinning || cooldownRemaining > 0 ? 'not-allowed' : 'pointer',
-                  opacity: isSpinning || cooldownRemaining > 0 ? 0.6 : 1,
+                  cursor: isSpinning || wheelStatusLoading || wheelAlreadySpun ? 'not-allowed' : 'pointer',
+                  opacity: isSpinning || wheelStatusLoading || wheelAlreadySpun ? 0.6 : 1,
                 }}
               >
-                {isSpinning ? 'Dreht sich...' : cooldownRemaining > 0 ? `Abkühlen (${cooldownRemaining}s)` : '🎡 Jetzt Drehen'}
+                {wheelStatusLoading ? 'Prüfe Tageslimit…' : isSpinning ? 'Dreht sich...' : wheelAlreadySpun ? 'Heute bereits gedreht' : '🎡 Jetzt Drehen'}
               </button>
 
-              {/* Rewarded Video Ad Booster Button */}
-              <button
-                onClick={handleStartVideoAd}
-                className="btn-cyberpunk"
-                style={{ padding: '12px 16px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
-                title="15s Sponsor-Video ansehen für +20 Tokens & Cooldown Reset"
-              >
-                <Video size={16} /> +20 Tok. Clip
-              </button>
             </div>
 
             {lastWin && (
@@ -953,7 +804,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     </div>
                   </div>
                   <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                    🪙 +{selectedQuest.bountyTokens} Tokens
+                    Demo-Mission · keine Token-Gutschrift
                   </span>
                 </div>
 
@@ -1051,8 +902,8 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     <MapIcon size={18} color={questPinConfirmed ? '#00ff66' : 'var(--accent-cyan)'} />
                     <span style={{ fontSize: '0.8rem', color: '#fff' }}>
                       {questPinConfirmed
-                        ? '✓ GPS-Koordinaten & Markierung auf Karte bestätigt'
-                        : 'Exakte Position auf der Karte markieren / bestätigen'}
+                        ? 'Demo-Pin gesetzt (keine GPS- oder Serverprüfung)'
+                        : 'Demo-Pin markieren (keine Standortprüfung)'}
                     </span>
                   </div>
                   <button
@@ -1065,9 +916,11 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                       color: questPinConfirmed ? '#00ff66' : 'var(--accent-cyan)',
                     }}
                   >
-                    {questPinConfirmed ? 'Pin gesetzt ✓' : 'Pin setzen'}
+                    {questPinConfirmed ? 'Demo-Pin gesetzt' : 'Demo-Pin setzen'}
                   </button>
                 </div>
+
+                {questNotice && <p role="status" style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '10px' }}>{questNotice}</p>}
 
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -1092,7 +945,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                       cursor: Object.keys(questAnswers).length < selectedQuest.questions.length || !questPinConfirmed ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    <CheckCircle2 size={16} /> Verifizierung Absenden (+{selectedQuest.bountyTokens} Tokens)
+                    <CheckCircle2 size={16} /> Verifizierung nicht verfügbar
                   </button>
                 </div>
               </div>
@@ -1113,17 +966,16 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                   <Compass size={28} className="glow-text-cyan" style={{ flexShrink: 0 }} />
                   <div>
                     <h4 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff' }}>
-                      🗺️ Verifizierte Community-Map-Quests (Scout-Prämien)
+                      🗺️ Missions-Vorschau (noch nicht serverseitig verfügbar)
                     </h4>
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      Hilf mit, veraltete Straßenbeläge, Anstiege &amp; Ladepunkte vor Ort zu verifizieren. Nach erfolgreichem GPS-Plausibilitätstest erhältst du sofort deine Token-Prämie!
+                      Die folgenden Beispielmissionen sind keine echten Aufträge. Standort, Antworten und Prämien werden derzeit nicht verifiziert oder gutgeschrieben.
                     </p>
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px' }}>
                   {MAP_QUESTS.map((quest) => {
-                    const isDone = completedQuestIds.includes(quest.id);
                     return (
                       <div
                         key={quest.id}
@@ -1131,8 +983,8 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                         style={{
                           padding: '14px',
                           borderRadius: '14px',
-                          border: isDone ? '1px solid rgba(0, 255, 102, 0.3)' : '1px solid var(--accent-gold)',
-                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(32, 32, 32, 0.6)',
+                          border: '1px solid var(--accent-gold)',
+                          backgroundColor: 'rgba(32, 32, 32, 0.6)',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'space-between',
@@ -1145,7 +997,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                               📍 {quest.locationName}
                             </span>
                             <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
-                              🪙 +{quest.bountyTokens} Tokens
+                              Demo
                             </span>
                           </div>
                           <h5 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff', marginBottom: '4px' }}>
@@ -1159,19 +1011,13 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                           </div>
                         </div>
 
-                        {isDone ? (
-                          <div style={{ fontSize: '0.75rem', color: '#00ff66', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
-                            <CheckCircle2 size={14} /> Verifiziert &amp; Belohnung ausgezahlt ✓
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleStartQuest(quest)}
-                            className="btn-cyberpunk btn-gold"
-                            style={{ padding: '8px', fontSize: '0.75rem', justifyContent: 'center' }}
-                          >
-                            <MapPin size={13} /> Vor Ort Verifizieren (+{quest.bountyTokens} Tok.)
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleStartQuest(quest)}
+                          className="btn-cyberpunk btn-gold"
+                          style={{ padding: '8px', fontSize: '0.75rem', justifyContent: 'center' }}
+                        >
+                          <MapPin size={13} /> Mission ansehen (Demo)
+                        </button>
                       </div>
                     );
                   })}
@@ -1181,143 +1027,14 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           </div>
         )}
 
-        {/* 3. Paid Surveys Offerwall Tab */}
+        {/* Surveys remain unavailable until a provider-backed offer and signed reward postback exist. */}
         {activeTab === 'surveys' && (
-          <div style={{ padding: '8px 0' }}>
-            {activeSurvey ? (
-              <div className="glass-panel" style={{ padding: '20px', borderRadius: '16px', border: '1px solid var(--accent-gold)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <h4 style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
-                    {activeSurvey.title} (Frage {surveyStep}/3)
-                  </h4>
-                  <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>
-                    🪙 +{activeSurvey.tokenReward} Tokens
-                  </span>
-                </div>
-
-                <div style={{ marginBottom: '20px' }}>
-                  {surveyStep === 1 && (
-                    <div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px' }}>
-                        Wie häufig fährst du durchschnittlich mit dem E-Bike oder Fahrrad?
-                      </p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {['Täglich zum Pendeln', '2-3 Mal pro Woche', 'Nur am Wochenende für Touren', 'Gelegentlich im Urlaub'].map((ans) => (
-                          <button key={ans} onClick={handleCompleteSurveyStep} className="btn-cyberpunk" style={{ textAlign: 'left', padding: '10px 14px' }}>
-                            {ans}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {surveyStep === 2 && (
-                    <div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px' }}>
-                        Wie wichtig ist dir eine verlässliche Anzeige von öffentlichen E-Bike Ladepunkten?
-                      </p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {['Extrem wichtig für längere Tagestouren', 'Wichtig als Sicherheitsreserve', 'Eher zweitrangig'].map((ans) => (
-                          <button key={ans} onClick={handleCompleteSurveyStep} className="btn-cyberpunk" style={{ textAlign: 'left', padding: '10px 14px' }}>
-                            {ans}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {surveyStep === 3 && (
-                    <div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '12px' }}>
-                        Welche Akkukapazität hat dein Haupt-E-Bike?
-                      </p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {['Unter 500 Wh', '500 Wh bis 625 Wh', '750 Wh oder mehr (Dual-Battery)', 'Weiß ich nicht genau'].map((ans) => (
-                          <button key={ans} onClick={handleCompleteSurveyStep} className="btn-cyberpunk btn-gold" style={{ textAlign: 'left', padding: '10px 14px' }}>
-                            {ans} (Umfrage abschließen)
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Verdiene echte Tokens während der Ladepause durch kurze Marktforschungs-Umfragen:
-                  </p>
-                  {/* Drittanbieter-Offerwall (BitLabs) übermittelt eine
-                      pseudonyme Kennung an einen US-Anbieter und benötigt daher
-                      die ausdrückliche Umfragen-Einwilligung. */}
-                  {ConsentService.allowsSurveys && (
-                    <a
-                      href={offerwallUrl || '#'}
-                      onClick={(e) => !offerwallUrl && e.preventDefault()}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
-                    >
-                      BitLabs Wall <ExternalLink size={12} />
-                    </a>
-                  )}
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '10px' }}>
-                  {surveys.map((sv) => {
-                    const isDone = completedSurveys.includes(sv.id);
-                    return (
-                      <div
-                        key={sv.id}
-                        className="glass-panel"
-                        style={{
-                          padding: '14px',
-                          borderRadius: '14px',
-                          border: isDone ? '1px solid rgba(0, 255, 102, 0.3)' : '1px solid var(--border-glass)',
-                          backgroundColor: isDone ? 'rgba(0, 255, 102, 0.05)' : 'rgba(32, 32, 32, 0.6)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          gap: '8px',
-                        }}
-                      >
-                        <div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                            <span style={{ fontSize: '0.7rem', color: 'var(--accent-gold)', fontWeight: 'bold' }}>
-                              ⏱️ {sv.durationMinutes} Min • ⭐ {sv.rating}
-                            </span>
-                            <span className="glow-text-gold" style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
-                              🪙 +{sv.tokenReward} Tokens
-                            </span>
-                          </div>
-                          <h5 style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff', marginBottom: '2px' }}>
-                            {sv.title}
-                          </h5>
-                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                            Thema: {sv.topic}
-                          </p>
-                        </div>
-
-                        {isDone ? (
-                          <div style={{ fontSize: '0.75rem', color: '#00ff66', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
-                            <CheckCircle2 size={14} /> Abgeschlossen & gutgeschrieben
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleStartSurvey(sv)}
-                            className="btn-cyberpunk btn-gold"
-                            style={{ padding: '8px', fontSize: '0.75rem', justifyContent: 'center' }}
-                          >
-                            <Play size={12} fill="currentColor" /> Umfrage Starten (+{sv.tokenReward} Tok.)
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <FileText size={32} style={{ margin: '0 auto 10px' }} />
+            <p style={{ fontWeight: 'bold', color: '#fff' }}>Derzeit keine verifizierten Umfragen</p>
+            <p style={{ fontSize: '0.8rem', marginTop: '6px' }}>
+              Umfrageanbieter und serverseitige Abschlussbestätigung sind noch nicht eingerichtet. Es werden keine Antworten oder Tokens vorgetäuscht.
+            </p>
           </div>
         )}
 
@@ -1326,12 +1043,13 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           <div style={{ padding: '8px 0', textAlign: 'center' }}>
             {!catcherActive ? (
               <div style={{ padding: '20px', backgroundColor: 'rgba(0, 230, 163, 0.05)', borderRadius: '14px', border: '1px solid var(--border-glass)' }}>
+                {catcherFinalScore !== null && <p role="status" style={{ color: 'var(--accent-cyan)', marginBottom: '10px' }}>Punktestand: {catcherFinalScore} · keine Token-Gutschrift (nur lokal berechnet)</p>}
                 <Zap size={40} className="glow-text-cyan" style={{ margin: '0 auto 12px' }} />
                 <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#fff', marginBottom: '8px' }}>
                   WATT-CATCHER REAKTIONS-GAME
                 </h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: '1.4' }}>
-                  Tippe so schnell wie möglich auf grüne 🟢 Energie-Orbs und gelbe ⚡ Super-Blitze. Meide rote Glitches! Erziele Punkte für echte In-App Tokens.
+                  Tippe auf Energie-Orbs und weiche Glitches aus. Das Spiel läuft lokal; Punkte werden nicht serverseitig geprüft und bringen keine Tokens.
                 </p>
                 <button className="btn-cyberpunk" onClick={startCatcherGame} style={{ padding: '12px 32px', fontSize: '0.95rem' }}>
                   <Flame size={18} /> Spiel Starten (20s)
@@ -1399,16 +1117,20 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                   🔒 Quiz bereits absolviert
                 </p>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.5' }}>
-                  Du hast dein Quiz-Guthaben für diese Session bereits eingelöst! Lade dein E-Bike weiter auf und komm bei der nächsten Fahrt wieder vorbei.
+                  Du hast dein Tagesquiz bereits beantwortet. Komm morgen für eine neue Frage wieder.
                 </p>
               </div>
+            ) : quizLoading ? (
+              <p style={{ color: 'var(--text-muted)', padding: '20px', textAlign: 'center' }}>Tagesquiz wird sicher geladen …</p>
+            ) : !currentQuestion ? (
+              <p style={{ color: 'var(--text-muted)', padding: '20px', textAlign: 'center' }}>{quizError || 'Das Tagesquiz ist derzeit nicht verfügbar.'}</p>
             ) : (
               <>
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                     <HelpCircle size={20} className="glow-text-cyan" />
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                      E-Bike Trivia (Frage #{currentQuestion.id})
+                      E-Bike Trivia (Frage {currentQuestion.questionId}) · {currentQuestion.rewardTokens} Tokens
                     </span>
                   </div>
                   <h4 style={{ fontSize: '1.05rem', fontWeight: 'bold', marginBottom: '12px', lineHeight: '1.4' }} className="glow-text-cyan">
@@ -1419,8 +1141,8 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {currentQuestion.options.map((opt) => {
                     const isSelected = quizSelectedOption === opt.label;
-                    const showCorrect = quizAnswered && opt.isCorrect;
-                    const showWrong = quizAnswered && isSelected && !opt.isCorrect;
+                    const showCorrect = quizAnswered && opt.label === correctAnswerLabel;
+                    const showWrong = quizAnswered && isSelected && opt.label !== correctAnswerLabel;
 
                     let buttonBg = 'rgba(28, 28, 28, 0.8)';
                     let buttonBorder = '1px solid var(--border-glass)';
@@ -1441,8 +1163,8 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     return (
                       <button
                         key={opt.label}
-                        disabled={quizAnswered}
-                        onClick={() => handleQuizAnswer(opt.label, opt.isCorrect)}
+                        disabled={quizAnswered || quizSubmitting}
+                        onClick={() => handleQuizAnswer(opt.label)}
                         style={{
                           padding: '12px 16px',
                           textAlign: 'left',
@@ -1456,14 +1178,14 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                           justifyContent: 'space-between',
                           gap: '8px',
                           width: '100%',
-                          cursor: quizAnswered ? 'default' : 'pointer',
+                          cursor: quizAnswered || quizSubmitting ? 'default' : 'pointer',
                         }}
                       >
                         <span>
                           <strong>{opt.label})</strong> {opt.text}
                         </span>
-                        {quizAnswered && opt.isCorrect && <CheckCircle2 size={16} color="#00ff66" />}
-                        {quizAnswered && isSelected && !opt.isCorrect && <XCircle size={16} color="#ff3232" />}
+                        {quizAnswered && opt.label === correctAnswerLabel && <CheckCircle2 size={16} color="#00ff66" />}
+                        {quizAnswered && isSelected && opt.label !== correctAnswerLabel && <XCircle size={16} color="#ff3232" />}
                       </button>
                     );
                   })}
@@ -1482,7 +1204,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                       <AlertCircle size={16} color={quizIsCorrect ? '#00ff66' : 'var(--accent-cyan)'} />
                       <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: quizIsCorrect ? '#00ff66' : 'var(--accent-cyan)' }}>
-                        {quizIsCorrect ? 'Hervorragend! Richtig geantwortet (+15 Tokens).' : 'Hier ist die Erklärung:'}
+                        {quizIsCorrect ? `Richtig! ${currentQuestion.rewardTokens} Tokens wurden deinem Konto gutgeschrieben.` : 'Hier ist die Erklärung:'}
                       </span>
                     </div>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: '1.4' }}>
@@ -1503,30 +1225,30 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
                 <CreditCard size={18} className="glow-text-gold" />
                 <h5 style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#fff' }}>
-                  Token-Packs Sofort Kaufen (Direkt-Gutschrift)
+                  Tokenkäufe derzeit nicht verfügbar
                 </h5>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
                 <div style={{ padding: '10px', backgroundColor: 'rgba(255, 183, 0, 0.08)', borderRadius: '10px', border: '1px solid rgba(255, 183, 0, 0.2)' }}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>☕ Mini-Pack (100 Tok.)</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--accent-gold)', marginBottom: '8px' }}>1,99 € einmalig</div>
-                  <button onClick={() => handleInitiateBuyTokenPack(100, '1,99 €')} className="btn-cyberpunk btn-gold" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
-                    Kaufen (1,99 €)
+                  <button disabled title="Zahlungsanbieter und Serverbestätigung sind noch nicht eingerichtet" className="btn-cyberpunk btn-gold" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center', opacity: 0.55 }}>
+                    Zahlung nicht verfügbar
                   </button>
                 </div>
 
                 <div style={{ padding: '10px', backgroundColor: 'rgba(0, 230, 163, 0.08)', borderRadius: '10px', border: '1px solid rgba(0, 230, 163, 0.2)' }}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>🚀 Power-Pack (500 Tok.)</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', marginBottom: '8px' }}>4,99 € (Beliebt)</div>
-                  <button onClick={() => handleInitiateBuyTokenPack(500, '4,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center' }}>
-                    Kaufen (4,99 €)
+                  <button disabled title="Zahlungsanbieter und Serverbestätigung sind noch nicht eingerichtet" className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center', opacity: 0.55 }}>
+                    Zahlung nicht verfügbar
                   </button>
                 </div>
 
                 <div style={{ padding: '10px', backgroundColor: 'rgba(255, 0, 127, 0.08)', borderRadius: '10px', border: '1px solid rgba(255, 0, 127, 0.2)' }}>
                   <div style={{ fontWeight: 'bold', fontSize: '0.85rem', color: '#fff' }}>👑 Supporter Pro</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--accent-pink)', marginBottom: '8px' }}>9,99 € Lifetime</div>
-                  <button onClick={() => handleInitiateBuyTokenPack(2000, '9,99 €')} className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center', borderColor: 'var(--accent-pink)', color: 'var(--accent-pink)' }}>
+                  <button disabled title="Zahlungsanbieter und Serverbestätigung sind noch nicht eingerichtet" className="btn-cyberpunk" style={{ width: '100%', padding: '6px', fontSize: '0.7rem', justifyContent: 'center', borderColor: 'var(--accent-pink)', color: 'var(--accent-pink)', opacity: 0.55 }}>
                     Freischalten (9,99 €)
                   </button>
                 </div>
@@ -1642,6 +1364,7 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
         {/* 6. Leaderboard Tab */}
         {activeTab === 'leaderboard' && (
           <div style={{ padding: '8px 0' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '10px' }}>Demo-Rangliste · keine Live-Kontodaten</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {LEADERBOARD_DATA.map((entry) => (
                 <div
@@ -1684,204 +1407,6 @@ export const LoungeModal: React.FC<LoungeModalProps> = ({ tokenBalance, onAddTok
           </div>
         )}
       </div>
-
-      {/* Rewarded Sponsor Video Ad Modal */}
-      {showVideoAd && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.95)',
-            zIndex: 3000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-          }}
-        >
-          <div
-            className="glass-panel"
-            style={{
-              width: '100%',
-              maxWidth: '480px',
-              padding: '24px',
-              borderRadius: '20px',
-              border: '2px solid var(--accent-gold)',
-              boxShadow: '0 0 40px rgba(255, 183, 0, 0.4)',
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                Sponsor Video Clip • {currentAd.sponsorName}
-              </span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--accent-gold)', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                <Timer size={16} /> {adTimeLeft > 0 ? `${adTimeLeft}s` : 'Belohnung bereit!'}
-              </div>
-            </div>
-
-            <div
-              style={{
-                height: '180px',
-                borderRadius: '14px',
-                backgroundColor: 'rgba(255, 183, 0, 0.1)',
-                border: '1px dashed var(--accent-gold)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '16px',
-                gap: '8px',
-              }}
-            >
-              <Video size={48} className="glow-text-gold" />
-              <h4 style={{ fontSize: '1rem', fontWeight: 'bold', color: '#fff' }}>
-                {currentAd.headline}
-              </h4>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.3' }}>
-                {currentAd.tagline}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <a
-                href={currentAd.url}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-cyberpunk"
-                style={{ flex: 1, padding: '10px', fontSize: '0.8rem', justifyContent: 'center', textDecoration: 'none' }}
-              >
-                {currentAd.buttonText}
-              </a>
-
-              <button
-                disabled={adTimeLeft > 0}
-                onClick={handleCompleteVideoAd}
-                className="btn-cyberpunk btn-gold"
-                style={{
-                  flex: 1,
-                  padding: '10px',
-                  fontSize: '0.8rem',
-                  justifyContent: 'center',
-                  opacity: adTimeLeft > 0 ? 0.4 : 1,
-                  cursor: adTimeLeft > 0 ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {adTimeLeft > 0 ? `Warte ${adTimeLeft}s` : '🪙 +20 Tokens Einlösen'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Digital Content Checkout Confirmation Modal (§ 356 Abs. 5 BGB / Verbraucherrechte) */}
-      {pendingPurchase && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(24, 24, 24, 0.94)',
-            backdropFilter: 'blur(16px)',
-            zIndex: 3500,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            animation: 'fadeIn 0.2s ease',
-          }}
-        >
-          <div
-            className="glass-panel"
-            style={{
-              maxWidth: '480px',
-              width: '100%',
-              padding: '24px',
-              borderRadius: '20px',
-              border: '2px solid var(--accent-gold)',
-              boxShadow: 'var(--glow-gold)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '14px',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 183, 0, 0.2)', paddingBottom: '10px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="glow-text-gold">
-                <CreditCard size={22} />
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>Kaufabschluss &amp; Widerruf</h3>
-              </div>
-              <button
-                onClick={() => setPendingPurchase(null)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div style={{ padding: '12px', backgroundColor: 'rgba(255, 183, 0, 0.08)', borderRadius: '12px', border: '1px solid rgba(255, 183, 0, 0.2)' }}>
-              <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.95rem' }}>
-                Ausgewählt: +{pendingPurchase.amount} Tokens ({pendingPurchase.priceEur})
-              </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                Sofortige Gutschrift auf dein In-App Token-Konto
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.75rem', color: '#fff', lineHeight: '1.4' }}>
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={consentInstantDelivery}
-                  onChange={(e) => setConsentInstantDelivery(e.target.checked)}
-                  style={{ marginTop: '3px' }}
-                />
-                <span>
-                  Ich verlange und stimme ausdrücklich zu, dass der Anbieter vor Ablauf der 14-tägigen Widerrufsfrist mit der Ausführung des Vertrags (Bereitstellung der digitalen Tokens) beginnt.
-                </span>
-              </label>
-
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={consentWaiverRight}
-                  onChange={(e) => setConsentWaiverRight(e.target.checked)}
-                  style={{ marginTop: '3px' }}
-                />
-                <span>
-                  Mir ist bekannt, dass ich durch diese Zustimmung mit Beginn der Ausführung des Vertrags mein gesetzliches Widerrufsrecht für diese digitalen Inhalte verliere (§ 356 Abs. 5 BGB).
-                </span>
-              </label>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
-              <button
-                onClick={() => setPendingPurchase(null)}
-                className="btn-cyberpunk"
-                style={{ flex: 1, padding: '10px', fontSize: '0.8rem', justifyContent: 'center' }}
-              >
-                Abbrechen
-              </button>
-              <button
-                disabled={!consentInstantDelivery || !consentWaiverRight}
-                onClick={handleConfirmPurchase}
-                className="btn-cyberpunk btn-gold"
-                style={{
-                  flex: 1.5,
-                  padding: '10px',
-                  fontSize: '0.8rem',
-                  justifyContent: 'center',
-                  opacity: (!consentInstantDelivery || !consentWaiverRight) ? 0.4 : 1,
-                  cursor: (!consentInstantDelivery || !consentWaiverRight) ? 'not-allowed' : 'pointer',
-                }}
-              >
-                Jetzt Kaufen ({pendingPurchase.priceEur})
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* B2B Partner Lead Modal */}
       {showPartnerModal && (

@@ -23,6 +23,7 @@ export default defineConfig({
       'src/components/Map/*.test.tsx',
       'src/components/Search/*.test.tsx',
       'src/components/Navigation/*.test.tsx',
+      'src/components/ChargeAndEarn/*.test.tsx',
       'tests/scenarios/**/*.test.ts',
       'tests/scripts/**/*.test.ts',
       'tests/services/**/*.test.ts',

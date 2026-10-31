@@ -1,3 +1,5 @@
+import { routeArchive, type ArchivedRide } from '../../services/routeArchiveService';
+import { RouteArchivePanel } from '../Archive/RouteArchivePanel';
 import React, { useState, useEffect } from 'react';
 import {
   BarChart3,
@@ -21,7 +23,6 @@ import {
   OfflineMapService,
   type DownloadedRegionInfo,
 } from '../../services/offlineMapService';
-import { dataRepository } from '../../services/dataRepository';
 import { UserIdentity } from '../../services/userIdentity';
 
 
@@ -29,6 +30,7 @@ interface AnalyticsModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentRoute?: Route | null;
+  onOpenRoute?: (route: Route) => void;
 }
 
 interface TokenHistoryItem {
@@ -39,8 +41,11 @@ interface TokenHistoryItem {
   type: 'earn' | 'spend';
 }
 
-export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose, currentRoute }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'routes' | 'tokens' | 'offline'>('overview');
+export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose, currentRoute, onOpenRoute }) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'routes' | 'tokens' | 'offline'>('routes');
+  const [rideHistory, setRideHistory] = useState<ArchivedRide[]>([]);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
+  const ownerId = UserIdentity.getUserId();
   const [savedRoutes, setSavedRoutes] = useState<Route[]>([]);
   const [downloadedRegions, setDownloadedRegions] = useState<DownloadedRegionInfo[]>([]);
   
@@ -52,51 +57,27 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
   // No fabricated token history: only real repository data may be displayed.
   const [tokenHistory] = useState<TokenHistoryItem[]>([]);
 
-  // No fabricated routes to present if the real repository is empty.
-  const defaultSampleRoutes: Route[] = [];
-
-  // Load saved routes and downloaded map regions on mount
   useEffect(() => {
     if (!isOpen) return;
-
-    const loadData = async () => {
-      // Load saved routes
-      try {
-        let routes = await dataRepository.getSavedRoutes(UserIdentity.getUserId());
-        if (!routes || routes.length === 0) {
-          routes = defaultSampleRoutes;
-          // Save active current route if present
-          if (currentRoute) {
-            routes.unshift(currentRoute);
-          }
-        } else if (currentRoute && !routes.some((r) => r.id === currentRoute.id)) {
-          routes.unshift(currentRoute);
-        }
-        setSavedRoutes(routes);
-      } catch (e) {
-        console.warn('Failed to load saved routes:', e);
-        setSavedRoutes(defaultSampleRoutes);
-      }
-
-      // Load offline regions
-      try {
-        const regions = await getDownloadedRegions();
-        setDownloadedRegions(regions);
-      } catch (e) {
-        console.warn('Failed to load offline regions:', e);
-      }
+    let active = true, generation = 0;
+    const refresh = async () => {
+      const current = ++generation;
+      try { const archive = await routeArchive.list(ownerId); if (active && current === generation) { setSavedRoutes(archive.plans.map(plan => plan.route)); setRideHistory(archive.rides); setArchiveError(null); } }
+      catch (error: any) { if (active && current === generation) setArchiveError(error?.message ?? 'Fahrtdaten konnten nicht gelesen werden.'); }
     };
-
-    loadData();
-  }, [isOpen, currentRoute]);
+    void refresh();
+    void getDownloadedRegions().then(regions => { if (active) setDownloadedRegions(regions); }).catch(() => {});
+    const unsubscribe = routeArchive.subscribe(() => { if (active) void refresh(); });
+    return () => { active = false; generation++; unsubscribe(); };
+  }, [isOpen, ownerId]);
 
   if (!isOpen) return null;
 
   // Calculate environmental & ride analytics
-  const totalKmRidden = savedRoutes.reduce((acc, r) => acc + r.distanceKm, 348.5); // total base + saved
+  const totalKmRidden = rideHistory.reduce((total, ride) => total + (ride.summary?.distanceKm ?? 0), 0);
   const co2SavedKg = parseFloat((totalKmRidden * 0.122).toFixed(1)); // ~122g CO2 saved per km vs avg car
   const treesEquivalent = Math.round(co2SavedKg / 2.3); // ~2.3kg CO2 per tree per year
-  const totalTokensEarned = tokenHistory.reduce((acc, t) => acc + (t.type === 'earn' ? t.amount : 0), 70);
+  const totalTokensEarned = tokenHistory.reduce((acc, t) => acc + (t.type === 'earn' ? t.amount : 0), 0);
 
   // Trigger offline region download
   const handleStartRegionDownload = async () => {
@@ -173,7 +154,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="glow-text-cyan">
             <BarChart3 size={24} />
             <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              FAHRDATEN & KI-ANALYTICS
+              STRECKENARCHIV & FAHRTENHISTORIE
             </h3>
           </div>
           <button
@@ -315,7 +296,7 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
                     {co2SavedKg} <span style={{ fontSize: '1.2rem' }}>kg CO₂</span>
                   </div>
                   <p style={{ marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Basierend auf {totalKmRidden} gefahrenen Kilometern mit KI-E-Bike Optimierung.
+                    Basierend auf {totalKmRidden} aufgezeichneten Kilometern.
                   </p>
                 </div>
 
@@ -403,67 +384,9 @@ export const AnalyticsModal: React.FC<AnalyticsModalProps> = ({ isOpen, onClose,
             </div>
           )}
 
-          {/* TAB 2: SAVED ROUTES & GPX EXPORT */}
-          {activeTab === 'routes' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Gespeicherte Routen für Offline-Navigation & GPX Export:
-                </span>
-              </div>
-
-              {savedRoutes.map((route) => (
-                <div
-                  key={route.id}
-                  style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(36, 36, 36, 0.8)',
-                    border: '1px solid var(--border-glass)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                    transition: 'border 0.2s',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
-                    <div>
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: 'bold', marginBottom: '4px' }} className="glow-text-cyan">
-                        {route.title}
-                      </h4>
-                      <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.3' }}>
-                        {route.summary || route.aiStory}
-                      </p>
-                    </div>
-
-                    {/* GPX Export Button */}
-                    <button
-                      className="btn-cyberpunk"
-                      onClick={() => exportRouteToGpx(route)}
-                      style={{
-                        padding: '8px 14px',
-                        fontSize: '0.8rem',
-                        whiteSpace: 'nowrap',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Download size={14} /> 📥 GPX Exportieren
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-                    <span>📏 <strong>{route.distanceKm} km</strong></span>
-                    <span>⛰️ <strong>{route.elevationGainM} hm</strong></span>
-                    <span>⏱️ <strong>~{route.estimatedTimeMin} min</strong></span>
-                    <span>⚡ <strong>~{route.estimatedBatteryConsumptionWh} Wh</strong></span>
-                    {route.chargingStopsOnRoute?.length > 0 && (
-                      <span className="glow-text-green">🔌 <strong>{route.chargingStopsOnRoute.length} Ladesäulen</strong></span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Real pending plans and recorded rides are kept separately. */}
+          {archiveError && <p role="alert">{archiveError}</p>}
+          {activeTab === 'routes' && <RouteArchivePanel key={UserIdentity.getUserId()} ownerId={UserIdentity.getUserId()} onOpenRoute={onOpenRoute} />}
 
           {/* TAB 3: TOKEN HISTORY */}
           {activeTab === 'tokens' && (

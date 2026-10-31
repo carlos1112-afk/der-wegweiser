@@ -9,6 +9,7 @@ interface GeolocationState {
   heading: number | null;
   error: string | null;
   isTracking: boolean;
+  observedAt: number | null;
 }
 
 const DEFAULT_LOCATION = { lat: 52.52, lng: 13.405 }; // Berlin Alexanderplatz
@@ -27,6 +28,7 @@ export function useGeolocation(enableHighAccuracy: boolean = true, enabled: bool
     heading: null,
     error: null,
     isTracking: false,
+    observedAt: null,
   });
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export function useGeolocation(enableHighAccuracy: boolean = true, enabled: bool
 
     setState((s) => ({ ...s, isTracking: true }));
 
-    const applyPosition = (lat: number, lng: number, accuracy: number | null, speed: number | null, heading: number | null) => {
+    const applyPosition = (lat: number, lng: number, accuracy: number | null, speed: number | null, heading: number | null, observedAt: number) => {
       if (isCancelled) return;
       setState({
         lat,
@@ -51,6 +53,7 @@ export function useGeolocation(enableHighAccuracy: boolean = true, enabled: bool
         accuracy,
         speed,
         heading,
+        observedAt,
         error: null,
         isTracking: true,
       });
@@ -90,7 +93,8 @@ export function useGeolocation(enableHighAccuracy: boolean = true, enabled: bool
                 position.coords.longitude,
                 position.coords.accuracy,
                 position.coords.speed,
-                position.coords.heading
+                position.coords.heading,
+                position.timestamp
               );
             }
           }
@@ -110,7 +114,7 @@ export function useGeolocation(enableHighAccuracy: boolean = true, enabled: bool
         if ('geolocation' in navigator) {
           webWatchId = navigator.geolocation.watchPosition(
             (pos) => {
-              applyPosition(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, pos.coords.speed, pos.coords.heading);
+              applyPosition(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, pos.coords.speed, pos.coords.heading, pos.timestamp);
             },
             (err) => {
               if (isCancelled) return;

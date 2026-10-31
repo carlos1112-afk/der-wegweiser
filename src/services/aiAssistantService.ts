@@ -1,5 +1,5 @@
-import type { Route, UserPreferences, UserMemoryPattern, PlugType } from '../types/navigation';
-import { RoutingService } from './routingService';
+import type { Location, Route, UserPreferences, UserMemoryPattern, PlugType } from '../types/navigation';
+import { RoutingService, type DestinationRouteOptions } from './routingService';
 import { AiGatewayService } from './ai/aiGatewayService';
 import { ConsentService } from './consentService';
 
@@ -150,7 +150,7 @@ export class AiAssistantService {
         startLat: userLat,
         startLng: userLng,
         targetDistanceKm,
-        batteryPercent: userPrefs.batteryCurrentPercent || 80,
+        batteryPercent: userPrefs.batteryCurrentPercent ?? null,
         bikeType: userPrefs.bikeType || 'ebike',
         themes: [mainTheme],
         maxElevationGainM: userPrefs.maxElevationSlopePercent
@@ -176,6 +176,23 @@ export class AiAssistantService {
       isScoutMission: route.isScoutMission,
     });
     if (storyText?.trim()) route.aiStory = storyText.trim();
+
+    return route;
+  }
+
+  /** Creates an actual point-to-point route, then adds an AI description when
+   * the road router returned verified geometry. */
+  public static async generateDestinationRoute(
+    start: Location,
+    destination: Location,
+    userPrefs: UserPreferences,
+    options: DestinationRouteOptions,
+    signal?: AbortSignal,
+  ): Promise<Route> {
+    if (typeof window !== 'undefined' && !ConsentService.allowsEssential) {
+      throw new Error('[AiAssistantService] Consent required before generating a route.');
+    }
+    const route = await RoutingService.generateDestinationRoute(start, destination, userPrefs, options, undefined, signal);
 
     return route;
   }

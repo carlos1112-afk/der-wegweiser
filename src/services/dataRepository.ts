@@ -1,7 +1,8 @@
-import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { ChargingStation, UserPreferences, UserMemoryPattern, TokenAccount, Route } from '../types/navigation';
 import { ChargingStationImportService } from './chargingStationImportService';
+import { ConsentService } from './consentService';
 
 // Haversine distance utility
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -88,9 +89,11 @@ class LocalAndFirestoreRepository implements IDataRepository {
 
     // Merge in-memory default stations and firestore/cached stations, ensuring uniqueness by ID
     const allStations = [...this.memoryStations];
+    const stationIds = new Set(allStations.map((station) => station.id));
     for (const fs of firestoreStations) {
-      if (!allStations.some(s => s.id === fs.id)) {
+      if (!stationIds.has(fs.id)) {
         allStations.push(fs);
+        stationIds.add(fs.id);
       }
     }
 
@@ -159,12 +162,15 @@ class LocalAndFirestoreRepository implements IDataRepository {
   }
 
   async getUserPreferences(userId: string): Promise<UserPreferences> {
+    const consentRevision = ConsentService.getRevision();
     try {
       const docRef = doc(db, 'user_preferences', userId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data() as UserPreferences;
-        localStorage.setItem(`pref_${userId}`, JSON.stringify(data));
+        if (ConsentService.hasValidConsent() && ConsentService.getRevision() === consentRevision) {
+          localStorage.setItem(`pref_${userId}`, JSON.stringify(data));
+        }
         return data;
       }
     } catch (error) {
@@ -210,12 +216,15 @@ class LocalAndFirestoreRepository implements IDataRepository {
   }
 
   async getUserMemoryPattern(userId: string): Promise<UserMemoryPattern> {
+    const consentRevision = ConsentService.getRevision();
     try {
       const docRef = doc(db, 'user_memory_patterns', userId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const data = docSnap.data() as UserMemoryPattern;
-        localStorage.setItem(`memory_${userId}`, JSON.stringify(data));
+        if (ConsentService.hasValidConsent() && ConsentService.getRevision() === consentRevision) {
+          localStorage.setItem(`memory_${userId}`, JSON.stringify(data));
+        }
         return data;
       }
     } catch (error) {
@@ -277,125 +286,77 @@ class LocalAndFirestoreRepository implements IDataRepository {
         this.tokenAccountsCache.set(userId, { ...data });
         return { ...data };
       }
+      this.tokenAccountsCache.delete(userId);
     } catch (error) {
       console.warn(`Firestore getTokenAccount failed for user ${userId}, falling back to in-memory cache:`, error);
     }
 
-    // Fallback: Check In-Memory cache
+    // A cached value is accepted only if it came from a prior server read.
     if (this.tokenAccountsCache.has(userId)) {
       return { ...this.tokenAccountsCache.get(userId)! };
     }
 
-    // Default configuration
+    // Fail closed: an absent account has no credits or unlimited entitlement.
     const defaultAccount: TokenAccount = {
       userId,
-      balance: 60,
-      lifetimeEarned: 100,
-      unlimitedOnDemand: true,
+      balance: 0,
+      lifetimeEarned: 0,
+      unlimitedOnDemand: false,
     };
     this.tokenAccountsCache.set(userId, defaultAccount);
     return { ...defaultAccount };
   }
 
   async addTokens(userId: string, amount: number, reason: string): Promise<number> {
-    try {
-      localStorage.removeItem(`tokens_${userId}`);
-    } catch {
-      // Ignore
-    }
-
-    const account = await this.getTokenAccount(userId);
-    account.balance += amount;
-    account.lifetimeEarned += amount;
-
-    // Update in-memory cache
-    this.tokenAccountsCache.set(userId, { ...account });
-
-    // Persist in Firestore
-    try {
-      const docRef = doc(db, 'user_tokens', userId);
-      await setDoc(docRef, account);
-    } catch (error) {
-      console.warn(`Firestore addTokens failed for user ${userId} (${reason}), updated in memory:`, error);
-    }
-
-    return account.balance;
+    void userId;
+    void reason;
+    if (!Number.isFinite(amount) || amount <= 0) throw new Error('Token reward amount must be positive.');
+    throw new Error('Token rewards require a server-verified earning event; client-issued rewards are disabled.');
   }
 
   async deductToken(userId: string, amount: number): Promise<boolean> {
-    try {
-      localStorage.removeItem(`tokens_${userId}`);
-    } catch {
-      // Ignore
-    }
-
-    const account = await this.getTokenAccount(userId);
-    if (account.unlimitedOnDemand || account.balance >= amount) {
-      account.balance = Math.max(0, account.balance - amount);
-
-      // Update in-memory cache
-      this.tokenAccountsCache.set(userId, { ...account });
-
-      // Persist in Firestore
-      try {
-        const docRef = doc(db, 'user_tokens', userId);
-        await setDoc(docRef, account);
-      } catch (error) {
-        console.warn(`Firestore deductToken failed for user ${userId}, updated in memory:`, error);
-      }
-
-      return true;
-    }
+    void userId;
+    void amount;
+    // Spending must happen atomically in a trusted callable such as redeemVoucher.
     return false;
   }
 
   async saveRoute(userId: string, route: Route): Promise<string> {
-    // 1. Save locally for instant offline retrieval
+    let localSaved = false;
+    let localError: unknown;
     try {
-      const saved = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
-      if (!saved.some((r: Route) => r.id === route.id)) {
-        saved.push(route);
-      }
-      localStorage.setItem(`routes_${userId}`, JSON.stringify(saved));
-    } catch (e) {
-      console.warn('Could not save route to localStorage:', e);
-    }
-
-    // 2. Persist in Firestore
+      const saved: Route[] = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      if (!Array.isArray(saved)) throw new Error('Ungültiger lokaler Routenbestand.');
+      const merged = new Map(saved.map(item => [item.id, item])); merged.set(route.id, route);
+      localStorage.setItem(`routes_${userId}`, JSON.stringify([...merged.values()])); localSaved = true;
+    } catch (error) { localError = error; }
     try {
-      const docRef = doc(db, 'routes', route.id);
-      await setDoc(docRef, { ...route, userId, savedAt: new Date().toISOString() });
-    } catch (error) {
-      console.warn('Firestore saveRoute failed, persisted locally:', error);
+      await setDoc(doc(db, 'routes', route.id), { ...route, userId, savedAt: new Date().toISOString() });
+    } catch (cloudError) {
+      if (!localSaved) throw new AggregateError([localError, cloudError], 'Route konnte weder lokal noch in der Cloud gespeichert werden.');
     }
-
     return route.id;
   }
 
   async getSavedRoutes(userId: string): Promise<Route[]> {
-    let firestoreRoutes: Route[] = [];
-
+    let local: Route[] = []; let localError: unknown;
     try {
-      const querySnapshot = await getDocs(collection(db, 'routes'));
-      firestoreRoutes = querySnapshot.docs.map((d) => d.data() as Route);
-      if (firestoreRoutes.length > 0) {
-        localStorage.setItem(`routes_${userId}`, JSON.stringify(firestoreRoutes));
-        return firestoreRoutes;
-      }
-    } catch (error) {
-      console.warn('Firestore getSavedRoutes failed, using local cache:', error);
-    }
-
+      const value = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
+      if (!Array.isArray(value)) throw new Error('Ungültiger lokaler Routenbestand.');
+      local = value;
+    } catch (error) { localError = error; }
     try {
-      const local = JSON.parse(localStorage.getItem(`routes_${userId}`) || '[]');
-      if (local && local.length > 0) {
-        return local;
-      }
-    } catch {
-      // Fallback
+      const result = await getDocs(query(collection(db, 'routes'), where('userId', '==', userId)));
+      const merged = new Map(result.docs.map(item => { const route = item.data() as Route; return [route.id, route] as const; }));
+      // Never replace offline-only routes with a smaller cloud response.
+      local.forEach(route => merged.set(route.id, route));
+      const routes = [...merged.values()];
+      try { localStorage.setItem(`routes_${userId}`, JSON.stringify(routes)); } catch { /* The durable IndexedDB archive is independent of this compatibility cache. */ }
+      return routes;
+    } catch (cloudError) {
+      if (localError) throw new AggregateError([localError, cloudError], 'Gespeicherte Routen konnten nicht gelesen werden.');
+      return local;
     }
-
-    return [];
   }
 
   async addPartnerLead(lead: { businessName: string; email: string; plan: string; type: string }): Promise<void> {

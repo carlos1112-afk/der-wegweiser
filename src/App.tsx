@@ -1,4 +1,9 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { routeArchive } from './services/routeArchiveService';
+import type { RoutePriority } from './services/premiumRouteService';
+import { GpxRecorderService, type RideSummary } from './services/gpxRecorderService';
+import { isValidatedRoute } from './types/routing';
+import type { RouteLocation } from './types/routing';
+import { useCallback, useState, useEffect, lazy, Suspense } from 'react';
 import { SearchInput } from './components/Search/SearchInput';
 import type { SearchResult } from './components/Search/SearchInput';
 import { MapView } from './components/Map/MapView';
@@ -6,20 +11,20 @@ import { BatteryHUD } from './components/BatteryHUD/BatteryHUD';
 import { WeatherHUD } from './components/WeatherHUD/WeatherHUD';
 import { GpxRecorderHUD } from './components/Recording/GpxRecorderHUD';
 import { OledBlackMode } from './components/DisplayModes/OledBlackMode';
-import type { Route, ChargingStation, LiveBikeTelemetry, UserPreferences, UserMemoryPattern } from './types/navigation';
+import type { Route, ChargingStation, LiveBikeTelemetry, UserMemoryPattern } from './types/navigation';
 import { dataRepository } from './services/dataRepository';
 import { AiAssistantService, DEFAULT_MODEL } from './services/aiAssistantService';
 import type { ModelId } from './services/aiAssistantService';
 import { BleService } from './services/bleService';
 import { OfflineMapService } from './services/offlineMapService';
 import { AuthService } from './services/authService';
-import { RoutingService } from './services/routingService';
 import { EBikeDisplayService } from './services/ebikeDisplayService';
 import type { User } from 'firebase/auth';
 
 import { useUILayout } from './contexts/UILayoutContext';
 import { BurgerMenu } from './components/Navigation/BurgerMenu';
 import { StartScreen } from './components/StartScreen/StartScreen';
+import { AdvancedRoutePlanner } from './components/StartScreen/AdvancedRoutePlanner';
 import { BottomActionBar } from './components/Navigation/BottomActionBar';
 import { ConfettiOverlay } from './components/Overlays/ConfettiOverlay';
 import { Menu } from 'lucide-react';
@@ -75,52 +80,44 @@ const ConsentModal = lazy(() =>
   import('./components/Legal/ConsentModal').then((m) => ({ default: m.ConsentModal }))
 );
 
-function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
 
 export function App() {
   const { isMainMenuOpen, setMainMenuOpen, isSearchActive, setSearchActive } = useUILayout();
 
   // Modal States (Declared first to supply active modal context to lifecycle)
-  const [showAnticipationModal, setShowAnticipationModal] = useState(true);
+  const [showAnticipationModal, setShowAnticipationModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [showLoungeModal, setShowLoungeModal] = useState(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const [showVoiceSettingsModal, setShowVoiceSettingsModal] = useState(false);
   const [showBoschModal, setShowBoschModal] = useState(false);
   const [showRideSummaryModal, setShowRideSummaryModal] = useState(false);
+  const [completedRideSummary, setCompletedRideSummary] = useState<RideSummary | null>(null);
   const [showGpxImportModal, setShowGpxImportModal] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [emergencyAlertDismissed, setEmergencyAlertDismissed] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authUser, setAuthUser] = useState<User | null>(AuthService.getCurrentUser());
+  const authUserIdRef = useRef<string | null>(AuthService.getCurrentUser()?.uid ?? null);
   const [showStartScreen, setShowStartScreen] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = AuthService.onAuthStateChange(setAuthUser);
-    return () => unsubscribe();
-  }, []);
+  const [showAdvancedRoutePlanner, setShowAdvancedRoutePlanner] = useState(false);
+  const [searchFocusRequest, setSearchFocusRequest] = useState(0);
 
   useEffect(() => {
     const unsubscribe = AuthService.onAuthStateChange((user) => {
+      const nextUid = user?.uid ?? null;
+      if (authUserIdRef.current !== nextUid) {
+        activeRouteRequestId.current++;
+        setCurrentRoute(null);
+        setCompletedRideSummary(null); setShowRideSummaryModal(false); setShowAnalyticsModal(false);
+        setIsSimulatingRoute(false);
+        setTokenBalance(0);
+      }
+      authUserIdRef.current = nextUid;
       setAuthUser(user);
       // Bei An-/Abmeldung muss die anonyme Kennung verworfen werden,
       // damit die echte Firebase-UID für Cloud-Pfade verwendet wird.
       UserIdentity.clearCache();
-      if (!user) {
-        activeRouteRequestId.current++;
-        setCurrentRoute(null);
-        setIsSimulatingRoute(false);
-        setTokenBalance(60);
-      }
     });
 
     // Initialize FCM Push Notifications pipeline
@@ -131,8 +128,14 @@ export function App() {
 
   // State
   const [currentRoute, setCurrentRoute] = useState<Route | null>(null);
+  const [routePreview, setRoutePreview] = useState<Route | null>(null);
+  const [manualStart, setManualStart] = useState<RouteLocation | null>(null);
+  const [showManualStart, setShowManualStart] = useState(false);
+  const [routingNotice, setRoutingNotice] = useState<string | null>(null);
+  const routeAbort = useRef<AbortController | null>(null);
+  const cancelRouting = useCallback(() => { routeAbort.current?.abort(); activeRouteRequestId.current++; }, []);
   const [chargingStations, setChargingStations] = useState<ChargingStation[]>([]);
-  const [tokenBalance, setTokenBalance] = useState(60);
+  const [tokenBalance, setTokenBalance] = useState(0);
   const [isOledModeActive, setIsOledModeActive] = useState(false);
   const [isSunlightMode, setIsSunlightMode] = useState(false);
   const [selectedStationForReview, setSelectedStationForReview] = useState<ChargingStation | null>(null);
@@ -184,14 +187,14 @@ export function App() {
     : showAnticipationModal
     ? 'anticipation'
     : null;
-  const isNavigating = !showAnticipationModal && !!currentRoute;
+  const isNavigating = isValidatedRoute(currentRoute?.validatedRoute) && currentRoute.validatedRoute.guidanceCapability === 'turn_by_turn';
   const lifecycle = useAppLifecycle(activeModalName, isNavigating, telemetry.speedKmH);
 
   // Hardware & Sensor Bindings throttled by Lifecycle Mode
   // Ohne gültige Einwilligung wird kein Standortwatch gestartet und keine
   // OS-Berechtigungsabfrage ausgelöst.
   const geo = useGeolocation(lifecycle.isHighAccuracyGps, hasConsent);
-  const userLocation = { lat: geo.lat, lng: geo.lng };
+  const userLocation = { lat: geo.lat, lng: geo.lng, accuracyM: geo.accuracy, observedAt: geo.observedAt };
   useScreenWakeLock(lifecycle.isWakeLockActive || isOledModeActive);
 
   // GPS Route Simulation State (Demo-Fahrt entlang der berechneten Route)
@@ -302,34 +305,17 @@ export function App() {
 
     const initData = async () => {
       try {
+        const requestUid = authUserIdRef.current;
         // 1. Fetch Charging Stations
         const stations = await dataRepository.getChargingStations().catch(() => []);
-        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
+        if (!isSubscribed || reqId !== activeRouteRequestId.current || authUserIdRef.current !== requestUid || !ConsentService.hasValidConsent()) return;
         setChargingStations(stations);
 
-        // 2. Fetch User Prefs & Memory
-        const prefs: UserPreferences = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-        const memory: UserMemoryPattern = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
-
-        // 3. Fetch Token Account Balance from Firestore/Cache
-        const tokenAcc = await dataRepository.getTokenAccount(UserIdentity.getUserId());
-        if (!isSubscribed || reqId !== activeRouteRequestId.current || !ConsentService.hasValidConsent()) return;
+        // Lade nur die Menüdaten. Eine heutige Strecke wird erst auf Knopfdruck
+        // erzeugt, damit die Startseite weder ungefragt routet noch Daten sendet.
+        const tokenAcc = await dataRepository.getTokenAccount(requestUid ?? UserIdentity.getUserId());
+        if (!isSubscribed || reqId !== activeRouteRequestId.current || authUserIdRef.current !== requestUid || !ConsentService.hasValidConsent()) return;
         setTokenBalance(tokenAcc.balance);
-
-        // 4. Pre-generate Zero-Click "Heute-Tour"
-        const anticipatedRoute = await AiAssistantService.generateAnticipatedRoute(
-          userLocation.lat,
-          userLocation.lng,
-          prefs,
-          memory
-        ).catch((err) => {
-          console.warn('[App] Heute-Tour konnte nicht generiert werden (Routing/Netzwerk offline):', err);
-          return null;
-        });
-        if (isSubscribed && reqId === activeRouteRequestId.current && ConsentService.hasValidConsent() && anticipatedRoute) {
-          setCurrentRoute(anticipatedRoute);
-        }
       } catch (err) {
         console.warn('[App] Initialer Datenabruf fehlgeschlagen (Offline-Modus):', err);
       }
@@ -340,7 +326,7 @@ export function App() {
     return () => {
       isSubscribed = false;
     };
-  }, [hasConsent, userLocation.lat, userLocation.lng]);
+  }, [hasConsent, authUser?.uid, userLocation.lat, userLocation.lng]);
 
   // Background Corridor Offline Cache
   useEffect(() => {
@@ -414,58 +400,24 @@ export function App() {
   const handleStationAdded = async (station: Omit<ChargingStation, 'id' | 'createdAt'>) => {
     const newStation = await dataRepository.addChargingStation(station);
     setChargingStations((prev) => [...prev, newStation]);
-
-    // Add +20 Tokens
-    const newBal = await dataRepository.addTokens(UserIdentity.getUserId(), 20, 'Ladesäulen-Scan');
-    setTokenBalance(newBal);
   };
 
-  const handleAddTokens = async (amount: number) => {
-    const newBal = await dataRepository.addTokens(UserIdentity.getUserId(), amount, 'Lade-Lounge Game');
-    setTokenBalance(newBal);
-  };
-
-  const handleRegenerateRoute = async (modelId: ModelId = DEFAULT_MODEL) => {
-    if (!ConsentService.hasValidConsent()) return;
-    const reqId = ++activeRouteRequestId.current;
-    try {
-      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-      const newRoute = await AiAssistantService.generateAnticipatedRoute(
-        userLocation.lat,
-        userLocation.lng,
-        prefs,
-        memory,
-        modelId
-      );
-      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(newRoute);
-      }
-    } catch (err: any) {
-      console.warn('[App] Route konnte nicht neu generiert werden:', err);
-      alert('Routing-Dienst derzeit nicht erreichbar. Bitte Internetverbindung prüfen.');
+  const handleTokenBalanceRefresh = async (serverBalance?: number) => {
+    if (Number.isSafeInteger(serverBalance) && (serverBalance as number) >= 0) {
+      setTokenBalance(serverBalance as number);
+      return;
     }
+    const account = await dataRepository.getTokenAccount(UserIdentity.getUserId());
+    setTokenBalance(account.balance);
+  };
+
+  const handleRegenerateRoute = async (_modelId: ModelId = DEFAULT_MODEL) => {
+    setRoutingNotice('KI-Premium ist noch nicht freigegeben. Kostenlose Zielplanung bleibt separat verfügbar.');
   };
 
   const handleAutoReroute = async () => {
-    if (!currentRoute || !ConsentService.hasValidConsent()) return;
-    const reqId = ++activeRouteRequestId.current;
-    console.log('[App] Auto-Rerouting triggered from current GPS position...');
-    try {
-      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const memory = await dataRepository.getUserMemoryPattern(UserIdentity.getUserId());
-      const recalculated = await AiAssistantService.generateAnticipatedRoute(
-        userLocation.lat,
-        userLocation.lng,
-        prefs,
-        memory
-      );
-      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(recalculated);
-      }
-    } catch (err: any) {
-      console.warn('[App] Auto-Reroute fehlgeschlagen:', err);
-    }
+    if (!currentRoute || !ConsentService.allowsEssential) return;
+    setRoutingNotice('Kostenlose Rückführung ist noch nicht freigegeben. Die Originalroute bleibt erhalten; Abbiegeführung pausiert.');
   };
 
   const handleToggleOledMode = () => {
@@ -482,92 +434,125 @@ export function App() {
     }
   };
 
-  const handlePlanRouteToPoint = async (targetLat: number, targetLng: number) => {
-    if (!ConsentService.hasValidConsent()) return;
+  const handlePlanRouteToPoint = async (
+    targetLat: number,
+    targetLng: number,
+    mode: 'standard' | 'premium' | 'offline' = 'standard',
+    destinationName = searchDestination?.label || 'Ausgewähltes Ziel',
+    userSelectedPriority: RoutePriority = null,
+    namedStops: SearchResult[] = [],
+  ) => {
+    if (!ConsentService.hasValidConsent()) {
+      setShowConsentModal(true);
+      return false;
+    }
+    const archiveOwner = UserIdentity.getUserId();
+    if (routeArchive.hasPending(archiveOwner)) { setRoutingNotice('Zuerst die offene Archiv-Sicherung abschließen.'); setShowAnalyticsModal(true); return false; }
+    const start: RouteLocation | null = manualStart ?? (geo.isTracking && !geo.error && geo.observedAt !== null && geo.observedAt <= Date.now() && Date.now() - geo.observedAt <= 10000 && geo.accuracy !== null && geo.accuracy <= 50
+      ? { ...userLocation, source: 'gps', observedAt: geo.observedAt, accuracyM: geo.accuracy, confirmed: true } : null);
+    if (!start) { setRoutingNotice('Aktueller GPS-Start fehlt. Bitte einen manuellen Start festlegen.'); setShowManualStart(true); return false; }
+    routeAbort.current?.abort();
+    const controller = new AbortController(); routeAbort.current = controller;
     const reqId = ++activeRouteRequestId.current;
     try {
       const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
-      const newRoute = await RoutingService.generateBikeRoute(
+      const newRoute = await AiAssistantService.generateDestinationRoute(
+        start,
+        { lat: targetLat, lng: targetLng },
+        prefs,
         {
-          startLat: userLocation.lat,
-          startLng: userLocation.lng,
-          targetDistanceKm: Math.max(2, Math.round(distKm * 1.3)),
-          batteryPercent: telemetry.batteryPercent,
-          bikeType: prefs.bikeType || 'ebike',
-          themes: ['Direktverbindung'],
-          maxElevationGainM: 120,
-          surfacePreference: 'any',
+          mode,
+          start,
+          destinationName,
+          userSelectedPriority,
+          via: namedStops.map(stop => ({ lat: stop.lat, lng: stop.lng, name: stop.label })),
         },
-        prefs
+        controller.signal
       );
-      if (newRoute.pathCoordinates.length > 1) {
-        newRoute.pathCoordinates[newRoute.pathCoordinates.length - 1] = [targetLat, targetLng];
-      }
-      newRoute.title = `Route zum gewählten Ziel (${newRoute.distanceKm} km)`;
-      newRoute.aiStory = `Fahrradoptimierte Verbindung zum gewählten Zielort (~${distKm.toFixed(1)} km) mit minimalem Höhenmeter-Widerstand (Heuristische Routenführung).`;
+      const archived = await routeArchive.saveGenerated(archiveOwner, newRoute);
       if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(newRoute);
+        setRoutePreview({ ...newRoute, archivePlanId: archived.id });
+        setShowAnticipationModal(true);
+        return true;
       }
+      return false;
     } catch (err: any) {
+      if (routeArchive.hasPending(archiveOwner) && archiveOwner === UserIdentity.getUserId()) { setRoutingNotice('Strecke ist erzeugt, aber noch nicht dauerhaft gesichert. Bitte im Archiv die Sicherung wiederholen.'); setShowAnalyticsModal(true); return false; }
+      if (reqId !== activeRouteRequestId.current || controller.signal.aborted) return false;
       console.warn('[App] Navigation zum Zielpunkt fehlgeschlagen:', err);
-      alert('Routenberechnung fehlgeschlagen. Der Routing-Dienst (BRouter) ist nicht erreichbar.');
+      if (err?.name !== 'AbortError') setRoutingNotice(err?.message || 'Routenberechnung fehlgeschlagen.');
+      return false;
     }
+  };
+
+  const handleGenerateTodayRoute = () => {
+    setShowStartScreen(false);
+    void handleRegenerateRoute();
+  };
+
+  const handleStartSimpleRoute = () => {
+    setShowStartScreen(false);
+    setSearchFocusRequest((request) => request + 1);
   };
 
   const handlePlanRouteToStation = async (station: ChargingStation) => {
-    if (!ConsentService.hasValidConsent()) return;
-    const reqId = ++activeRouteRequestId.current;
-    try {
-      const prefs = await dataRepository.getUserPreferences(UserIdentity.getUserId());
-      const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, station.lat, station.lng);
-      const detourRoute = await RoutingService.generateBikeRoute(
-        {
-          startLat: userLocation.lat,
-          startLng: userLocation.lng,
-          targetDistanceKm: Math.max(1, Math.round(distKm * 1.2)),
-          batteryPercent: telemetry.batteryPercent,
-          bikeType: prefs.bikeType || 'ebike',
-          themes: ['Ladesäulen-Anfahrt'],
-          maxElevationGainM: 60,
-          surfacePreference: 'asphalt',
-        },
-        prefs
-      );
-      if (detourRoute.pathCoordinates.length > 1) {
-        detourRoute.pathCoordinates[detourRoute.pathCoordinates.length - 1] = [station.lat, station.lng];
-      }
-      detourRoute.title = `Anfahrt: ${station.name}`;
-      detourRoute.aiStory = `Direkte Anfahrt zur Ladestation ${station.name} (${station.plugType.toUpperCase()}) (Heuristische Routenführung).`;
-      detourRoute.waypoints = [
-        { id: 'start', lat: userLocation.lat, lng: userLocation.lng, category: 'start', name: 'Start' },
-        { id: station.id, lat: station.lat, lng: station.lng, category: 'charging', name: station.name },
-      ];
-      if (reqId === activeRouteRequestId.current && ConsentService.hasValidConsent()) {
-        setCurrentRoute(detourRoute);
-      }
-    } catch (err: any) {
-      console.warn('[App] Anfahrt zur Ladestation fehlgeschlagen:', err);
-      alert('Routenberechnung zur Ladestation fehlgeschlagen. Der Routing-Dienst ist nicht erreichbar.');
-    }
+    await handlePlanRouteToPoint(station.lat, station.lng, 'standard', station.name);
   };
 
-  const handleAddStationReview = async (review: { rating: number; comment: string; tags: string[] }) => {
-    console.log('[App] Review added for station:', selectedStationForReview?.name, review);
-    // Reward +10 Tokens
-    await handleAddTokens(10);
+  const handleAddStationReview = async (_review: { rating: number; comment: string; tags: string[] }): Promise<boolean> => {
+    return false;
   };
+
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => { if (routeArchive.hasAnyPending() || GpxRecorderService.getStatus().isRecording) { event.preventDefault(); event.returnValue = ''; } };
+    window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn);
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = ConsentService.onChange(flags => {
+      routeAbort.current?.abort(); activeRouteRequestId.current++;
+      setRoutePreview(null); setManualStart(null);
+      if (!flags?.essential) { setCurrentRoute(null); setCompletedRideSummary(null); setShowRideSummaryModal(false); setShowAnalyticsModal(false); }
+    });
+    return () => { unsubscribe(); cancelRouting(); };
+  }, [cancelRouting]);
+
+  useEffect(() => {
+    routeAbort.current?.abort(); activeRouteRequestId.current++;
+    setRoutePreview(null); setManualStart(null); setRoutingNotice(null);
+  }, [authUser?.uid, hasConsent]);
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      {!showStartScreen && !currentRoute && <div style={{ position: 'absolute', top: 86, left: 12, right: 12, zIndex: 2101 }}>
+        <button type="button" className="glass-pill" onClick={() => setShowManualStart(value => !value)}>{manualStart ? 'Manuellen Start ändern' : 'Start manuell festlegen'}</button>
+        {showManualStart && <SearchInput placeholder="Start suchen oder lat,lng" onSelect={place => {
+          setManualStart({ lat: place.lat, lng: place.lng, source: 'manual', accuracyM: null, observedAt: Date.now(), confirmed: true });
+          setShowManualStart(false); setRoutingNotice(`Manueller Start: ${place.label}. Navigation benötigt später eine aktuelle GPS-Position.`);
+        }} />}
+      </div>}
+      {routingNotice && !showStartScreen && <div role="status" className="glass-panel" style={{ position: 'absolute', top: 136, left: 12, right: 12, zIndex: 1800, padding: 12 }}>
+        {routingNotice} <button type="button" aria-label="Routenhinweis schließen" onClick={() => setRoutingNotice(null)}>✕</button>
+      </div>}
       {showStartScreen && (
         <StartScreen
-          onStart={() => setShowStartScreen(false)}
+          onGenerateToday={handleGenerateTodayRoute}
+          onStartSimpleRoute={handleStartSimpleRoute}
+          onOpenAdvancedRoute={() => setShowAdvancedRoutePlanner(true)}
           onOpenSettings={() => setMainMenuOpen(true)}
           onOpenLogin={() => setShowAuthModal(true)}
-          tokenBalance={tokenBalance}
-          telemetry={telemetry}
           currentUser={authUser}
+        />
+      )}
+      {showAdvancedRoutePlanner && (
+        <AdvancedRoutePlanner
+          signedIn={Boolean(authUser)}
+          onGenerate={async (destination, priority, stops) => {
+            const generated = await handlePlanRouteToPoint(destination.lat, destination.lng, 'premium', destination.label, priority, stops);
+            if (generated) { setShowAdvancedRoutePlanner(false); setShowStartScreen(false); }
+            return generated;
+          }}
+          onClose={() => { setShowAdvancedRoutePlanner(false); setShowStartScreen(true); }}
         />
       )}
 
@@ -615,6 +600,7 @@ export function App() {
           {!currentRoute ? (
             <SearchInput
               placeholder="Ziel eingeben..."
+              focusRequest={searchFocusRequest}
               onSelect={(result) => {
                 setSearchDestination(result);
                 setSearchActive(false);
@@ -632,7 +618,7 @@ export function App() {
               }}
             >
               <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
-                ▼ Navigation aktiv
+                ▼ Track / Route anzeigen
               </span>
             </div>
           )}
@@ -649,7 +635,7 @@ export function App() {
         </div>
       </div>
 
-      <BurgerMenu 
+      <BurgerMenu
         isOpen={isMainMenuOpen}
         onClose={() => setMainMenuOpen(false)}
         isSunlightMode={isSunlightMode}
@@ -673,15 +659,15 @@ export function App() {
         isBleConnected={telemetry.isConnected}
       />
 
-      <BottomActionBar 
+      {!isBottomCardOpen && <BottomActionBar
         isNavigating={!!currentRoute}
         onOpenScanner={() => setShowScannerModal(true)}
         onOpenVoice={() => setShowVoiceSettingsModal(true)}
-        onOpenSearch={() => setSearchActive(true)}
-      />
+        onOpenSearch={() => { setSearchActive(true); setSearchFocusRequest((request) => request + 1); }}
+      />}
 
       {/* Integrated E-Bike Telemetry & Bluetooth Pairing Widget */}
-      <div
+      {!isBottomCardOpen && <div
         style={{
           position: 'absolute',
           bottom: '88px',
@@ -696,15 +682,19 @@ export function App() {
           onConnectBLE={handleConnectBLE}
           onOpenBoschModal={() => setShowBoschModal(true)}
         />
-      </div>
+      </div>}
 
       {/* GPX Track Recorder Pill - Relocated right side above right controls */}
-      {!currentRoute && (
-        <div style={{ position: 'absolute', right: '10px', top: '150px', zIndex: 1900 }}>
+      {!showStartScreen && hasConsent && (
+        <div style={{ position: 'absolute', right: '10px', top: '190px', zIndex: 1900 }}>
           <GpxRecorderHUD
-            userLocation={activeUserLocation}
+            key={UserIdentity.getUserId()}
+            ownerId={UserIdentity.getUserId()}
+            route={currentRoute}
+            isSimulating={isSimulatingRoute}
+            userLocation={userLocation}
             telemetry={telemetry}
-            onFinishRide={() => setShowRideSummaryModal(true)}
+            onFinishRide={(summary) => { setCompletedRideSummary(summary); setShowRideSummaryModal(true); }}
           />
         </div>
       )}
@@ -719,9 +709,9 @@ export function App() {
         onSelectStation={(station) => handlePlanRouteToStation(station)}
         onAutoReroute={handleAutoReroute}
         onOpenReviewModal={(station) => setSelectedStationForReview(station)}
-        onPlanRouteToPoint={(lat, lng) => {
-          handlePlanRouteToPoint(lat, lng);
-          setSearchDestination(null);
+        onPlanRouteToPoint={async (lat, lng, mode) => {
+          const planned = await handlePlanRouteToPoint(lat, lng, mode);
+          if (planned) setSearchDestination(null);
         }}
         onPlanRouteToStation={handlePlanRouteToStation}
         isSimulating={isSimulatingRoute}
@@ -740,15 +730,18 @@ export function App() {
             onClose={() => setShowAuthModal(false)}
           />
         )}
-        {showAnticipationModal && currentRoute && (
+        {showAnticipationModal && routePreview && (
           <AnticipationModal
-            route={currentRoute}
+            route={routePreview}
             onAcceptRoute={(route) => {
+              if (!isValidatedRoute(route.validatedRoute)) return;
+              if (GpxRecorderService.getStatus().isRecording || routeArchive.hasPending(UserIdentity.getUserId())) { setRoutingNotice('Bitte die laufende Aufzeichnung zuerst beenden und sichern. Die neue Strecke bleibt im Archiv.'); return; }
               setCurrentRoute(route);
+              setRoutePreview(null);
               setShowAnticipationModal(false);
             }}
             onRegenerate={handleRegenerateRoute}
-            onClose={() => setShowAnticipationModal(false)}
+            onClose={() => { routeAbort.current?.abort(); setRoutePreview(null); setShowAnticipationModal(false); }}
           />
         )}
 
@@ -763,15 +756,21 @@ export function App() {
         {showLoungeModal && (
           <LoungeModal
             tokenBalance={tokenBalance}
-            onAddTokens={handleAddTokens}
+            onTokenBalanceRefresh={handleTokenBalanceRefresh}
             onClose={() => setShowLoungeModal(false)}
           />
         )}
 
         {showAnalyticsModal && (
           <AnalyticsModal
+            key={UserIdentity.getUserId()}
             isOpen={showAnalyticsModal}
             currentRoute={currentRoute}
+            onOpenRoute={(route) => {
+              if (GpxRecorderService.getStatus().isRecording || routeArchive.hasPending(UserIdentity.getUserId())) { setRoutingNotice('Bitte zuerst die laufende Aufzeichnung beenden und sichern.'); return; }
+              setCurrentRoute(route); setShowAnalyticsModal(false); setShowStartScreen(false);
+              setRoutingNotice('Gespeicherter Track geladen. Keine erneute Wegeprüfung oder Abbiegeführung.');
+            }}
             onClose={() => setShowAnalyticsModal(false)}
           />
         )}
@@ -797,10 +796,10 @@ export function App() {
         )}
 
         {/* Ride Summary & GPX Export Modal */}
-        {showRideSummaryModal && (
+        {showRideSummaryModal && completedRideSummary && (
           <RideSummaryModal
+            summary={completedRideSummary}
             isOpen={showRideSummaryModal}
-            onAddTokens={handleAddTokens}
             onClose={() => setShowRideSummaryModal(false)}
           />
         )}
@@ -810,6 +809,7 @@ export function App() {
           <GpxImportModal
             isOpen={showGpxImportModal}
             onRouteLoaded={(importedRoute) => {
+              if (GpxRecorderService.getStatus().isRecording || routeArchive.hasPending(UserIdentity.getUserId())) { setRoutingNotice('Bitte zuerst die laufende Aufzeichnung beenden und sichern.'); return; }
               setCurrentRoute(importedRoute);
               setShowGpxImportModal(false);
             }}
