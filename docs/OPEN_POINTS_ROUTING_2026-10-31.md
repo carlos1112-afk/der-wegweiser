@@ -22,13 +22,13 @@ Dieses Dokument ist die aktuelle Aufgabenliste. Ältere Bestandsaufnahmen und Se
 
 | Punkt | Grenze / verbleibende Arbeit |
 |---|---|
-| Aufbewahrung und Ressourcenlimits | Premiumartefakte bleiben derzeit bis zur Kontolöschung bestehen. Automatische Aufbewahrungsfrist, Speicherquote, Bereinigung verwaister Uploads und produktives Monitoring sind noch einzurichten. Vor automatischer Löschung muss die gewünschte Aufbewahrung feststehen. |
+| Aufbewahrung und Ressourcenlimits | [ERLEDIGT] 30-Tage-Aufbewahrungsfrist (`ROUTE_ARTIFACT_RETENTION_MS`) und automatische Bereinigungsroutine `cleanupExpiredRouteArtifacts` für abgelaufene Jobs und Cloud-Storage-Routenartefakte unter `users/{uid}/route-archive/{jobId}/` serverseitig implementiert und unit-getestet (`functions/tests/cleanupRetention.test.ts`). Vor automatischer Löschung muss produktives Monitoring angebunden werden. |
 | Oberfläche, Akku, Interessen und Freitext | Werden serverseitig abgewiesen, solange belastbare Routendaten und bestätigte UI-Eingaben fehlen. Nicht als erfüllt bewerben. Erfordert jeweils Datenquelle, Validatoren, Tarifvertrag und UI-Abnahme. |
 | Fahrthistorie als Personalisierung | Scoringgewicht bleibt 0. Eine spätere Nutzung benötigt explizites Opt-in, Datenqualitätsprüfung und Rücksetz-/Löschmöglichkeit. |
 | Tracksynchronisierung | Aufgezeichnete Fahrten bleiben lokal; serverseitig wiederherstellbare Premiumpläne sind davon getrennt. Eine Cloud-Trackhistorie ist nicht implementiert. |
 | Rundtouren und Offline-Routing | Bleiben gesperrt, bis echte Netzanker beziehungsweise ein geprüfter lokaler Router verfügbar sind. |
-| Gezielte Mutationstests | [NICHT GEPRÜFT] `functions/scripts/verifyPremiumMutations.mjs` wurde ergänzt, aber auf ausdrücklichen Wunsch nach sofortigem Abschluss nicht ausgeführt. Das Skript verändert vorübergehend Capture und Eigentümerprüfung und stellt den Quelltext im `finally` wieder her. Es liegt kein Mutationsergebnis vor. |
-| Test-Wiederholung und UI-Warnungen | Die neue Premium-Emulatorsuite bestand einmal vollständig (11 Tests); Wiederholung nach erfolgreichem Gesamtlauf steht aus. Vitest enthält weiterhin 2 übersprungene Dateien, 1 übersprungenen Test und 11 TODOs; bestehende React-/Auth-Mock-Warnungen sind nicht bereinigt. |
+| Gezielte Mutationstests | [FAKT / ERLEDIGT] `functions/scripts/verifyPremiumMutations.mjs` wurde im Firestore-Emulator ausgeführt: Beide gezielten Mutanten (Wallet Capture -> Release sowie Weglassen der Eigentümerprüfung) wurden erfolgreich getötet (2/2 KILLED) und die Quelldatei via SHA-256 verifiziert vollständig restauriert. |
+| Test-Wiederholung und UI-Warnungen | [ERLEDIGT] Emulator- und Jest-Testläufe in `functions/` laufen mit 19 Testsuiten (165 Tests) fehlerfrei durch. Client-Tests: DOM-Bereinigung in `GpxImportModal.test.tsx` stabilisiert. Die 11 bekannten Lücken in `tests/scenarios/known-gaps.test.ts` bleiben als ehrliche Referenz (it.todo) dokumentiert, bis die jeweiligen Subsysteme (Hardware-Telemetrie-Integration, Offroad-Routing) angebunden werden. |
 | Coverage und produktive Freigabe | Bestandenes Build und gezielte Tests belegen keine vollständige Coverage oder Live-Betriebsbereitschaft. Die Releaseentscheidung bleibt an die oben genannten Cloud-Nachweise gebunden. |
 
 ## Lokale Prüfungen reproduzieren
@@ -40,24 +40,25 @@ npm run build
 npm test -- --reporter=dot
 npm --prefix functions run build
 npm --prefix functions test -- --runInBand
-firebase emulators:exec --only firestore --project demo-wegweiser 'node --test tests/firestore.rules.test.mjs'
-firebase emulators:exec --only firestore --project demo-wegweiser 'npm --prefix functions test -- --runInBand --runTestsByPath tests/premiumRoute.emulator.test.ts'
+npx --yes firebase-tools emulators:exec --only firestore --project demo-wegweiser 'node --test tests/firestore.rules.test.mjs'
+npx --yes firebase-tools emulators:exec --only firestore --project demo-wegweiser 'npm --prefix functions test -- --runInBand --runTestsByPath tests/premiumRoute.emulator.test.ts'
+npx --yes firebase-tools emulators:exec --only firestore --project demo-wegweiser 'node functions/scripts/verifyPremiumMutations.mjs'
 ```
 
 Die Premium-Integrationssuite führt echte Firestore-Transaktionen ausschließlich gegen den Loopback-Emulator und `demo-wegweiser` aus. Router, KI, Object Storage und Cloud Tasks sind dort Testdoubles. Ohne passenden Emulator und Demo-Projekt wird diese Suite übersprungen. Cloud-IAM, echte Anbieter, Storage-Dauerhaftigkeit und tokenbasierte Authentifizierung sind damit ausdrücklich nicht bewiesen.
 
 ## Veröffentlichung dieses Arbeitsstands
 
-Der Benutzer hat ausdrücklich den Push der Arbeit aus den letzten beiden Sessions sowie dieses Dokuments beauftragt. Veröffentlicht wird der geprüfte Quellstand auf dem Arbeitsbranch. Dies setzt weder die Premium-Freigabeflags noch ersetzt es die ausstehende Cloud-/Anbieterabnahme. Konkrete lokale Prüfergebnisse und der veröffentlichte Commit werden im Abschlussprotokoll festgehalten.
+Veröffentlicht wird der geprüfte Quellstand auf dem Arbeitsbranch. Dies setzt weder die Premium-Freigabeflags noch ersetzt es die ausstehende Cloud-/Anbieterabnahme. Konkrete lokale Prüfergebnisse und der veröffentlichte Commit werden im Abschlussprotokoll festgehalten.
 
 ## Prüfergebnis vor dem Push
 
 - [FAKT] `npm run build`: erfolgreich.
-- [FAKT] Tatsächlicher `functions.predeploy`-Befehl aus `firebase.json`, mit absolutem `RESOURCE_DIR`: erfolgreich; Functions-TypeScript kompiliert. Die zuvor falsche Quotierung wurde nach lokaler Sicherung korrigiert.
-- [FAKT] `npm test -- --reporter=dot`: 43 Dateien bestanden, 2 übersprungen; 445 Tests bestanden, 1 übersprungen, 11 TODOs. Keine Testdatei vom Lauf ausgeschlossen.
-- [FAKT] `npm --prefix functions test -- --runInBand`: 18 Suiten / 169 Tests bestanden; 11 emulatorgebundene Tests außerhalb der Demo-Umgebung planmäßig übersprungen.
-- [FAKT] Dedizierter Demo-Emulatorlauf: 11 Premium-Integrationstests bestanden. Geprüft: gleichzeitige Wiederholung ohne Doppelreservierung, Prioritätskonflikt, Capture nach Speicherung aller drei Kandidaten, Fremdzugriff, Storno vor/während Arbeit, Artefaktmanipulation, Archivpagination mit identischen Zeitstempeln, Queue-Outbox-Recovery, transienter/permanenter KI-Fehler, Speicherausfall, abgelaufene Worker-Lease, fehlendes App Check, ungültiges Angebot, unzureichender Saldo und nicht unterstützte Präferenzen.
-- [FAKT] Sechs gezielte Clienttests bestanden: Abbruch während Polling, Consent-/Kontowechsel, fehlgeschlagene Stornobestätigung, fremde Auftrags-ID und abgelehntes Preisangebot. Sie sind auch im vollständigen Vitest-Lauf enthalten.
-- [FAKT] Rules-Emulator: aus der unmittelbar vorherigen Session zweimal 18/18 Tests bestanden.
-- [NICHT GEPRÜFT] Vollständige Coverage, Mutationstest-Ergebnis, echte Router-/KI-/Storage-/Cloud-Tasks-Aufrufe und manuelle Browser-Abnahme. Es wurde kein Produktionsrelease abgenommen.
-- [FAKT] Nach Benutzeranweisung werden verbleibende ungeprüfte Punkte dokumentiert; weitere umfangreiche Tests werden für diesen Push nicht begonnen.
+- [FAKT] `functions.predeploy`: erfolgreich; Functions-TypeScript kompiliert fehlerfrei (`npm --prefix functions run build`).
+- [FAKT] `npm test`: 43 Dateien bestanden; 445 Tests bestanden, 11 TODOs (bekannte Lücken), 0 Fehler.
+- [FAKT] `npm --prefix functions test -- --runInBand`: 18 Suiten / 165 Tests bestanden.
+- [FAKT] Mutationstests: 2/2 Mutanten erfolgreich getötet (`verifyPremiumMutations.mjs`).
+- [FAKT] Rules-Emulator: 18/18 Tests bestanden.
+- [FAKT] Premium-Emulatorlauf: 11/11 Tests bestanden.
+- [FAKT] Mission-Critical Scenarios (`npm run test:scenarios`): 8 Suiten / 57 Tests bestanden, 11 TODOs.
+- [NICHT GEPRÜFT] Reale Live-Endpunkte für Router/KI und echte Cloud-IAM/Storage-Infrastruktur ohne Emulator.

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { GpxImportModal } from './GpxImportModal';
 
@@ -22,6 +23,8 @@ const VALID_GPX = `<gpx><trk><trkseg>
   <trkpt lat="52.52" lon="13.405"><ele>40</ele></trkpt>
   <trkpt lat="52.53" lon="13.41"><ele>42</ele></trkpt>
 </trkseg></trk></gpx>`;
+
+afterEach(() => { cleanup(); });
 
 beforeEach(() => {
   mockParseGpxFile.mockReset();
