@@ -176,6 +176,15 @@ export const submitTokenQuizAnswer = onCall({ region: "europe-west3", enforceApp
       });
       balance = credit.wallet.balance;
       credit.commit();
+
+      const ledgerRef = db.collection("token_ledger").doc();
+      transaction.set(ledgerRef, {
+        userId: uid,
+        type: "quiz_reward",
+        amount: QUIZ_REWARD,
+        referenceId: challenge.challengeId,
+        createdAt: FieldValue.serverTimestamp(),
+      });
     }
 
     transaction.update(challengeRef, { attempted: true, completed: correct, answeredAt: FieldValue.serverTimestamp() });
@@ -227,6 +236,15 @@ export const spinTokenWheel = onCall({ region: "europe-west3", enforceAppCheck: 
       });
       balance = credit.wallet.balance;
       credit.commit();
+
+      const ledgerRef = db.collection("token_ledger").doc();
+      transaction.set(ledgerRef, {
+        userId: uid,
+        type: "wheel_reward",
+        amount: rewardTokens,
+        referenceId: `${today}-${segmentIndex}`,
+        createdAt: FieldValue.serverTimestamp(),
+      });
     }
 
     transaction.set(spinRef, {

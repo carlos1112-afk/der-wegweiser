@@ -119,7 +119,12 @@ export const deleteAccountData = onCall({ region: "europe-west3" }, async (reque
       if (error?.code !== 'auth/user-not-found') throw error;
     }
 
-    await jobRef.delete();
+    await jobRef.set({
+      uid,
+      status: 'completed',
+      completedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
     return { success: true, status: 'completed', jobId: uid };
   } catch (error: any) {
     await jobRef.set({
@@ -189,6 +194,15 @@ export const redeemVoucher = onCall({ region: "europe-west3", enforceAppCheck: t
         userId,
         cost: item.cost,
         redeemedAt: FieldValue.serverTimestamp(),
+      });
+
+      const ledgerRef = db.collection("token_ledger").doc();
+      transaction.set(ledgerRef, {
+        userId,
+        type: "voucher_redemption",
+        amount: -item.cost,
+        referenceId: redemptionId,
+        createdAt: FieldValue.serverTimestamp(),
       });
 
       return { success: true, code: item.code, message: "Item redeemed successfully." };
