@@ -35,6 +35,7 @@ import { useAppLifecycle } from './hooks/useAppLifecycle';
 import { AppLifecycleService } from './services/appLifecycleService';
 import { ConsentService } from './services/consentService';
 import { UserIdentity } from './services/userIdentity';
+import { AdMobService } from './services/adMobService';
 import { PushNotificationService } from './services/pushNotificationService';
 import { CoPilotService } from './services/coPilotService';
 import { useRef } from 'react';
@@ -189,6 +190,20 @@ export function App() {
     : null;
   const isNavigating = isValidatedRoute(currentRoute?.validatedRoute) && currentRoute.validatedRoute.guidanceCapability === 'turn_by_turn';
   const lifecycle = useAppLifecycle(activeModalName, isNavigating, telemetry.speedKmH);
+
+  // AdMob Banner Lifecycle (non-intrusive placement, hidden during active navigation)
+  useEffect(() => {
+    if (ConsentService.hasValidConsent()) {
+      AdMobService.initialize();
+      if (!isNavigating) {
+        AdMobService.showBanner();
+      } else {
+        AdMobService.hideBanner();
+      }
+    } else {
+      AdMobService.hideBanner();
+    }
+  }, [consent, isNavigating]);
 
   // Hardware & Sensor Bindings throttled by Lifecycle Mode
   // Ohne gültige Einwilligung wird kein Standortwatch gestartet und keine

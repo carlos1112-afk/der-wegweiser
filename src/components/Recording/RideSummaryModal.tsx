@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Trophy, Download, Share2, Sparkles, CheckCircle2, X } from 'lucide-react';
 import type { RideSummary } from '../../services/gpxRecorderService';
 import { SpatialTelemetrySanitizerService } from '../../services/spatialTelemetrySanitizerService';
 import { SoundFxService } from '../../services/soundFxService';
+import { AdMobService } from '../../services/adMobService';
 
 interface RideSummaryModalProps {
   isOpen: boolean;
@@ -15,6 +16,12 @@ export const RideSummaryModal: React.FC<RideSummaryModalProps> = ({
   onClose, summary,
 }) => {
   const [downloaded, setDownloaded] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      AdMobService.showInterstitial().catch(() => undefined);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
