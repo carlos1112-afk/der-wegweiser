@@ -499,3 +499,31 @@ export const reconcileExpiredPremiumRoutes = onSchedule({ region: 'europe-west3'
     });
   }
 });
+
+export const ROUTE_ARTIFACT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+/** Cleans up expired route jobs and their cloud storage artifacts older than 30 days */
+export const cleanupExpiredRouteArtifacts = onSchedule({ region: 'europe-west3', schedule: 'every 24 hours', timeZone: 'UTC', maxInstances: 1 }, async () => {
+  const cutoff = Timestamp.fromMillis(Date.now() - ROUTE_ARTIFACT_RETENTION_MS);
+  const expiredJobs = await database().collection('premium_route_jobs')
+    .where('createdAt', '<=', cutoff)
+    .limit(100)
+    .get();
+
+  for (const doc of expiredJobs.docs) {
+    const data = doc.data();
+    const uid = data.userId;
+    const jobId = doc.id;
+    if (uid && jobId) {
+      try {
+        const bucket = getStorage().bucket();
+        const [files] = await bucket.getFiles({ prefix: `users/${uid}/route-archive/${jobId}/` });
+        await Promise.all(files.map(file => file.delete()));
+      } catch (err) {
+        console.warn(`[Cleanup] Storage deletion failed for job ${jobId}:`, err);
+      }
+    }
+    await doc.ref.delete();
+    await database().collection('premium_route_outbox').doc(jobId).delete().catch(() => {});
+  }
+});
