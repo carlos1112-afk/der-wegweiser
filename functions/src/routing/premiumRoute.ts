@@ -502,28 +502,55 @@ export const reconcileExpiredPremiumRoutes = onSchedule({ region: 'europe-west3'
 
 export const ROUTE_ARTIFACT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-/** Cleans up expired route jobs and their cloud storage artifacts older than 30 days */
-export const cleanupExpiredRouteArtifacts = onSchedule({ region: 'europe-west3', schedule: 'every 24 hours', timeZone: 'UTC', maxInstances: 1 }, async () => {
-  const cutoff = Timestamp.fromMillis(Date.now() - ROUTE_ARTIFACT_RETENTION_MS);
-  const expiredJobs = await database().collection('premium_route_jobs')
-    .where('createdAt', '<=', cutoff)
-    .limit(100)
-    .get();
+const CLEANUP_BATCH_SIZE = 100;
+const CLEANUP_TIMEOUT_SECONDS = 120;
+const CLEANUP_BUDGET_MS = (CLEANUP_TIMEOUT_SECONDS - 10) * 1_000;
 
-  for (const doc of expiredJobs.docs) {
-    const data = doc.data();
-    const uid = data.userId;
-    const jobId = doc.id;
-    if (uid && jobId) {
+/** Cleans up expired route jobs and their cloud storage artifacts older than 30 days */
+export const cleanupExpiredRouteArtifacts = onSchedule({
+  region: 'europe-west3', schedule: 'every 24 hours', timeZone: 'UTC', maxInstances: 1,
+  timeoutSeconds: CLEANUP_TIMEOUT_SECONDS,
+}, async () => {
+  const deadline = performance.now() + CLEANUP_BUDGET_MS;
+  const cutoff = Timestamp.fromMillis(Date.now() - ROUTE_ARTIFACT_RETENTION_MS);
+  const db = database();
+  const expiredJobs = db.collection('premium_route_jobs').where('createdAt', '<=', cutoff)
+    .orderBy('createdAt').limit(CLEANUP_BATCH_SIZE);
+  let page = expiredJobs;
+
+  while (performance.now() < deadline) {
+    const snapshot = await page.get();
+    const last = snapshot.docs[snapshot.docs.length - 1];
+    if (!last) return;
+
+    for (const doc of snapshot.docs) {
+      if (performance.now() >= deadline) return;
+      const uid = doc.data().userId;
+      const jobId = doc.id;
+      if (uid) {
+        try {
+          const [files] = await privateBucket().getFiles({ prefix: `users/${uid}/route-archive/${jobId}/` });
+          if (performance.now() >= deadline) return;
+          const deletions = await Promise.allSettled(files.map(file => file.delete({ ignoreNotFound: true })));
+          const failure = deletions.find(result => result.status === 'rejected');
+          if (failure?.status === 'rejected') throw failure.reason;
+        } catch (err) {
+          console.warn(`[Cleanup] Storage deletion failed for job ${jobId}:`, err);
+          continue;
+        }
+      }
+
+      if (performance.now() >= deadline) return;
       try {
-        const bucket = getStorage().bucket();
-        const [files] = await bucket.getFiles({ prefix: `users/${uid}/route-archive/${jobId}/` });
-        await Promise.all(files.map(file => file.delete()));
+        await db.collection('premium_route_outbox').doc(jobId).delete();
+        if (performance.now() >= deadline) return;
+        await doc.ref.delete();
       } catch (err) {
-        console.warn(`[Cleanup] Storage deletion failed for job ${jobId}:`, err);
+        console.warn(`[Cleanup] Firestore deletion failed for job ${jobId}:`, err);
       }
     }
-    await doc.ref.delete();
-    await database().collection('premium_route_outbox').doc(jobId).delete().catch(() => {});
+
+    // Advance past retained failures, including jobs that share the last creation timestamp.
+    page = expiredJobs.startAfter(last);
   }
 });

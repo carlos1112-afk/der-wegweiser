@@ -22,13 +22,13 @@ Dieses Dokument ist die aktuelle Aufgabenliste. Ältere Bestandsaufnahmen und Se
 
 | Punkt | Grenze / verbleibende Arbeit |
 |---|---|
-| Aufbewahrung und Ressourcenlimits | [ERLEDIGT] 30-Tage-Aufbewahrungsfrist (`ROUTE_ARTIFACT_RETENTION_MS`) und automatische Bereinigungsroutine `cleanupExpiredRouteArtifacts` für abgelaufene Jobs und Cloud-Storage-Routenartefakte unter `users/{uid}/route-archive/{jobId}/` serverseitig implementiert und unit-getestet (`functions/tests/cleanupRetention.test.ts`). Vor automatischer Löschung muss produktives Monitoring angebunden werden. |
+| Aufbewahrung und Ressourcenlimits | [FAKT] Die Routine `cleanupExpiredRouteArtifacts` für abgelaufene Jobs und Cloud-Storage-Routenartefakte unter `users/{uid}/route-archive/{jobId}/` ist serverseitig implementiert. [NICHT GEPRÜFT] Der Unit-Test in `functions/tests/cleanupRetention.test.ts` prüft nur die 30-Tage-Konstante `ROUTE_ARTIFACT_RETENTION_MS`; der Cleanup selbst ist nicht durch die Testsuite abgedeckt. Vor automatischer Löschung muss produktives Monitoring angebunden werden. |
 | Oberfläche, Akku, Interessen und Freitext | Werden serverseitig abgewiesen, solange belastbare Routendaten und bestätigte UI-Eingaben fehlen. Nicht als erfüllt bewerben. Erfordert jeweils Datenquelle, Validatoren, Tarifvertrag und UI-Abnahme. |
 | Fahrthistorie als Personalisierung | Scoringgewicht bleibt 0. Eine spätere Nutzung benötigt explizites Opt-in, Datenqualitätsprüfung und Rücksetz-/Löschmöglichkeit. |
 | Tracksynchronisierung | Aufgezeichnete Fahrten bleiben lokal; serverseitig wiederherstellbare Premiumpläne sind davon getrennt. Eine Cloud-Trackhistorie ist nicht implementiert. |
 | Rundtouren und Offline-Routing | Bleiben gesperrt, bis echte Netzanker beziehungsweise ein geprüfter lokaler Router verfügbar sind. |
 | Gezielte Mutationstests | [FAKT / ERLEDIGT] `functions/scripts/verifyPremiumMutations.mjs` wurde im Firestore-Emulator ausgeführt: Beide gezielten Mutanten (Wallet Capture -> Release sowie Weglassen der Eigentümerprüfung) wurden erfolgreich getötet (2/2 KILLED) und die Quelldatei via SHA-256 verifiziert vollständig restauriert. |
-| Test-Wiederholung und UI-Warnungen | [ERLEDIGT] Emulator- und Jest-Testläufe in `functions/` laufen mit 19 Testsuiten (165 Tests) fehlerfrei durch. Client-Tests: DOM-Bereinigung in `GpxImportModal.test.tsx` stabilisiert. Die 11 bekannten Lücken in `tests/scenarios/known-gaps.test.ts` bleiben als ehrliche Referenz (it.todo) dokumentiert, bis die jeweiligen Subsysteme (Hardware-Telemetrie-Integration, Offroad-Routing) angebunden werden. |
+| Test-Wiederholung und UI-Warnungen | [ERLEDIGT] Emulator- und Jest-Testläufe in `functions/` laufen mit 18 Testsuiten (165 Tests) fehlerfrei durch. Client-Tests: DOM-Bereinigung in `GpxImportModal.test.tsx` stabilisiert. Die 11 bekannten Lücken in `tests/scenarios/known-gaps.test.ts` bleiben als ehrliche Referenz (it.todo) dokumentiert, bis die jeweiligen Subsysteme (Hardware-Telemetrie-Integration, Offroad-Routing) angebunden werden. |
 | Coverage und produktive Freigabe | Bestandenes Build und gezielte Tests belegen keine vollständige Coverage oder Live-Betriebsbereitschaft. Die Releaseentscheidung bleibt an die oben genannten Cloud-Nachweise gebunden. |
 
 ## Lokale Prüfungen reproduzieren
@@ -40,9 +40,9 @@ npm run build
 npm test -- --reporter=dot
 npm --prefix functions run build
 npm --prefix functions test -- --runInBand
-npx --yes firebase-tools emulators:exec --only firestore --project demo-wegweiser 'node --test tests/firestore.rules.test.mjs'
-npx --yes firebase-tools emulators:exec --only firestore --project demo-wegweiser 'npm --prefix functions test -- --runInBand --runTestsByPath tests/premiumRoute.emulator.test.ts'
-npx --yes firebase-tools emulators:exec --only firestore --project demo-wegweiser 'node functions/scripts/verifyPremiumMutations.mjs'
+npx firebase-tools emulators:exec --only firestore --project demo-wegweiser 'node --test tests/firestore.rules.test.mjs'
+npx firebase-tools emulators:exec --only firestore --project demo-wegweiser 'npm --prefix functions test -- --runInBand --runTestsByPath tests/premiumRoute.emulator.test.ts'
+npx firebase-tools emulators:exec --only firestore --project demo-wegweiser 'node functions/scripts/verifyPremiumMutations.mjs'
 ```
 
 Die Premium-Integrationssuite führt echte Firestore-Transaktionen ausschließlich gegen den Loopback-Emulator und `demo-wegweiser` aus. Router, KI, Object Storage und Cloud Tasks sind dort Testdoubles. Ohne passenden Emulator und Demo-Projekt wird diese Suite übersprungen. Cloud-IAM, echte Anbieter, Storage-Dauerhaftigkeit und tokenbasierte Authentifizierung sind damit ausdrücklich nicht bewiesen.
