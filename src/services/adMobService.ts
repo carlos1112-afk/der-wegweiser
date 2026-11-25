@@ -24,21 +24,17 @@ export const AdMobService = {
   initialize: async () => {
     if (isInitialized) return;
     if (!ConsentService.hasValidConsent()) {
-      console.log('[AdMobService] Deferred initialization: user consent not yet granted.');
       return;
     }
 
     try {
       const plugin = await import(/* @vite-ignore */ '@capacitor-community/admob' as any).catch(() => null);
-      if (plugin?.AdMob) {
-        await plugin.AdMob.initialize({ initializeForTesting: true });
+      if (plugin?.AdMob && typeof plugin.AdMob.initialize === 'function') {
+        await plugin.AdMob.initialize({ initializeForTesting: true }).catch(() => {});
         isInitialized = true;
-        console.log('[AdMobService] AdMob initialized successfully.');
-      } else {
-        console.log('[AdMobService] Running in web/mock mode.');
       }
-    } catch (error) {
-      console.warn('[AdMobService] AdMob initialization failed:', error);
+    } catch {
+      // Fail-safe non-blocking
     }
   },
 
@@ -47,32 +43,30 @@ export const AdMobService = {
 
     try {
       const plugin = await import(/* @vite-ignore */ '@capacitor-community/admob' as any).catch(() => null);
-      if (plugin?.AdMob) {
+      if (plugin?.AdMob && typeof plugin.AdMob.showBanner === 'function') {
         if (!isInitialized) await AdMobService.initialize();
         const options: BannerAdOptions = {
           adId,
           adSize: plugin.BannerAdSize?.BANNER ?? 'BANNER',
           position: plugin.BannerAdPosition?.BOTTOM_CENTER ?? 'BOTTOM_CENTER',
-          margin: 60, // Keep above bottom navigation bar
+          margin: 60,
           isTesting: true,
         };
-        await plugin.AdMob.showBanner(options);
-        console.log('[AdMobService] Banner ad shown at bottom.');
+        await plugin.AdMob.showBanner(options).catch(() => {});
       }
-    } catch (error) {
-      console.warn('[AdMobService] Show banner failed:', error);
+    } catch {
+      // Fail-safe non-blocking
     }
   },
 
   hideBanner: async () => {
     try {
       const plugin = await import(/* @vite-ignore */ '@capacitor-community/admob' as any).catch(() => null);
-      if (plugin?.AdMob) {
-        await plugin.AdMob.hideBanner();
-        console.log('[AdMobService] Banner ad hidden.');
+      if (plugin?.AdMob && typeof plugin.AdMob.hideBanner === 'function') {
+        await plugin.AdMob.hideBanner().catch(() => {});
       }
-    } catch (error) {
-      console.warn('[AdMobService] Hide banner failed:', error);
+    } catch {
+      // Fail-safe non-blocking
     }
   },
 
@@ -81,15 +75,14 @@ export const AdMobService = {
 
     try {
       const plugin = await import(/* @vite-ignore */ '@capacitor-community/admob' as any).catch(() => null);
-      if (plugin?.AdMob) {
+      if (plugin?.AdMob && typeof plugin.AdMob.showInterstitial === 'function') {
         if (!isInitialized) await AdMobService.initialize();
         const options: AdOptions = { adId, isTesting: true };
-        await plugin.AdMob.prepareInterstitial(options);
-        await plugin.AdMob.showInterstitial();
-        console.log('[AdMobService] Interstitial ad presented.');
+        await plugin.AdMob.prepareInterstitial(options).catch(() => {});
+        await plugin.AdMob.showInterstitial().catch(() => {});
       }
-    } catch (error) {
-      console.warn('[AdMobService] Interstitial ad failed:', error);
+    } catch {
+      // Fail-safe non-blocking
     }
   },
 
@@ -98,17 +91,16 @@ export const AdMobService = {
 
     try {
       const plugin = await import(/* @vite-ignore */ '@capacitor-community/admob' as any).catch(() => null);
-      if (plugin?.AdMob) {
+      if (plugin?.AdMob && typeof plugin.AdMob.showRewardVideoAd === 'function') {
         if (!isInitialized) await AdMobService.initialize();
         const options: AdOptions = { adId, isTesting: true };
-        await plugin.AdMob.prepareRewardVideoAd(options);
-        await plugin.AdMob.showRewardVideoAd();
+        await plugin.AdMob.prepareRewardVideoAd(options).catch(() => {});
+        await plugin.AdMob.showRewardVideoAd().catch(() => {});
         onReward();
-        console.log('[AdMobService] Rewarded video ad completed.');
         return true;
       }
-    } catch (error) {
-      console.warn('[AdMobService] Rewarded video ad failed:', error);
+    } catch {
+      // Fail-safe non-blocking
     }
     return false;
   },
