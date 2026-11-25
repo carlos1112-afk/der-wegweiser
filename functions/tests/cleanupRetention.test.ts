@@ -6,7 +6,6 @@ const mockGetFiles = jest.fn();
 const mockWhere = jest.fn();
 const mockLimit = jest.fn();
 const mockCollection = jest.fn();
-const mockRun = jest.fn();
 
 jest.mock('firebase-admin/firestore', () => ({
   FieldPath: { documentId: jest.fn() },
@@ -74,10 +73,9 @@ describe('cleanupExpiredRouteArtifacts', () => {
 
     expect(mockGetFiles).toHaveBeenCalledWith({ prefix: 'users/user-1/route-archive/expired-job/' });
     expect(mockDelete).toHaveBeenCalledTimes(2);
-    expect(mockDelete.mock.invocationCallOrder[0]).toBeLessThan(mockDelete.mock.invocationCallOrder[1]);
   });
 
-  it('does not delete any job or artifact when no jobs have reached the retention cutoff', async () => {
+  it('does not delete anything when no jobs have reached the retention cutoff', async () => {
     mockGet.mockResolvedValue({ docs: [] });
     mockWhere.mockReturnValue({ limit: mockLimit });
     mockLimit.mockReturnValue({ get: mockGet });
